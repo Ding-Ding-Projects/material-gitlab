@@ -1,0 +1,16 @@
+{
+  "name": "material-gitlab-deployer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Material 3-inspired deployment plan preview shell for GitLab installations.",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "electron": "^36.0.0",
+    "typescript": "^5.7.0"
+  }
+}
