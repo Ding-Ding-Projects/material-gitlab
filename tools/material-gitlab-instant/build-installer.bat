@@ -15,7 +15,7 @@ if errorlevel 1 (
   exit /b 1
 )
 echo [gitlab-instant] Packaging an unsigned Squirrel.Windows installer
-call npx --no-install electron-builder --win squirrel
+call npx --no-install electron-builder --win squirrel --publish never
 if errorlevel 1 (
   echo [gitlab-instant] ERROR: electron-builder Squirrel packaging failed. 1>&2
   popd >nul

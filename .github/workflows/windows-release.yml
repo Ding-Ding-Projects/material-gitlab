@@ -51,21 +51,29 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $applications = @(
-            'tools\material-gitlab-deployer',
-            'tools\material-gitlab-instant'
+            [pscustomobject]@{
+              Id = 'material-gitlab-deployer'
+              Root = 'tools\material-gitlab-deployer'
+              OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows'
+            },
+            [pscustomobject]@{
+              Id = 'material-gitlab-instant'
+              Root = 'tools\material-gitlab-instant'
+              OutputRoot = 'tools\material-gitlab-instant\installer\squirrel-windows'
+            }
           )
           foreach ($application in $applications) {
-            $installer = Join-Path $application 'build-installer.bat'
+            $installer = Join-Path $application.Root 'build-installer.bat'
             if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
               throw "Required installer entry point is missing: $installer"
             }
-            $squirrelOutput = Join-Path $application 'dist\squirrel-windows'
+            $squirrelOutput = Join-Path (Get-Location).Path $application.OutputRoot
             if (Test-Path -LiteralPath $squirrelOutput -PathType Container) {
               Remove-Item -LiteralPath $squirrelOutput -Recurse -Force
             }
             & $installer /s
             if ($LASTEXITCODE -ne 0) {
-              throw "Unsigned Squirrel.Windows installer build failed for $application (exit $LASTEXITCODE)."
+              throw "Unsigned Squirrel.Windows installer build failed for $($application.Id) (exit $LASTEXITCODE)."
             }
           }
 
@@ -85,26 +93,25 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP 'windows-release-assets'
           if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
-          $workflowStart = [DateTimeOffset]::Parse($env:WORKFLOW_STARTED).UtcDateTime
           $applications = @(
-            [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer' },
-            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant' }
+            [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer'; OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows' },
+            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant'; OutputRoot = 'tools\material-gitlab-instant\installer\squirrel-windows' }
           )
           $manifest = @()
           foreach ($application in $applications) {
-            $outputRoot = Join-Path $application.Root 'dist\squirrel-windows'
+            $outputRoot = Join-Path (Get-Location).Path $application.OutputRoot
             if (-not (Test-Path -LiteralPath $outputRoot -PathType Container)) {
               throw "$($application.Id) produced no Squirrel.Windows output directory at $outputRoot."
             }
-            $setup = @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*-Setup.exe' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart })
+            $setup = @(Get-ChildItem -LiteralPath $outputRoot -File -Filter 'Setup.exe')
             if ($setup.Count -ne 1) {
-              throw "$($application.Id) must produce exactly one fresh Squirrel *-Setup.exe; found $($setup.Count)."
+              throw "$($application.Id) must produce exactly one fresh literal Setup.exe in its Squirrel output root; found $($setup.Count)."
             }
-            $releaseIndex = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter 'RELEASES' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart })
+            $releaseIndex = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter 'RELEASES')
             if ($releaseIndex.Count -ne 1) {
               throw "$($application.Id) must produce one fresh RELEASES index beside Setup.exe; found $($releaseIndex.Count)."
             }
-            $fullPackage = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter '*-full.nupkg' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart -and $_.Length -gt 0 })
+            $fullPackage = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter '*-full.nupkg' | Where-Object { $_.Length -gt 0 })
             if ($fullPackage.Count -ne 1) {
               throw "$($application.Id) must produce exactly one fresh non-empty Squirrel full .nupkg beside Setup.exe; found $($fullPackage.Count)."
             }
@@ -159,11 +166,16 @@ jobs:
           Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $catalogUrl -OutFile $catalogPath
           $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
           $assets = @()
-          foreach ($releasePage in 1..10) {
+          $releasePage = 1
+          $maxReleasePages = 10
+          do {
             $releases = @(Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/Ding-Ding-Projects/dim-sum-photos/releases?per_page=100&page=$releasePage")
-            $assets += @($releases | ForEach-Object { $_.assets } | Where-Object { $_.name -match '^catalog-v1.*\.(png|jpg|jpeg)$' })
-            if ($releases.Count -lt 100) { break }
-          }
+            $assets += @($releases |
+              Where-Object { $_.tag_name -match '^catalog-v1(?:$|-)' } |
+              ForEach-Object { $_.assets } |
+              Where-Object { $_.name -match '^hk-dish-\d{4}-.+\.(png|jpg|jpeg)$' })
+            $releasePage++
+          } while ($releases.Count -gt 0 -and $releasePage -le $maxReleasePages)
           if (-not $assets) { throw 'No published catalog-v1 photo assets were found.' }
           $prior = Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100"
           $used = (($prior | ForEach-Object { $_.body }) -join "`n")
