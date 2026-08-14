@@ -16,4 +16,6 @@ Run `build.bat` from this directory. It bootstraps a user-scoped Node.js LTS thr
 
 Run `build-installer.bat` to build and package through `electron-builder --win squirrel`. It verifies `Setup.exe`, the adjacent `RELEASES` index, SHA-256, and `NotSigned` status. Code signing keys and certificates are intentionally not used; Windows may show an unknown-publisher warning. Squirrel assets are emitted under `dist\squirrel-windows\`.
 
+Squirrel packaging uses the public immutable-on-`main` icon URL configured in `package.json`; the icon asset must be dewed to `Ding-Ding-Projects/material-gitlab` before packaging can complete.
+
 The build scripts do not create hosts, contact SSH endpoints, expose ports, or provision a local Docker/WSL2 environment. Those are user-selected configuration choices only.

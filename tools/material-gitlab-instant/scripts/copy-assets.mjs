@@ -7,6 +7,7 @@ const source = join(root, 'src', 'renderer');
 const destination = join(root, 'dist', 'renderer');
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
+await cp(join(root, 'package.json'), join(root, 'dist', 'package.json'));
 await cp(join(source, 'index.html'), join(destination, 'index.html'));
 await cp(join(source, 'styles.css'), join(destination, 'styles.css'));
 try {

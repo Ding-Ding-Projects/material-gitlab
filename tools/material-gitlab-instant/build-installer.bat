@@ -34,6 +34,13 @@ if not exist "%SETUP_DIR%RELEASES" (
   popd >nul
   exit /b 1
 )
+set "FULL_NUPKG="
+for /r "%SETUP_DIR%" %%F in (*-full.nupkg) do if not defined FULL_NUPKG set "FULL_NUPKG=%%~fF"
+if not defined FULL_NUPKG (
+  echo [gitlab-instant] ERROR: Squirrel full .nupkg package is missing beside Setup.exe. 1>&2
+  popd >nul
+  exit /b 1
+)
 powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=Get-AuthenticodeSignature -LiteralPath '%SETUP%'; if ($s.Status -ne 'NotSigned') { Write-Error ('Setup.exe signing status is ' + $s.Status); exit 1 }; $h=(Get-FileHash -Algorithm SHA256 -LiteralPath '%SETUP%').Hash; Write-Output ('Installer=' + '%SETUP%'); Write-Output ('SHA256=' + $h); Write-Output 'Signing=NotSigned'"
 if errorlevel 1 (
   echo [gitlab-instant] ERROR: unsigned installer verification failed. 1>&2

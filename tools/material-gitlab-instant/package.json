@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "description": "A configuration-only GitLab local-instance Electron shell.",
   "author": "GitLab",
-  "main": "dist/main.js",
+  "main": "main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
     "start": "electron .",
@@ -19,15 +19,28 @@
   "build": {
     "appId": "com.materialgitlab.instant",
     "productName": "GitLab Instant",
+    "icon": "build/icon.ico",
+    "files": [
+      {
+        "from": "dist",
+        "to": ".",
+        "filter": ["**/*"]
+      },
+      {
+        "from": "package.json",
+        "to": "package.json"
+      }
+    ],
     "asar": true,
     "forceCodeSigning": false,
     "win": {
       "target": "squirrel",
       "signAndEditExecutable": false,
-      "signingHashAlgorithms": []
+      "signExecutable": false
     },
     "squirrelWindows": {
-      "noMsi": true
+      "msi": false,
+      "iconUrl": "https://raw.githubusercontent.com/Ding-Ding-Projects/material-gitlab/main/tools/material-gitlab-instant/build/icon.ico"
     }
   }
 }
