@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Local toy lock metadata",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "locks"],
+  "properties": {
+    "version": { "const": 1 },
+    "locks": {
+      "type": "array",
+      "maxItems": 500,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "target", "method", "duration", "createdAt"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[A-Za-z0-9._:-]+$" },
+          "target": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "method": { "enum": ["password", "totp"] },
+          "duration": { "enum": ["surface", "minutes", "session"] },
+          "minutes": { "type": ["integer", "null"], "minimum": 1, "maximum": 1440 },
+          "createdAt": { "type": "string", "format": "date-time", "maxLength": 64 },
+          "locked": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
