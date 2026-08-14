@@ -158,13 +158,24 @@
     border-radius: 12px;
   }
 
+  .login-m3-captcha {
+    display: flex;
+    justify-content: center;
+    margin-bottom: $gl-spacing-scale-5;
+  }
+
   .login-m3-form-options {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: $gl-spacing-scale-4;
+    margin-bottom: $gl-spacing-scale-4;
     min-height: 32px;
     font-size: 0.8125rem;
+  }
+
+  .login-m3-passkey-form {
+    margin-top: $gl-spacing-scale-3;
   }
 
   .login-m3-register {
@@ -176,7 +187,6 @@
   .login-m3-form,
   .login-m3-auth-stack {
     .form-control,
-    .gl-form-input,
     .password-input {
       border-radius: 12px;
     }
@@ -196,7 +206,7 @@
   }
 
   .login-m3-provider-box {
-    .gl-new-card,
+    > :first-child,
     .btn {
       border-radius: 999px;
     }
