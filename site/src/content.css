@@ -1,0 +1,100 @@
+/* Material 3 text-field treatment for every product-facing field. */
+:root {
+  --md3-field-container: #f3edf7;
+  --md3-field-container-focus: #e8def8;
+  --md3-field-on-container: #1d1b20;
+  --md3-field-label: #49454f;
+  --md3-field-outline: #79747e;
+  --md3-field-outline-focus: #6750a4;
+  --md3-field-error: #ba1a1a;
+  --md3-field-radius: 4px;
+}
+
+.md3-text-field {
+  position: relative;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--md3-field-label);
+  font-size: .875rem;
+  line-height: 1.25rem;
+}
+
+.md3-text-field__label {
+  display: block;
+  color: inherit;
+  font-weight: 600;
+}
+
+.md3-text-field__control,
+.md3-text-field--standalone {
+  width: 100%;
+  min-height: 56px;
+  padding: 16px;
+  border: 1px solid var(--md3-field-outline);
+  border-radius: var(--md3-field-radius);
+  background: var(--md3-field-container);
+  color: var(--md3-field-on-container);
+  font: inherit;
+  line-height: 1.5;
+  outline: none;
+  transition: border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+textarea.md3-text-field__control {
+  min-height: 112px;
+  resize: vertical;
+}
+
+select.md3-text-field__control {
+  appearance: auto;
+  padding-right: 12px;
+}
+
+.md3-text-field__control::placeholder {
+  color: var(--md3-field-label);
+  opacity: .82;
+}
+
+.md3-text-field__control:hover,
+.md3-text-field--standalone:hover {
+  border-color: var(--md3-field-on-container);
+}
+
+.md3-text-field__control:focus-visible,
+.md3-text-field--standalone:focus-visible {
+  border-color: var(--md3-field-outline-focus);
+  background: var(--md3-field-container-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--md3-field-outline-focus) 22%, transparent);
+}
+
+.md3-text-field__control:invalid:not(:placeholder-shown) {
+  border-color: var(--md3-field-error);
+}
+
+input[type="number"].md3-text-field__control,
+input[type="date"].md3-text-field__control,
+input[type="time"].md3-text-field__control,
+input[type="datetime-local"].md3-text-field__control,
+input[type="search"].md3-text-field__control,
+input[type="text"].md3-text-field__control,
+input[type="password"].md3-text-field__control,
+input[type="url"].md3-text-field__control,
+input[type="email"].md3-text-field__control {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 760px) {
+  .md3-text-field__control,
+  .md3-text-field--standalone {
+    min-height: 52px;
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .md3-text-field__control,
+  .md3-text-field--standalone {
+    transition: none;
+  }
+}
