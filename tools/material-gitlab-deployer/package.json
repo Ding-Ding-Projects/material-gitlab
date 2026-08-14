@@ -3,10 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "description": "Material 3-inspired deployment plan preview shell for GitLab installations.",
+  "author": "Material GitLab Contributors",
+  "productName": "Material GitLab Deployer",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
-    "start": "electron ."
+    "start": "electron .",
+    "package:squirrel": "electron-builder --win squirrel"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -14,6 +17,38 @@
   "devDependencies": {
     "@types/node": "22.20.1",
     "electron": "^36.0.0",
+    "electron-builder": "^26.15.3",
+    "electron-builder-squirrel-windows": "^26.15.3",
     "typescript": "5.9.3"
+  },
+  "build": {
+    "appId": "uk.dewhui.material-gitlab-deployer",
+    "artifactName": "${productName}-${version}-${arch}.${ext}",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*.js",
+      "dist/renderer/**/*",
+      "package.json"
+    ],
+    "forceCodeSigning": false,
+    "win": {
+      "target": [
+        {
+          "target": "squirrel",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signExecutable": false
+    },
+    "squirrelWindows": {
+      "artifactName": "Setup.exe",
+      "iconUrl": "https://raw.githubusercontent.com/Ding-Ding-Projects/material-gitlab/main/tools/material-gitlab-deployer/build/icon.ico",
+      "msi": false
+    }
   }
 }

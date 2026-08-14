@@ -12,9 +12,50 @@ Run `build.bat` from any current directory on Windows. It first anchors the proc
 
 `npm run build` performs the compile and asset-copy steps directly; `npm start` launches the local preview shell.
 
-## Installer status
+## Squirrel.Windows packaging
 
-`build-installer.bat` is deliberately fail-closed (exit code 2). This package does not yet carry a verified app icon or Squirrel.Windows packaging configuration, so it must not claim to produce an installer. When packaging is added, it must use the supported Squirrel.Windows path, keep code signing disabled, and verify the unsigned setup and update assets before publication. No installer is currently shipped.
+`build-installer.bat` is the package-owned entry point for the Windows installer. Run it
+from any directory, or use `/s` (also `--silent` or `SILENT=1`) for an unattended build.
+It builds the package first and then invokes the checked-in Squirrel.Windows configuration;
+do not substitute an ad-hoc `electron-builder` command. The script never deploys, publishes,
+tags, or contacts a host.
+
+The checked-in Electron Builder metadata writes to `dist/squirrel-windows/`. A ready unsigned package contains
+all of the following from the same build and version:
+
+| Asset | Purpose |
+| --- | --- |
+| `Setup.exe` | Squirrel bootstrap installer users download and run. |
+| `RELEASES` | Update-feed index consumed by Squirrel clients. |
+| `<package>-<version>-full.nupkg` | Complete update package; this is required even when no delta package is generated. |
+
+Delta `.nupkg` files may also be present. They are supplementary; the full package, `RELEASES`,
+and `Setup.exe` are the minimum installer set. The build's staging report should name the exact
+files and SHA-256 values. Do not treat a directory listing or a stale file left by an older build
+as evidence that the current commit produced an asset.
+
+### Icon and metadata
+
+The Squirrel configuration references the committed original application icon at
+`build/icon.ico` and the package metadata in `package.json`. Keep the icon source in this package
+(rather than a mutable URL), use a valid
+multi-resolution Windows `.ico`, and keep the package author, application identifier, version,
+artifact name, and public HTTPS update-feed metadata in the checked-in packaging configuration.
+The icon is presentation metadata only: changing it must not change the installed identity or
+update feed. A framework-default icon, a missing icon, or metadata that points at an unreachable
+or mutable asset blocks packaging readiness.
+
+### Unsigned verification boundary
+
+Code signing is permanently disabled. `Setup.exe` and every generated update executable are
+unsigned and may show an unknown-publisher or SmartScreen warning on Windows. Packaging readiness
+means that the real files exist under `dist/squirrel-windows/`, the full `.nupkg` is referenced by
+`RELEASES`, the files correspond to the intended commit and version, and the executables report
+an unsigned state. It does **not** mean the installer was executed, a host was contacted, an
+update was downloaded, or a release was published. Those are separate evidence boundaries.
+
+This documentation records the packaging contract only; it does not claim that a build has run or
+that these assets currently exist in this checkout.
 
 ## Configuration records
 
