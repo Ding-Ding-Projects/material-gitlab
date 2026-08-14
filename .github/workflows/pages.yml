@@ -1,0 +1,84 @@
+name: GitHub Pages
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package.json
+
+      - name: Bootstrap site dependencies
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $site = Join-Path $env:GITHUB_WORKSPACE 'site'
+          $manifest = Join-Path $site 'package.json'
+          if (-not (Test-Path -LiteralPath $manifest -PathType Leaf)) {
+            throw 'The top-level site/package.json manifest is missing; refusing to invent an alternate site build.'
+          }
+          if (-not (Test-Path -LiteralPath (Join-Path $site 'index.html') -PathType Leaf)) {
+            throw 'The top-level site/index.html entrypoint is missing; refusing to invent an alternate site build.'
+          }
+          npm install --prefix $site --ignore-scripts --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw "npm install for site dependencies failed with exit code $LASTEXITCODE" }
+
+      - name: Build top-level site for Pages base path
+        shell: pwsh
+        env:
+          PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $site = Join-Path $env:GITHUB_WORKSPACE 'site'
+          $basePath = $env:PAGES_BASE_PATH
+          if ([string]::IsNullOrWhiteSpace($basePath)) {
+            $basePath = "/$($env:GITHUB_REPOSITORY.Split('/')[-1])/"
+          }
+          npm run build --prefix $site -- --base $basePath
+          if ($LASTEXITCODE -ne 0) { throw "site build failed with exit code $LASTEXITCODE" }
+          $dist = Join-Path $site 'dist'
+          if (-not (Test-Path -LiteralPath $dist -PathType Container)) {
+            throw 'The top-level site build did not produce site/dist; refusing to publish an alternate artifact.'
+          }
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: windows-2022
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy Pages artifact
+        id: deployment
+        uses: actions/deploy-pages@v4
