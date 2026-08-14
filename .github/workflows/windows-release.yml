@@ -158,13 +158,12 @@ jobs:
           $catalogPath = Join-Path $env:RUNNER_TEMP 'dim-sum-catalog.json'
           Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $catalogUrl -OutFile $catalogPath
           $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
-          $releasePage = 1
           $assets = @()
-          do {
+          foreach ($releasePage in 1..10) {
             $releases = @(Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/Ding-Ding-Projects/dim-sum-photos/releases?per_page=100&page=$releasePage")
             $assets += @($releases | ForEach-Object { $_.assets } | Where-Object { $_.name -match '^catalog-v1.*\.(png|jpg|jpeg)$' })
-            $releasePage++
-          } while ($releases.Count -gt 0)
+            if ($releases.Count -lt 100) { break }
+          }
           if (-not $assets) { throw 'No published catalog-v1 photo assets were found.' }
           $prior = Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100"
           $used = (($prior | ForEach-Object { $_.body }) -join "`n")
