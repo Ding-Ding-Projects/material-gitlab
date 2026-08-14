@@ -40,6 +40,6 @@ if errorlevel 1 (
   popd >nul
   exit /b 1
 )
-echo [gitlab-instant] Installer ready under %SETUP_DIR% (unsigned; Deen No may show an unknown-publisher warning).
+echo [gitlab-instant] Installer ready under %SETUP_DIR% (unsigned; Windows may show an unknown-publisher warning).
 popd >nul
 exit /b 0

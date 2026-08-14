@@ -14,4 +14,4 @@ Not-ready or unsupported states remain reviewable and explain the exact next con
 
 Run `build.bat` from this directory. It bootstraps a user-scoped Node.js LTS through `winget` when needed, installs the declared dependencies, compiles TypeScript, and copies the local renderer assets. Use `build.bat /s`, `build.bat --silent`, or `SILENT=1` for unattended operation.
 
-Run `build-installer.bat` to build and package through `electron-builder --win squirrel`. It verifies `Setup.exe`, the adjacent `RELEASES` index, SHA-256, and `NotSigned` status. Code signing keys and certificates are intentionally not used; Deen No may show an unknown-publisher warning. Squirrel assets are emitted under `dist\squirrel-windows\`.
+Run `build-installer.bat` to build and package through `electron-builder --win squirrel`. It verifies `Setup.exe`, the adjacent `RELEASES` index, SHA-256, and `NotSigned` status. Code signing keys and certificates are intentionally not used; Windows may show an unknown-publisher warning. Squirrel assets are emitted under `dist\squirrel-windows\`.
