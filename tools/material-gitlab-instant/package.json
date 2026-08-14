@@ -1,0 +1,33 @@
+{
+  "name": "material-gitlab-instant",
+  "private": true,
+  "version": "0.1.0",
+  "description": "A configuration-only GitLab local-instance Electron shell.",
+  "author": "GitLab",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "start": "electron .",
+    "package": "electron-builder --win squirrel"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "electron": "^36.0.0",
+    "electron-builder": "26.15.3",
+    "typescript": "^5.7.0"
+  },
+  "build": {
+    "appId": "com.materialgitlab.instant",
+    "productName": "GitLab Instant",
+    "asar": true,
+    "forceCodeSigning": false,
+    "win": {
+      "target": "squirrel",
+      "signAndEditExecutable": false,
+      "signingHashAlgorithms": []
+    },
+    "squirrelWindows": {
+      "noMsi": true
+    }
+  }
+}
