@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "surface": "material-gitlab-site",
+  "source": "site/src/content.js",
+  "styles": "site/src/content.css",
+  "purpose": "Public copy catalogue and Material 3 text-field contract for the landing page.",
+  "languageModes": ["en", "zh-Hant", "bilingual"],
+  "contentKeys": [
+    "brand.name",
+    "brand.tagline",
+    "home.eyebrow",
+    "home.title",
+    "home.description",
+    "home.primaryAction",
+    "home.secondaryAction",
+    "home.quickStart",
+    "home.quickStartDescription",
+    "sections.guides",
+    "sections.reference",
+    "sections.settings",
+    "sections.library",
+    "guides.workspace",
+    "guides.momentum",
+    "guides.details",
+    "states.empty",
+    "states.loading",
+    "states.offline",
+    "states.saved"
+  ],
+  "textFields": [
+    {
+      "id": "siteSearch",
+      "control": "input[type=search]",
+      "label": { "en": "Search the library", "zh-Hant": "搜尋文件庫" },
+      "supporting": { "en": "Search guide titles, feature names, and article summaries.", "zh-Hant": "搜尋指南標題、功能名稱和文章摘要。" },
+      "states": ["default", "error", "disabled"],
+      "aria": ["label", "describedby", "invalid"]
+    },
+    {
+      "id": "tabSearch",
+      "control": "input[type=search]",
+      "label": { "en": "Search pages", "zh-Hant": "搜尋頁面" },
+      "supporting": { "en": "Filter the visible pages without changing their order.", "zh-Hant": "篩選目前頁面，不會改變頁面次序。" },
+      "states": ["default", "error", "disabled"],
+      "aria": ["label", "describedby", "invalid"]
+    },
+    {
+      "id": "regexPattern",
+      "control": "input[type=text]",
+      "label": { "en": "Pattern", "zh-Hant": "模式" },
+      "supporting": { "en": "Optional JavaScript regular expression for this search.", "zh-Hant": "此搜尋可選用 JavaScript 正規表示式。" },
+      "states": ["default", "error", "disabled"],
+      "aria": ["label", "describedby", "invalid"]
+    },
+    {
+      "id": "vocabularyUpload",
+      "control": "input[type=file]",
+      "label": { "en": "Personal vocabulary file", "zh-Hant": "個人詞彙檔案" },
+      "supporting": { "en": "Choose a local JSON file. Nothing is uploaded.", "zh-Hant": "選擇本機 JSON 檔案；檔案不會上載。" },
+      "states": ["default", "error", "disabled"],
+      "aria": ["label", "describedby", "invalid"]
+    }
+  ],
+  "fieldContract": {
+    "minimumBlockSizePx": 48,
+    "focusIndicator": "2px border plus 3px contrast ring",
+    "errorState": "aria-invalid=true and supporting text names the recovery action",
+    "disabledState": "control remains readable and names the unavailable condition",
+    "motion": "respects prefers-reduced-motion",
+    "responsive": "full width below 672px; no horizontal page overflow"
+  }
+}
