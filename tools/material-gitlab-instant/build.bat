@@ -19,12 +19,12 @@ if errorlevel 1 (
 where npm >nul 2>&1
 if errorlevel 1 call :fail "npm is unavailable after Node.js bootstrap."
 call :log "Installing declared build dependencies"
-if exist package-lock.json (npm ci --no-audit --no-fund) else (npm install --no-audit --no-fund)
+if exist package-lock.json (call npm ci --no-audit --no-fund) else (call npm install --no-audit --no-fund)
 if errorlevel 1 call :fail "npm dependency installation failed; the dependency tree is incomplete."
 call :log "Compiling TypeScript and copying renderer assets"
-npm run build
+call npm run build
 if errorlevel 1 call :fail "npm run build failed."
-call :log "Build complete: dist is ready"
+call :log "Build complete: app-dist is ready"
 if "%SILENT_MODE%"=="0" (
   choice /C YN /N /M "Launch the local shell now? [Y/N] "
   if not errorlevel 2 (

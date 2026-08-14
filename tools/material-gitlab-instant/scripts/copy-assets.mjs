@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const source = join(root, 'src', 'renderer');
-const destination = join(root, 'dist', 'renderer');
+const destination = join(root, 'app-dist', 'renderer');
 await rm(destination, { recursive: true, force: true });
 await mkdir(destination, { recursive: true });
 await cp(join(source, 'index.html'), join(destination, 'index.html'));

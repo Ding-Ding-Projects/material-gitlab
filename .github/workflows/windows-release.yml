@@ -46,17 +46,28 @@ jobs:
           "workflow_started=$startedText" >> $env:GITHUB_OUTPUT
           "workflow_start_ticks=$($start.UtcTicks)" >> $env:GITHUB_OUTPUT
 
-      - name: Build the runnable Windows application
+      - name: Build both Windows application installers
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $artifactDir = Join-Path (Get-Location) 'build\artifacts'
-          if (Test-Path -LiteralPath $artifactDir) { Remove-Item -LiteralPath $artifactDir -Recurse -Force }
-          .\build.bat /s
-
-      - name: Build the unsigned Windows installer
-        shell: pwsh
-        run: .\build-installer.bat /s
+          $applications = @(
+            'tools\material-gitlab-deployer',
+            'tools\material-gitlab-instant'
+          )
+          foreach ($application in $applications) {
+            $installer = Join-Path $application 'build-installer.bat'
+            if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
+              throw "Required installer entry point is missing: $installer"
+            }
+            $squirrelOutput = Join-Path $application 'dist\squirrel-windows'
+            if (Test-Path -LiteralPath $squirrelOutput -PathType Container) {
+              Remove-Item -LiteralPath $squirrelOutput -Recurse -Force
+            }
+            & $installer /s
+            if ($LASTEXITCODE -ne 0) {
+              throw "Unsigned Squirrel.Windows installer build failed for $application (exit $LASTEXITCODE)."
+            }
+          }
 
       - name: Collect and validate installer assets
         id: collect
@@ -74,30 +85,57 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP 'windows-release-assets'
           if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
-          $files = Get-ChildItem -LiteralPath (Get-Location) -Recurse -File | Where-Object {
-            $_.Name -match '^(Setup\.exe|RELEASES|.+\.nupkg)$' -and
-            $_.FullName -notmatch '[\\/]node_modules[\\/]|[\\/]vendor[\\/]|[\\/]tmp[\\/]' -and
-            $_.LastWriteTimeUtc -gt [DateTime]::Parse($env:WORKFLOW_STARTED).UtcDateTime
-          }
-          if (-not $files) { throw 'No fresh Squirrel.Windows Setup.exe, RELEASES, or .nupkg assets were produced after workflow start.' }
-
-          foreach ($file in $files) {
-            $destination = Join-Path $stage $file.Name
-            Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
-            if ($file.Extension -eq '.exe') {
-              $signature = Get-AuthenticodeSignature -LiteralPath $destination
-              if ($signature.Status -ne 'NotSigned') { throw "Code signing is prohibited; $($file.Name) has signature status $($signature.Status)." }
+          $workflowStart = [DateTimeOffset]::Parse($env:WORKFLOW_STARTED).UtcDateTime
+          $applications = @(
+            [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer' },
+            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant' }
+          )
+          $manifest = @()
+          foreach ($application in $applications) {
+            $outputRoot = Join-Path $application.Root 'dist\squirrel-windows'
+            if (-not (Test-Path -LiteralPath $outputRoot -PathType Container)) {
+              throw "$($application.Id) produced no Squirrel.Windows output directory at $outputRoot."
+            }
+            $setup = @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*-Setup.exe' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart })
+            if ($setup.Count -ne 1) {
+              throw "$($application.Id) must produce exactly one fresh Squirrel *-Setup.exe; found $($setup.Count)."
+            }
+            $releaseIndex = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter 'RELEASES' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart })
+            if ($releaseIndex.Count -ne 1) {
+              throw "$($application.Id) must produce one fresh RELEASES index beside Setup.exe; found $($releaseIndex.Count)."
+            }
+            $fullPackage = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter '*-full.nupkg' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart -and $_.Length -gt 0 })
+            if ($fullPackage.Count -ne 1) {
+              throw "$($application.Id) must produce exactly one fresh non-empty Squirrel full .nupkg beside Setup.exe; found $($fullPackage.Count)."
+            }
+            $releaseText = Get-Content -Raw -LiteralPath $releaseIndex[0].FullName
+            if ($releaseText -notmatch [regex]::Escape($fullPackage[0].Name)) {
+              throw "$($application.Id) RELEASES does not reference its fresh full package $($fullPackage[0].Name)."
+            }
+            $signature = Get-AuthenticodeSignature -LiteralPath $setup[0].FullName
+            if ($signature.Status -ne 'NotSigned') {
+              throw "Code signing is prohibited; $($application.Id) Setup.exe has signature status $($signature.Status)."
+            }
+            $contractFiles = @($setup[0], $releaseIndex[0]) + $fullPackage
+            foreach ($file in $contractFiles) {
+              $publishedAsset = "$($application.Id)-$($file.Name)"
+              Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $stage $publishedAsset) -Force
+              $manifest += [pscustomobject]@{
+                Application = $application.Id
+                Asset = $file.Name
+                PublishedAsset = $publishedAsset
+                Bytes = $file.Length
+                Sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+              }
             }
           }
-          if (-not (Get-ChildItem -LiteralPath $stage -Filter 'Setup.exe' -File)) { throw 'Setup.exe is missing.' }
-          if (-not (Get-ChildItem -LiteralPath $stage -Filter 'RELEASES' -File)) { throw 'RELEASES is missing.' }
-          if (-not (Get-ChildItem -LiteralPath $stage -Filter '*.nupkg' -File)) { throw 'At least one Squirrel.Windows .nupkg is missing.' }
-          $hashes = Get-ChildItem -LiteralPath $stage -File | Get-FileHash -Algorithm SHA256
-          $hashes | ForEach-Object { "$($_.Path | Split-Path -Leaf) $($_.Hash)" } | Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Encoding utf8
+          $manifest | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $stage 'SQUIRREL-ASSET-MANIFEST.json') -Encoding utf8
+          $hashes = Get-ChildItem -LiteralPath $stage -Recurse -File | Get-FileHash -Algorithm SHA256
+          $hashes | ForEach-Object { "$($_.Path.Substring($stage.Length + 1)) $($_.Hash)" } | Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Encoding utf8
           "RELEASE_ASSET_DIR=$stage" >> $env:GITHUB_ENV
-          "RELEASE_ASSET_COUNT=$((Get-ChildItem -LiteralPath $stage -File).Count)" >> $env:GITHUB_ENV
+          "RELEASE_ASSET_COUNT=$((Get-ChildItem -LiteralPath $stage -Recurse -File).Count)" >> $env:GITHUB_ENV
           "asset_dir=$stage" >> $env:GITHUB_OUTPUT
-          "asset_count=$((Get-ChildItem -LiteralPath $stage -File).Count)" >> $env:GITHUB_OUTPUT
+          "asset_count=$((Get-ChildItem -LiteralPath $stage -Recurse -File).Count)" >> $env:GITHUB_OUTPUT
 
       - name: Upload installer evidence
         if: ${{ always() }}
@@ -185,15 +223,30 @@ jobs:
           $tag = '${{ steps.notes.outputs.release_tag }}'
           $sha = '${{ github.sha }}'
           if (gh release view $tag --repo '${{ github.repository }}' *> $null) { throw "Release tag $tag already exists; refusing to overwrite it." }
-          $assets = Get-ChildItem -LiteralPath $env:RELEASE_ASSET_DIR -File | ForEach-Object { $_.FullName }
-          if (-not ($assets | Where-Object { $_ -match '[\\/]Setup\.exe$' })) { throw 'Refusing publication without a genuine Setup.exe.' }
+          $manifestPath = Join-Path $env:RELEASE_ASSET_DIR 'SQUIRREL-ASSET-MANIFEST.json'
+          if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw 'Refusing publication without the Squirrel asset manifest.' }
+          $manifest = @(Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json)
+          foreach ($application in @('material-gitlab-deployer', 'material-gitlab-instant')) {
+            $assetsForApplication = @($manifest | Where-Object { $_.Application -eq $application })
+            $fullPackages = @($assetsForApplication | Where-Object { $_.Asset -match '-full\.nupkg$' })
+            $setupAssets = @($assetsForApplication | Where-Object { $_.Asset -match '-Setup\.exe$' })
+            if ($setupAssets.Count -ne 1 -or -not ($assetsForApplication.Asset -contains 'RELEASES') -or $fullPackages.Count -lt 1) {
+              throw "Refusing publication because $application lacks its complete Squirrel asset set."
+            }
+          }
+          $assets = Get-ChildItem -LiteralPath $env:RELEASE_ASSET_DIR -Recurse -File | ForEach-Object { $_.FullName }
           gh release create $tag --repo '${{ github.repository }}' --target $sha --title "Windows $tag" --notes-file $env:RELEASE_NOTES_PATH @assets
           $release = gh api "repos/${{ github.repository }}/releases/tags/$tag" | ConvertFrom-Json
           if ($release.draft -ne $false -or $release.target_commitish -ne $sha) { throw 'Published release did not resolve to the exact non-draft target commit.' }
-          $expected = @('Setup.exe', 'RELEASES', 'SHA256SUMS.txt')
-          foreach ($name in $expected) {
+          $required = @('SHA256SUMS.txt', 'SQUIRREL-ASSET-MANIFEST.json')
+          foreach ($name in $required) {
             $asset = $release.assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
             if (-not $asset -or [int64]$asset.size -le 0) { throw "Published release is missing non-empty $name." }
           }
-          $nupkg = @($release.assets | Where-Object { $_.name -match '\.nupkg$' -and [int64]$_.size -gt 0 })
-          if (-not $nupkg) { throw 'Published release is missing a non-empty .nupkg asset.' }
+          foreach ($application in @('material-gitlab-deployer', 'material-gitlab-instant')) {
+            $contract = @($manifest | Where-Object { $_.Application -eq $application })
+            foreach ($entry in $contract) {
+              $asset = $release.assets | Where-Object { $_.name -eq $entry.PublishedAsset } | Select-Object -First 1
+              if (-not $asset -or [int64]$asset.size -ne [int64]$entry.Bytes) { throw "Published release is missing the verified $application asset $($entry.Asset)." }
+            }
+          }

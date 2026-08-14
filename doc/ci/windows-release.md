@@ -11,32 +11,36 @@ one uniquely tagged release only when build, packaging, and publication succeed.
 
 ## Run the supported build path
 
-Manual release preparation uses the two root scripts in order, in silent mode:
+Manual release preparation uses the two app-local installer scripts, in silent
+mode:
 
 ```bat
-build.bat /s
-build-installer.bat /s
+tools\material-gitlab-deployer\build-installer.bat /s
+tools\material-gitlab-instant\build-installer.bat /s
 ```
 
-`build.bat /s` bootstraps the declared Node.js and Yarn versions, installs the
-frozen JavaScript dependencies, and runs the production frontend build.
-`build-installer.bat /s` packages the exact `HEAD` commit and validates the
-resulting archive and SHA-256 digest. Neither script publishes, tags, pushes, or
-creates a release.
+Each script bootstraps its own declared Node.js dependencies, builds its own
+app, and packages from that app root. Neither script publishes, tags, pushes, or
+creates a release. The Rails monorepo root `build.bat` and source-ZIP
+`build-installer.bat` are not part of this app-release path and must not run in
+this workflow.
 
-The current repository declares a source ZIP rather than a native Windows
-installer. The package must therefore be labelled as a source ZIP; a workflow
-that promises a native installer is blocked until a supported installer is
-implemented. Never rename a ZIP to make it look like an installer.
+Each app must produce its own fresh unsigned Squirrel.Windows asset set under
+`dist\squirrel-windows`: a non-empty `*-Setup.exe`, an adjacent non-empty
+`RELEASES` index, and a non-empty `*-full.nupkg`. The workflow validates both
+sets independently and stages them separately before prefixing release asset
+names. A set from one app never substitutes for the other, and a source ZIP is
+never renamed to look like an installer.
 
 ## Workflow stages
 
 1. Check out the intended commit and record its full SHA.
-2. Bootstrap the repository's declared toolchain and dependencies on a clean
-   Windows runner.
-3. Run `build.bat /s` and fail closed on any non-zero result or missing output.
-4. Run `build-installer.bat /s` and validate the artifact type, entries, size,
-   digest, and source commit.
+2. Bootstrap each app's declared toolchain and dependencies on a clean Windows
+   runner, without running the Rails monorepo Yarn install.
+3. Clean each app's prior `dist\squirrel-windows` output and run both local
+   `build-installer.bat /s` commands.
+4. Validate both unsigned Squirrel asset sets: Setup.exe, adjacent RELEASES,
+   and a full `.nupkg`, along with size, digest, and source commit.
 5. Collect safe logs and metadata even when an earlier stage fails.
 6. Publish one unique, non-draft release only after all publication inputs are
    verified.
@@ -78,10 +82,11 @@ Code signing is permanently disabled. The release is explicitly unsigned and
 may trigger an unknown-publisher or SmartScreen warning. No signing certificate,
 private key, signer service, or certificate auto-discovery is permitted.
 
-Stop publication and report the exact evidence when bootstrapping fails, either
-script fails, output is stale or malformed, the target SHA does not match, timing
-or line-count evidence is missing, a required asset is unavailable, or any tool
-attempts to sign. Artifact collection must still run defensively with
+Stop publication and report the exact evidence when either app's bootstrapping
+or installer script fails, either app's output is stale or malformed, either
+app lacks `*-Setup.exe`, adjacent RELEASES, or a full `.nupkg`, the target SHA does
+not match, timing or line-count evidence is missing, a required asset is
+unavailable, or any tool attempts to sign. Artifact collection must still run defensively with
 `if: ${{ always() }}`, `continue-on-error: true`, and
 `if-no-files-found: warn`; it must never turn a failed build green.
 

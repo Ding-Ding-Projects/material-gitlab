@@ -19,23 +19,35 @@ resolved version in its run summary:
 
 | Item | Source of truth | Bootstrap requirement |
 | --- | --- | --- |
-| Node.js | `.nvmrc` and `package.json` | Install a user-scoped compatible LTS runtime from the canonical Node.js package source. |
-| Yarn | `package.json`, `yarn.lock`, and `build.bat` | Activate Yarn 1.22.22 through Corepack, or use the documented user-scoped npm fallback. |
-| Git | repository tooling and `build-installer.bat` | Use the runner's Git only after verifying that `git archive`, `git rev-parse`, and hashing are available. |
-| PowerShell | `build-installer.bat` validation command | Use the runner's PowerShell for ZIP validation and SHA-256 calculation. |
-| Repository dependencies | `yarn.lock` | Run `yarn install --frozen-lockfile --non-interactive --no-progress`; do not mutate the lockfile. |
+| Node.js and npm | Each app's `package.json` and lockfile | Install a user-scoped compatible Node.js runtime with npm, then let each app's supported installer script restore only its own declared dependencies. |
+| Git | release metadata and commit proof | Use the runner's Git only after verifying that `git rev-parse` and hashing are available. |
+| PowerShell | installer and workflow validation | Use the runner's PowerShell for Authenticode status, SHA-256, and release-asset validation. |
+| App dependencies | `tools/material-gitlab-deployer/package-lock.json` and `tools/material-gitlab-instant/package-lock.json` | Restore dependencies from each app root. The Rails monorepo `yarn install` is outside this release contract and must not run. |
 
-The root scripts are the supported local and manual release path:
+The workflow builds the two independent app roots rather than the Rails monorepo
+root. Its supported package commands are:
 
 ```bat
-build.bat /s
-build-installer.bat /s
+tools\material-gitlab-deployer\build-installer.bat /s
+tools\material-gitlab-instant\build-installer.bat /s
 ```
 
-The first command must complete before the second starts. Silent mode must not
-prompt, open a window, or wait for input. A missing dependency, failed
-bootstrap, failed build, stale output, or malformed archive is a hard failure;
-the job must stop before publication and retain its logs and safe diagnostics.
+Before each command, the workflow removes that app's
+`dist\squirrel-windows` directory so residual files cannot satisfy the
+contract. Silent mode must not prompt, open a window, or wait for input. A
+missing dependency, failed bootstrap, failed build, stale output, or malformed
+archive is a hard failure; the job must stop before publication and retain its
+logs and safe diagnostics.
+
+## Dual-app artifact contract
+
+Each app must independently create a fresh unsigned Squirrel.Windows set under
+its own `dist\squirrel-windows` directory. The required set for **each** app is
+one non-empty `*-Setup.exe`, an adjacent non-empty `RELEASES` index, and one
+non-empty `*-full.nupkg`. `Setup.exe` must report `NotSigned`. The workflow
+preserves the two sets in separate staging directories and prefixes their
+published release asset names, so one app cannot overwrite the other's
+`RELEASES` index or package metadata.
 
 ## Artifact and evidence collection
 
@@ -49,10 +61,10 @@ source trees, or temporary files.
 
 The collector must verify that each artifact exists, is readable, and was
 created from the intended commit. It must not accept a file left by an earlier
-run. The current repository's packaging script creates an unsigned source ZIP
-because no native Windows installer is declared; it must not be described as a
-native installer. If the release contract requires an installer, packaging is
-blocked until a supported installer path exists.
+run. The root repository source-ZIP packager is not part of this
+application-release contract and must not be collected as an installer. If
+either named app lacks a supported Squirrel.Windows path, packaging is blocked;
+a source ZIP and an asset set from the other app are not substitutes.
 
 ## Deliberate verification boundary
 
@@ -95,9 +107,9 @@ invoked.
 The publisher must stop and report the exact blocker when any of these occurs:
 
 - the required runtime, package manager, or dependency cannot be bootstrapped;
-- `build.bat /s` or `build-installer.bat /s` fails;
-- an expected artifact is missing, stale, malformed, or cannot be tied to the
-  intended commit;
+- either app's `build-installer.bat /s` fails;
+- either app's `*-Setup.exe`, adjacent `RELEASES`, or full `.nupkg` is missing,
+  stale, malformed, signed, or cannot be tied to the intended commit;
 - the release target, timing evidence, line-count output, or required asset is
   unavailable;
 - the selected dim-sum asset is not a published catalog asset; or
