@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "storage": "localStorage",
+  "preferences": {
+    "language": ["en", "zh-Hant", "bilingual"],
+    "funnyLevelEnglish": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "funnyLevelCantonese": { "type": "integer", "minimum": 1, "maximum": 5 },
+    "showEmojis": { "type": "boolean" }
+  },
+  "personalVocabulary": {
+    "schemaVersion": 1,
+    "shape": { "entries": "object<string,string>" },
+    "limits": { "maxBytes": 131072, "maxEntries": 500, "maxTextLength": 200 },
+    "states": ["empty", "loaded", "invalid", "replaced", "cleared"],
+    "privacy": "validated local cache only; no network, telemetry, exports, or public records"
+  }
+}
