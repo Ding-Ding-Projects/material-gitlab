@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "documents": [
+    {"id":"ollama-health","title":"Local Ollama health and recovery","summary":"Diagnose missing, stopped, unhealthy, offline, and healthy local states without network access.","body":"The suite manager uses only a local adapter. Offline help remains available when Ollama is missing or stopped."},
+    {"id":"ollama-models","title":"Models and conservative hardware fit","summary":"Browse verified local model records and explain Runs well, Runs with limits, Unlikely, or Unknown.","body":"Model records are supplied by a verified local source. Missing size or hardware evidence produces Unknown rather than a guess."},
+    {"id":"ollama-pulls","title":"Batch pulls","summary":"Queue local pulls with bounded progress, cancellation, retry, and partial outcomes.","body":"A failed item stays failed and never turns the batch green or removes an installed model."},
+    {"id":"ollama-chat","title":"Local chat sessions","summary":"Stream or complete chat through the local Ollama adapter with editable parameters and saved sessions.","body":"Prompts, responses, and attachments remain on this device."},
+    {"id":"ollama-harness","title":"Allowlisted harness profiles","summary":"Launch only picked executables with explicit argument arrays and reviewable local profiles.","body":"Arbitrary shell commands and unvalidated expansion are rejected."}
+  ]
+}
