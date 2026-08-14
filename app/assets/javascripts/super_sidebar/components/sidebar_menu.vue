@@ -1,6 +1,6 @@
 <script>
 import { GlBreakpointInstance, breakpoints } from '@gitlab/ui/src/utils'; // eslint-disable-line no-restricted-syntax -- GlBreakpointInstance is used intentionally here. In this case we must obtain viewport breakpoints
-import { GlNavItem, GlModalDirective, GlTooltipDirective, GlToastMixin } from '@gitlab/ui';
+import { GlIcon, GlModalDirective, GlTooltipDirective, GlToastMixin } from '@gitlab/ui';
 import superSidebarDataQuery from '~/super_sidebar/graphql/queries/super_sidebar.query.graphql';
 import { __, s__, sprintf } from '~/locale';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
@@ -32,7 +32,7 @@ export default {
     MenuSection,
     NavItem,
     PinnedSection,
-    GlNavItem,
+    GlIcon,
     FeatureLibraryModal,
   },
   directives: {
@@ -372,7 +372,7 @@ export default {
 
 <template>
   <div
-    class="gl-relative gl-px-3 gl-py-2 m3-shell-sidebar-menu"
+    class="gl-relative m3-shell-sidebar-menu"
     :class="{
       'gl-flex gl-h-full gl-flex-col': !showUnpinnedItems,
     }"
@@ -405,19 +405,22 @@ export default {
       @pin-remove="destroyPin"
       @pin-reorder="movePin"
     />
-    <gl-nav-item
+    <button
       v-if="showFeatureLibrary"
       v-gl-modal="$options.modalId"
       v-gl-tooltip.right.viewport="isIconOnly ? $options.i18n.browseMoreFeatures : ''"
+      type="button"
       :aria-label="$options.i18n.browseMoreFeatures"
+      class="gl-nav-item m3-shell-nav-item m3-shell-nav-action"
       :class="{ 'feature-library-shimmer': shimmerActive }"
       data-testid="feature-library-trigger"
-      icon="applications"
-      :is-icon-only="isIconOnly"
       @click="dismissShimmerCallout"
     >
-      {{ $options.i18n.browseMoreFeatures }}
-    </gl-nav-item>
+      <span class="m3-shell-nav-item-icon"><gl-icon name="applications" /></span>
+      <span v-show="!isIconOnly" class="gl-nav-item-label m3-shell-nav-item-label">
+        {{ $options.i18n.browseMoreFeatures }}
+      </span>
+    </button>
     <template v-if="activeUnpinnedItem">
       <hr aria-hidden="true" class="gl-border-t gl-m-3 gl-border-strong" />
       <ul
