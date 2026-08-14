@@ -40,6 +40,7 @@ export default {
   mixins: [Tracking.mixin(), glFeatureFlagsMixin()],
   i18n: {
     primaryNavigation: s__('Navigation|Primary navigation'),
+    productMark: s__('Navigation|G'),
     productName: 'GitLab',
     search: s__('Navigation|Search or go to…'),
   },
@@ -98,7 +99,7 @@ export default {
 
         if (!collapsed) {
           this.$nextTick(() => {
-            this.firstFocusableElement().focus();
+            this.firstFocusableElement()?.focus();
           });
         }
       },
@@ -163,17 +164,25 @@ export default {
       }
     },
     firstFocusableElement() {
-      return this.$refs.sidebarMenu.$el.querySelector('a');
+      return this.focusableElements()[0];
     },
     lastFocusableElement() {
-      return this.$refs.helpCenter.$el.querySelector('button');
+      const focusableElements = this.focusableElements();
+      return focusableElements[focusableElements.length - 1];
+    },
+    focusableElements() {
+      return [
+        ...this.$refs.sidebar.querySelectorAll(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ];
     },
     focusTrap(event) {
       const { keyCode, shiftKey } = event;
       const firstFocusableElement = this.firstFocusableElement();
       const lastFocusableElement = this.lastFocusableElement();
 
-      if (keyCode !== TAB_KEY_CODE) return;
+      if (keyCode !== TAB_KEY_CODE || !firstFocusableElement || !lastFocusableElement) return;
 
       if (shiftKey) {
         if (document.activeElement === firstFocusableElement) {
@@ -197,6 +206,7 @@ export default {
     <div ref="overlay" class="super-sidebar-overlay" @click="collapseSidebar"></div>
     <nav
       id="super-sidebar"
+      ref="sidebar"
       aria-labelledby="super-sidebar-heading"
       class="super-sidebar m3-shell-sidebar"
       :class="sidebarClasses"
@@ -210,16 +220,18 @@ export default {
       <h2 id="super-sidebar-heading" class="gl-sr-only">
         {{ $options.i18n.primaryNavigation }}
       </h2>
-      <div class="contextual-nav m3-shell-sidebar-content gl-flex gl-grow gl-flex-col gl-overflow-hidden">
+      <div
+        class="contextual-nav m3-shell-sidebar-content gl-flex gl-grow gl-flex-col gl-overflow-hidden"
+      >
         <div v-if="!isIconOnly" class="m3-shell-sidebar-header">
           <div class="m3-shell-sidebar-brand" aria-hidden="true">
-            <span class="m3-shell-sidebar-brand-mark">G</span>
+            <span class="m3-shell-sidebar-brand-mark">{{ $options.i18n.productMark }}</span>
             <span class="m3-shell-sidebar-brand-name">{{ $options.i18n.productName }}</span>
           </div>
           <a
             v-if="currentContext"
             id="super-sidebar-context-header"
-            :href="currentContext.webUrl"
+            :href="currentContext.webPath"
             class="super-sidebar-context-header m3-shell-sidebar-context-card"
           >
             <gl-avatar
@@ -240,7 +252,9 @@ export default {
             class="super-sidebar-context-header m3-shell-sidebar-context-card m3-shell-sidebar-context-card-static"
           >
             <span class="m3-shell-sidebar-context-copy">
-              <span class="m3-shell-sidebar-context-name">{{ sidebarData.current_context_header }}</span>
+              <span class="m3-shell-sidebar-context-name">{{
+                sidebarData.current_context_header
+              }}</span>
             </span>
           </div>
           <button
