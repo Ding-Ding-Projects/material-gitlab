@@ -67,27 +67,32 @@ exit /b 0
 :ensure_yarn
 where corepack >nul 2>nul
 if not errorlevel 1 goto :corepack_yarn
+goto :npm_yarn
+
+:corepack_yarn
+echo [INSTALL] Activating the manifest-pinned Yarn 1.22.22 through Corepack.
+corepack prepare yarn@1.22.22 --activate
+if not errorlevel 1 (
+  set "YARN_CMD=corepack yarn"
+  goto :check_yarn
+)
+echo [WARN] Corepack could not prepare Yarn 1.22.22; trying the user-scoped npm fallback.
+
+:npm_yarn
 where npm >nul 2>nul
 if errorlevel 1 (
   echo [ERROR] Neither Corepack nor npm is available to provide the manifest's Yarn package manager.
   exit /b 1
 )
-echo [INSTALL] Corepack is unavailable; acquiring Yarn 1.22.22 in the user npm prefix.
-npm install --global yarn@1.22.22 --no-fund --no-audit
+set "YARN_TOOLS=%LOCALAPPDATA%\material-gitlab-tools"
+echo [INSTALL] Acquiring Yarn 1.22.22 in the user-scoped npm prefix: %YARN_TOOLS%.
+npm install --global --prefix "%YARN_TOOLS%" yarn@1.22.22 --no-fund --no-audit
 if errorlevel 1 (
   echo [ERROR] npm could not acquire Yarn 1.22.22.
   exit /b 1
 )
-goto :check_yarn
-
-:corepack_yarn
-echo [INSTALL] Activating the manifest-pinned Yarn 1.22.22 through Corepack.
-corepack prepare yarn@1.22.22 --activate
-if errorlevel 1 (
-  echo [ERROR] Corepack could not prepare Yarn 1.22.22 in its user cache.
-  exit /b 1
-)
-set "YARN_CMD=corepack yarn"
+set "PATH=%YARN_TOOLS%;%YARN_TOOLS%\bin;%PATH%"
+set "YARN_CMD=yarn"
 
 :check_yarn
 if /I "%YARN_CMD%"=="yarn" (
