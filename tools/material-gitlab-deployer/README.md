@@ -45,6 +45,19 @@ The icon is presentation metadata only: changing it must not change the installe
 update feed. A framework-default icon, a missing icon, or metadata that points at an unreachable
 or mutable asset blocks packaging readiness.
 
+The package metadata also declares the public Git repository explicitly (the `repository`
+field, including its HTTPS URL). This is required by Electron Builder's PublishManager even
+for a local Squirrel build: without it, repository detection can fail with `Cannot detect
+repository by .git/config`. The metadata declaration is packaging input only; it does not
+grant the local build permission to contact or modify that repository.
+
+The package command is invoked with `--publish never`. That explicit no-publish boundary is
+intentional: PublishManager must not publish, clean up, or reject the locally generated
+Squirrel files merely because a repository publisher is unavailable. A successful local run
+therefore means only that the unsigned installer assets were produced and verified locally;
+it never creates a GitHub/GitLab release, uploads an asset, tags a commit, or otherwise
+publishes anything.
+
 ### Unsigned verification boundary
 
 Code signing is permanently disabled. `Setup.exe` and every generated update executable are

@@ -4,12 +4,16 @@
   "version": "0.1.0",
   "description": "Material 3-inspired deployment plan preview shell for GitLab installations.",
   "author": "Material GitLab Contributors",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ding-Ding-Projects/material-gitlab.git"
+  },
   "productName": "Material GitLab Deployer",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
     "start": "electron .",
-    "package:squirrel": "electron-builder --win squirrel"
+    "package:squirrel": "electron-builder --win squirrel --publish never"
   },
   "engines": {
     "node": ">=20.0.0"
