@@ -2,6 +2,20 @@
 import { createNavigationState, setTabQuery, setTabRegex, toggleCommandPalette, bindNavigationKeyboard, filterTabs } from './navigation.js';
 import { loadPreferences, updatePreferences, readVocabularyFile, cacheVocabulary, vocabularyStatus } from './preferences.js';
 import { getStatusHubState, registerStatusHubProject } from './status-hub.js';
+import { initAppearanceEditor, registerAppearanceTarget } from './appearance.js';
+import { loadTabState, saveTabState, addTab, renderTabShell } from './tabs.js';
+import { createRegexBuilder, bindRegexBuilder } from './regex-builder.js';
+import { initNotifications, createNotification, saveNotifications, loadNotifications } from './notifications.js';
+import { appendHistoryEvent, loadHistory } from './history.js';
+import { exportRecords, downloadExport } from './exports.js';
+import { bindAuthenticator } from './authenticator.js';
+import { lockRecoveryDisclosure, bindToyLockSurface } from './toy-locks.js';
+import { loadSchedule, upsertRule } from './scheduled-settings.js';
+import { validateLogoFile, uploadCustomLogo, resetLogo } from './logo-customization.js';
+import { mountOfflineDocs } from './offline-docs.js';
+import { createOllamaManager } from './ollama-manager.js';
+import { applyMobileAccessibility, installFocusRing } from './mobile-accessibility.js';
+import { initProductContent } from './content.js';
 (function () {
   'use strict';
 
@@ -114,6 +128,52 @@ import { getStatusHubState, registerStatusHubProject } from './status-hub.js';
     const existing = getStatusHubState(); $('[data-status-hub-state]').textContent = `${existing.state}: ${existing.delivery.reason}`; render();
   }
 
+  function wireExpansionSurfaces() {
+    initAppearanceEditor(document);
+    document.querySelectorAll('[data-appearance-target]').forEach((element) => registerAppearanceTarget(element));
+
+    const tabsRoot = $('[data-tabs-shell]');
+    if (tabsRoot) {
+      let tabs = loadTabState();
+      if (!tabs.tabs.length) tabs = addTab(tabs, { id: 'overview', label: 'Overview', route: '#overview', pinned: true });
+      tabs = addTab(tabs, { id: 'tools', label: 'Tools', route: '#tools' });
+      const render = () => { tabs = saveTabState(tabs); renderTabShell(tabsRoot, tabs, (next) => { tabs = next; render(); }); };
+      render();
+      $('[data-tab-add]')?.addEventListener('click', () => { tabs = addTab(tabs, { id: `tab-${Date.now().toString(36)}`, label: 'New local tab', route: '#tools' }); render(); });
+    }
+
+    const toolsSearch = $('[data-tools-search]');
+    const toolsBuilder = $('[data-tools-regex-builder]');
+    const toolsToggle = $('[data-tools-regex-toggle]');
+    if (toolsSearch && toolsBuilder) { createRegexBuilder({ root: toolsBuilder, search: toolsSearch, label: 'Tool surface regex builder', download: false }); bindRegexBuilder(toolsSearch, toolsBuilder, toolsToggle); }
+
+    initNotifications({ stack: $('[data-notification-stack]'), centre: $('[data-notification-centre]') });
+    $('[data-notification-demo]')?.addEventListener('click', () => { const items = loadNotifications(); saveNotifications([...items, createNotification('Local notification recorded.', { kind: 'success', title: 'Site tools' })]); document.dispatchEvent(new CustomEvent('notifications:changed')); });
+
+    const historyList = $('[data-history-list]');
+    const renderHistory = () => { const events = loadHistory(); $('[data-history-summary]').textContent = `${events.length} local history event${events.length === 1 ? '' : 's'}.`; if (historyList) historyList.innerHTML = events.slice(-10).reverse().map((event) => `<li>${text(event.action)} · ${text(event.createdAt)}</li>`).join(''); };
+    $('[data-history-record]')?.addEventListener('click', () => { appendHistoryEvent('settings changed', { surface: 'site tools' }); renderHistory(); });
+    $('[data-history-export]')?.addEventListener('click', () => downloadExport(loadHistory(), 'json', 'material-gitlab-history.json'));
+    renderHistory();
+
+    $('[data-lock-disclosure]').textContent = lockRecoveryDisclosure();
+    bindToyLockSurface(document);
+    bindAuthenticator(document);
+
+    const scheduleSummary = $('[data-schedule-summary]');
+    const renderSchedule = () => { const schedule = loadSchedule(); if (scheduleSummary) scheduleSummary.textContent = `${schedule.rules.length} local rule${schedule.rules.length === 1 ? '' : 's'}; timezone ${schedule.timezone}.`; };
+    $('[data-schedule-add]')?.addEventListener('click', () => { upsertRule({ id: `rule-${Date.now().toString(36)}`, label: 'Reading focus', values: { density: 'comfortable' } }); renderSchedule(); });
+    renderSchedule();
+
+    $('[data-logo-upload]')?.addEventListener('change', async (event) => { const file = event.target.files?.[0]; try { await validateLogoFile(file); await uploadCustomLogo(file); $('[data-logo-status]').textContent = `Using ${file.name} locally.`; } catch (error) { $('[data-logo-status]').textContent = error.message; } event.target.value = ''; });
+    $('[data-logo-reset]')?.addEventListener('click', () => { resetLogo(); $('[data-logo-status]').textContent = 'Using the shipped mark.'; });
+
+    const ollama = createOllamaManager();
+    $('[data-ollama-check]')?.addEventListener('click', async () => { const status = await ollama.checkHealth(); $('[data-ollama-status]').textContent = `${status.state}: ${status.detail}`; });
+    mountOfflineDocs($('[data-offline-doc-list]'), { onSelect: (doc) => { $('[data-ollama-status]').textContent = `Offline article selected: ${doc.title}`; } });
+    applyMobileAccessibility(document); installFocusRing(document);
+  }
+
   async function init() {
     try {
       const [inventory, manifest] = await Promise.all([
@@ -127,7 +187,7 @@ import { getStatusHubState, registerStatusHubProject } from './status-hub.js';
       const status = $('[data-runtime-status]');
       if (status) status.textContent = `Documentation data unavailable: ${error.message}`;
     }
-    renderInventory(); renderDocs(); wireSearch(); wireTabs(); wireNavigationFoundation(); wirePreferencesFoundation();
+    renderInventory(); renderDocs(); wireSearch(); wireTabs(); wireNavigationFoundation(); wirePreferencesFoundation(); wireExpansionSurfaces(); initProductContent(document);
     document.dispatchEvent(new CustomEvent('material-site-ready', { detail: { basePath: base.href, state } }));
   }
 
