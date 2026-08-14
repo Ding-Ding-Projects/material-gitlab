@@ -49,7 +49,6 @@ function failures(inventory) {
   }
   return result;
 }
-
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -82,4 +81,3 @@ if (baselineFailures.length) {
     console.log(`Completeness Chut passed: ${inventory.features.length} hand-written rows; ${dimensions.length} evidence dimensions; every removal was rejected.`);
   }
 }
-
