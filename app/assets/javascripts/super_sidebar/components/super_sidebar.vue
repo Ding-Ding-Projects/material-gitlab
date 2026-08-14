@@ -175,12 +175,12 @@ export default {
 </script>
 
 <template>
-  <div v-if="menuItems.length" class="super-sidebar-wrapper">
+  <div v-if="menuItems.length" class="super-sidebar-wrapper m3-shell-sidebar-wrapper">
     <div ref="overlay" class="super-sidebar-overlay" @click="collapseSidebar"></div>
     <nav
       id="super-sidebar"
       aria-labelledby="super-sidebar-heading"
-      class="super-sidebar"
+      class="super-sidebar m3-shell-sidebar"
       :class="sidebarClasses"
       data-testid="super-sidebar"
       :inert="sidebarState.isCollapsed"
@@ -192,11 +192,11 @@ export default {
       <h2 id="super-sidebar-heading" class="gl-sr-only">
         {{ $options.i18n.primaryNavigation }}
       </h2>
-      <div class="contextual-nav gl-flex gl-grow gl-flex-col gl-overflow-hidden gl-pt-2">
+      <div class="contextual-nav m3-shell-sidebar-content gl-flex gl-grow gl-flex-col gl-overflow-hidden gl-pt-2">
         <div
           v-if="sidebarData.current_context_header && !isIconOnly"
           id="super-sidebar-context-header"
-          class="super-sidebar-context-header gl-m-0 gl-px-5 gl-py-3 gl-font-bold gl-leading-reset"
+          class="super-sidebar-context-header m3-shell-sidebar-context gl-m-0 gl-px-5 gl-py-3 gl-font-bold gl-leading-reset"
         >
           {{ sidebarData.current_context_header }}
         </div>

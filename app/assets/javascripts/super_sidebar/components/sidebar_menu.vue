@@ -372,7 +372,7 @@ export default {
 
 <template>
   <div
-    class="gl-relative gl-px-3 gl-py-2"
+    class="gl-relative gl-px-3 gl-py-2 m3-shell-sidebar-menu"
     :class="{
       'gl-flex gl-h-full gl-flex-col': !showUnpinnedItems,
     }"

@@ -226,14 +226,14 @@ export default {
 <template>
   <li
     v-gl-tooltip.right.viewport="isIconOnly && !isFlyout ? item.title : ''"
-    class="show-on-focus-or-hover--context hide-on-focus-or-hover--context transition-opacity-on-hover--context gl-relative"
+    class="show-on-focus-or-hover--context hide-on-focus-or-hover--context transition-opacity-on-hover--context gl-relative m3-shell-nav-item-wrapper"
     data-testid="nav-item"
     @mouseenter="isMouseIn = true"
     @mouseleave="isMouseIn = false"
   >
     <gl-nav-item
       v-bind="linkProps"
-      class="super-sidebar-nav-item show-on-focus-or-hover--control hide-on-focus-or-hover--control gl-mb-1"
+      class="super-sidebar-nav-item m3-shell-nav-item show-on-focus-or-hover--control hide-on-focus-or-hover--control gl-mb-1"
       :class="computedLinkClasses"
       data-testid="nav-item-link"
       :aria-label="item.title"
