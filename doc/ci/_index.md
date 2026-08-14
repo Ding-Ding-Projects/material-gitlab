@@ -64,6 +64,7 @@ For more information, see:
 - [Tutorial: Create and run your first GitLab CI/CD pipeline](quick_start/_index.md#create-a-gitlab-ciyml-file)
 - [Specify a custom CI/CD configuration file](pipelines/settings.md#specify-a-custom-cicd-configuration-file)
 - [Pipelines](pipelines/_index.md)
+- [Windows release workflow](windows-release.md)
 
 ## Step 2: Find or create runners
 
