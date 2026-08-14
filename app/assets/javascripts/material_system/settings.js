@@ -31,19 +31,30 @@ function boundedString(value, maxLength) {
 }
 
 export function validateSettings(candidate) {
-  if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate)) return { ok: false, errors: ['settings must be an object'] };
+  if (!candidate || typeof candidate !== 'object' || Array.isArray(candidate))
+    return { ok: false, errors: ['settings must be an object'] };
   const errors = [];
-  if (candidate.schemaVersion !== SETTINGS_SCHEMA_VERSION) errors.push('unsupported schema version');
+  if (candidate.schemaVersion !== SETTINGS_SCHEMA_VERSION)
+    errors.push('unsupported schema version');
   if (!LANGUAGES.has(candidate.language)) errors.push('invalid language');
   for (const key of ['funnyLevelEnglish', 'funnyLevelCantonese']) {
-    if (!Number.isInteger(candidate[key]) || candidate[key] < 1 || candidate[key] > 5) errors.push(`${key} must be an integer from 1 to 5`);
+    if (!Number.isInteger(candidate[key]) || candidate[key] < 1 || candidate[key] > 5)
+      errors.push(`${key} must be an integer from 1 to 5`);
   }
-  if (typeof candidate.showDialogEmojis !== 'boolean') errors.push('showDialogEmojis must be boolean');
+  if (typeof candidate.showDialogEmojis !== 'boolean')
+    errors.push('showDialogEmojis must be boolean');
   if (!THEMES.has(candidate.theme)) errors.push('invalid theme');
   if (!DENSITIES.has(candidate.density)) errors.push('invalid density');
-  if (!HEX_COLOR.test(candidate.accentColor)) errors.push('accentColor must be a #RRGGBB or #RRGGBBAA color');
+  if (!HEX_COLOR.test(candidate.accentColor))
+    errors.push('accentColor must be a #RRGGBB or #RRGGBBAA color');
   if (!boundedString(candidate.fontFamily, 128)) errors.push('fontFamily must be 1-128 characters');
-  if (typeof candidate.fontScale !== 'number' || !Number.isFinite(candidate.fontScale) || candidate.fontScale < 0.8 || candidate.fontScale > 2) errors.push('fontScale must be between 0.8 and 2');
+  if (
+    typeof candidate.fontScale !== 'number' ||
+    !Number.isFinite(candidate.fontScale) ||
+    candidate.fontScale < 0.8 ||
+    candidate.fontScale > 2
+  )
+    errors.push('fontScale must be between 0.8 and 2');
   if (!MOTIONS.has(candidate.motion)) errors.push('invalid motion preference');
   return errors.length ? { ok: false, errors } : { ok: true, value: clone(candidate) };
 }
@@ -53,7 +64,8 @@ export function migrateSettings(input) {
   const migrated = { ...clone(DEFAULT_SETTINGS) };
   if (source.schemaVersion === 0 || source.schemaVersion === undefined) {
     if (typeof source.languageMode === 'string') migrated.language = source.languageMode;
-    if (Number.isInteger(source.funnyLevel)) migrated.funnyLevelEnglish = migrated.funnyLevelCantonese = source.funnyLevel;
+    if (Number.isInteger(source.funnyLevel))
+      migrated.funnyLevelEnglish = migrated.funnyLevelCantonese = source.funnyLevel;
   }
   for (const key of Object.keys(DEFAULT_SETTINGS)) if (key in source) migrated[key] = source[key];
   migrated.schemaVersion = SETTINGS_SCHEMA_VERSION;
@@ -75,10 +87,17 @@ export function loadSettings(storage = globalThis.localStorage) {
 export function saveSettings(settings, storage = globalThis.localStorage) {
   const normalized = migrateSettings(settings);
   const checked = validateSettings(normalized);
-  if (!checked.ok || !storage || typeof storage.setItem !== 'function') return { ok: false, errors: checked.errors || ['storage unavailable'] };
+  if (!checked.ok || !storage || typeof storage.setItem !== 'function')
+    return { ok: false, errors: checked.errors || ['storage unavailable'] };
   const serialized = JSON.stringify(checked.value);
-  if (serialized.length > SETTINGS_MAX_BYTES) return { ok: false, errors: ['settings exceed storage limit'] };
-  try { storage.setItem(SETTINGS_STORAGE_KEY, serialized); return { ok: true, value: checked.value }; } catch (_error) { return { ok: false, errors: ['settings could not be persisted'] }; }
+  if (serialized.length > SETTINGS_MAX_BYTES)
+    return { ok: false, errors: ['settings exceed storage limit'] };
+  try {
+    storage.setItem(SETTINGS_STORAGE_KEY, serialized);
+    return { ok: true, value: checked.value };
+  } catch (_error) {
+    return { ok: false, errors: ['settings could not be persisted'] };
+  }
 }
 
 export function updateSettings(patch, storage = globalThis.localStorage) {
@@ -86,12 +105,70 @@ export function updateSettings(patch, storage = globalThis.localStorage) {
 }
 
 export function subscribeSettings(listener, target = globalThis) {
-  if (!target || typeof target.addEventListener !== 'function' || typeof listener !== 'function') return () => {};
-  const onStorage = (event) => { if (event.key === SETTINGS_STORAGE_KEY) listener(loadSettings(target.localStorage)); };
+  if (!target || typeof target.addEventListener !== 'function' || typeof listener !== 'function')
+    return () => {};
+  const onStorage = (event) => {
+    if (event.key === SETTINGS_STORAGE_KEY) listener(loadSettings(target.localStorage));
+  };
   target.addEventListener('storage', onStorage);
   return () => target.removeEventListener('storage', onStorage);
 }
 
 export function settingsTokens(settings = DEFAULT_SETTINGS) {
-  return createMaterialTokens({ scheme: settings.theme === 'dark' ? 'dark' : 'light', density: settings.density });
+  return createMaterialTokens({
+    scheme: settings.theme === 'dark' ? 'dark' : 'light',
+    density: settings.density,
+  });
+}
+
+/**
+ * Observable settings adapter for Vue composables and other renderers. The
+ * store owns persistence while consumers keep rendering concerns local.
+ */
+export function createMaterialSettingsStore({
+  storage = globalThis.localStorage,
+  target = globalThis,
+} = {}) {
+  let state = loadSettings(storage);
+  const listeners = new Set();
+  const emit = () => {
+    const snapshot = clone(state);
+    listeners.forEach((listener) => listener(snapshot));
+    return snapshot;
+  };
+  const unsubscribeStorage = subscribeSettings((next) => {
+    state = next;
+    emit();
+  }, target);
+
+  return Object.freeze({
+    snapshot: () => clone(state),
+    subscribe(listener) {
+      if (typeof listener !== 'function') return () => {};
+      listeners.add(listener);
+      listener(clone(state));
+      return () => listeners.delete(listener);
+    },
+    update(patch = {}) {
+      const result = saveSettings({ ...state, ...patch }, storage);
+      if (result.ok) {
+        state = result.value;
+        emit();
+      }
+      return result;
+    },
+    reset() {
+      const result = saveSettings(DEFAULT_SETTINGS, storage);
+      if (result.ok) {
+        state = result.value;
+        emit();
+      }
+      return result;
+    },
+    tokens: () => settingsTokens(state),
+    dispose() {
+      unsubscribeStorage();
+      listeners.clear();
+    },
+  });
 }
