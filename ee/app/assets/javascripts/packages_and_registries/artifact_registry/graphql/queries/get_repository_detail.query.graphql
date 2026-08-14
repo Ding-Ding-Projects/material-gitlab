@@ -1,0 +1,40 @@
+# @feature_category: artifact_registry
+
+# `organization { id }` stays a non-@client sibling selection: the graphql-verify
+# redactor drops @client fields outright, so a selection set holding nothing else
+# would redact to an empty one.
+#
+# `name` stays selected whatever else the page renders: graphql/cache_config.js keys
+# ArtifactRegistryRepository on it, so the cache cannot normalize the entity without it.
+query getArtifactRegistryRepositoryDetail(
+  $organizationId: OrganizationsOrganizationID!
+  $name: String!
+) {
+  organization(id: $organizationId) {
+    id
+    artifactRegistryRepository(name: $name) @client {
+      name
+      format
+      kind
+      visibility
+      description
+      artifactsCount
+      downloadsCount
+      sizeBytes
+      createdAt
+      lastUpdatedAt
+      createdBy {
+        id
+        name
+        avatarUrl
+        webPath
+      }
+      updatedBy {
+        id
+        name
+        avatarUrl
+        webPath
+      }
+    }
+  }
+}

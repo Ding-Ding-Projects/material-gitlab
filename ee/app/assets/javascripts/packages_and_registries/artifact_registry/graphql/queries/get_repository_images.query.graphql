@@ -1,0 +1,35 @@
+# @feature_category: artifact_registry
+#import "~/graphql_shared/fragments/page_info.fragment.graphql"
+
+query getArtifactRegistryRepositoryImages(
+  $organizationId: OrganizationsOrganizationID!
+  $name: String!
+  $first: Int
+  $last: Int
+  $before: String
+  $after: String
+) {
+  organization(id: $organizationId) {
+    id
+    # The paging arguments repeat here because Apollo prunes only the @client field's own
+    # variables; on `images` alone they reach the server unused and it rejects the query.
+    artifactRegistryRepository(
+      name: $name
+      first: $first
+      last: $last
+      before: $before
+      after: $after
+    ) @client {
+      name
+      images(first: $first, last: $last, before: $before, after: $after) {
+        nodes {
+          id
+          name
+        }
+        pageInfo {
+          ...PageInfo
+        }
+      }
+    }
+  }
+}

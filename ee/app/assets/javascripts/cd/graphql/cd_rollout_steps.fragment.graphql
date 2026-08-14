@@ -1,0 +1,25 @@
+fragment CdRolloutSteps on CdRollout {
+  id
+  rolloutSteps {
+    id
+    stepType
+    name
+    params
+    state
+    environment {
+      id
+      name
+    }
+    steps {
+      id
+      stepType
+      name
+      params
+      state
+      environment {
+        id
+        name
+      }
+    }
+  }
+}

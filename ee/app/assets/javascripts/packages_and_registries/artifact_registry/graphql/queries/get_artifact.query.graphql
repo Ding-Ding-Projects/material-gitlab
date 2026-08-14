@@ -1,0 +1,34 @@
+# @feature_category: artifact_registry
+
+query getArtifactRegistryArtifact(
+  $organizationId: OrganizationsOrganizationID!
+  $name: String!
+  $artifactId: ID!
+) {
+  organization(id: $organizationId) {
+    id
+    # `artifactId` repeats here because Apollo prunes only the @client field's own
+    # variables; on `image` and `package` alone it reaches the server unused and it
+    # rejects the query.
+    artifactRegistryRepository(name: $name, artifactId: $artifactId) @client {
+      name
+      format
+      image(id: $artifactId) {
+        id
+        name
+      }
+      package(id: $artifactId) {
+        ... on ArtifactRegistryMavenPackage {
+          id
+          groupId
+          artifactId
+        }
+        ... on ArtifactRegistryNpmPackage {
+          id
+          name
+          scope
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,109 @@
+# The schema owns ArtifactRegistryRepository and the connection the list reads, so only
+# the fields with no server backing are declared here. Redeclaring the type would
+# collide with the schema's own and fail the Apollo schema build.
+extend type ArtifactRegistryRepository {
+  artifactsCount: String!
+  createdAt: String!
+  createdBy: UserCore
+  updatedBy: UserCore
+  images(first: Int, last: Int, before: String, after: String): ArtifactRegistryImageConnection
+  packages(first: Int, last: Int, before: String, after: String): ArtifactRegistryPackageConnection
+  image(id: ID!): ArtifactRegistryImage
+  package(id: ID!): ArtifactRegistryPackage
+}
+
+type ArtifactRegistry {
+  handle: String!
+  status: String!
+  createdAt: String!
+}
+
+type ArtifactRegistryImage {
+  id: ID!
+  name: String!
+}
+
+type ArtifactRegistryMavenPackage {
+  id: ID!
+  groupId: String!
+  artifactId: String!
+}
+
+type ArtifactRegistryNpmPackage {
+  id: ID!
+  name: String!
+  scope: String
+  versionsCount: Int!
+}
+
+union ArtifactRegistryPackage = ArtifactRegistryMavenPackage | ArtifactRegistryNpmPackage
+
+type ArtifactRegistryImageConnection {
+  nodes: [ArtifactRegistryImage!]!
+  pageInfo: PageInfo!
+}
+
+type ArtifactRegistryPackageConnection {
+  nodes: [ArtifactRegistryPackage!]!
+  pageInfo: PageInfo!
+}
+
+type LocalArtifactRegistryActivatePayload {
+  registry: ArtifactRegistry
+  errors: [String!]!
+}
+
+input LocalArtifactRegistryActivateInput {
+  organizationId: OrganizationsOrganizationID!
+  handle: String!
+}
+
+type LocalArtifactRegistryRepositoryCreatePayload {
+  repository: ArtifactRegistryRepository
+  errors: [String!]!
+}
+
+input LocalArtifactRegistryRepositoryCreateInput {
+  slug: String!
+  name: String!
+  format: String!
+  kind: String!
+  visibility: String!
+  description: String
+}
+
+type LocalArtifactRegistryRepositoryUpdatePayload {
+  repository: ArtifactRegistryRepository
+  errors: [String!]!
+}
+
+# `name` addresses the repository rather than renaming it, and `format` is absent
+# outright: both are immutable at Artifact Registry (ADR-009, ADR-022), so the update
+# surface exposes neither as writable.
+input LocalArtifactRegistryRepositoryUpdateInput {
+  slug: String!
+  name: String!
+  visibility: String!
+  description: String
+}
+
+# A deleted repository has nothing to return, so the payload carries errors alone.
+type LocalArtifactRegistryRepositoryDeletePayload {
+  errors: [String!]!
+}
+
+# `name` addresses the repository; nothing else is settable on the way out.
+input LocalArtifactRegistryRepositoryDeleteInput {
+  slug: String!
+  name: String!
+}
+
+extend type Organization {
+  artifactRegistry: ArtifactRegistry
+}
+
+extend type Mutation {
+  artifactRegistryActivate(
+    input: LocalArtifactRegistryActivateInput!
+  ): LocalArtifactRegistryActivatePayload
+}

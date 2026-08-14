@@ -1,0 +1,28 @@
+# @feature_category: artifact_registry
+
+# The edit prefill. `organization { id }` stays a non-@client sibling selection: the
+# graphql-verify redactor drops @client fields outright, so a selection set holding
+# nothing else would redact to an empty one.
+#
+# "...ByName" because `getArtifactRegistryRepository` already belongs to the Google
+# Artifact Registry slice, and operation names are unique across the whole app
+# (@graphql-eslint/unique-operation-name).
+#
+# `kind` is selected although the form renders it nowhere: it completes the cache
+# entity, so a repository first read through this query answers the list's selections
+# without a refetch.
+query getArtifactRegistryRepositoryByName(
+  $organizationId: OrganizationsOrganizationID!
+  $name: String!
+) {
+  organization(id: $organizationId) {
+    id
+    artifactRegistryRepository(name: $name) @client {
+      name
+      format
+      kind
+      visibility
+      description
+    }
+  }
+}

@@ -1,2 +1,4 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+VERSION merge=ours
+Dangerfile gitlab-language=ruby
+*.rb diff=ruby
+workhorse/testdata/*.pdf -filter -diff -merge
