@@ -6,6 +6,11 @@
   "author": "Ding-Ding Projects",
   "license": "MIT",
   "homepage": "https://github.com/Ding-Ding-Projects/material-gitlab",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Ding-Ding-Projects/material-gitlab",
+    "directory": "tools/material-gitlab-instant"
+  },
   "main": "app-dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
