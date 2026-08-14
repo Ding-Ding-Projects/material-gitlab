@@ -32,6 +32,17 @@ module GitlabEdition
     end
   end
 
+  # Return the active product edition without changing the existing CE/EE/JH
+  # predicates or the extension path selection above. Consumers that only
+  # support CE and EE should treat :jh as the EE-compatible side of the
+  # shared surface and continue to use `ee?` for feature decisions.
+  def self.edition
+    return :jh if jh?
+    return :ee if ee?
+
+    :ce
+  end
+
   def self.ee?
     # To reduce dependencies in QA image we are not using
     # `Gitlab::Utils::StrongMemoize` but reimplementing its functionality.
