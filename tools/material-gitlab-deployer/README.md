@@ -14,7 +14,9 @@ Run `build.bat` from any current directory on Windows. It anchors the process to
 
 ## Installer status
 
-`build-installer.bat` is deliberately fail-closed (exit code 2). This package does not yet carry a verified app icon or Squirrel.Windows packaging configuration, so it must not claim to produce an installer. When packaging is added, it must use the supported Squirrel.Windows path, keep code signing disabled, and verify the unsigned setup and update assets before publication. No installer is currently shipped.
+`build-installer.bat` uses the supported Squirrel.Windows packaging path and writes unsigned assets to `dist/squirrel-windows/`. It runs the regular build first, packages the x64 Electron app, then verifies that `Material-GitLab-Deployer-0.1.0-Setup.exe`, `RELEASES`, and the full `.nupkg` are present and that the update index references the package. Code signing is permanently disabled (`forceCodeSigning`, `signExecutable`, and `signAndEditExecutable` are all `false`); the resulting installer may show the operating system's unknown-publisher warning.
+
+The committed original mark is `build/material-gitlab-deployer.svg`; `build/material-gitlab-deployer.ico` is a valid multi-resolution Windows icon generated from that mark and wired into both Electron and Squirrel metadata. Packaging never deploys, publishes, creates hosts, contacts SSH, or exposes ports.
 
 ## Configuration records
 

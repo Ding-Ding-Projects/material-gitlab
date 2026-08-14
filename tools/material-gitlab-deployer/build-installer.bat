@@ -1,9 +1,29 @@
 @echo off
 setlocal EnableExtensions
 
-rem Packaging is intentionally fail-closed until a verified app icon and Squirrel
-rem configuration are committed. This script must never publish or execute deployment.
-if /I not "%~1"=="/s" if /I not "%~1"=="--silent" echo Installer packaging is not configured for this preview package.
-echo No installer was produced: Squirrel.Windows metadata and a verified app icon are not present.
-echo The preview package is unsigned and does not create hosts, contact SSH, or expose ports.
-exit /b 2
+pushd "%~dp0" || (echo Could not enter the deployer package directory. & exit /b 1)
+set "SILENT="
+if /I "%~1"=="/s" set "SILENT=1"
+if /I "%~1"=="--silent" set "SILENT=1"
+
+where node >nul 2>nul || (echo Node.js 20+ is required. & exit /b 1)
+where npm >nul 2>nul || (echo npm is required with Node.js. & exit /b 1)
+if exist package-lock.json (call npm ci) else (call npm install)
+if errorlevel 1 exit /b %errorlevel%
+
+echo [1/3] Building the packaged Electron application...
+call npm run build
+if errorlevel 1 exit /b %errorlevel%
+echo [2/3] Producing unsigned Squirrel.Windows assets...
+call npx --no-install electron-builder --win squirrel
+if errorlevel 1 exit /b %errorlevel%
+echo [3/3] Verifying Setup.exe, RELEASES, and the full nupkg...
+call npm run verify-package
+if errorlevel 1 exit /b %errorlevel%
+echo Installer packaging complete. Code signing is disabled; no deployment or publication occurred.
+if defined CI exit /b 0
+if /I "%SILENT%"=="1" exit /b 0
+choice /C YN /N /M "Launch the packaged preview shell now? [Y/N] "
+if errorlevel 2 exit /b 0
+start "Material GitLab Deployer" "%~dp0dist\squirrel-windows\win-unpacked\Material GitLab Deployer.exe"
+exit /b %errorlevel%
