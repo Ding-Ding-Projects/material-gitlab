@@ -1,0 +1,239 @@
+// Material 3 tabs, breadcrumbs and navigation rail for the MD3 prototype
+// layer: an underline tab bar for page sub-navigation, the pill-shaped
+// segmented view switcher from Issues.dc.html (List/Board), a breadcrumb
+// trail, and a standalone icon+label navigation rail for compact layouts.
+// Requires md3/_tokens.scss, md3/_shape.scss, md3/_elevation.scss,
+// md3/_motion.scss and md3/_typography.scss to already be loaded.
+
+.md3-tabs {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  overflow-x: auto;
+  border-bottom: 1px solid var(--gl-md3-outlv);
+}
+
+.md3-tabs__tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background-color: transparent;
+  color: var(--gl-md3-onsurfv);
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  @include gl-md3-label-large;
+  transition: color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-standard),
+    border-color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-standard),
+    background-color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-standard);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    color: var(--gl-md3-onsurf);
+    background-color: var(--gl-md3-surfcl);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: -2px;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+  }
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+}
+
+.md3-tabs__tab--active {
+  color: var(--gl-md3-prim);
+  border-bottom-color: var(--gl-md3-prim);
+}
+
+.md3-tabs__badge {
+  padding: 1px 7px;
+  color: var(--gl-md3-onsurfv);
+  background-color: var(--gl-md3-surfch);
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: var(--gl-md3-shape-full);
+}
+
+.md3-tabs__badge--active {
+  color: var(--gl-md3-onprimc);
+  background-color: var(--gl-md3-primc);
+}
+
+// Segmented view switcher (e.g. Issues.dc.html's List/Board control): a
+// shared pill track holding contiguous options, distinct from the
+// bordered, individually-spaced .md3-chip family in _chips.scss.
+.md3-segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background-color: var(--gl-md3-surfc);
+  border-radius: var(--gl-md3-shape-full);
+}
+
+.md3-segmented__option {
+  padding: 7px 18px;
+  border: 0;
+  background-color: transparent;
+  color: var(--gl-md3-onsurfv);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  border-radius: var(--gl-md3-shape-full);
+  @include gl-md3-motion-standard(background-color);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--gl-md3-surfch);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+  }
+}
+
+.md3-segmented__option--active {
+  color: var(--gl-md3-onprimc);
+  background-color: var(--gl-md3-primc);
+}
+
+.md3-breadcrumbs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px 0;
+  color: var(--gl-md3-onsurfv);
+  @include gl-md3-body-medium;
+}
+
+.md3-breadcrumbs__item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.md3-breadcrumbs__link {
+  padding: 2px 4px;
+  color: var(--gl-md3-onsurfv);
+  text-decoration: none;
+  border-radius: var(--gl-md3-shape-xs);
+  transition: color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-standard),
+    background-color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-standard);
+
+  &:hover {
+    color: var(--gl-md3-prim);
+    background-color: var(--gl-md3-surfcl);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+}
+
+.md3-breadcrumbs__current {
+  overflow: hidden;
+  padding: 2px 4px;
+  color: var(--gl-md3-onsurf);
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.md3-breadcrumbs__separator {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  color: var(--gl-md3-onsurfv);
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+}
+
+// Standalone MD3 navigation rail: a vertical icon+label destination list,
+// distinct from the sidebar drawer's own .md3-sidebar--rail collapsed
+// state in _sidebar.scss.
+.md3-nav-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px;
+  width: 80px;
+  padding: 12px 8px;
+  background-color: var(--gl-md3-surf);
+  color: var(--gl-md3-onsurfv);
+}
+
+.md3-nav-rail__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 6px 4px 10px;
+  border: 0;
+  background-color: transparent;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  @include gl-md3-motion-standard(color);
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+    border-radius: var(--gl-md3-shape-xs);
+  }
+}
+
+.md3-nav-rail__indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 32px;
+  background-color: transparent;
+  border-radius: var(--gl-md3-shape-full);
+  @include gl-md3-motion-standard(background-color);
+
+  .material-symbols-outlined {
+    font-size: 22px;
+  }
+}
+
+.md3-nav-rail__item--active {
+  color: var(--gl-md3-onsurf);
+}
+
+.md3-nav-rail__item--active .md3-nav-rail__indicator {
+  background-color: var(--gl-md3-sec);
+}
+
+.md3-nav-rail__label {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 14px;
+  text-align: center;
+}

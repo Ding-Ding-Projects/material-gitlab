@@ -1,0 +1,87 @@
+// Material 3 type scale for the MD3 prototype layer.
+// Sizes, weights and tracking below are read from the design prototypes
+// (page H1s at 24px/500, dialog titles at 20px/500, body text at 13-14px,
+// uppercase section labels at 11px/700/.6px tracking, etc.) rather than
+// the generic spec figures - the rest of the scale is interpolated to stay
+// internally consistent with those anchors.
+
+$gl-md3-font-brand: 'Google Sans', 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+$gl-md3-font-plain: 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+// Iterable definition of the full scale, keyed by style name, so the
+// custom-property block and the utility classes below are generated from
+// one source instead of two hand-kept lists drifting apart.
+$gl-md3-type-scale: (
+  'display-large': (family: $gl-md3-font-brand, size: 45px, line-height: 52px, weight: 500, tracking: 0, transform: none),
+  'display-medium': (family: $gl-md3-font-brand, size: 36px, line-height: 44px, weight: 500, tracking: 0, transform: none),
+  'display-small': (family: $gl-md3-font-brand, size: 30px, line-height: 38px, weight: 500, tracking: 0, transform: none),
+
+  'headline-large': (family: $gl-md3-font-brand, size: 26px, line-height: 32px, weight: 500, tracking: 0, transform: none),
+  'headline-medium': (family: $gl-md3-font-brand, size: 24px, line-height: 30px, weight: 500, tracking: 0, transform: none),
+  'headline-small': (family: $gl-md3-font-brand, size: 21px, line-height: 27px, weight: 500, tracking: 0, transform: none),
+
+  'title-large': (family: $gl-md3-font-brand, size: 20px, line-height: 26px, weight: 500, tracking: 0, transform: none),
+  'title-medium': (family: $gl-md3-font-brand, size: 18px, line-height: 24px, weight: 500, tracking: 0.15px, transform: none),
+  'title-small': (family: $gl-md3-font-brand, size: 16px, line-height: 22px, weight: 500, tracking: 0.1px, transform: none),
+
+  'body-large': (family: $gl-md3-font-plain, size: 14px, line-height: 20px, weight: 400, tracking: 0.15px, transform: none),
+  'body-medium': (family: $gl-md3-font-plain, size: 13px, line-height: 18px, weight: 400, tracking: 0.2px, transform: none),
+  'body-small': (family: $gl-md3-font-plain, size: 12px, line-height: 16px, weight: 400, tracking: 0.3px, transform: none),
+
+  'label-large': (family: $gl-md3-font-plain, size: 12.5px, line-height: 16px, weight: 500, tracking: 0.1px, transform: none),
+  'label-medium': (family: $gl-md3-font-plain, size: 12px, line-height: 15px, weight: 700, tracking: 0.5px, transform: uppercase),
+  'label-small': (family: $gl-md3-font-plain, size: 11px, line-height: 13px, weight: 700, tracking: 0.6px, transform: uppercase),
+);
+
+:root {
+  --gl-md3-font-family-brand: #{$gl-md3-font-brand};
+  --gl-md3-font-family-plain: #{$gl-md3-font-plain};
+
+  @each $name, $props in $gl-md3-type-scale {
+    --gl-md3-type-#{$name}-family: #{map-get($props, family)};
+    --gl-md3-type-#{$name}-size: #{map-get($props, size)};
+    --gl-md3-type-#{$name}-line-height: #{map-get($props, line-height)};
+    --gl-md3-type-#{$name}-weight: #{map-get($props, weight)};
+    --gl-md3-type-#{$name}-tracking: #{map-get($props, tracking)};
+    --gl-md3-type-#{$name}-transform: #{map-get($props, transform)};
+  }
+}
+
+// Mixin form, for components that build up a rule set rather than reaching
+// for a utility class directly.
+@mixin gl-md3-type($style) {
+  font-family: var(--gl-md3-type-#{$style}-family);
+  font-size: var(--gl-md3-type-#{$style}-size);
+  font-weight: var(--gl-md3-type-#{$style}-weight);
+  line-height: var(--gl-md3-type-#{$style}-line-height);
+  letter-spacing: var(--gl-md3-type-#{$style}-tracking);
+  text-transform: var(--gl-md3-type-#{$style}-transform);
+}
+
+@mixin gl-md3-display-large { @include gl-md3-type('display-large'); }
+@mixin gl-md3-display-medium { @include gl-md3-type('display-medium'); }
+@mixin gl-md3-display-small { @include gl-md3-type('display-small'); }
+
+@mixin gl-md3-headline-large { @include gl-md3-type('headline-large'); }
+@mixin gl-md3-headline-medium { @include gl-md3-type('headline-medium'); }
+@mixin gl-md3-headline-small { @include gl-md3-type('headline-small'); }
+
+@mixin gl-md3-title-large { @include gl-md3-type('title-large'); }
+@mixin gl-md3-title-medium { @include gl-md3-type('title-medium'); }
+@mixin gl-md3-title-small { @include gl-md3-type('title-small'); }
+
+@mixin gl-md3-body-large { @include gl-md3-type('body-large'); }
+@mixin gl-md3-body-medium { @include gl-md3-type('body-medium'); }
+@mixin gl-md3-body-small { @include gl-md3-type('body-small'); }
+
+@mixin gl-md3-label-large { @include gl-md3-type('label-large'); }
+@mixin gl-md3-label-medium { @include gl-md3-type('label-medium'); }
+@mixin gl-md3-label-small { @include gl-md3-type('label-small'); }
+
+// Utility classes, one per scale step, generated from the same map so a
+// class and its mixin can never disagree about a value.
+@each $name, $props in $gl-md3-type-scale {
+  .md3-#{$name} {
+    @include gl-md3-type($name);
+  }
+}
