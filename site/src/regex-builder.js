@@ -13,6 +13,7 @@ const encoder = typeof TextEncoder === 'function' ? new TextEncoder() : null;
 const bytes = (value) => encoder ? encoder.encode(String(value)).byteLength : String(value).length;
 const escapeHtml = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char]));
 const clone = (value) => JSON.parse(JSON.stringify(value));
+let builderSequence = 0;
 
 export function validateRegexInput(pattern, flags = '', sample = '') {
   const normalizedFlags = String(flags || '').trim();
@@ -57,8 +58,13 @@ export function createRegexBuilder(options = {}) {
   const onChange = typeof options.onChange === 'function' ? options.onChange : () => {};
   root.classList.add('regex-builder');
   root.setAttribute('role', 'region'); root.setAttribute('aria-label', options.label || 'Regex builder');
-  const radioName = `regex-mode-${Math.random().toString(36).slice(2)}`;
-  root.innerHTML = `<div class="regex-builder__row regex-builder__mode"><label><input type="radio" name="${radioName}" value="text"> Plain text</label><label><input type="radio" name="${radioName}" value="regex"> Regular expression</label></div><div class="regex-builder__pattern"><label for="regex-pattern">Pattern</label><textarea id="regex-pattern" data-regex-pattern maxlength="4096" spellcheck="false"></textarea></div><div class="regex-builder__row"><label for="regex-flags">Flags</label><input id="regex-flags" data-regex-flags maxlength="8" inputmode="text" value="i"><span class="regex-builder__summary" data-regex-engine>ECMAScript RegExp</span></div><div><span>Guided tokens</span><div class="regex-builder__token-list" data-regex-tokens></div></div><div class="regex-builder__pattern"><label for="regex-sample">Sample text</label><textarea id="regex-sample" data-regex-sample maxlength="65536"></textarea></div><div class="regex-builder__feedback" data-regex-feedback aria-live="polite"></div><ol class="regex-builder__matches" data-regex-matches aria-live="polite"></ol><div class="regex-builder__row"><button type="button" data-regex-copy>Copy pattern</button><button type="button" data-regex-export>Export JSON</button></div>`;
+  const instanceId = `regex-builder-${++builderSequence}`;
+  const radioName = `${instanceId}-mode`;
+  const patternId = `${instanceId}-pattern`;
+  const flagsId = `${instanceId}-flags`;
+  const sampleId = `${instanceId}-sample`;
+  if (!root.id) root.id = instanceId;
+  root.innerHTML = `<div class="regex-builder__row regex-builder__mode"><label><input type="radio" name="${radioName}" value="text"> Plain text</label><label><input type="radio" name="${radioName}" value="regex"> Regular expression</label></div><div class="regex-builder__pattern"><label for="${patternId}">Pattern</label><textarea id="${patternId}" data-regex-pattern maxlength="4096" spellcheck="false"></textarea></div><div class="regex-builder__row"><label for="${flagsId}">Flags</label><input id="${flagsId}" data-regex-flags maxlength="8" inputmode="text" value="i"><span class="regex-builder__summary" data-regex-engine>ECMAScript RegExp</span></div><div><span>Guided tokens</span><div class="regex-builder__token-list" data-regex-tokens></div></div><div class="regex-builder__pattern"><label for="${sampleId}">Sample text</label><textarea id="${sampleId}" data-regex-sample maxlength="65536"></textarea></div><div class="regex-builder__feedback" data-regex-feedback aria-live="polite"></div><ol class="regex-builder__matches" data-regex-matches aria-live="polite"></ol><div class="regex-builder__row"><button type="button" data-regex-copy>Copy pattern</button><button type="button" data-regex-export>Export JSON</button></div>`;
   const pattern = root.querySelector('[data-regex-pattern]'); const flags = root.querySelector('[data-regex-flags]'); const sample = root.querySelector('[data-regex-sample]'); const feedback = root.querySelector('[data-regex-feedback]'); const matches = root.querySelector('[data-regex-matches]');
   pattern.value = state.pattern; flags.value = state.flags; sample.value = state.sample; root.querySelectorAll('input[type="radio"]').forEach((input) => { input.checked = input.value === state.mode; });
   const tokenHost = root.querySelector('[data-regex-tokens]');
@@ -73,6 +79,8 @@ export function createRegexBuilder(options = {}) {
 
 export function bindRegexBuilder(search, builder, toggle) {
   if (!search || !builder) return () => {};
+  if (!builder.id) builder.id = `regex-builder-${++builderSequence}`;
+  toggle?.setAttribute('aria-controls', builder.id);
   const show = () => { builder.hidden = false; toggle?.setAttribute('aria-expanded', 'true'); builder.querySelector('textarea,input')?.focus(); };
   const hide = () => { builder.hidden = true; toggle?.setAttribute('aria-expanded', 'false'); };
   toggle?.addEventListener('click', () => builder.hidden ? show() : hide());

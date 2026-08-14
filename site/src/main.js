@@ -66,7 +66,7 @@ import { initUniversalRuntime } from './universal-runtime.js';
       const panel = $('[data-document-viewer], #document-viewer') || container;
       try { panel.innerHTML = `<article class="document-view"><h2>${text(doc.title)}</h2>${markdownToHtml(await loadText(doc.path))}</article>`; }
       catch (error) { panel.innerHTML = `<p role="alert">Unable to load this article: ${text(error.message)}</p>`; }
-    }, { once: true });
+    });
   }
 
   function renderInventory() {
@@ -83,12 +83,16 @@ import { initUniversalRuntime } from './universal-runtime.js';
   }
 
   function wireTabs() {
-    $$('[role="tab"], [data-tab-target]').forEach((tab) => tab.addEventListener('click', () => {
-      const target = tab.getAttribute('aria-controls') || tab.dataset.tabTarget;
-      state.activeTab = target;
-      $$('[role="tab"]').forEach((item) => item.setAttribute('aria-selected', String(item === tab)));
-      $$('[role="tabpanel"], [data-tab-panel]').forEach((panel) => { panel.hidden = panel.id !== target && panel.dataset.tabPanel !== target; });
-    }));
+    $$('[role="tablist"]').forEach((list) => {
+      const tabs = $$(':scope > [role="tab"]', list);
+      const scope = list.closest('section') || document;
+      tabs.forEach((tab) => tab.addEventListener('click', () => {
+        const target = tab.getAttribute('aria-controls') || tab.dataset.tabTarget;
+        state.activeTab = target;
+        tabs.forEach((item) => { const active = item === tab; item.setAttribute('aria-selected', String(active)); item.tabIndex = active ? 0 : -1; });
+        $$('[role="tabpanel"], [data-tab-panel]', scope).forEach((panel) => { panel.hidden = panel.id !== target && panel.dataset.tabPanel !== target; });
+      }));
+    });
   }
 
   function wireNavigationFoundation() {

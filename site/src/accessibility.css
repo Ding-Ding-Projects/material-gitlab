@@ -1,0 +1,36 @@
+.skip-link {
+  position: fixed;
+  inset-block-start: 0.5rem;
+  inset-inline-start: 0.5rem;
+  z-index: 2000;
+  min-block-size: 44px;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: var(--primary, #6750a4);
+  color: var(--on-primary, #fff);
+  font-weight: 700;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.touch-target {
+  min-block-size: 44px;
+}
+
+a.touch-target:not(.brand) {
+  display: inline-flex;
+  align-items: center;
+}
+
+.brand {
+  min-block-size: 44px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skip-link {
+    transition: none;
+  }
+}
