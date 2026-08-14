@@ -1,6 +1,9 @@
 @echo off
 setlocal EnableExtensions
 
+rem Always own the build from this package directory, even when invoked from the repository root.
+pushd "%~dp0" || (echo Could not enter the deployer package directory. & exit /b 1)
+
 rem Build the deployer from a clean Windows checkout. No deployment or shell execution occurs.
 if /I "%~1"=="/s" set "SILENT=1"
 if /I "%~1"=="--silent" set "SILENT=1"
