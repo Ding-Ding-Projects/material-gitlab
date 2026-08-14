@@ -250,17 +250,9 @@ export default {
         </template>
       </gl-form-fields>
 
-      <div
-        v-if="showCaptcha"
-        ref="captcha"
-        class="gl-mb-5 gl-flex gl-justify-center"
-        data-testid="captcha-el"
-      ></div>
+      <div v-if="showCaptcha" ref="captcha" class="login-m3-captcha" data-testid="captcha-el"></div>
 
-      <div
-        v-if="isRememberMeEnabled || showPasswordField"
-        class="login-m3-form-options gl-mb-4"
-      >
+      <div v-if="isRememberMeEnabled || showPasswordField" class="login-m3-form-options">
         <div v-if="isRememberMeEnabled">
           <input type="hidden" :name="rememberMeNameAttr" :value="rememberMe" />
           <gl-form-checkbox
@@ -273,10 +265,7 @@ export default {
             {{ __('Remember me') }}
           </gl-form-checkbox>
         </div>
-        <gl-link
-          v-if="showPasswordField && isUnconfirmedEmail"
-          :href="newUserConfirmationPath"
-        >
+        <gl-link v-if="showPasswordField && isUnconfirmedEmail" :href="newUserConfirmationPath">
           {{ __('Resend confirmation email') }}
         </gl-link>
         <gl-link v-else-if="showPasswordField" :href="newPasswordPath">{{
@@ -299,7 +288,7 @@ export default {
       v-if="showPasskeySignIn"
       :action="passkeysSignInPath"
       method="post"
-      class="login-m3-passkey-form gl-mt-3"
+      class="login-m3-passkey-form"
       data-testid="passkey-form"
     >
       <input type="hidden" name="authenticity_token" :value="$options.csrf.token" />
