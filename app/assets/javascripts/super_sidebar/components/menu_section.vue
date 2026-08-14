@@ -168,7 +168,7 @@ export default {
       v-if="!headerless"
       :id="`menu-section-button-${itemId}`"
       v-outside="handleClickOutside"
-      class="gl-relative gl-mb-1"
+      class="gl-relative gl-mb-1 m3-shell-nav-section"
       :class="computedLinkClasses"
       data-testid="menu-section-button"
       :data-qa-section-name="item.title"
@@ -208,7 +208,7 @@ export default {
       :id="itemId"
       v-model="isExpanded"
       :class="{ 'gl-hidden': isIconOnly && !headerless }"
-      class="gl-m-0 gl-list-none gl-p-0 gl-transition-[height] gl-duration-medium gl-ease-ease"
+      class="gl-m-0 gl-list-none gl-p-0 gl-transition-[height] gl-duration-medium gl-ease-ease m3-shell-nav-section-items"
       data-testid="menu-section"
       :data-qa-section-name="item.title"
     >

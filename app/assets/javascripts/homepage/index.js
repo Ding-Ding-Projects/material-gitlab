@@ -6,6 +6,26 @@ import HomepageApp from './components/homepage_app.vue';
 
 Vue.use(VueApollo);
 
+export const parseLastPushEvent = (value) => {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'object') {
+    return Array.isArray(value) ? null : value;
+  }
+
+  try {
+    const parsedValue = JSON.parse(value);
+
+    return parsedValue && typeof parsedValue === 'object' && !Array.isArray(parsedValue)
+      ? parsedValue
+      : null;
+  } catch {
+    return null;
+  }
+};
+
 export default () => {
   const el = document.getElementById('js-homepage-app');
 
@@ -23,9 +43,6 @@ export default () => {
     lastPushEvent,
   } = el.dataset;
 
-  // Parse lastPushEvent - it's already JSON string from backend
-  const parsedLastPushEvent = lastPushEvent ? JSON.parse(lastPushEvent) : null;
-
   return initVueApp({
     el,
     name: 'HomepageAppRoot',
@@ -42,7 +59,7 @@ export default () => {
       assignedMergeRequestsPath,
       assignedWorkItemsPath,
       authoredWorkItemsPath,
-      lastPushEvent: parsedLastPushEvent,
+      lastPushEvent: parseLastPushEvent(lastPushEvent),
     },
   });
 };

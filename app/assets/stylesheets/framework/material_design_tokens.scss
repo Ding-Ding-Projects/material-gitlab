@@ -1,0 +1,63 @@
+// Material Design 3 semantic tokens for the shared application shell.
+//
+// Keep the GitLab UI tokens as the source of truth so CE, EE, and JH themes
+// can continue to override their existing aliases without forking shell CSS.
+:root {
+  --m3-color-surface: var(--gl-background-color-default, var(--gl-color-neutral-0));
+  --m3-color-surface-container: var(--gl-application-chrome-background-color, var(--gl-background-color-section, var(--gl-color-neutral-50)));
+  --m3-color-surface-container-high: var(--gl-background-color-overlap, var(--gl-color-neutral-100));
+  --m3-color-on-surface: var(--gl-text-color-default, var(--gl-color-neutral-950));
+  --m3-color-on-surface-variant: var(--gl-text-color-subtle, var(--gl-color-neutral-600));
+  --m3-color-outline: var(--gl-border-color-default, var(--gl-color-neutral-200));
+  --m3-color-primary: var(--gl-color-blue-500);
+  --m3-color-on-primary: var(--gl-color-neutral-0);
+  --m3-shape-corner-small: var(--gl-border-radius-base, 0.25rem);
+  --m3-shape-corner-medium: var(--gl-border-radius-lg, 0.5rem);
+  --m3-shape-corner-large: 1rem;
+  --m3-space-1: var(--gl-spacing-scale-1, 2px);
+  --m3-space-2: var(--gl-spacing-scale-2, 4px);
+  --m3-space-3: var(--gl-spacing-scale-3, 8px);
+  --m3-space-4: var(--gl-spacing-scale-4, 12px);
+  --m3-space-5: var(--gl-spacing-scale-5, 16px);
+  --m3-space-6: var(--gl-spacing-scale-6, 24px);
+  --m3-shell-elevation: var(--gl-shadow-sm, 0 1px 2px rgb(0 0 0 / 12%));
+}
+
+// The shell owns only semantic presentation. Existing CE/EE class names and
+// component-level tokens remain available to downstream stylesheets.
+body {
+  color: var(--m3-color-on-surface);
+  background-color: var(--m3-color-surface-container);
+}
+
+.layout-page {
+  background-color: var(--m3-color-surface-container);
+}
+
+.super-sidebar {
+  background-color: var(--m3-color-surface);
+  border-inline-end: 1px solid var(--m3-color-outline);
+  box-shadow: var(--m3-shell-elevation);
+}
+
+.panels-container {
+  gap: var(--m3-space-3);
+}
+
+.broadcast-wrapper {
+  border: 1px solid var(--m3-color-outline);
+  border-radius: var(--m3-shape-corner-medium);
+  background-color: var(--m3-color-surface);
+}
+
+.top-bar {
+  background-color: var(--m3-color-surface);
+  border-block-end: 1px solid var(--m3-color-outline);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .super-sidebar,
+  .panels-container {
+    transition: none !important;
+  }
+}

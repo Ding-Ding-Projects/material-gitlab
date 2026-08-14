@@ -6,3 +6,131 @@
 .event-item > .system-note-image > svg {
   @apply gl-fill-icon-subtle #{!important};
 }
+
+// Personal homepage dashboard surfaces. Keep these roles scoped to the CE
+// homepage mount so the shell can evolve independently of global layout.
+#js-homepage-app {
+  --homepage-surface: var(--gl-color-surface-container, var(--gl-color-neutral-0));
+  --homepage-surface-container: var(
+    --gl-color-surface-container-low,
+    var(--gl-color-neutral-50)
+  );
+  --homepage-surface-raised: var(--gl-color-surface-container-high, var(--gl-color-neutral-100));
+  --homepage-outline: var(--gl-color-border-subtle, var(--gl-color-neutral-200));
+  --homepage-primary: var(--gl-color-text-link, var(--gl-color-blue-700));
+  --homepage-radius: 1rem;
+  --homepage-gap: 1.5rem;
+
+  container-type: inline-size;
+  color: var(--gl-color-text-default);
+
+  // The dashboard reads as one calm M3 surface while each widget remains an
+  // independently actionable card.
+  > * {
+    min-width: 0;
+  }
+
+  [data-testid='homepage-greeting-header'] {
+    margin-block-end: clamp(1.25rem, 3cqi, 2rem);
+    padding: clamp(1rem, 2.5cqi, 1.5rem);
+    border: 1px solid var(--homepage-outline);
+    border-radius: calc(var(--homepage-radius) + 0.25rem);
+    background: var(--homepage-surface);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--gl-color-neutral-900) 10%, transparent);
+  }
+
+  [data-testid='homepage-greeting-header'] button:focus-visible,
+  [data-testid='homepage-greeting-header'] a:focus-visible {
+    outline: 3px solid var(--homepage-primary);
+    outline-offset: 3px;
+  }
+
+  [data-testid='review-requested-widget'],
+  [data-testid='assigned-merge-requests-widget'],
+  [data-testid='assigned-work-items-widget'],
+  [data-testid='authored-work-items-widget'] {
+    min-height: 10rem;
+    border: 1px solid var(--homepage-outline);
+    border-radius: var(--homepage-radius);
+    background: var(--homepage-surface-container);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--gl-color-neutral-900) 8%, transparent);
+    transition: box-shadow 160ms ease, transform 160ms ease, background-color 160ms ease;
+
+    &:hover {
+      background: var(--homepage-surface-raised);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--gl-color-neutral-900) 14%, transparent);
+      transform: translateY(-1px);
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--homepage-primary);
+      outline-offset: 3px;
+    }
+  }
+
+  [data-testid='homepage-quick-access-widget'],
+  [data-testid='homepage-todos-widget'],
+  [data-testid='homepage-activity-widget'],
+  [data-testid='homepage-pick-up-widget'] {
+    border: 1px solid var(--homepage-outline);
+    border-radius: var(--homepage-radius);
+    background: var(--homepage-surface);
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--gl-color-neutral-900) 8%, transparent);
+  }
+
+  [data-testid='homepage-quick-access-widget'] [role='tablist'] {
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border-radius: 0.75rem;
+    background: var(--homepage-surface-container);
+  }
+
+  [data-testid='homepage-quick-access-widget'] [role='tab'] {
+    min-height: 2.75rem;
+    border-radius: 0.625rem;
+
+    &:focus-visible {
+      outline: 3px solid var(--homepage-primary);
+      outline-offset: 2px;
+    }
+  }
+
+  .event-item {
+    border-block-end-color: var(--homepage-outline);
+
+    &:focus-within {
+      background: var(--homepage-surface-container);
+    }
+  }
+}
+
+@container (max-width: 42rem) {
+  #js-homepage-app {
+    --homepage-gap: 1rem;
+
+    [data-testid='homepage-greeting-header'] {
+      padding: 1rem;
+    }
+
+    [data-testid='review-requested-widget'],
+    [data-testid='assigned-merge-requests-widget'],
+    [data-testid='assigned-work-items-widget'],
+    [data-testid='authored-work-items-widget'] {
+      min-height: 8rem;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #js-homepage-app [data-testid$='-widget'] {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  #js-homepage-app [data-testid$='-widget'],
+  #js-homepage-app [data-testid='homepage-greeting-header'] {
+    border: 1px solid CanvasText;
+    box-shadow: none;
+  }
+}
