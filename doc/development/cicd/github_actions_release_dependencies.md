@@ -2,9 +2,9 @@
 
 This inventory defines the dependencies and fresh-run bootstrap requirements for the
 Windows release path. It is intentionally separate from workflow YAML so a workflow
-change can be checked against one reviewed, neutral record. The repository currently
-does not carry a `.github/workflows` release workflow; when one is added, every job
-must map to a row below before it is enabled.
+change can be checked against one reviewed, neutral record. The Windows workflow is
+currently being introduced and must remain mapped to the rows below before it is
+enabled.
 
 ## Scope and policy
 
@@ -23,9 +23,15 @@ must map to a row below before it is enabled.
 
 | Job | Required tools and inputs | Fresh-run bootstrap and post-bootstrap proof | Safe outputs |
 | --- | --- | --- | --- |
-| `bootstrap-windows` | Git; PowerShell; the runtime and package manager versions declared by the repository (`.nvmrc`, `package.json`, lockfiles, `Gemfile`, and other manifests); project source at the workflow SHA | Resolve versions from manifests, install only missing tools from their canonical upstreams, refresh the current process `PATH`, then print each resolved version and verify the checkout is at the requested SHA | Bootstrap log containing versions, SHA, runner image, and job status |
-| `build-and-package-windows` | All tools from `bootstrap-windows`; the repository's supported build and packaging scripts; the Windows packaging tool required by that script | Run the committed build and installer path from a clean checkout. Verify the expected runnable output, installer, release index, package files, and that every artifact was produced from the requested SHA. Fail if packaging invokes signing | Build log, package manifest, installer metadata, hashes, and failed-build diagnostics |
-| `publish-release` | Git; GitHub CLI (`gh`) or the supported release API action; an ephemeral token supplied through `GH_TOKEN`/`GITHUB_TOKEN` using `RELEASE_TOKEN || ORG_TOKEN || GITHUB_TOKEN`; the validated release manifest | Confirm the target SHA, unique tag, required installer assets, unsigned status, line-count table, workflow timing, and a catalog-backed dim-sum code name before publishing one non-draft release. Verify the published release and each asset after publication | Release URL, tag/SHA record, asset URLs and hashes, timing record, line-count table, and publication log |
+| `build` | `actions/checkout@v4`; Git; PowerShell; GitHub CLI (`gh`); the runtime and package manager versions declared by the repository (`.nvmrc`, `package.json`, lockfiles, `Gemfile`, and other manifests); `build.bat`; `build-installer.bat`; `actions/upload-artifact@v4` | Resolve versions from manifests, install only missing tools from their canonical upstreams, refresh the current process `PATH`, then print each resolved version and verify the checkout is at the requested SHA. Run both committed scripts from a clean checkout and fail closed when either script is absent. Verify the expected runnable output, installer, release index, package files, and unsigned status | Bootstrap/build log, package manifest, installer metadata, hashes, failed-build diagnostics, and safe evidence artifact |
+| `release` | `actions/checkout@v4`; `actions/download-artifact@v4`; Git; PowerShell; GitHub CLI (`gh`); an ephemeral token supplied through `GH_TOKEN`/`GITHUB_TOKEN` using `RELEASE_TOKEN || ORG_TOKEN || GITHUB_TOKEN` | Confirm the downloaded evidence, target SHA, unique tag, required installer assets, unsigned status, line-count table, workflow timing, and a catalog-backed dim-sum code name before publishing one non-draft release. Verify the published release and each asset after publication | Release URL, tag/SHA record, asset URLs and hashes, timing record, line-count table, and publication log |
+
+### Current repository boundary
+
+The current revision does not contain root-level `build.bat` or
+`build-installer.bat`. The `build` job must therefore stop with a clear missing-route
+message until those supported scripts are added; it must not substitute an ad-hoc
+command or claim that a release artifact exists.
 
 ## Dependency sources and constraints
 
@@ -49,6 +55,7 @@ must map to a row below before it is enabled.
 ## Fresh-run acceptance checklist
 
 - [ ] A clean Windows runner reaches the first build command without manual setup.
+- [ ] Root-level `build.bat` and `build-installer.bat` exist before dispatching a release.
 - [ ] Every installed version is printed with its source and constraint.
 - [ ] The current process sees newly installed executables after `PATH` refresh.
 - [ ] The build uses the supported repository script, not an ad-hoc command.
@@ -58,6 +65,6 @@ must map to a row below before it is enabled.
 - [ ] Post-publication checks can download every required asset and verify its hash.
 - [ ] Failure collection records the run ID, SHA, job status, and runner context.
 
-This document is an inventory, not a claim that a release workflow or a published
-artifact currently exists. A missing workflow, missing dependency, or unverified
-artifact remains an explicit implementation item.
+This document is an inventory, not a claim that a published artifact currently exists.
+A missing dependency, missing build script, or unverified artifact remains an explicit
+implementation item.
