@@ -45,7 +45,7 @@ export class NotificationCenter {
       actions: actions.map((action) => ({ ...action })),
       metadata: { ...metadata },
     };
-    const staysOpen = persistent ?? severity === 'error' || severity === 'warning' || timeout === 0;
+    const staysOpen = persistent ?? (severity === 'error' || severity === 'warning' || timeout === 0);
     item.persistent = staysOpen;
     this.items = [item, ...this.items];
     if (!staysOpen && timeout > 0) {
