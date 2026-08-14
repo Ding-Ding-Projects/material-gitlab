@@ -1,4 +1,7 @@
 /* Material GitLab site runtime.  The shell owns markup; this module owns data and behaviour. */
+import { createNavigationState, setTabQuery, setTabRegex, toggleCommandPalette, bindNavigationKeyboard, filterTabs } from './navigation.js';
+import { loadPreferences, updatePreferences, readVocabularyFile, cacheVocabulary, vocabularyStatus } from './preferences.js';
+import { getStatusHubState, registerStatusHubProject } from './status-hub.js';
 (function () {
   'use strict';
 
@@ -72,6 +75,45 @@
     }));
   }
 
+  function wireNavigationFoundation() {
+    let navigation = createNavigationState({ tabs: [{ id: 'overview', label: 'Overview' }, { id: 'guides', label: 'Guides' }, { id: 'reference', label: 'Reference' }, { id: 'settings', label: 'Settings' }] });
+    const tabSearch = $('[data-tab-search]');
+    const regexBuilder = $('[data-regex-builder]');
+    const regexToggle = $('[data-regex-toggle]');
+    const regexPattern = $('[data-tab-regex]');
+    const regexFlags = $('[data-tab-regex-flags]');
+    const regexFeedback = $('[data-regex-feedback]');
+    const commandDialog = $('[data-command-dialog]');
+    const commandSearch = $('[data-command-search]');
+    const commandResults = $('[data-command-results]');
+    const renderTabMatches = () => {
+      const matches = filterTabs(navigation).map((tab) => tab.id);
+      $$('[data-nav-tab]').forEach((tab) => { tab.hidden = !matches.includes(tab.dataset.navTab); });
+    };
+    tabSearch?.addEventListener('input', () => { navigation = setTabQuery(navigation, tabSearch.value); renderTabMatches(); });
+    regexToggle?.addEventListener('click', () => { const open = regexBuilder.hidden; regexBuilder.hidden = !open; regexToggle.setAttribute('aria-expanded', String(open)); });
+    const syncRegex = () => { navigation = setTabRegex(navigation, { enabled: Boolean(regexPattern.value), pattern: regexPattern.value, flags: regexFlags.value }); regexFeedback.textContent = navigation.tabRegex.error || 'Pattern ready.'; renderTabMatches(); };
+    regexPattern?.addEventListener('input', syncRegex); regexFlags?.addEventListener('input', syncRegex);
+    $('[data-command-palette]')?.addEventListener('click', () => { commandDialog?.showModal(); commandSearch?.focus(); });
+    commandSearch?.addEventListener('input', () => { navigation = toggleCommandPalette(navigation, true); const query = commandSearch.value.toLowerCase(); const items = ['Overview', 'Guides', 'Reference', 'Settings', 'Feature inventory', 'Documentation']; commandResults.innerHTML = items.filter((item) => item.toLowerCase().includes(query)).map((item) => `<li>${text(item)}</li>`).join(''); });
+    bindNavigationKeyboard(document, () => navigation, (next) => { navigation = next; commandDialog?.showModal(); commandSearch?.focus(); });
+    renderTabMatches();
+  }
+
+  function wirePreferencesFoundation() {
+    let preferences = loadPreferences();
+    const status = $('[data-preferences-status]');
+    const render = () => {
+      $$('[data-preference]').forEach((control) => { const key = control.dataset.preference; control.type === 'checkbox' ? (control.checked = preferences[key]) : (control.value = preferences[key]); });
+      $$('[data-level-output]').forEach((output) => { output.value = preferences[output.dataset.levelOutput]; output.textContent = preferences[output.dataset.levelOutput]; });
+      status.textContent = `Language: ${preferences.language}; vocabulary: ${vocabularyStatus().state}.`;
+    };
+    $$('[data-preference]').forEach((control) => control.addEventListener('input', () => { const key = control.dataset.preference; preferences = updatePreferences({ [key]: control.type === 'checkbox' ? control.checked : control.value }); render(); }));
+    $('[data-vocabulary-upload]')?.addEventListener('change', async (event) => { try { cacheVocabulary(await readVocabularyFile(event.target.files[0])); status.textContent = 'Personal vocabulary loaded locally.'; } catch (error) { status.textContent = error.message; } });
+    $('[data-register-status]')?.addEventListener('click', () => { const state = registerStatusHubProject({ repository: 'Ding-Ding-Projects/material-gitlab', defaultBranch: 'main', releaseChannel: 'unreleased' }); $('[data-status-hub-state]').textContent = `${state.state}: local registration recorded; remote delivery is unverified.`; });
+    const existing = getStatusHubState(); $('[data-status-hub-state]').textContent = `${existing.state}: ${existing.delivery.reason}`; render();
+  }
+
   async function init() {
     try {
       const [inventory, manifest] = await Promise.all([
@@ -85,7 +127,7 @@
       const status = $('[data-runtime-status]');
       if (status) status.textContent = `Documentation data unavailable: ${error.message}`;
     }
-    renderInventory(); renderDocs(); wireSearch(); wireTabs();
+    renderInventory(); renderDocs(); wireSearch(); wireTabs(); wireNavigationFoundation(); wirePreferencesFoundation();
     document.dispatchEvent(new CustomEvent('material-site-ready', { detail: { basePath: base.href, state } }));
   }
 
