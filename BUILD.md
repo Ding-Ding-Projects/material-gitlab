@@ -55,6 +55,10 @@ Code signing is intentionally disabled. The generated installer is unsigned and 
 
 These scripts build and package; they do not run tests, lint, type checks, captures, or release gates. Run the repository's local checks separately when a task requires them, and report their real result. A successful script run proves only that the requested runnable or installer artifact was produced and verified locally; it is not evidence of a green GitHub Actions workflow, runtime/UI verification, or a published release.
 
+## Overlay provenance validator
+
+Run [`scripts/verify-upstream-overlay.mjs`](scripts/verify-upstream-overlay.mjs) to confirm the pinned upstream GitLab provenance record is present, well formed, and reachable from the current checkout history. The validator fails closed if the manifest is missing or malformed, if the upstream repository is not the canonical GitLab repository, or if the pinned commit is not in this repository's history.
+
 ## Troubleshooting
 
 When a phase fails, the output names the missing requirement, version constraint, canonical source attempted, and blocking error. Fix the reported dependency or packaging issue and rerun the same script. Do not substitute an ad-hoc packaging command: keeping both scripts as the single documented local paths makes a fresh-machine run reproducible.
