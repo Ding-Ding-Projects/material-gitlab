@@ -46,17 +46,41 @@ jobs:
           "workflow_started=$startedText" >> $env:GITHUB_OUTPUT
           "workflow_start_ticks=$($start.UtcTicks)" >> $env:GITHUB_OUTPUT
 
-      - name: Build the runnable Windows application
+      - name: Build GitLab Instant runnable Windows application
+        id: instant_build
+        continue-on-error: true
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
-          $artifactDir = Join-Path (Get-Location) 'build\artifacts'
-          if (Test-Path -LiteralPath $artifactDir) { Remove-Item -LiteralPath $artifactDir -Recurse -Force }
-          .\build.bat /s
+          Push-Location (Join-Path (Get-Location) 'tools\material-gitlab-instant')
+          try { .\build.bat /s } finally { Pop-Location }
 
-      - name: Build the unsigned Windows installer
+      - name: Build GitLab Instant unsigned Windows installer
+        id: instant_installer
+        if: ${{ always() }}
+        continue-on-error: true
         shell: pwsh
-        run: .\build-installer.bat /s
+        run: |
+          Push-Location (Join-Path (Get-Location) 'tools\material-gitlab-instant')
+          try { .\build-installer.bat /s } finally { Pop-Location }
+
+      - name: Build GitLab Deployer runnable Windows application
+        id: deployer_build
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Push-Location (Join-Path (Get-Location) 'tools\material-gitlab-deployer')
+          try { .\build.bat /s } finally { Pop-Location }
+
+      - name: Build GitLab Deployer unsigned Windows installer
+        id: deployer_installer
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          Push-Location (Join-Path (Get-Location) 'tools\material-gitlab-deployer')
+          try { .\build-installer.bat /s } finally { Pop-Location }
 
       - name: Collect and validate installer assets
         id: collect
@@ -64,34 +88,57 @@ jobs:
         env:
           WORKFLOW_STARTED: ${{ steps.timing.outputs.workflow_started }}
           WORKFLOW_START_TICKS: ${{ steps.timing.outputs.workflow_start_ticks }}
+          INSTANT_BUILD_OUTCOME: ${{ steps.instant_build.outcome }}
+          INSTANT_INSTALLER_OUTCOME: ${{ steps.instant_installer.outcome }}
+          DEPLOYER_BUILD_OUTCOME: ${{ steps.deployer_build.outcome }}
+          DEPLOYER_INSTALLER_OUTCOME: ${{ steps.deployer_installer.outcome }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $expected = '${{ github.sha }}'
           $actual = (git rev-parse HEAD).Trim()
           if ($actual -ne $expected) { throw "Installer was not built from $expected (checkout is $actual)." }
+          foreach ($check in @(
+            @{ Name = 'GitLab Instant build'; Outcome = $env:INSTANT_BUILD_OUTCOME },
+            @{ Name = 'GitLab Instant installer'; Outcome = $env:INSTANT_INSTALLER_OUTCOME },
+            @{ Name = 'GitLab Deployer build'; Outcome = $env:DEPLOYER_BUILD_OUTCOME },
+            @{ Name = 'GitLab Deployer installer'; Outcome = $env:DEPLOYER_INSTALLER_OUTCOME }
+          )) {
+            if ($check.Outcome -ne 'success') { throw "$($check.Name) did not complete successfully (outcome: $($check.Outcome))." }
+          }
 
           $stage = Join-Path $env:RUNNER_TEMP 'windows-release-assets'
           if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
-          $files = Get-ChildItem -LiteralPath (Get-Location) -Recurse -File | Where-Object {
-            $_.Name -match '^(Setup\.exe|RELEASES|.+\.nupkg)$' -and
-            $_.FullName -notmatch '[\\/]node_modules[\\/]|[\\/]vendor[\\/]|[\\/]tmp[\\/]' -and
-            $_.LastWriteTimeUtc -gt [DateTime]::Parse($env:WORKFLOW_STARTED).UtcDateTime
-          }
-          if (-not $files) { throw 'No fresh Squirrel.Windows Setup.exe, RELEASES, or .nupkg assets were produced after workflow start.' }
-
-          foreach ($file in $files) {
-            $destination = Join-Path $stage $file.Name
-            Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
-            if ($file.Extension -eq '.exe') {
-              $signature = Get-AuthenticodeSignature -LiteralPath $destination
-              if ($signature.Status -ne 'NotSigned') { throw "Code signing is prohibited; $($file.Name) has signature status $($signature.Status)." }
+          $apps = @(
+            @{ Key = 'material-gitlab-instant'; Label = 'GitLab Instant'; Root = (Join-Path (Get-Location) 'tools\material-gitlab-instant\dist\squirrel-windows') },
+            @{ Key = 'material-gitlab-deployer'; Label = 'GitLab Deployer'; Root = (Join-Path (Get-Location) 'tools\material-gitlab-deployer\dist\squirrel-windows') }
+          )
+          $manifest = [System.Collections.Generic.List[string]]::new()
+          $manifest.Add("BUILD_SHA=$expected")
+          foreach ($app in $apps) {
+            if (-not (Test-Path -LiteralPath $app.Root)) { throw "$($app.Label) did not produce dist\\squirrel-windows; installer output is required." }
+            $files = @(Get-ChildItem -LiteralPath $app.Root -File | Where-Object { $_.LastWriteTimeUtc -gt [DateTime]::Parse($env:WORKFLOW_STARTED).UtcDateTime })
+            $setup = $files | Where-Object { $_.Name -match 'Setup\.exe$' } | Select-Object -First 1
+            $releases = $files | Where-Object { $_.Name -eq 'RELEASES' } | Select-Object -First 1
+            $nupkgs = @($files | Where-Object { $_.Extension -eq '.nupkg' -and $_.Length -gt 0 })
+            if (-not $setup -or $setup.Length -le 0) { throw "$($app.Label) is missing a fresh non-empty Setup.exe." }
+            if (-not $releases -or $releases.Length -le 0) { throw "$($app.Label) is missing a fresh non-empty RELEASES index." }
+            if (-not $nupkgs) { throw "$($app.Label) is missing a fresh non-empty .nupkg." }
+            $selected = @($setup, $releases) + $nupkgs
+            foreach ($file in $selected) {
+              $suffix = if ($file.Extension -eq '.exe') { 'Setup.exe' } elseif ($file.Name -eq 'RELEASES') { 'RELEASES' } else { $file.Name }
+              $destination = Join-Path $stage ("{0}-{1}" -f $app.Key, $suffix)
+              Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
+              if ((Get-Item -LiteralPath $destination).Length -le 0) { throw "Copied asset is empty: $destination" }
+              if ($file.Extension -eq '.exe') {
+                $signature = Get-AuthenticodeSignature -LiteralPath $destination
+                if ($signature.Status -ne 'NotSigned') { throw "Code signing is prohibited; $($file.Name) has signature status $($signature.Status)." }
+              }
+              $manifest.Add("$([IO.Path]::GetFileName($destination))=$((Get-FileHash -Algorithm SHA256 -LiteralPath $destination).Hash)")
             }
           }
-          if (-not (Get-ChildItem -LiteralPath $stage -Filter 'Setup.exe' -File)) { throw 'Setup.exe is missing.' }
-          if (-not (Get-ChildItem -LiteralPath $stage -Filter 'RELEASES' -File)) { throw 'RELEASES is missing.' }
-          if (-not (Get-ChildItem -LiteralPath $stage -Filter '*.nupkg' -File)) { throw 'At least one Squirrel.Windows .nupkg is missing.' }
+          $manifest | Set-Content -LiteralPath (Join-Path $stage 'BUILD-MANIFEST.txt') -Encoding utf8
           $hashes = Get-ChildItem -LiteralPath $stage -File | Get-FileHash -Algorithm SHA256
           $hashes | ForEach-Object { "$($_.Path | Split-Path -Leaf) $($_.Hash)" } | Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Encoding utf8
           "RELEASE_ASSET_DIR=$stage" >> $env:GITHUB_ENV
@@ -190,10 +237,12 @@ jobs:
           gh release create $tag --repo '${{ github.repository }}' --target $sha --title "Windows $tag" --notes-file $env:RELEASE_NOTES_PATH @assets
           $release = gh api "repos/${{ github.repository }}/releases/tags/$tag" | ConvertFrom-Json
           if ($release.draft -ne $false -or $release.target_commitish -ne $sha) { throw 'Published release did not resolve to the exact non-draft target commit.' }
-          $expected = @('Setup.exe', 'RELEASES', 'SHA256SUMS.txt')
+          $expected = @('material-gitlab-instant-Setup.exe', 'material-gitlab-instant-RELEASES', 'material-gitlab-deployer-Setup.exe', 'material-gitlab-deployer-RELEASES', 'BUILD-MANIFEST.txt', 'SHA256SUMS.txt')
           foreach ($name in $expected) {
             $asset = $release.assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
             if (-not $asset -or [int64]$asset.size -le 0) { throw "Published release is missing non-empty $name." }
           }
-          $nupkg = @($release.assets | Where-Object { $_.name -match '\.nupkg$' -and [int64]$_.size -gt 0 })
-          if (-not $nupkg) { throw 'Published release is missing a non-empty .nupkg asset.' }
+          foreach ($prefix in @('material-gitlab-instant-', 'material-gitlab-deployer-')) {
+            $nupkg = @($release.assets | Where-Object { $_.name -like "$prefix*.nupkg" -and [int64]$_.size -gt 0 })
+            if (-not $nupkg) { throw "Published release is missing a non-empty .nupkg asset for $prefix." }
+          }

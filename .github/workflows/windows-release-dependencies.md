@@ -25,17 +25,19 @@ resolved version in its run summary:
 | PowerShell | `build-installer.bat` validation command | Use the runner's PowerShell for ZIP validation and SHA-256 calculation. |
 | Repository dependencies | `yarn.lock` | Run `yarn install --frozen-lockfile --non-interactive --no-progress`; do not mutate the lockfile. |
 
-The root scripts are the supported local and manual release path:
+The two application package directories are the supported release inputs:
 
 ```bat
-build.bat /s
-build-installer.bat /s
+tools\material-gitlab-instant\build.bat /s
+tools\material-gitlab-instant\build-installer.bat /s
+tools\material-gitlab-deployer\build.bat /s
+tools\material-gitlab-deployer\build-installer.bat /s
 ```
 
-The first command must complete before the second starts. Silent mode must not
-prompt, open a window, or wait for input. A missing dependency, failed
+Each application's build must complete before its installer starts. Silent mode
+must not prompt, open a window, or wait for input. A missing dependency, failed
 bootstrap, failed build, stale output, or malformed archive is a hard failure;
-the job must stop before publication and retain its logs and safe diagnostics.
+the job must still collect logs and safe diagnostics before refusing publication.
 
 ## Artifact and evidence collection
 
@@ -47,12 +49,20 @@ result, runner image, resolved tool versions, artifact paths, byte sizes, and
 SHA-256 digests. Do not upload credentials, dependency directories, caches,
 source trees, or temporary files.
 
-The collector must verify that each artifact exists, is readable, and was
-created from the intended commit. It must not accept a file left by an earlier
-run. The current repository's packaging script creates an unsigned source ZIP
-because no native Windows installer is declared; it must not be described as a
-native installer. If the release contract requires an installer, packaging is
-blocked until a supported installer path exists.
+The collector verifies both application contracts independently. For each
+application it requires a fresh, non-empty `Setup.exe`, `RELEASES`, and at
+least one `.nupkg` under `dist\squirrel-windows`; every file must be readable,
+unsigned where applicable, and produced from the exact triggering commit SHA.
+Staged names are prefixed `material-gitlab-instant-*` and
+`material-gitlab-deployer-*`. The collector writes `BUILD-MANIFEST.txt`
+(including `BUILD_SHA` and per-file digests) and `SHA256SUMS.txt` alongside
+the staged assets.
+
+The deployer package currently has no native installer configuration: its
+`build-installer.bat /s` intentionally exits with code 2. This is an explicit
+fail-closed blocker. The workflow must not publish an Instant-only release or
+describe the deployer as packaged until its complete Squirrel.Windows contract
+exists.
 
 ## Deliberate verification boundary
 
@@ -95,9 +105,9 @@ invoked.
 The publisher must stop and report the exact blocker when any of these occurs:
 
 - the required runtime, package manager, or dependency cannot be bootstrapped;
-- `build.bat /s` or `build-installer.bat /s` fails;
-- an expected artifact is missing, stale, malformed, or cannot be tied to the
-  intended commit;
+- either application's `build.bat /s` or `build-installer.bat /s` fails;
+- either application's `Setup.exe`, `RELEASES`, or `.nupkg` contract is
+  missing, stale, empty, malformed, or cannot be tied to the intended commit;
 - the release target, timing evidence, line-count output, or required asset is
   unavailable;
 - the selected dim-sum asset is not a published catalog asset; or

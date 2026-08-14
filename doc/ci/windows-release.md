@@ -5,38 +5,47 @@ description: Build, package, and publish the Windows release with reproducible e
 
 # Windows release workflow
 
-This page describes the Windows-only release contract. The workflow builds the
-repository from a pinned commit, packages the supported artifact, and publishes
-one uniquely tagged release only when build, packaging, and publication succeed.
+This page describes the Windows-only release contract. The workflow builds two
+application packages from a pinned commit, verifies both unsigned Squirrel.Windows
+asset sets, and publishes one uniquely tagged release only when every contract
+and publication check succeeds.
 
 ## Run the supported build path
 
-Manual release preparation uses the two root scripts in order, in silent mode:
+The workflow invokes each package's scripts in silent mode:
 
 ```bat
-build.bat /s
-build-installer.bat /s
+tools\material-gitlab-instant\build.bat /s
+tools\material-gitlab-instant\build-installer.bat /s
+tools\material-gitlab-deployer\build.bat /s
+tools\material-gitlab-deployer\build-installer.bat /s
 ```
 
-`build.bat /s` bootstraps the declared Node.js and Yarn versions, installs the
-frozen JavaScript dependencies, and runs the production frontend build.
-`build-installer.bat /s` packages the exact `HEAD` commit and validates the
-resulting archive and SHA-256 digest. Neither script publishes, tags, pushes, or
-creates a release.
+For each package, `build.bat /s` bootstraps its declared dependencies and runs
+the production build. Its companion `build-installer.bat /s` packages the exact
+checkout and validates the unsigned Squirrel.Windows output. Neither script
+publishes, tags, pushes, or creates a release.
 
-The current repository declares a source ZIP rather than a native Windows
-installer. The package must therefore be labelled as a source ZIP; a workflow
-that promises a native installer is blocked until a supported installer is
-implemented. Never rename a ZIP to make it look like an installer.
+The deployer package is currently fail-closed: `tools\material-gitlab-deployer\build-installer.bat /s`
+exits 2 because verified icon and Squirrel metadata are not yet present. This
+blocks publication of a dual-package release; the workflow must not substitute
+an Instant-only release or rename another archive as a deployer installer.
+
+The required per-package outputs are a fresh, non-empty `Setup.exe`, `RELEASES`,
+and at least one `.nupkg` under `dist\squirrel-windows`. Staged names are
+prefixed `material-gitlab-instant-*` and `material-gitlab-deployer-*`. The
+collector also emits `BUILD-MANIFEST.txt` with `BUILD_SHA` and per-asset hashes,
+plus `SHA256SUMS.txt`; all are tied to the exact triggering SHA.
 
 ## Workflow stages
 
 1. Check out the intended commit and record its full SHA.
 2. Bootstrap the repository's declared toolchain and dependencies on a clean
    Windows runner.
-3. Run `build.bat /s` and fail closed on any non-zero result or missing output.
-4. Run `build-installer.bat /s` and validate the artifact type, entries, size,
-   digest, and source commit.
+3. Run both application `build.bat /s` commands and fail closed on any
+   non-zero result or missing output.
+4. Run both application `build-installer.bat /s` commands and validate each
+   Squirrel asset set, unsigned status, sizes, digests, and source commit.
 5. Collect safe logs and metadata even when an earlier stage fails.
 6. Publish one unique, non-draft release only after all publication inputs are
    verified.
@@ -50,8 +59,9 @@ workflow's verification boundary and release notes must not imply that they ran.
 Release notes include `Workflow started`, `Workflow completed`, and
 `Workflow duration` with UTC ISO-8601 timestamps and a stable `HH:mm:ss`
 duration. The clock starts at the first job's actual `startedAt` value and ends
-at the final release-publication step. The release tag, target commit, package
-manifest, and asset digests are checked against the same immutable commit.
+at the final release-publication step. The release tag, target commit,
+`BUILD-MANIFEST.txt`, and asset digests are checked against the same immutable
+commit.
 
 ## Line count and dim-sum metadata
 
@@ -79,9 +89,10 @@ may trigger an unknown-publisher or SmartScreen warning. No signing certificate,
 private key, signer service, or certificate auto-discovery is permitted.
 
 Stop publication and report the exact evidence when bootstrapping fails, either
-script fails, output is stale or malformed, the target SHA does not match, timing
-or line-count evidence is missing, a required asset is unavailable, or any tool
-attempts to sign. Artifact collection must still run defensively with
+application script fails (including the current deployer exit-2 blocker), a
+required per-application asset is stale, empty, or malformed, the target SHA
+does not match, timing or line-count evidence is missing, or any tool attempts
+to sign. Artifact collection must still run defensively with
 `if: ${{ always() }}`, `continue-on-error: true`, and
 `if-no-files-found: warn`; it must never turn a failed build green.
 
