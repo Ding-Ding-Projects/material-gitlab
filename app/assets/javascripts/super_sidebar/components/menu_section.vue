@@ -3,8 +3,8 @@ import { kebabCase } from 'lodash-es';
 import {
   GlCollapse,
   GlIcon,
-  GlNavItem,
   GlAnimatedChevronRightDownIcon,
+  GlTooltipDirective,
   GlOutsideDirective as Outside,
 } from '@gitlab/ui';
 import { HIDDEN_NAV_ITEM_CLASS } from '../constants';
@@ -16,12 +16,11 @@ export default {
   components: {
     GlCollapse,
     GlIcon,
-    GlNavItem,
     GlAnimatedChevronRightDownIcon,
     NavItem,
     FlyoutMenu,
   },
-  directives: { Outside },
+  directives: { Outside, GlTooltip: GlTooltipDirective },
   inject: {
     isIconOnly: { default: false },
   },
@@ -84,6 +83,7 @@ export default {
     computedLinkClasses() {
       return {
         'with-mouse-over-flyout': this.isMouseOverFlyout,
+        'm3-shell-nav-section-active': this.isActive,
       };
     },
     isActive() {
@@ -164,30 +164,35 @@ export default {
 
 <template>
   <component :is="tag">
-    <gl-nav-item
+    <button
       v-if="!headerless"
       :id="`menu-section-button-${itemId}`"
       v-outside="handleClickOutside"
-      class="gl-relative gl-mb-1 m3-shell-nav-section"
+      v-gl-tooltip.right.viewport="isIconOnly ? item.title : ''"
+      type="button"
+      class="gl-nav-item gl-relative m3-shell-nav-section"
       :class="computedLinkClasses"
       data-testid="menu-section-button"
       :data-qa-section-name="item.title"
       :aria-label="item.title"
-      :icon="item.icon"
-      :is-icon-only="isIconOnly"
-      :expanded="isExpanded"
-      :selected="isActive"
-      is-parent
       v-bind="buttonProps"
       @click="handleClick"
-      @escape="handleClickOutside"
+      @keydown.esc="handleClickOutside"
       @pointerover="handlePointerover"
       @pointerleave="handlePointerleave"
     >
-      <span class="gl-truncate-end menu-section-button-label">
+      <span v-show="isIconOnly" class="m3-shell-nav-section-icon">
+        <gl-icon :name="item.icon" />
+      </span>
+      <span v-show="!isIconOnly" class="gl-truncate-end menu-section-button-label">
         {{ item.title }}
       </span>
-    </gl-nav-item>
+      <gl-animated-chevron-right-down-icon
+        v-show="!isIconOnly"
+        class="m3-shell-nav-section-chevron"
+        :is-on="isExpanded"
+      />
+    </button>
 
     <flyout-menu
       v-if="showFlyout"
@@ -219,7 +224,6 @@ export default {
             :key="`${item.title}-${subItem.title}`"
             :item="subItem"
             :async-count="asyncCount"
-            hide-icon
             @pin-add="(itemId, itemTitle) => $emit('pin-add', itemId, itemTitle)"
             @pin-remove="(itemId, itemTitle) => $emit('pin-remove', itemId, itemTitle)"
           />

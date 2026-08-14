@@ -1,5 +1,6 @@
 <script>
 import { computed, defineAsyncComponent } from 'vue';
+import { GlAvatar, GlIcon } from '@gitlab/ui';
 import { GlBreakpointInstance, breakpoints } from '@gitlab/ui/src/utils'; // eslint-disable-line no-restricted-syntax -- GlBreakpointInstance is used intentionally here. In this case we must obtain viewport breakpoints
 import { Mousetrap } from '~/lib/mousetrap';
 import { TAB_KEY_CODE } from '~/lib/utils/keycodes';
@@ -7,6 +8,7 @@ import { keysFor, TOGGLE_SUPER_SIDEBAR } from '~/behaviors/shortcuts/keybindings
 import { s__ } from '~/locale';
 import Tracking from '~/tracking';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+import { EVENT_OPEN_GLOBAL_SEARCH } from '~/vue_shared/global_search/constants';
 import { JS_TOGGLE_EXPAND_CLASS } from '../constants';
 import { sidebarState } from '../state';
 import {
@@ -24,6 +26,8 @@ import ScrollScrim from './scroll_scrim.vue';
 export default {
   name: 'SuperSidebar',
   components: {
+    GlAvatar,
+    GlIcon,
     IconOnlyToggle,
     HelpCenter,
     SidebarMenu,
@@ -36,6 +40,8 @@ export default {
   mixins: [Tracking.mixin(), glFeatureFlagsMixin()],
   i18n: {
     primaryNavigation: s__('Navigation|Primary navigation'),
+    productName: 'GitLab',
+    search: s__('Navigation|Search or go to…'),
   },
   inject: ['showTrialWidget'],
   provide() {
@@ -60,6 +66,15 @@ export default {
   computed: {
     menuItems() {
       return this.sidebarData.current_menu_items || [];
+    },
+    currentContext() {
+      return this.sidebarData.current_context?.item || null;
+    },
+    contextName() {
+      return this.currentContext?.name || this.sidebarData.current_context_header;
+    },
+    contextNamespace() {
+      return this.currentContext?.namespace || this.sidebarData.current_context_header;
     },
     sidebarClasses() {
       return {
@@ -138,6 +153,9 @@ export default {
     collapseSidebar() {
       toggleSuperSidebarCollapsed(true);
     },
+    openGlobalSearch() {
+      document.dispatchEvent(new CustomEvent(EVENT_OPEN_GLOBAL_SEARCH));
+    },
     handleEscKey() {
       if (this.isOverlapping()) {
         this.collapseSidebar();
@@ -192,13 +210,50 @@ export default {
       <h2 id="super-sidebar-heading" class="gl-sr-only">
         {{ $options.i18n.primaryNavigation }}
       </h2>
-      <div class="contextual-nav m3-shell-sidebar-content gl-flex gl-grow gl-flex-col gl-overflow-hidden gl-pt-2">
-        <div
-          v-if="sidebarData.current_context_header && !isIconOnly"
-          id="super-sidebar-context-header"
-          class="super-sidebar-context-header m3-shell-sidebar-context gl-m-0 gl-px-5 gl-py-3 gl-font-bold gl-leading-reset"
-        >
-          {{ sidebarData.current_context_header }}
+      <div class="contextual-nav m3-shell-sidebar-content gl-flex gl-grow gl-flex-col gl-overflow-hidden">
+        <div v-if="!isIconOnly" class="m3-shell-sidebar-header">
+          <div class="m3-shell-sidebar-brand" aria-hidden="true">
+            <span class="m3-shell-sidebar-brand-mark">G</span>
+            <span class="m3-shell-sidebar-brand-name">{{ $options.i18n.productName }}</span>
+          </div>
+          <a
+            v-if="currentContext"
+            id="super-sidebar-context-header"
+            :href="currentContext.webUrl"
+            class="super-sidebar-context-header m3-shell-sidebar-context-card"
+          >
+            <gl-avatar
+              :src="currentContext.avatarUrl"
+              :entity-id="currentContext.id"
+              :entity-name="currentContext.name"
+              :size="32"
+              shape="rect"
+            />
+            <span class="m3-shell-sidebar-context-copy">
+              <span class="m3-shell-sidebar-context-name">{{ contextName }}</span>
+              <span class="m3-shell-sidebar-context-namespace">{{ contextNamespace }}</span>
+            </span>
+          </a>
+          <div
+            v-else-if="sidebarData.current_context_header"
+            id="super-sidebar-context-header"
+            class="super-sidebar-context-header m3-shell-sidebar-context-card m3-shell-sidebar-context-card-static"
+          >
+            <span class="m3-shell-sidebar-context-copy">
+              <span class="m3-shell-sidebar-context-name">{{ sidebarData.current_context_header }}</span>
+            </span>
+          </div>
+          <button
+            type="button"
+            class="m3-shell-sidebar-search"
+            :aria-label="$options.i18n.search"
+            data-testid="super-sidebar-search-button"
+            @click="openGlobalSearch"
+          >
+            <gl-icon name="search" :size="16" />
+            <span class="m3-shell-sidebar-search-label">{{ $options.i18n.search }}</span>
+            <kbd class="m3-shell-sidebar-search-shortcut">/</kbd>
+          </button>
         </div>
         <scroll-scrim class="gl-grow" data-testid="nav-container">
           <sidebar-menu
