@@ -19,7 +19,7 @@
         <a href="#guides">Guides</a>
         <a href="#reference">Reference</a>
       </nav>
-      <button class="icon-button" type="button" aria-label="Open search" title="Search">⌕</button>
+      <label class="site-search" for="site-search"><span aria-hidden="true">⌕</span><input id="site-search" data-site-search type="search" placeholder="Search guides and features" /></label>
     </header>
 
     <main>
@@ -55,8 +55,25 @@
         <div class="section-heading"><div><p class="eyebrow">Reference</p><h2>A small system with room to grow</h2></div></div>
         <div class="reference-grid"><div><h3>Material by default</h3><p>Expressive colour, readable type, and clear states create a dependable base for every page.</p></div><div><h3>Local and fast</h3><p>Assets resolve from the current base path, so the site works from a subdirectory as well as a domain root.</p></div><div><h3>Ready for your docs</h3><p>Drop new articles into the shell without losing navigation, spacing, or responsive behaviour.</p></div></div>
       </section>
+
+      <section id="library" class="section-shell content-section library-section" aria-labelledby="library-title">
+        <div class="section-heading"><div><p class="eyebrow">Live library</p><h2 id="library-title">Canonical docs, one calm surface</h2></div></div>
+        <div class="tab-strip" role="tablist" aria-label="Documentation library">
+          <button type="button" role="tab" aria-selected="true" aria-controls="inventory-panel" data-tab-target="inventory-panel">Feature inventory</button>
+          <button type="button" role="tab" aria-selected="false" aria-controls="documents-panel" data-tab-target="documents-panel">Documentation</button>
+        </div>
+        <div id="inventory-panel" role="tabpanel" class="library-panel" data-tab-panel="inventory-panel">
+          <p class="runtime-status" data-runtime-status>Loading the universal feature inventory…</p>
+          <ul id="inventory" class="inventory-list" data-inventory aria-live="polite"></ul>
+        </div>
+        <div id="documents-panel" role="tabpanel" class="library-panel" data-tab-panel="documents-panel" hidden>
+          <div id="documents" class="documents-list" data-documents></div>
+          <div id="document-viewer" class="document-viewer" data-document-viewer aria-live="polite"><p>Choose an article to read it here.</p></div>
+        </div>
+      </section>
     </main>
 
-    <footer class="site-footer section-shell"><span>Material GitLab</span><span>Made for focused work.</span></footer>
+    <footer class="site-footer section-shell"><span>Material GitLab</span><span>Made for focused work.</span><a class="text-link" href="#library">Open library</a></footer>
+    <script type="module" src="./src/main.js"></script>
   </body>
 </html>
