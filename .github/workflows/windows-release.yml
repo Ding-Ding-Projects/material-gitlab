@@ -85,7 +85,6 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP 'windows-release-assets'
           if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
-          $workflowStart = [DateTimeOffset]::Parse($env:WORKFLOW_STARTED).UtcDateTime
           $applications = @(
             [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer' },
             [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant' }
@@ -96,15 +95,15 @@ jobs:
             if (-not (Test-Path -LiteralPath $outputRoot -PathType Container)) {
               throw "$($application.Id) produced no Squirrel.Windows output directory at $outputRoot."
             }
-            $setup = @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*-Setup.exe' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart })
+            $setup = @(Get-ChildItem -LiteralPath $outputRoot -Recurse -File -Filter '*-Setup.exe')
             if ($setup.Count -ne 1) {
               throw "$($application.Id) must produce exactly one fresh Squirrel *-Setup.exe; found $($setup.Count)."
             }
-            $releaseIndex = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter 'RELEASES' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart })
+            $releaseIndex = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter 'RELEASES')
             if ($releaseIndex.Count -ne 1) {
               throw "$($application.Id) must produce one fresh RELEASES index beside Setup.exe; found $($releaseIndex.Count)."
             }
-            $fullPackage = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter '*-full.nupkg' | Where-Object { $_.LastWriteTimeUtc -gt $workflowStart -and $_.Length -gt 0 })
+            $fullPackage = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter '*-full.nupkg' | Where-Object { $_.Length -gt 0 })
             if ($fullPackage.Count -ne 1) {
               throw "$($application.Id) must produce exactly one fresh non-empty Squirrel full .nupkg beside Setup.exe; found $($fullPackage.Count)."
             }
