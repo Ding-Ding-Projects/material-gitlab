@@ -15,31 +15,38 @@ if errorlevel 1 (
   exit /b 1
 )
 echo [gitlab-instant] Packaging an unsigned Squirrel.Windows installer
-npx --no-install electron-builder --win squirrel
+call npx --no-install electron-builder --win squirrel
 if errorlevel 1 (
   echo [gitlab-instant] ERROR: electron-builder Squirrel packaging failed. 1>&2
   popd >nul
   exit /b 1
 )
-set "SETUP="
-for /r "%ROOT%dist" %%F in (*Setup.exe) do if not defined SETUP set "SETUP=%%~fF"
-if not defined SETUP (
+set "ASSET_DIR=%ROOT%installer\squirrel-windows"
+set "SETUP=%ASSET_DIR%\Setup.exe"
+if not exist "%SETUP%" (
   echo [gitlab-instant] ERROR: no Squirrel Setup.exe was produced. 1>&2
   popd >nul
   exit /b 1
 )
-for %%F in ("%SETUP%") do set "SETUP_DIR=%%~dpF"
-if not exist "%SETUP_DIR%RELEASES" (
+set "RELEASES=%ASSET_DIR%\RELEASES"
+if not exist "%RELEASES%" (
   echo [gitlab-instant] ERROR: Squirrel RELEASES index is missing beside Setup.exe. 1>&2
   popd >nul
   exit /b 1
 )
-powershell -NoProfile -ExecutionPolicy Bypass -Command "$s=Get-AuthenticodeSignature -LiteralPath '%SETUP%'; if ($s.Status -ne 'NotSigned') { Write-Error ('Setup.exe signing status is ' + $s.Status); exit 1 }; $h=(Get-FileHash -Algorithm SHA256 -LiteralPath '%SETUP%').Hash; Write-Output ('Installer=' + '%SETUP%'); Write-Output ('SHA256=' + $h); Write-Output 'Signing=NotSigned'"
+set "FULL_NUPKG="
+for /r "%ASSET_DIR%" %%F in (*-full.nupkg) do if not defined FULL_NUPKG set "FULL_NUPKG=%%~fF"
+if not defined FULL_NUPKG (
+  echo [gitlab-instant] ERROR: no Squirrel full .nupkg was produced. 1>&2
+  popd >nul
+  exit /b 1
+)
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "%ROOT%scripts\verify-squirrel-assets.ps1" -SetupPath "%SETUP%" -ReleasesPath "%RELEASES%" -FullNupkgPath "%FULL_NUPKG%"
 if errorlevel 1 (
   echo [gitlab-instant] ERROR: unsigned installer verification failed. 1>&2
   popd >nul
   exit /b 1
 )
-echo [gitlab-instant] Installer ready under %SETUP_DIR% (unsigned; Windows may show an unknown-publisher warning).
+echo [gitlab-instant] Installer ready under %ASSET_DIR% (unsigned; Windows may show an unknown-publisher warning).
 popd >nul
 exit /b 0

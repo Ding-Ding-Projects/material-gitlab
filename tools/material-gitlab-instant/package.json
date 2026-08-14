@@ -2,9 +2,11 @@
   "name": "material-gitlab-instant",
   "private": true,
   "version": "0.1.0",
-  "description": "A configuration-only GitLab local-instance Electron shell.",
-  "author": "GitLab",
-  "main": "dist/main.js",
+  "description": "A configuration-only GitLab local-instance Electron shell with explicit readiness states.",
+  "author": "Ding-Ding Projects",
+  "license": "MIT",
+  "homepage": "https://github.com/Ding-Ding-Projects/material-gitlab",
+  "main": "app-dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
     "start": "electron .",
@@ -19,15 +21,22 @@
   "build": {
     "appId": "com.materialgitlab.instant",
     "productName": "GitLab Instant",
+    "directories": {
+      "output": "installer"
+    },
+    "icon": "build/icon.ico",
+    "copyright": "Copyright © 2026 Ding-Ding Projects",
     "asar": true,
     "forceCodeSigning": false,
     "win": {
       "target": "squirrel",
       "signAndEditExecutable": false,
-      "signingHashAlgorithms": []
+      "signExecutable": false
     },
     "squirrelWindows": {
-      "noMsi": true
+      "artifactName": "Setup.exe",
+      "msi": false,
+      "iconUrl": "https://raw.githubusercontent.com/Ding-Ding-Projects/material-gitlab/main/tools/material-gitlab-instant/build/icon.ico"
     }
   }
 }

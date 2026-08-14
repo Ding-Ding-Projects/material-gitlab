@@ -22,9 +22,18 @@ h2 { font-size: 1.2rem; margin: 0 0 14px; }
 .card { background: var(--surface); border: 1px solid #e3e5eb; border-radius: 24px; box-shadow: 0 3px 14px #26324a0d; margin-bottom: 20px; padding: 24px; }
 .step { color: var(--primary); font-size: .76rem; font-weight: 800; letter-spacing: .08em; margin: 0 0 12px; text-transform: uppercase; }
 .hint, .message, .boundary { color: var(--muted); font-size: .88rem; line-height: 1.5; }
-.field { display: grid; font-size: .92rem; font-weight: 650; gap: 7px; margin: 18px 0; }
-input { background: #fff; border: 1px solid var(--outline); border-radius: 12px; font: inherit; padding: 12px; width: 100%; }
-input:focus, button:focus-visible { outline: 3px solid #9cc2ff; outline-offset: 2px; }
+.field { margin: 18px 0; }
+.m3-field { position: relative; }
+.m3-field__label { background: var(--surface); color: #4b5361; display: inline-block; font-size: .86rem; font-weight: 650; left: 12px; line-height: 1; padding: 0 4px; position: absolute; top: -5px; z-index: 1; }
+input, textarea, select { background: var(--surface); border: 1px solid var(--outline); border-radius: 12px; color: inherit; font: inherit; min-height: 48px; padding: 13px 14px; width: 100%; }
+input::placeholder, textarea::placeholder { color: #747985; opacity: 1; }
+input:hover, textarea:hover, select:hover { border-color: #4b5361; }
+input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: 3px solid #9cc2ff; outline-offset: 1px; }
+input[aria-invalid="true"], textarea[aria-invalid="true"], select[aria-invalid="true"] { border-color: #b3261e; }
+.m3-field:focus-within .m3-field__label { color: var(--primary); }
+.m3-field__support { color: var(--muted); font-size: .78rem; line-height: 1.4; margin: 6px 4px 0; }
+.m3-field__support--error { color: #b3261e; }
+button:focus-visible { outline: 3px solid #9cc2ff; outline-offset: 2px; }
 .actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .button { background: var(--primary); border: 0; border-radius: 999px; color: #fff; cursor: pointer; font: inherit; font-weight: 700; padding: 12px 18px; }
 .button.secondary { background: #e5edff; color: #2d4e82; }
