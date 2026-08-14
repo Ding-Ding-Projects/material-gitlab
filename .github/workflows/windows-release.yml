@@ -29,6 +29,16 @@ jobs:
           }
           Write-Host 'Build dependencies: Git and GitHub CLI are provided by the runner.'
 
+      - name: Record first-job workflow start
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $run = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID" | ConvertFrom-Json
+          if (-not $run.run_started_at) { throw 'GitHub Actions did not report the first-job workflow start timestamp.' }
+          $run.run_started_at | Set-Content -LiteralPath (Join-Path $env:RUNNER_TEMP 'workflow-started-at.txt') -Encoding utf8
+
       - name: Build and package unsigned Windows artifacts
         shell: pwsh
         run: |
@@ -43,6 +53,30 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "build.bat /s failed with exit code $LASTEXITCODE" }
           & cmd.exe /c "`"$installer`" /s"
           if ($LASTEXITCODE -ne 0) { throw "build-installer.bat /s failed with exit code $LASTEXITCODE" }
+
+      - name: Run the committed line counter
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $candidates = @(Get-ChildItem -LiteralPath $env:GITHUB_WORKSPACE -Recurse -File -ErrorAction SilentlyContinue |
+            Where-Object { $_.FullName -notmatch '\\(node_modules|vendor|tmp|release-staging)\\' -and $_.Name -match '^(line[-_]?count|count[-_]lines)(\.(ps1|rb|py|js|mjs|sh|bat|cmd))?$' })
+          if ($candidates.Count -eq 0) { throw 'No committed line-counter script was found; refusing to publish without CI-produced counts.' }
+          if ($candidates.Count -gt 1) { throw "Ambiguous committed line counters: $($candidates.FullName -join ', ')" }
+          $counter = $candidates[0]
+          $output = Join-Path $env:RUNNER_TEMP 'line-count.txt'
+          switch ($counter.Extension.ToLowerInvariant()) {
+            '.ps1' { & pwsh -NoProfile -File $counter.FullName | Tee-Object -FilePath $output }
+            '.rb' { & ruby $counter.FullName | Tee-Object -FilePath $output }
+            '.py' { & py -3 $counter.FullName | Tee-Object -FilePath $output }
+            '.js' { & node $counter.FullName | Tee-Object -FilePath $output }
+            '.mjs' { & node $counter.FullName | Tee-Object -FilePath $output }
+            '.sh' { & bash $counter.FullName | Tee-Object -FilePath $output }
+            '.bat' { & cmd.exe /c $counter.FullName | Tee-Object -FilePath $output }
+            '.cmd' { & cmd.exe /c $counter.FullName | Tee-Object -FilePath $output }
+            default { & $counter.FullName | Tee-Object -FilePath $output }
+          }
+          if ($LASTEXITCODE -and $LASTEXITCODE -ne 0) { throw "Committed line counter failed with exit code $LASTEXITCODE" }
+          if ((Get-Item -LiteralPath $output).Length -eq 0) { throw 'Committed line counter produced no table.' }
 
       - name: Collect safe release files
         if: ${{ always() }}
@@ -64,8 +98,10 @@ jobs:
             job_status = $env:GITHUB_JOB
             runner = $env:RUNNER_NAME
             generated_utc = (Get-Date).ToUniversalTime().ToString('o')
+            workflow_started = (Get-Content -LiteralPath (Join-Path $env:RUNNER_TEMP 'workflow-started-at.txt') -Raw).Trim()
           }
           $metadata | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $staging 'build-metadata.json') -Encoding utf8
+          Copy-Item -LiteralPath (Join-Path $env:RUNNER_TEMP 'line-count.txt') -Destination (Join-Path $staging 'line-count.txt') -Force
 
       - name: Upload release evidence
         if: ${{ always() }}
@@ -93,6 +129,24 @@ jobs:
           name: windows-release-evidence-${{ github.run_id }}
           path: release-staging
 
+      - name: Resolve published dim-sum catalog asset
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $catalogUrl = 'https://raw.githubusercontent.com/Ding-Ding-Projects/dim-sum-photos/main/catalog/index.json'
+          $catalog = Invoke-RestMethod -Uri $catalogUrl -TimeoutSec 30
+          $records = @($catalog.records) + @($catalog.dishes) + @($catalog)
+          $dish = $records | Where-Object { $_.name.en -and $_.name.zhHant } | Select-Object -First 1
+          if (-not $dish) { throw 'The public dim-sum catalog has no bilingual dish record.' }
+          $releasePages = gh api --paginate --slurp 'repos/Ding-Ding-Projects/dim-sum-photos/releases?per_page=100' | ConvertFrom-Json
+          $releases = @($releasePages | ForEach-Object { $_ })
+          $asset = $releases.assets | Where-Object { $_.name -match '^catalog-v1.*\.(png|jpe?g|webp)$' -and $_.browser_download_url } | Select-Object -First 1
+          if (-not $asset) { throw 'No published catalog-v1 photo asset is available; refusing to vendor or invent a substitute.' }
+          [ordered]@{ dish = "$($dish.name.en) · $($dish.name.zhHant)"; catalog = $catalogUrl; photo = $asset.browser_download_url; asset = $asset.name } |
+            ConvertTo-Json | Set-Content -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'release-staging/dim-sum-source.json') -Encoding utf8
+
       - name: Publish unique non-draft release
         shell: pwsh
         env:
@@ -104,4 +158,19 @@ jobs:
           if (-not $assets) { throw 'No packaged assets were produced; refusing to publish a release.' }
           $tag = "windows-$($env:GITHUB_SHA.Substring(0,12))-$($env:GITHUB_RUN_NUMBER)"
           $assetArgs = @($assets.FullName)
-          gh release create $tag @assetArgs --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Windows $tag" --generate-notes
+          $source = Get-Content -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'release-staging/dim-sum-source.json') -Raw | ConvertFrom-Json
+          $metadata = Get-Content -LiteralPath (Join-Path $env:GITHUB_WORKSPACE 'release-staging/build-metadata.json') -Raw | ConvertFrom-Json
+          $notesPath = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          @("Windows release $tag", "", "Dim-sum code name: $($source.dish)", "Public photo asset: $($source.photo)", "Line-count table: attached as line-count.txt (produced by the committed counter).", "", "Workflow started: $($metadata.workflow_started)", 'Workflow completed: pending publication verification', 'Workflow duration: pending publication verification') -join [Environment]::NewLine | Set-Content -LiteralPath $notesPath -Encoding utf8
+          gh release create $tag @assetArgs --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Windows $tag" --notes-file $notesPath
+          $completed = [DateTime]::UtcNow
+          $started = [DateTime]::Parse($metadata.workflow_started).ToUniversalTime()
+          $duration = $completed - $started
+          @("Windows release $tag", "", "Dim-sum code name: $($source.dish)", "Public photo asset: $($source.photo)", "Line-count table: attached as line-count.txt (produced by the committed counter).", "", "Workflow started: $($started.ToString('o'))", "Workflow completed: $($completed.ToString('o'))", "Workflow duration: $($duration.ToString('hh\:mm\:ss'))") -join [Environment]::NewLine | Set-Content -LiteralPath $notesPath -Encoding utf8
+          gh release edit $tag --repo $env:GITHUB_REPOSITORY --notes-file $notesPath
+          $release = gh api "repos/$env:GITHUB_REPOSITORY/releases/tags/$tag" | ConvertFrom-Json
+          if ($release.draft -or $release.prerelease) { throw 'Published release is draft or prerelease; refusing to report completion.' }
+          if ($release.target_commitish -ne $env:GITHUB_SHA) { throw "Release target mismatch: expected $env:GITHUB_SHA, got $($release.target_commitish)" }
+          $publishedNames = @($release.assets | ForEach-Object Name)
+          foreach ($asset in $assets) { if ($publishedNames -notcontains $asset.Name) { throw "Published release is missing asset $($asset.Name)" } }
+          Write-Host "Verified release $tag targets $env:GITHUB_SHA and contains all packaged assets."
