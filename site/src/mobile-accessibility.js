@@ -8,4 +8,24 @@ export function applyMobileAccessibility(root = document) {
   if (matchMedia?.('(prefers-reduced-motion: reduce)').matches) root.documentElement?.classList.add('reduce-motion');
   return root;
 }
-export function installFocusRing(root = document) { const onFocus = (event) => event.target?.classList?.add('keyboard-focus'); const onBlur = (event) => event.target?.classList?.remove('keyboard-focus'); root.addEventListener('focusin', onFocus); root.addEventListener('focusout', onBlur); return () => { root.removeEventListener('focusin', onFocus); root.removeEventListener('focusout', onBlur); }; }
+export function installFocusRing(root = document) {
+  let keyboardNavigation = false;
+  const onKeydown = (event) => {
+    if (event.key === 'Tab' || event.key.startsWith('Arrow') || event.key === 'Home' || event.key === 'End') keyboardNavigation = true;
+  };
+  const onPointer = () => { keyboardNavigation = false; };
+  const onFocus = (event) => {
+    if (keyboardNavigation) event.target?.classList?.add('keyboard-focus');
+  };
+  const onBlur = (event) => event.target?.classList?.remove('keyboard-focus');
+  root.addEventListener('keydown', onKeydown, true);
+  root.addEventListener('pointerdown', onPointer, true);
+  root.addEventListener('focusin', onFocus);
+  root.addEventListener('focusout', onBlur);
+  return () => {
+    root.removeEventListener('keydown', onKeydown, true);
+    root.removeEventListener('pointerdown', onPointer, true);
+    root.removeEventListener('focusin', onFocus);
+    root.removeEventListener('focusout', onBlur);
+  };
+}
