@@ -29,7 +29,7 @@ choice /C YN /N /M "Run the existing frontend development server now? [Y/N] "
 if errorlevel 2 exit /b 0
 echo [RUN] Starting yarn dev-server. Press Ctrl+C to stop it.
 pushd "%REPO_ROOT%" >nul
-yarn dev-server
+call %YARN_CMD% dev-server
 set "RUN_EXIT=%ERRORLEVEL%"
 popd >nul
 exit /b %RUN_EXIT%
@@ -71,7 +71,7 @@ goto :npm_yarn
 
 :corepack_yarn
 echo [INSTALL] Activating the manifest-pinned Yarn 1.22.22 through Corepack.
-corepack prepare yarn@1.22.22 --activate
+call corepack prepare yarn@1.22.22 --activate
 if not errorlevel 1 (
   set "YARN_CMD=corepack yarn"
   goto :check_yarn
@@ -86,7 +86,7 @@ if errorlevel 1 (
 )
 set "YARN_TOOLS=%LOCALAPPDATA%\material-gitlab-tools"
 echo [INSTALL] Acquiring Yarn 1.22.22 in the user-scoped npm prefix: %YARN_TOOLS%.
-npm install --global --prefix "%YARN_TOOLS%" yarn@1.22.22 --no-fund --no-audit
+call npm install --global --prefix "%YARN_TOOLS%" yarn@1.22.22 --no-fund --no-audit
 if errorlevel 1 (
   echo [ERROR] npm could not acquire Yarn 1.22.22.
   exit /b 1
@@ -108,7 +108,7 @@ exit /b 0
 :install_dependencies
 echo [DEPS] Installing JavaScript dependencies from yarn.lock (frozen, reproducible mode).
 pushd "%REPO_ROOT%" >nul
-%YARN_CMD% install --frozen-lockfile --non-interactive --no-progress
+call %YARN_CMD% install --frozen-lockfile --non-interactive --no-progress
 set "DEPS_EXIT=%ERRORLEVEL%"
 popd >nul
 if not "%DEPS_EXIT%"=="0" (
@@ -121,7 +121,7 @@ exit /b 0
 :build_frontend
 echo [BUILD] Running the repository-declared production frontend build: yarn webpack-prod.
 pushd "%REPO_ROOT%" >nul
-%YARN_CMD% webpack-prod
+call %YARN_CMD% webpack-prod
 set "BUILD_EXIT=%ERRORLEVEL%"
 popd >nul
 if not "%BUILD_EXIT%"=="0" (
