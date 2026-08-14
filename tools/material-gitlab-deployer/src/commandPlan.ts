@@ -76,9 +76,20 @@ export function buildCommandPlan(policy: CommandPolicy, request: CommandRequest)
   requireSafeToken(policy.executable, "executable");
   requireSafeToken(request.command, "command");
 
-  const definition = policy.commands[request.command];
-  if (!definition) {
+  if (!Object.prototype.hasOwnProperty.call(policy.commands, request.command)) {
     throw new Error(`command is not allowlisted: ${request.command}`);
+  }
+  const definition = policy.commands[request.command];
+  if (!definition || typeof definition !== "object") {
+    throw new Error(`command is not allowlisted: ${request.command}`);
+  }
+
+  definition.subcommand.forEach((token, index) => requireSafeToken(token, `subcommand token ${index + 1}`));
+  definition.allowedFlags.forEach((flag) => requireFlagName(flag, `allowlisted flag ${flag}`));
+  for (const requiredFlag of definition.requiredFlags ?? []) {
+    if (!allowedFlagInDefinition(definition.allowedFlags, requiredFlag)) {
+      throw new Error(`required flag is not allowlisted for ${request.command}: ${requiredFlag}`);
+    }
   }
 
   const allowedFlags = new Set(definition.allowedFlags);
@@ -115,9 +126,15 @@ export function buildCommandPlan(policy: CommandPolicy, request: CommandRequest)
   positionals.forEach((value, index) => requireSafeToken(value, `positional argument ${index + 1}`));
 
   const allowedEnvironment = new Set(policy.allowedEnvironmentKeys ?? []);
-  const environment: Record<string, string> = {};
+  const environment: Record<string, string> = Object.create(null) as Record<string, string>;
   for (const key of Object.keys(request.environment ?? {}).sort()) {
-    if (!ENVIRONMENT_NAME.test(key) || !allowedEnvironment.has(key)) {
+    if (
+      !ENVIRONMENT_NAME.test(key) ||
+      !allowedEnvironment.has(key) ||
+      key === "__proto__" ||
+      key === "constructor" ||
+      key === "prototype"
+    ) {
       throw new Error(`environment key is not allowlisted: ${key}`);
     }
     const value = request.environment?.[key] ?? "";
@@ -154,3 +171,6 @@ export function buildCommandPlan(policy: CommandPolicy, request: CommandRequest)
   });
 }
 
+function allowedFlagInDefinition(allowedFlags: readonly string[], candidate: string): boolean {
+  return allowedFlags.includes(candidate);
+}
