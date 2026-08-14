@@ -59,7 +59,7 @@ jobs:
             [pscustomobject]@{
               Id = 'material-gitlab-instant'
               Root = 'tools\material-gitlab-instant'
-              OutputRoot = 'tools\material-gitlab-instant\installer'
+              OutputRoot = 'tools\material-gitlab-instant\installer\squirrel-windows'
             }
           )
           foreach ($application in $applications) {
@@ -95,7 +95,7 @@ jobs:
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
           $applications = @(
             [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer'; OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows' },
-            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant'; OutputRoot = 'tools\material-gitlab-instant\installer' }
+            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant'; OutputRoot = 'tools\material-gitlab-instant\installer\squirrel-windows' }
           )
           $manifest = @()
           foreach ($application in $applications) {
