@@ -51,21 +51,29 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $applications = @(
-            'tools\material-gitlab-deployer',
-            'tools\material-gitlab-instant'
+            [pscustomobject]@{
+              Id = 'material-gitlab-deployer'
+              Root = 'tools\material-gitlab-deployer'
+              OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows'
+            },
+            [pscustomobject]@{
+              Id = 'material-gitlab-instant'
+              Root = 'tools\material-gitlab-instant'
+              OutputRoot = 'tools\material-gitlab-instant\installer'
+            }
           )
           foreach ($application in $applications) {
-            $installer = Join-Path $application 'build-installer.bat'
+            $installer = Join-Path $application.Root 'build-installer.bat'
             if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
               throw "Required installer entry point is missing: $installer"
             }
-            $squirrelOutput = Join-Path $application 'dist\squirrel-windows'
+            $squirrelOutput = Join-Path (Get-Location).Path $application.OutputRoot
             if (Test-Path -LiteralPath $squirrelOutput -PathType Container) {
               Remove-Item -LiteralPath $squirrelOutput -Recurse -Force
             }
             & $installer /s
             if ($LASTEXITCODE -ne 0) {
-              throw "Unsigned Squirrel.Windows installer build failed for $application (exit $LASTEXITCODE)."
+              throw "Unsigned Squirrel.Windows installer build failed for $($application.Id) (exit $LASTEXITCODE)."
             }
           }
 
@@ -86,12 +94,12 @@ jobs:
           if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
           $applications = @(
-            [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer' },
-            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant' }
+            [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer'; OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows' },
+            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant'; OutputRoot = 'tools\material-gitlab-instant\installer' }
           )
           $manifest = @()
           foreach ($application in $applications) {
-            $outputRoot = Join-Path $application.Root 'dist\squirrel-windows'
+            $outputRoot = Join-Path (Get-Location).Path $application.OutputRoot
             if (-not (Test-Path -LiteralPath $outputRoot -PathType Container)) {
               throw "$($application.Id) produced no Squirrel.Windows output directory at $outputRoot."
             }
