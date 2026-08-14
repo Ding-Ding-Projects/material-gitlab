@@ -13,7 +13,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 const args = new Set(process.argv.slice(2));
@@ -26,6 +26,42 @@ function git(...gitArgs) {
     throw new Error(`git ${gitArgs.join(' ')} failed: ${result.stderr?.trim() || result.error?.message || `exit ${result.status}`}`);
   }
   return result.stdout;
+}
+
+function runGitAsync(input, gitArgs) {
+  return new Promise((resolve, reject) => {
+    const child = spawn('git', ['-C', root, ...gitArgs], { stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'] });
+    let stdout = '';
+    let stderr = '';
+    let outputSize = 0;
+    const maxBuffer = 64 * 1024 * 1024;
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => {
+      outputSize += Buffer.byteLength(chunk);
+      if (outputSize > maxBuffer) {
+        child.kill();
+        reject(new Error(`git ${gitArgs.join(' ')} exceeded ${maxBuffer} byte output limit`));
+        return;
+      }
+      stdout += chunk;
+    });
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+    child.on('error', (error) => reject(new Error(`git ${gitArgs.join(' ')} failed: ${error.message}`)));
+    child.on('close', (status) => {
+      if (status === 0) resolve(stdout);
+      else reject(new Error(`git ${gitArgs.join(' ')} failed: ${stderr.trim() || `exit ${status}`}`));
+    });
+    if (input !== undefined) child.stdin.end(input);
+  });
+}
+
+function gitAsync(...gitArgs) {
+  return runGitAsync(undefined, gitArgs);
+}
+
+function gitAsyncWithInput(input, ...gitArgs) {
+  return runGitAsync(input, gitArgs);
 }
 
 function countLines(text) {
@@ -93,18 +129,88 @@ for (const file of trackedFiles) {
   }
 }
 
-const commitCache = new Map();
-function commitIdentity(commit) {
-  if (commitCache.has(commit)) return commitCache.get(commit);
-  const metadata = git('show', '-s', '--format=%an%n%ae%n%(trailers:only,unfold=true)', commit).split(/\r?\n/);
-  const author = metadata[0] || 'Unknown';
-  const email = metadata[1] || '';
-  const trailers = metadata.slice(2).join('\n');
-  const automation = /(bot|automation|agent|claude|codex)/i.test(`${author} ${email} ${trailers}`);
-  const identity = { author, email, automation };
-  commitCache.set(commit, identity);
-  return identity;
+const blameConcurrency = Math.min(8, Math.max(1, Number(process.env.LINE_COUNT_BLAME_CONCURRENCY) || 8));
+const blameEntries = included.filter((entry) => entry.total > 0);
+
+async function mapWithWorkerPool(entries, worker, concurrency) {
+  const results = new Array(entries.length);
+  let next = 0;
+  async function runWorker() {
+    while (true) {
+      const index = next++;
+      if (index >= entries.length) return;
+      results[index] = await worker(entries[index]);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(concurrency, entries.length) }, () => runWorker()));
+  return results;
 }
+
+function parseIncrementalBlame(output, file) {
+  const ranges = [];
+  let pending = null;
+  const flush = () => {
+    if (!pending) return;
+    ranges.push(pending);
+    pending = null;
+  };
+  for (const line of output.split(/\r?\n/)) {
+    const header = line.match(/^\^?([0-9a-f]{40})\s+\d+\s+\d+(?:\s+(\d+))?/);
+    if (header) {
+      flush();
+      pending = { commit: header[1], lines: Number(header[2] ?? 1) };
+    } else if (line === '') {
+      flush();
+    }
+  }
+  flush();
+  if (ranges.some((range) => !Number.isInteger(range.lines) || range.lines < 1)) {
+    throw new Error(`git blame --incremental returned an invalid range for ${file}`);
+  }
+  return ranges;
+}
+
+const blameResults = await mapWithWorkerPool(
+  blameEntries,
+  async (entry) => parseIncrementalBlame(await gitAsync('blame', '--incremental', revision, '--', entry.file), entry.file),
+  blameConcurrency,
+);
+
+const commitIds = [...new Set(blameResults.flat().map((range) => range.commit))];
+const commitCache = new Map();
+async function loadCommitIdentities(commits) {
+  const batchSize = 128;
+  for (let offset = 0; offset < commits.length; offset += batchSize) {
+    const batch = commits.slice(offset, offset + batchSize);
+    const output = await gitAsyncWithInput(`${batch.join('\n')}\n`, 'log', '--no-walk', '--stdin', '--format=%H%x00%an%x00%ae%x00%(trailers:only,unfold=true)%x00');
+    const fields = output.split('\0');
+    if (fields.at(-1) === '') fields.pop();
+    if (fields.length !== batch.length * 4 || fields.length % 4 !== 0) {
+      throw new Error(`git log returned malformed commit metadata for batch starting at ${offset}`);
+    }
+    const requested = new Set(batch);
+    const seen = new Set();
+    for (let index = 0; index < fields.length; index += 4) {
+      const [commit, author, email, trailers] = fields.slice(index, index + 4);
+      if (!/^[0-9a-f]{40}$/.test(commit) || !requested.has(commit) || seen.has(commit)) {
+        throw new Error(`git log returned malformed commit identity: ${commit}`);
+      }
+      seen.add(commit);
+      const identity = {
+        author: author || 'Unknown',
+        email: email || '',
+        automation: /(bot|automation|agent|claude|codex)/i.test(`${author} ${email} ${trailers}`),
+      };
+      commitCache.set(commit, identity);
+    }
+    if (seen.size !== requested.size) throw new Error(`git log omitted commit metadata in batch starting at ${offset}`);
+  }
+  for (const commit of commits) {
+    if (!commitCache.has(commit)) throw new Error(`git log omitted commit metadata for ${commit}`);
+  }
+}
+
+await loadCommitIdentities(commitIds);
 
 const authors = new Map();
 function addAuthor(identity, count) {
@@ -115,27 +221,8 @@ function addAuthor(identity, count) {
   authors.set(key, current);
 }
 
-for (const entry of included) {
-  // Incremental blame reports line ranges without echoing file contents. This
-  // keeps the release counter practical on a large repository while retaining
-  // surviving-line precision.
-  const incremental = git('blame', '--incremental', revision, '--', entry.file);
-  let pending = null;
-  const flush = () => {
-    if (!pending) return;
-    addAuthor(commitIdentity(pending.commit), pending.lines);
-    pending = null;
-  };
-  for (const line of incremental.split(/\r?\n/)) {
-    const header = line.match(/^\^?([0-9a-f]{40})\s+\d+\s+\d+(?:\s+(\d+))?/);
-    if (header) {
-      flush();
-      pending = { commit: header[1], lines: Number(header[2] ?? 1) };
-    } else if (line === '') {
-      flush();
-    }
-  }
-  flush();
+for (const ranges of blameResults) {
+  for (const range of ranges) addAuthor(commitCache.get(range.commit), range.lines);
 }
 
 const totals = { total: 0, nonBlank: 0 };
