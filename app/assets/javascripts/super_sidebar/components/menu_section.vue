@@ -74,9 +74,12 @@ export default {
       });
     },
     buttonProps() {
+      const usesFlyout = this.isIconOnly && this.hasFlyout;
+
       return {
-        'aria-controls': this.itemId,
-        'aria-expanded': String(this.isExpanded),
+        'aria-controls': usesFlyout ? `menu-section-button-${this.itemId}-flyout` : this.itemId,
+        'aria-expanded': String(usesFlyout ? this.showFlyout : this.isExpanded),
+        'aria-haspopup': usesFlyout ? 'menu' : null,
         'data-qa-menu-item': this.item.title,
       };
     },
@@ -170,7 +173,7 @@ export default {
       v-outside="handleClickOutside"
       v-gl-tooltip.right.viewport="isIconOnly ? item.title : ''"
       type="button"
-      class="gl-nav-item gl-relative m3-shell-nav-section"
+      class="gl-nav-item m3-shell-nav-section gl-relative"
       :class="computedLinkClasses"
       data-testid="menu-section-button"
       :data-qa-section-name="item.title"
@@ -213,7 +216,7 @@ export default {
       :id="itemId"
       v-model="isExpanded"
       :class="{ 'gl-hidden': isIconOnly && !headerless }"
-      class="gl-m-0 gl-list-none gl-p-0 gl-transition-[height] gl-duration-medium gl-ease-ease m3-shell-nav-section-items"
+      class="m3-shell-nav-section-items gl-m-0 gl-list-none gl-p-0 gl-transition-[height] gl-duration-medium gl-ease-ease"
       data-testid="menu-section"
       :data-qa-section-name="item.title"
     >

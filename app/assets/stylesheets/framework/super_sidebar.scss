@@ -1073,7 +1073,7 @@ $scroll-scrim-height: 2.25rem;
   // Raise the nav item's icon and label above the overlay so the content stays
   // visible while the pseudo-element is drawn on top of the nav item's own
   // background.
-  .gl-nav-item-slot,
+  .m3-shell-nav-item-icon,
   .gl-nav-item-label {
     position: relative;
     z-index: 1;

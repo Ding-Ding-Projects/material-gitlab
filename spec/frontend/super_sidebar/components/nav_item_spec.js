@@ -1,5 +1,5 @@
 import { h, nextTick } from 'vue';
-import { GlButton, GlAvatar, GlNavItem } from '@gitlab/ui';
+import { GlButton, GlAvatar } from '@gitlab/ui';
 import { RouterLinkStub } from '@vue/test-utils';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { createMockDirective, getBinding } from 'helpers/vue_mock_directive';
@@ -19,7 +19,6 @@ describe('NavItem component', () => {
   const findPill = () => wrapper.findByTestId('pill-badge');
   const findBadge = () => wrapper.findByTestId('nav-item-feature-announcement-badge');
   const findPinButton = () => wrapper.findComponent(GlButton);
-  const findNavItem = () => wrapper.findComponent(GlNavItem);
 
   const createWrapper = ({
     item,
@@ -336,18 +335,22 @@ describe('NavItem component', () => {
 
   describe('when `item` prop has `link` attribute', () => {
     describe('when `item` has `is_active` set to `false`', () => {
-      it('renders `GlNavItem` with no selected prop', () => {
+      it('renders a native link without current-page semantics', () => {
         createWrapper({ item: { title: 'Foo', link: '/foo', is_active: false } });
 
-        expect(findNavItem().props('selected')).toBe(false);
+        expect(findLink().element.tagName).toBe('A');
+        expect(findLink().attributes('href')).toBe('/foo');
+        expect(findLink().attributes('aria-current')).toBeUndefined();
       });
     });
 
     describe('when `item` has `is_active` set to `true`', () => {
-      it('renders `GlNavItem` with selected prop', () => {
+      it('renders a native link that announces the current page', () => {
         createWrapper({ item: { title: 'Foo', link: '/foo', is_active: true } });
 
-        expect(findNavItem().props('selected')).toBe(true);
+        expect(findLink().element.tagName).toBe('A');
+        expect(findLink().attributes('href')).toBe('/foo');
+        expect(findLink().attributes('aria-current')).toBe('page');
       });
     });
   });
