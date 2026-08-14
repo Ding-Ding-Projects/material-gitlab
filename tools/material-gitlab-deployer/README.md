@@ -8,7 +8,7 @@ The shell is preview-only. It validates configuration and renders an allowlisted
 
 ## Build
 
-From this directory, run `build.bat` on Windows. The script checks for Node.js and npm, installs the declared dependencies (`npm ci` when a lockfile exists, otherwise `npm install`), compiles TypeScript, and offers to launch the preview shell. Use `build.bat /s` (also `--silent` or `SILENT=1`) for a non-interactive build. The script never deploys.
+Run `build.bat` from any current directory on Windows. It first anchors the process to this package directory, then checks for Node.js 20+ and npm, installs the package-owned dependencies from `package-lock.json`, and compiles with the pinned TypeScript 5.9.3 compiler and Node 22.20.1 types. Use `build.bat /s` (also `--silent` or `SILENT=1`) for a non-interactive build. The script never deploys.
 
 `npm run build` performs the compile and asset-copy steps directly; `npm start` launches the local preview shell.
 
