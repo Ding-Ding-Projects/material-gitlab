@@ -22,7 +22,11 @@ async function checkReadiness(): Promise<ReadinessResult> {
         clearTimeout(timer);
         const state = READY_STATUSES.has(response.statusCode) ? 'ready' : 'not-ready';
         resolve({ state, origin: config.origin, checkedAt, status: response.statusCode, ...(state === 'not-ready' ? { reason: 'http-error' as const } : {}) });
-        response.resume();
+        // Electron's IncomingResponse does not expose Node's resume() in its
+        // public type. Drain the bounded readiness body through its typed stream
+        // events so the request can finish without relying on an untyped escape.
+        response.on('data', () => undefined);
+        response.on('end', () => undefined);
       });
       request.on('error', () => { clearTimeout(timer); resolve({ state: 'unreachable', origin: config.origin, checkedAt, reason: 'network-error' }); });
       request.end();
