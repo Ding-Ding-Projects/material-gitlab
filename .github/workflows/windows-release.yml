@@ -170,7 +170,10 @@ jobs:
           $assets = @()
           do {
             $releases = @(Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/Ding-Ding-Projects/dim-sum-photos/releases?per_page=100&page=$releasePage")
-            $assets += @($releases | ForEach-Object { $_.assets } | Where-Object { $_.name -match '^catalog-v1.*\.(png|jpg|jpeg)$' })
+            $assets += @($releases |
+              Where-Object { $_.tag_name -match '^catalog-v1(?:$|-)' } |
+              ForEach-Object { $_.assets } |
+              Where-Object { $_.name -match '^hk-dish-\d{4}-.+\.(png|jpg|jpeg)$' })
             $releasePage++
           } while ($releases.Count -gt 0 -and $releasePage -le $maxReleasePages)
           if (-not $assets) { throw 'No published catalog-v1 photo assets were found.' }
