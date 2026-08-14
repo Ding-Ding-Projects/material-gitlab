@@ -8,11 +8,16 @@
  * silently folded into a project's totals. Surviving-line authorship comes from
  * `git blame`; an automation line is one whose blamed commit author or
  * Co-Authored-By trailer identifies an automation identity (bot, automation,
- * agent, Claude, or Codex).
+ * agent, Claude, or Codex). Nonzero blame exits with no diagnostic are retried
+ * only after the active pool drains, with bounded backoff and progressively
+ * lower concurrency through a final serial attempt. Cancellations, signals,
+ * spawn failures, and ordinary Git errors remain fail-closed and retain their
+ * command, path, exit, signal, stderr, byte-count, and elapsed-time details.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 
 const root = process.cwd();
@@ -28,31 +33,81 @@ function git(...gitArgs) {
   return result.stdout;
 }
 
+function describeGitCommand(gitArgs) {
+  return ['git', '-C', root, ...gitArgs].map((part) => JSON.stringify(part)).join(' ');
+}
+
+function formatExitStatus(status) {
+  if (status === null || status === undefined) return '<none>';
+  const unsigned = status >>> 0;
+  return unsigned >= 0x80000000 ? `${status} (0x${unsigned.toString(16).toUpperCase().padStart(8, '0')})` : String(status);
+}
+
+class GitCommandError extends Error {
+  constructor({ gitArgs, status = null, signal = null, stderr = '', spawnError = null, reason = null, stdoutBytes = 0, elapsedMs = 0 }) {
+    const details = [
+      `command: ${describeGitCommand(gitArgs)}`,
+      `exit: ${formatExitStatus(status)}`,
+      `signal: ${signal ?? '<none>'}`,
+      `spawn error: ${spawnError ? `${spawnError.code ?? spawnError.name}: ${spawnError.message}` : '<none>'}`,
+      `reason: ${reason ?? '<none>'}`,
+      `stdout bytes: ${stdoutBytes}`,
+      `stderr bytes: ${Buffer.byteLength(stderr)}`,
+      `elapsed ms: ${elapsedMs.toFixed(3)}`,
+      `stderr JSON: ${JSON.stringify(stderr)}`,
+    ];
+    super(`Git child command failed:\n${details.join('\n')}`);
+    this.name = 'GitCommandError';
+    this.gitArgs = [...gitArgs];
+    this.status = status;
+    this.signal = signal;
+    this.stderr = stderr;
+    this.spawnError = spawnError;
+    this.reason = reason;
+    this.stdoutBytes = stdoutBytes;
+    this.stderrBytes = Buffer.byteLength(stderr);
+    this.elapsedMs = elapsedMs;
+  }
+}
+
 function runGitAsync(input, gitArgs) {
   return new Promise((resolve, reject) => {
     const child = spawn('git', ['-C', root, ...gitArgs], { stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'] });
     let stdout = '';
     let stderr = '';
     let outputSize = 0;
+    let settled = false;
+    const startedAt = process.hrtime.bigint();
     const maxBuffer = 64 * 1024 * 1024;
+    const elapsedMs = () => Number(process.hrtime.bigint() - startedAt) / 1_000_000;
+    const rejectOnce = (error) => {
+      if (settled) return;
+      settled = true;
+      reject(error);
+    };
     child.stdout.setEncoding('utf8');
     child.stderr.setEncoding('utf8');
     child.stdout.on('data', (chunk) => {
       outputSize += Buffer.byteLength(chunk);
       if (outputSize > maxBuffer) {
         child.kill();
-        reject(new Error(`git ${gitArgs.join(' ')} exceeded ${maxBuffer} byte output limit`));
+        rejectOnce(new GitCommandError({ gitArgs, stderr, reason: `stdout exceeded ${maxBuffer} byte output limit`, stdoutBytes: outputSize, elapsedMs: elapsedMs() }));
         return;
       }
       stdout += chunk;
     });
     child.stderr.on('data', (chunk) => { stderr += chunk; });
-    child.on('error', (error) => reject(new Error(`git ${gitArgs.join(' ')} failed: ${error.message}`)));
-    child.on('close', (status) => {
+    child.on('error', (error) => rejectOnce(new GitCommandError({ gitArgs, stderr, spawnError: error, stdoutBytes: outputSize, elapsedMs: elapsedMs() })));
+    child.on('close', (status, signal) => {
+      if (settled) return;
+      settled = true;
       if (status === 0) resolve(stdout);
-      else reject(new Error(`git ${gitArgs.join(' ')} failed: ${stderr.trim() || `exit ${status}`}`));
+      else reject(new GitCommandError({ gitArgs, status, signal, stderr, stdoutBytes: outputSize, elapsedMs: elapsedMs() }));
     });
-    if (input !== undefined) child.stdin.end(input);
+    if (input !== undefined) {
+      child.stdin.on('error', (error) => rejectOnce(new GitCommandError({ gitArgs, stderr, spawnError: error, reason: 'stdin write failed', stdoutBytes: outputSize, elapsedMs: elapsedMs() })));
+      child.stdin.end(input);
+    }
   });
 }
 
@@ -146,6 +201,74 @@ async function mapWithWorkerPool(entries, worker, concurrency) {
   return results;
 }
 
+function isTransientBlameFailure(error) {
+  if (!(error instanceof GitCommandError)) return false;
+  if (error.reason || error.signal || error.spawnError) return false;
+  if (typeof error.status !== 'number' || error.status === 0) return false;
+  const unsignedStatus = error.status >>> 0;
+  if (unsignedStatus === 0xC000013A || error.status === 130) return false;
+  return error.stderr.trim() === '';
+}
+
+function blameRetryConcurrencies(initialConcurrency) {
+  return [initialConcurrency, Math.max(1, Math.floor(initialConcurrency / 2)), 1];
+}
+
+function describeBlameFailure(entry, history) {
+  const attempts = history.map(({ concurrency, error }, index) => [
+    `attempt ${index + 1} at concurrency ${concurrency}`,
+    error instanceof Error ? error.message : String(error),
+  ].join('\n')).join('\n---\n');
+  return new Error(`git blame failed for path ${JSON.stringify(entry.file)} after ${history.length} attempt(s):\n${attempts}`);
+}
+
+async function mapBlamesWithRetry(entries, worker, initialConcurrency, sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds))) {
+  const results = new Array(entries.length);
+  const histories = new Map();
+  const concurrencyLevels = blameRetryConcurrencies(initialConcurrency);
+  let pending = entries.map((entry, index) => ({ entry, index }));
+
+  for (let stage = 0; stage < concurrencyLevels.length && pending.length > 0; stage += 1) {
+    if (stage > 0) await sleep(stage === 1 ? 250 : 1000);
+    const concurrency = Math.min(concurrencyLevels[stage], pending.length);
+    const outcomes = await mapWithWorkerPool(pending, async ({ entry, index }) => {
+      try {
+        return { ok: true, value: await worker(entry, { concurrency, attempt: (histories.get(index)?.length ?? 0) + 1 }) };
+      } catch (error) {
+        return { ok: false, error };
+      }
+    }, concurrency);
+
+    const retry = [];
+    const terminal = [];
+    for (let offset = 0; offset < pending.length; offset += 1) {
+      const item = pending[offset];
+      const outcome = outcomes[offset];
+      if (outcome.ok) {
+        results[item.index] = outcome.value;
+        continue;
+      }
+      const history = histories.get(item.index) ?? [];
+      history.push({ concurrency, error: outcome.error });
+      histories.set(item.index, history);
+      if (isTransientBlameFailure(outcome.error) && stage + 1 < concurrencyLevels.length) retry.push(item);
+      else terminal.push(item);
+    }
+
+    if (terminal.length > 0) {
+      terminal.sort((left, right) => left.index - right.index);
+      const item = terminal[0];
+      const history = histories.get(item.index);
+      if (history.length === 1 && !isTransientBlameFailure(history[0].error)) throw history[0].error;
+      throw describeBlameFailure(item.entry, history);
+    }
+    pending = retry;
+  }
+
+  assert.equal(pending.length, 0, 'retry loop must resolve or reject every pending blame');
+  return results;
+}
+
 function parseIncrementalBlame(output, file) {
   const ranges = [];
   let pending = null;
@@ -170,7 +293,100 @@ function parseIncrementalBlame(output, file) {
   return ranges;
 }
 
-const blameResults = await mapWithWorkerPool(
+async function runSelfTest() {
+  const transientInterrupted = new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', 'interrupted.rb'], status: 3221225786 });
+  const transientEmpty = new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', 'empty.rb'], status: 1 });
+  const terminatedBySignal = new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', 'signalled.rb'], signal: 'SIGTERM' });
+  const permanent = new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', 'missing.rb'], status: 128, stderr: 'fatal: no such path missing.rb\n' });
+  assert.equal(isTransientBlameFailure(transientInterrupted), false);
+  assert.match(transientInterrupted.message, /3221225786 \(0xC000013A\)/);
+  assert.match(transientInterrupted.message, /signal: <none>/);
+  assert.match(transientInterrupted.message, /stderr JSON: ""/);
+  assert.equal(isTransientBlameFailure(transientEmpty), true);
+  assert.equal(isTransientBlameFailure(terminatedBySignal), false);
+  assert.equal(isTransientBlameFailure(permanent), false);
+
+  const attempts = new Map();
+  const ordered = await mapBlamesWithRetry(
+    [{ file: 'first.rb' }, { file: 'second.rb' }, { file: 'third.rb' }],
+    async (entry, context) => {
+      const seen = attempts.get(entry.file) ?? [];
+      seen.push(context.concurrency);
+      attempts.set(entry.file, seen);
+      if (entry.file === 'second.rb' && context.concurrency > 1) {
+        throw new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', entry.file], status: 1 });
+      }
+      return `${entry.file}:${context.concurrency}`;
+    },
+    8,
+    async () => {},
+  );
+  assert.deepEqual(ordered, ['first.rb:3', 'second.rb:1', 'third.rb:3']);
+  assert.deepEqual(attempts.get('first.rb'), [3]);
+  assert.deepEqual(attempts.get('second.rb'), [3, 1]);
+  assert.deepEqual(attempts.get('third.rb'), [3]);
+
+  const fallbackEntries = Array.from({ length: 8 }, (_, index) => ({ file: `fallback-${index}.rb` }));
+  const fallbackAttempts = new Map();
+  const fallbackResults = await mapBlamesWithRetry(fallbackEntries, async (entry, context) => {
+    const seen = fallbackAttempts.get(entry.file) ?? [];
+    seen.push(context.concurrency);
+    fallbackAttempts.set(entry.file, seen);
+    if (context.concurrency > 1) {
+      throw new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', entry.file], status: 1 });
+    }
+    return entry.file;
+  }, 8, async () => {});
+  assert.deepEqual(fallbackResults, fallbackEntries.map((entry) => entry.file));
+  for (const entry of fallbackEntries) assert.deepEqual(fallbackAttempts.get(entry.file), [8, 4, 1]);
+
+  let permanentAttempts = 0;
+  await assert.rejects(
+    mapBlamesWithRetry([{ file: 'missing.rb' }], async () => {
+      permanentAttempts += 1;
+      throw permanent;
+    }, 8, async () => {}),
+    (error) => error === permanent,
+  );
+  assert.equal(permanentAttempts, 1);
+
+  let exhaustedAttempts = 0;
+  await assert.rejects(
+    mapBlamesWithRetry([{ file: 'unstable.rb' }], async () => {
+      exhaustedAttempts += 1;
+      throw new GitCommandError({ gitArgs: ['blame', '--incremental', 'HEAD', '--', 'unstable.rb'], status: 1 });
+    }, 8, async () => {}),
+    (error) => {
+      assert.match(error.message, /path "unstable\.rb" after 3 attempt\(s\)/);
+      assert.equal((error.message.match(/stderr JSON: ""/g) ?? []).length, 3);
+      assert.match(error.message, /attempt 3 at concurrency 1/);
+      return true;
+    },
+  );
+  assert.equal(exhaustedAttempts, 3);
+
+  const missingPath = '__line_count_self_test_missing_path__';
+  await assert.rejects(
+    gitAsync('blame', '--incremental', revision, '--', missingPath),
+    (error) => {
+      assert.equal(isTransientBlameFailure(error), false);
+      assert.match(error.message, /exit: 128/);
+      assert.match(error.message, /signal: <none>/);
+      assert.match(error.message, new RegExp(missingPath));
+      assert.match(error.message, /stderr JSON: "(?!")/);
+      return true;
+    },
+  );
+
+  console.log('PASS: 6 line-counter retry, serial-fallback, ordering, fail-closed, and diagnostic scenarios');
+}
+
+if (args.has('--self-test')) {
+  await runSelfTest();
+  process.exit(0);
+}
+
+const blameResults = await mapBlamesWithRetry(
   blameEntries,
   async (entry) => parseIncrementalBlame(await gitAsync('blame', '--incremental', revision, '--', entry.file), entry.file),
   blameConcurrency,
@@ -182,7 +398,7 @@ async function loadCommitIdentities(commits) {
   const batchSize = 128;
   for (let offset = 0; offset < commits.length; offset += batchSize) {
     const batch = commits.slice(offset, offset + batchSize);
-    const output = await gitAsyncWithInput(`${batch.join('\n')}\n`, 'log', '--no-walk', '--stdin', '--format=%H%x00%an%x00%ae%x00%(trailers:only,unfold=true)%x00');
+    const output = await gitAsyncWithInput(`${batch.join('\n')}\n`, 'log', '-z', '--no-walk', '--stdin', '--format=%H%x00%an%x00%ae%x00%(trailers:only,unfold=true)');
     const fields = output.split('\0');
     if (fields.at(-1) === '') fields.pop();
     if (fields.length !== batch.length * 4 || fields.length % 4 !== 0) {
