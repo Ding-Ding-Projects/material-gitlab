@@ -18,7 +18,7 @@
     <header class="site-header">
       <a class="brand" href="./" aria-label="Material GitLab home">
         <span class="brand-mark" aria-hidden="true">M</span>
-        <span class="brand-copy"><strong>Material GitLab</strong><small>Design-led documentation</small></span>
+        <span class="brand-copy"><strong data-display-name>Material GitLab</strong><small>Design-led documentation</small></span>
       </a>
       <nav class="top-nav" aria-label="Primary navigation">
         <a href="#overview">Overview</a>
@@ -85,13 +85,27 @@
 
       <section id="settings" class="section-shell content-section settings-section" aria-labelledby="settings-title">
         <div class="section-heading"><div><p class="eyebrow">Preferences</p><h2 id="settings-title">Make the reading experience yours</h2></div></div>
+        <div class="settings-search" data-school-sensitive>
+          <label for="settings-search">Search settings</label>
+          <input id="settings-search" type="search" data-settings-search placeholder="Search labels, explanations, and current values" />
+          <button type="button" data-settings-regex-toggle aria-expanded="false">Regex builder</button>
+          <div data-settings-regex-builder hidden></div>
+        </div>
         <div class="settings-grid" data-settings-surface>
-          <label>Language mode<select data-preference="language"><option value="en">English</option><option value="zh-Hant">繁體中文</option><option value="bilingual">English + 繁體中文</option></select></label>
-          <label>English tone <input type="range" min="1" max="5" value="1" data-preference="funnyLevelEnglish" /><output data-level-output="funnyLevelEnglish">1</output></label>
-          <label>Cantonese tone <input type="range" min="1" max="5" value="1" data-preference="funnyLevelCantonese" /><output data-level-output="funnyLevelCantonese">1</output></label>
-          <label class="checkbox-row"><input type="checkbox" data-preference="showEmojis" checked /> Show emojis in messages</label>
-          <label>Personal vocabulary JSON <input type="file" accept="application/json,.json" data-vocabulary-upload /></label>
+          <label data-setting data-search="language mode english cantonese bilingual">Language mode<select data-preference="language" aria-label="Language mode"><option value="en">English</option><option value="zh-Hant">繁體中文</option><option value="bilingual">English + 繁體中文</option></select><small>Default provenance: compiled English; the saved local value wins.</small></label>
+          <label data-setting data-search="english funny tone level">English tone <input type="range" min="1" max="5" value="1" data-preference="funnyLevelEnglish" /><output data-level-output="funnyLevelEnglish">1</output><small>Styles all English messages without changing facts.</small></label>
+          <label data-setting data-search="cantonese funny tone level">Cantonese tone <input type="range" min="1" max="5" value="1" data-preference="funnyLevelCantonese" /><output data-level-output="funnyLevelCantonese">1</output><small>Styles all Cantonese messages without changing facts.</small></label>
+          <label class="checkbox-row" data-setting data-search="emoji dialog message box"><input type="checkbox" data-preference="showEmojis" checked /> Show emojis in messages <small>Emoji is decorative and never enters control labels.</small></label>
+          <label data-setting data-search="theme light dark">Theme<select data-preference="theme" aria-label="Theme"><option value="light">Light</option><option value="dark">Dark</option></select><small>Default provenance: compiled light theme.</small></label>
+          <label data-setting data-search="density compact comfortable">Density<select data-preference="density" aria-label="Density"><option value="compact">Compact</option><option value="standard">Standard</option><option value="comfortable">Comfortable</option></select><small>Default provenance: compiled standard density.</small></label>
+          <label data-setting data-search="accent seed color">Accent color<input type="color" data-preference="accentColor" value="#6750a4" /><small>Default provenance: Material purple #6750a4.</small></label>
+          <label data-setting data-search="personal vocabulary json upload replace clear">Personal vocabulary JSON <input type="file" accept="application/json,.json" data-vocabulary-upload /><button type="button" data-vocabulary-clear>Clear local vocabulary</button><small>Validated locally; payload and filename are excluded from exports and history.</small></label>
+          <label data-setting data-search="display application name rename">Displayed site name<input type="text" data-display-name-input maxlength="80" value="Material GitLab" /><button type="button" data-display-name-reset>Reset name</button><small>Changes presentation only, never the repository or installed identity.</small></label>
           <p class="settings-status" data-preferences-status role="status">No personal vocabulary file loaded.</p>
+        </div>
+        <div class="settings-grid universal-settings" data-feature="school-mode narrator-voice-pickers" data-school-sensitive>
+          <fieldset data-setting data-search="focus school mode rename credential unlock"><legend>Shared focus mode</legend><label>Mode name<input type="text" data-school-name maxlength="80" value="Focus mode" /></label><label>Local unlock value<input type="password" data-school-credential autocomplete="new-password" /></label><label class="checkbox-row"><input type="checkbox" data-school-toggle /> Enable this mode everywhere on the site</label><p data-school-status role="status"></p><small>This is a local experience lock, not a security boundary. Clear this site’s storage to reset it.</small></fieldset>
+          <fieldset data-setting data-search="narrator voice speech rate pitch language"><legend>Narrator and voices</legend><label class="checkbox-row"><input type="checkbox" data-narrator-enabled /> Enable narrator</label><label>Narrated language<select data-narrator-language aria-label="Narrated language"><option value="en">English</option><option value="zh-Hant">Cantonese</option><option value="both">Both, serialized</option></select></label><label>English voice<select data-narrator-english-voice aria-label="English narrator voice"><option value="auto">Choose automatically</option></select></label><label>Cantonese voice<select data-narrator-cantonese-voice aria-label="Cantonese narrator voice"><option value="auto">Choose automatically</option></select></label><label>Rate<input type="range" min="0.5" max="2" step="0.05" value="1" data-narrator-rate /></label><label>Pitch<input type="range" min="0" max="2" step="0.05" value="1" data-narrator-pitch /></label><button type="button" data-narrator-test>Test narrator</button><p data-narrator-status role="status">Narrator is off by default.</p></fieldset>
         </div>
         <div class="status-hub-card" data-status-hub>
           <h3>Project status</h3><p data-status-hub-state>Not registered.</p>
@@ -127,12 +141,18 @@
           <article class="surface-card"><h3>Scheduled settings and file conversion</h3><p data-schedule-summary>No local schedule rules.</p><button type="button" data-schedule-add>Add local schedule</button><label>Choose a file <input type="file" data-converter-file /></label><p data-converter-status>Nothing queued.</p></article>
           <article class="surface-card"><h3>Logo customization</h3><label>Local logo image <input type="file" accept="image/png,image/jpeg,image/webp" data-logo-upload /></label><button type="button" data-logo-reset>Reset logo</button><p data-logo-status>Using the shipped mark.</p></article>
           <article class="surface-card"><h3>Ollama and offline docs</h3><p data-ollama-status>Local Ollama transport is not configured; offline state remains available.</p><button type="button" data-ollama-check>Check local health</button><div data-offline-docs><label for="offline-doc-search">Search offline docs</label><input id="offline-doc-search" type="search" data-offline-doc-search /><div data-offline-doc-list></div></div></article>
+          <article class="surface-card" data-feature="destructive-confirmation external-editor"><h3>Safe actions and editor handoff</h3><p>Destructive actions require two independent keys and a full-range slider.</p><button type="button" data-super-open>Open super confirmation</button><button type="button" data-export-vscode>Export for Visual Studio Code</button><a href="https://vscode.dev/" target="_blank" rel="noreferrer">Open Visual Studio Code for the Web</a><p>The static site cannot launch a local executable; it downloads a complete UTF-8 export and keeps the editor route explicit.</p></article>
+          <article class="surface-card" data-feature="browser-download-surfaces"><h3>Browser download capture states</h3><p>The working browser equivalent keeps Start, active progress, and completion as separate surfaces.</p><button type="button" data-download-capture>Start captured download</button><p data-download-status role="status">idle: 0/0 bytes</p></article>
         </div>
       </section>
     </main>
 
-    <footer class="site-footer section-shell"><span>Material GitLab</span><span>Made for focused work.</span><a class="text-link" href="#library">Open library</a></footer>
+    <footer class="site-footer section-shell"><span data-display-name>Material GitLab</span><span>Made for focused work.</span><a class="text-link" href="#library">Open library</a></footer>
     <dialog data-command-dialog aria-labelledby="command-title"><form method="dialog"><h2 id="command-title">Command palette</h2><label for="command-search">Search commands</label><input id="command-search" type="search" data-command-search /><button value="cancel">Close</button></form><ul data-command-results></ul></dialog>
+    <dialog data-super-confirmation aria-labelledby="super-title"><h2 id="super-title">Confirm the exact destructive action</h2><p>This demonstration records an authorization event; it does not delete data.</p><label><input type="checkbox" data-super-key-a /> Key one: I reviewed the affected local record.</label><label><input type="checkbox" data-super-key-b /> Key two: I understand the action cannot be inferred from a joke.</label><label>Confirmation slider<input type="range" min="0" max="100" value="0" data-super-slider disabled /></label><progress max="100" value="0" data-super-progress></progress><div><button type="button" data-super-commit disabled>Authorize action</button><button type="button" data-super-cancel>Emergency exit</button></div></dialog>
+    <dialog data-download-start-dialog aria-labelledby="download-start-title"><h2 id="download-start-title">Start download</h2><p data-download-proposal></p><button type="button" data-download-confirm>Start download</button><button type="button" data-download-cancel>Cancel</button></dialog>
+    <dialog data-download-active-dialog aria-labelledby="download-active-title"><h2 id="download-active-title">Downloading</h2><progress max="8192" value="0"></progress><p>Transfer remains local and cancellable.</p><button type="button" data-download-cancel>Cancel transfer</button></dialog>
+    <dialog data-download-complete-dialog aria-labelledby="download-complete-title"><h2 id="download-complete-title">Download complete</h2><p>The file was generated and handed to the browser download queue.</p><button type="button" data-download-dismiss>Dismiss</button></dialog>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

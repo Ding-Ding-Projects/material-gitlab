@@ -1,6 +1,6 @@
 /* Material GitLab site runtime.  The shell owns markup; this module owns data and behaviour. */
 import { createNavigationState, setTabQuery, setTabRegex, toggleCommandPalette, bindNavigationKeyboard, filterTabs } from './navigation.js';
-import { loadPreferences, updatePreferences, readVocabularyFile, cacheVocabulary, vocabularyStatus } from './preferences.js';
+import { loadPreferences, updatePreferences, readVocabularyFile, cacheVocabulary, clearVocabularyCache, vocabularyStatus } from './preferences.js';
 import { getStatusHubState, registerStatusHubProject } from './status-hub.js';
 import { initAppearanceEditor, registerAppearanceTarget } from './appearance.js';
 import { loadTabState, saveTabState, addTab, renderTabShell } from './tabs.js';
@@ -16,6 +16,8 @@ import { mountOfflineDocs } from './offline-docs.js';
 import { createOllamaManager } from './ollama-manager.js';
 import { applyMobileAccessibility, installFocusRing } from './mobile-accessibility.js';
 import { initProductContent } from './content.js';
+import { initCommandPalette } from './command-palette.js';
+import { initUniversalRuntime } from './universal-runtime.js';
 (function () {
   'use strict';
 
@@ -151,6 +153,7 @@ import { initProductContent } from './content.js';
     };
     $$('[data-preference]').forEach((control) => control.addEventListener('input', () => { const key = control.dataset.preference; preferences = updatePreferences({ [key]: control.type === 'checkbox' ? control.checked : control.value }); render(); }));
     $('[data-vocabulary-upload]')?.addEventListener('change', async (event) => { try { cacheVocabulary(await readVocabularyFile(event.target.files[0])); status.textContent = 'Personal vocabulary loaded locally.'; } catch (error) { status.textContent = error.message; } });
+    $('[data-vocabulary-clear]')?.addEventListener('click', () => { clearVocabularyCache(); status.textContent = 'Personal vocabulary cleared; shipped wording restored.'; });
     $('[data-register-status]')?.addEventListener('click', () => { const state = registerStatusHubProject({ repository: 'Ding-Ding-Projects/material-gitlab', defaultBranch: 'main', releaseChannel: 'unreleased' }); $('[data-status-hub-state]').textContent = `${state.state}: local registration recorded; remote delivery is unverified.`; });
     const refreshSchedule = () => {
       scheduledState = resolveScheduledState(loadSchedule());
@@ -181,6 +184,19 @@ import { initProductContent } from './content.js';
     const toolsBuilder = $('[data-tools-regex-builder]');
     const toolsToggle = $('[data-tools-regex-toggle]');
     if (toolsSearch && toolsBuilder) { createRegexBuilder({ root: toolsBuilder, search: toolsSearch, label: 'Tool surface regex builder', download: false }); bindRegexBuilder(toolsSearch, toolsBuilder, toolsToggle); }
+    const settingsSearch = $('[data-settings-search]');
+    const settingsBuilder = $('[data-settings-regex-builder]');
+    const settingsToggle = $('[data-settings-regex-toggle]');
+    if (settingsSearch && settingsBuilder) {
+      const filterSettings = (query = settingsSearch.value, regexState = null) => {
+        let matcher = null;
+        try { if (regexState?.mode === 'regex' && regexState.pattern) matcher = new RegExp(regexState.pattern, regexState.flags || 'i'); } catch { matcher = null; }
+        $$('[data-setting]').forEach((element) => { const haystack = `${element.dataset.search || ''} ${element.textContent}`; element.hidden = Boolean(query && !(matcher ? matcher.test(haystack) : haystack.toLocaleLowerCase().includes(String(query).toLocaleLowerCase()))); });
+      };
+      createRegexBuilder({ root: settingsBuilder, search: settingsSearch, label: 'Settings regex builder', download: false, onChange: (regexState) => filterSettings(regexState.pattern, regexState) });
+      bindRegexBuilder(settingsSearch, settingsBuilder, settingsToggle);
+      settingsSearch.addEventListener('input', () => filterSettings());
+    }
 
     initNotifications({ stack: $('[data-notification-stack]'), centre: $('[data-notification-centre]') });
     $('[data-notification-demo]')?.addEventListener('click', () => { const items = loadNotifications(); saveNotifications([...items, createNotification('Local notification recorded.', { kind: 'success', title: 'Site tools' })]); document.dispatchEvent(new CustomEvent('notifications:changed')); });
@@ -207,6 +223,9 @@ import { initProductContent } from './content.js';
     const ollama = createOllamaManager();
     $('[data-ollama-check]')?.addEventListener('click', async () => { const status = await ollama.checkHealth(); $('[data-ollama-status]').textContent = `${status.state}: ${status.detail}`; });
     mountOfflineDocs($('[data-offline-doc-list]'), { onSelect: (doc) => { $('[data-ollama-status]').textContent = `Offline article selected: ${doc.title}`; } });
+    $('[data-export-vscode]')?.addEventListener('click', () => downloadExport({ schemaVersion: 1, surface: 'Material GitLab documentation site', preferences: loadPreferences(), omitted: ['personal vocabulary', 'credentials', 'authenticator secrets'] }, 'json', 'material-gitlab-site-export.json'));
+    initCommandPalette({ documentRef: document, windowRef: window });
+    initUniversalRuntime(document);
     applyMobileAccessibility(document); installFocusRing(document);
   }
 
