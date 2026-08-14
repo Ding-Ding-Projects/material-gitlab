@@ -17,9 +17,14 @@ export const DEFAULT_PREFERENCES = Object.freeze({
   funnyLevelEnglish: 1,
   funnyLevelCantonese: 1,
   showEmojis: true,
+  theme: 'light',
+  density: 'standard',
+  accentColor: '#6750a4',
 });
 
 const LANGUAGES = new Set(['en', 'zh-Hant', 'bilingual']);
+const THEMES = new Set(['light', 'dark']);
+const DENSITIES = new Set(['compact', 'standard', 'comfortable']);
 const UNSAFE_KEYS = new Set(['__proto__', 'prototype', 'constructor']);
 
 function storageOf(storage) {
@@ -41,6 +46,9 @@ export function normalizePreferences(value = {}) {
     funnyLevelEnglish: integerLevel(source.funnyLevelEnglish, DEFAULT_PREFERENCES.funnyLevelEnglish),
     funnyLevelCantonese: integerLevel(source.funnyLevelCantonese, DEFAULT_PREFERENCES.funnyLevelCantonese),
     showEmojis: typeof source.showEmojis === 'boolean' ? source.showEmojis : DEFAULT_PREFERENCES.showEmojis,
+    theme: THEMES.has(source.theme) ? source.theme : DEFAULT_PREFERENCES.theme,
+    density: DENSITIES.has(source.density) ? source.density : DEFAULT_PREFERENCES.density,
+    accentColor: typeof source.accentColor === 'string' && /^#[0-9a-f]{6}$/i.test(source.accentColor) ? source.accentColor.toLowerCase() : DEFAULT_PREFERENCES.accentColor,
   };
 }
 

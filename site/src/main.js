@@ -10,7 +10,7 @@ import { appendHistoryEvent, loadHistory } from './history.js';
 import { exportRecords, downloadExport } from './exports.js';
 import { bindAuthenticator } from './authenticator.js';
 import { lockRecoveryDisclosure, bindToyLockSurface } from './toy-locks.js';
-import { loadSchedule, upsertRule } from './scheduled-settings.js';
+import { loadSchedule, upsertRule, resolveScheduledState, scheduleStorageStatus, subscribeSchedule } from './scheduled-settings.js';
 import { validateLogoFile, uploadCustomLogo, resetLogo } from './logo-customization.js';
 import { mountOfflineDocs } from './offline-docs.js';
 import { createOllamaManager } from './ollama-manager.js';
@@ -117,15 +117,50 @@ import { initProductContent } from './content.js';
   function wirePreferencesFoundation() {
     let preferences = loadPreferences();
     const status = $('[data-preferences-status]');
+    const themeColor = $('meta[name="theme-color"]');
+    const appearance = {
+      light: { surface: '#fffbfe', container: '#f3edf7', onSurface: '#1d1b20', outline: '#79747e', body: 'linear-gradient(180deg,#fffbfe 0%,#f8f4fa 100%)' },
+      dark: { surface: '#141218', container: '#211f26', onSurface: '#e6e1e5', outline: '#938f99', body: 'linear-gradient(180deg,#141218 0%,#1d1b20 100%)' },
+    };
+    let scheduledState = { values: {}, matchingRules: [] };
+    const applyEffectivePreferences = () => {
+      const effective = { ...preferences, ...scheduledState.values };
+      const palette = appearance[effective.theme] || appearance.light;
+      root.lang = effective.language === 'zh-Hant' ? 'zh-Hant' : 'en';
+      root.dataset.language = effective.language;
+      root.dataset.theme = effective.theme;
+      root.dataset.density = effective.density;
+      root.style.colorScheme = effective.theme;
+      root.style.fontSize = effective.density === 'compact' ? '93.75%' : effective.density === 'comfortable' ? '106.25%' : '';
+      root.style.setProperty('--surface', palette.surface);
+      root.style.setProperty('--surface-container', palette.container);
+      root.style.setProperty('--on-surface', palette.onSurface);
+      root.style.setProperty('--outline', palette.outline);
+      root.style.setProperty('--primary', effective.accentColor);
+      document.body.style.background = palette.body;
+      document.body.style.color = palette.onSurface;
+      if (themeColor) themeColor.content = effective.accentColor;
+      return effective;
+    };
     const render = () => {
       $$('[data-preference]').forEach((control) => { const key = control.dataset.preference; control.type === 'checkbox' ? (control.checked = preferences[key]) : (control.value = preferences[key]); });
       $$('[data-level-output]').forEach((output) => { output.value = preferences[output.dataset.levelOutput]; output.textContent = preferences[output.dataset.levelOutput]; });
-      status.textContent = `Language: ${preferences.language}; vocabulary: ${vocabularyStatus().state}.`;
+      const effective = applyEffectivePreferences();
+      const scheduled = scheduledState.matchingRules.length ? ` Scheduled rule${scheduledState.matchingRules.length === 1 ? '' : 's'} active: ${scheduledState.matchingRules.map((rule) => rule.label).join(', ')}.` : ' No scheduled rule is active; saved preferences are in use.';
+      status.textContent = `Language: ${effective.language}; vocabulary: ${vocabularyStatus().state}.${scheduled}`;
     };
     $$('[data-preference]').forEach((control) => control.addEventListener('input', () => { const key = control.dataset.preference; preferences = updatePreferences({ [key]: control.type === 'checkbox' ? control.checked : control.value }); render(); }));
     $('[data-vocabulary-upload]')?.addEventListener('change', async (event) => { try { cacheVocabulary(await readVocabularyFile(event.target.files[0])); status.textContent = 'Personal vocabulary loaded locally.'; } catch (error) { status.textContent = error.message; } });
     $('[data-register-status]')?.addEventListener('click', () => { const state = registerStatusHubProject({ repository: 'Ding-Ding-Projects/material-gitlab', defaultBranch: 'main', releaseChannel: 'unreleased' }); $('[data-status-hub-state]').textContent = `${state.state}: local registration recorded; remote delivery is unverified.`; });
-    const existing = getStatusHubState(); $('[data-status-hub-state]').textContent = `${existing.state}: ${existing.delivery.reason}`; render();
+    const refreshSchedule = () => {
+      scheduledState = resolveScheduledState(loadSchedule());
+      document.dispatchEvent(new CustomEvent('schedule:resolved', { detail: scheduledState }));
+      render();
+    };
+    subscribeSchedule(refreshSchedule);
+    document.addEventListener('schedule:changed', refreshSchedule);
+    window.setInterval(refreshSchedule, 30000);
+    const existing = getStatusHubState(); $('[data-status-hub-state]').textContent = `${existing.state}: ${existing.delivery.reason}`; refreshSchedule();
   }
 
   function wireExpansionSurfaces() {
@@ -161,8 +196,9 @@ import { initProductContent } from './content.js';
     bindAuthenticator(document);
 
     const scheduleSummary = $('[data-schedule-summary]');
-    const renderSchedule = () => { const schedule = loadSchedule(); if (scheduleSummary) scheduleSummary.textContent = `${schedule.rules.length} local rule${schedule.rules.length === 1 ? '' : 's'}; timezone ${schedule.timezone}.`; };
-    $('[data-schedule-add]')?.addEventListener('click', () => { upsertRule({ id: `rule-${Date.now().toString(36)}`, label: 'Reading focus', values: { density: 'comfortable' } }); renderSchedule(); });
+    const renderSchedule = () => { const schedule = loadSchedule(); const resolved = resolveScheduledState(schedule); const storage = scheduleStorageStatus(); if (scheduleSummary) { const fallback = resolved.matchingRules.length ? `Active now: ${resolved.matchingRules.map((rule) => rule.label).join(', ')}.` : storage.detail; scheduleSummary.textContent = `${schedule.rules.length} local rule${schedule.rules.length === 1 ? '' : 's'}; browser local timezone. ${fallback}`; } };
+    $('[data-schedule-add]')?.addEventListener('click', () => { upsertRule({ id: `rule-${Date.now().toString(36)}`, label: 'Reading focus', values: { density: 'comfortable', theme: 'dark' } }); document.dispatchEvent(new CustomEvent('schedule:changed')); renderSchedule(); });
+    document.addEventListener('schedule:resolved', renderSchedule);
     renderSchedule();
 
     $('[data-logo-upload]')?.addEventListener('change', async (event) => { const file = event.target.files?.[0]; try { await validateLogoFile(file); await uploadCustomLogo(file); $('[data-logo-status]').textContent = `Using ${file.name} locally.`; } catch (error) { $('[data-logo-status]').textContent = error.message; } event.target.value = ''; });

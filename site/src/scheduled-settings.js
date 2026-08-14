@@ -4,16 +4,30 @@ export const SCHEDULE_STORAGE_KEY = 'material-gitlab.scheduled-settings.v1';
 export const MAX_RULES = 64;
 export const MAX_LABEL_LENGTH = 120;
 const SOURCES = new Set(['local']);
+const LANGUAGES = new Set(['en', 'zh-Hant', 'bilingual']);
+const THEMES = new Set(['light', 'dark']);
+const DENSITIES = new Set(['compact', 'standard', 'comfortable']);
 
 const storeOf = (storage) => storage || (() => { try { return globalThis.localStorage; } catch { return null; } })();
 const boundedString = (value, fallback = '') => typeof value === 'string' && value.length <= MAX_LABEL_LENGTH ? value : fallback;
 const validTime = (value) => typeof value === 'string' && /^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value);
 const validDate = (value) => value === '' || (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value));
+const validAccent = (value) => typeof value === 'string' && /^#[0-9a-f]{6}$/i.test(value);
+
+function normalizeValues(value) {
+  const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const values = {};
+  if (LANGUAGES.has(source.language)) values.language = source.language;
+  if (THEMES.has(source.theme)) values.theme = source.theme;
+  if (DENSITIES.has(source.density)) values.density = source.density;
+  if (validAccent(source.accentColor)) values.accentColor = source.accentColor.toLowerCase();
+  return values;
+}
 
 export function normalizeRule(rule = {}, index = 0) {
   const source = rule && typeof rule === 'object' ? rule : {};
   const weekdays = Array.isArray(source.weekdays) ? [...new Set(source.weekdays.map(Number).filter((day) => Number.isInteger(day) && day >= 0 && day <= 6))] : [];
-  const values = source.values && typeof source.values === 'object' && !Array.isArray(source.values) ? { ...source.values } : {};
+  const values = normalizeValues(source.values);
   return {
     id: boundedString(source.id, `rule-${index + 1}`) || `rule-${index + 1}`,
     label: boundedString(source.label, `Schedule ${index + 1}`),
@@ -61,7 +75,7 @@ export function removeRule(id, storage) {
   return saveSchedule(schedule, storage);
 }
 
-function dateKey(date) { return date.toISOString().slice(0, 10); }
+function dateKey(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
 function timeKey(date) { return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`; }
 export function ruleMatches(rule, date = new Date()) {
   const normalized = normalizeRule(rule);
@@ -74,7 +88,30 @@ export function ruleMatches(rule, date = new Date()) {
 }
 
 export function resolveScheduledValues(schedule = loadSchedule(), date = new Date()) {
-  return normalizeSchedule(schedule).rules.filter((rule) => ruleMatches(rule, date)).sort((a, b) => b.priority - a.priority || b.id.localeCompare(a.id)).reduce((result, rule) => ({ ...result, ...rule.values }), {});
+  return resolveScheduledState(schedule, date).values;
+}
+
+export function scheduleStorageStatus(storage) {
+  const store = storeOf(storage);
+  if (!store) return { state: 'unavailable', detail: 'Browser storage is unavailable; saved preferences remain active.' };
+  try {
+    const raw = store.getItem(SCHEDULE_STORAGE_KEY);
+    if (!raw) return { state: 'empty', detail: 'No local schedule is saved.' };
+    JSON.parse(raw);
+    return { state: 'ready', detail: 'Local schedule is available.' };
+  } catch {
+    return { state: 'fallback', detail: 'The local schedule could not be read; saved preferences remain active.' };
+  }
+}
+
+export function resolveScheduledState(schedule = loadSchedule(), date = new Date()) {
+  const matchingRules = normalizeSchedule(schedule).rules
+    .filter((rule) => ruleMatches(rule, date))
+    .sort((a, b) => a.priority - b.priority || a.id.localeCompare(b.id));
+  return {
+    values: matchingRules.reduce((result, rule) => ({ ...result, ...rule.values }), {}),
+    matchingRules,
+  };
 }
 
 export function subscribeSchedule(listener, target = globalThis) {
@@ -83,4 +120,4 @@ export function subscribeSchedule(listener, target = globalThis) {
   target.addEventListener('storage', handler); return () => target.removeEventListener('storage', handler);
 }
 
-export default { loadSchedule, saveSchedule, upsertRule, removeRule, ruleMatches, resolveScheduledValues, subscribeSchedule };
+export default { loadSchedule, saveSchedule, scheduleStorageStatus, upsertRule, removeRule, ruleMatches, resolveScheduledValues, resolveScheduledState, subscribeSchedule };
