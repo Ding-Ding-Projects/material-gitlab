@@ -55,7 +55,19 @@ export function createResolver({ aliasMap = {}, rootPath, fallbackResolve }) {
         return target;
       }
       if (!isExact && (specifier === aliasName || specifier.startsWith(`${aliasName}/`))) {
-        return `${target}${specifier.slice(aliasName.length)}`;
+        const remainder = specifier.slice(aliasName.length);
+        if (!remainder) return target;
+
+        // An alias that points at a directory holds a platform-native absolute
+        // path, while `remainder` always arrives with forward slashes. Joining
+        // the two by concatenation produced mixed-separator graph keys such as
+        // `...\app\assets\javascripts/pages/admin/index.js`, which never match
+        // the native paths webpack and the vue3_migration.yml promotion step
+        // look those files up by. path.join normalises both halves, and is a
+        // no-op on platforms that already use forward slashes. Aliases whose
+        // target is a bare package specifier rather than a path keep their
+        // previous string form so module resolution is unchanged.
+        return path.isAbsolute(target) ? path.join(target, remainder) : `${target}${remainder}`;
       }
     }
     return specifier;

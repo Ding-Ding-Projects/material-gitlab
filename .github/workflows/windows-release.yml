@@ -232,7 +232,14 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $tag = '${{ steps.notes.outputs.release_tag }}'
           $sha = '${{ github.sha }}'
-          if (gh release view $tag --repo '${{ github.repository }}' *> $null) { throw "Release tag $tag already exists; refusing to overwrite it." }
+          # Test gh's exit code, not its output. `*> $null` discards every
+          # stream, so the previous `if (gh release view ... *> $null)` form was
+          # always testing $null and never fired - including when the tag really
+          # did exist, which is the one case it was written to catch.
+          gh release view $tag --repo '${{ github.repository }}' *> $null
+          $tagLookup = $LASTEXITCODE
+          $global:LASTEXITCODE = 0
+          if ($tagLookup -eq 0) { throw "Release tag $tag already exists; refusing to overwrite it." }
           $manifestPath = Join-Path $env:RELEASE_ASSET_DIR 'SQUIRREL-ASSET-MANIFEST.json'
           if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw 'Refusing publication without the Squirrel asset manifest.' }
           $manifest = @(Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json)

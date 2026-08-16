@@ -100,10 +100,25 @@ if (env.GLCI_SKIP_NODE_MODULES_PATCHING !== 'true') {
 
     // Apply any patches to our packages
     // See https://gitlab.com/gitlab-org/gitlab/-/issues/336138
-    process.exitCode =
-      spawnSync('node_modules/.bin/patch-package', ['--error-on-fail', '--error-on-warn'], {
-        stdio: ['ignore', 'inherit', 'inherit'],
-      }).status ?? 1;
+    //
+    // Run patch-package through its own entry point with the current Node
+    // binary instead of the node_modules/.bin shim. That shim is an
+    // extensionless POSIX script, so on Windows spawnSync cannot execute it:
+    // it fails with ENOENT and reports a null status, and the nullish fallback
+    // below would turn that into an exit code of 1 with nothing printed at
+    // all. `yarn install` then fails on every Windows machine immediately
+    // after announcing that the postinstall check passed.
+    const patchPackage = spawnSync(
+      process.execPath,
+      [require.resolve('patch-package/index.js'), '--error-on-fail', '--error-on-warn'],
+      { cwd: ROOT_PATH, stdio: ['ignore', 'inherit', 'inherit'] },
+    );
+
+    if (patchPackage.error) {
+      throw new Error(`Could not run patch-package: ${patchPackage.error.message}`);
+    }
+
+    process.exitCode = patchPackage.status ?? 1;
   } catch (e) {
     console.error(`${chalk.red('error')} Patch validation failed: ${e.message}`);
     console.error(
