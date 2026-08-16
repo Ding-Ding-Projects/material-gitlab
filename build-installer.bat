@@ -31,10 +31,10 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem If this checkout gains the repository's one-click build entry point, run
-rem it first so the package cannot quietly rely on stale generated output.
-rem The current source-only checkout has no build.bat, so archive creation is
-rem intentionally the complete supported packaging route.
+rem Run the repository's one-click build entry point first so the package
+rem cannot quietly rely on stale generated output. build.bat is present in this
+rem checkout, so this branch is the normal path rather than a dormant one; the
+rem existence test remains only so a source-only export can still be archived.
 if exist "%SCRIPT_DIR%build.bat" (
   if not defined SILENT_MODE echo Running build.bat /s before packaging...
   call "%SCRIPT_DIR%build.bat" /s

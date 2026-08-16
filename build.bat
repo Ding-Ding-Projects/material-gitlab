@@ -22,7 +22,8 @@ call :build_frontend || exit /b 1
 
 echo.
 echo [OK] Frontend build completed successfully.
-echo [INFO] Output is in public\assets and is generated from the repository's webpack-prod script.
+echo [INFO] Output is in public\assets, built from the same frontend-islands and
+echo [INFO] webpack steps the repository's webpack-prod script declares.
 if "%SILENT_MODE%"=="1" exit /b 0
 
 choice /C YN /N /M "Run the existing frontend development server now? [Y/N] "
@@ -119,17 +120,75 @@ echo [OK] JavaScript dependencies are ready.
 exit /b 0
 
 :build_frontend
-echo [BUILD] Running the repository-declared production frontend build: yarn webpack-prod.
+rem The repository's own webpack-prod script is a POSIX command chain: an
+rem extensionless bash script, then an inline VAR=value environment prefix.
+rem Yarn runs package scripts through cmd.exe on this platform and cmd can
+rem parse neither half, so `yarn webpack-prod` fails here before it starts.
+rem Both halves are therefore invoked directly below, in the same order and
+rem with the same environment the script declares.
+call :ensure_bash || exit /b 1
+
+rem Yarn 1 runs package scripts through cmd.exe on this platform regardless of
+rem which shell invoked yarn, and this repository uses the POSIX
+rem `VAR=value command` prefix throughout - including the island builds under
+rem ee/frontend_islands, which fail with 'NODE_ENV' is not recognized without
+rem this. Point yarn at the same bash for this process tree only; nothing is
+rem written to the user's global yarn configuration.
+set "YARN_SCRIPT_SHELL=%BASH_CMD%"
+
+echo [BUILD] Building the frontend islands with the repository's own script.
 pushd "%REPO_ROOT%" >nul
-call %YARN_CMD% webpack-prod
+call "%BASH_CMD%" scripts/build_frontend_islands
+set "ISLANDS_EXIT=%ERRORLEVEL%"
+popd >nul
+if not "%ISLANDS_EXIT%"=="0" (
+  echo [ERROR] scripts/build_frontend_islands failed with exit code %ISLANDS_EXIT%.
+  exit /b %ISLANDS_EXIT%
+)
+echo [OK] Frontend islands are built.
+
+echo [BUILD] Running webpack in production mode.
+rem webpack is started through its JS entry point rather than the
+rem node_modules\.bin shim, which is an extensionless POSIX script too.
+set "NODE_ENV=production"
+if not defined NODE_OPTIONS set "NODE_OPTIONS=--max-old-space-size=10240"
+pushd "%REPO_ROOT%" >nul
+call node "node_modules\webpack\bin\webpack.js" --config config/webpack.config.js
 set "BUILD_EXIT=%ERRORLEVEL%"
 popd >nul
 if not "%BUILD_EXIT%"=="0" (
-echo [ERROR] yarn webpack-prod failed with exit code %BUILD_EXIT%.
+  echo [ERROR] webpack failed with exit code %BUILD_EXIT%.
   exit /b %BUILD_EXIT%
 )
 if not exist "%REPO_ROOT%\public\assets" (
-  echo [ERROR] webpack-prod returned success but public\assets was not produced.
+  echo [ERROR] webpack returned success but public\assets was not produced.
   exit /b 1
 )
+exit /b 0
+
+:ensure_bash
+rem The repository's shell scripts need the bash that Git for Windows ships.
+rem C:\Windows\System32\bash.exe is the WSL launcher: it sits on PATH by
+rem default and cannot see this checkout's Windows Node installation, so it is
+rem never an acceptable substitute and is deliberately not searched for here.
+set "BASH_CMD="
+if exist "%ProgramFiles%\Git\bin\bash.exe" set "BASH_CMD=%ProgramFiles%\Git\bin\bash.exe"
+if not defined BASH_CMD if exist "%ProgramFiles(x86)%\Git\bin\bash.exe" set "BASH_CMD=%ProgramFiles(x86)%\Git\bin\bash.exe"
+if not defined BASH_CMD if exist "%LOCALAPPDATA%\Programs\Git\bin\bash.exe" set "BASH_CMD=%LOCALAPPDATA%\Programs\Git\bin\bash.exe"
+if defined BASH_CMD goto :bash_ready
+echo [INSTALL] Git for Windows is missing; acquiring the user-scoped package with winget.
+where winget >nul 2>nul
+if errorlevel 1 (
+  echo [ERROR] Git for Windows is missing and winget is unavailable. Install Git for Windows, then rerun this script.
+  exit /b 1
+)
+winget install --id Git.Git --scope user --accept-source-agreements --accept-package-agreements --silent
+if exist "%LOCALAPPDATA%\Programs\Git\bin\bash.exe" set "BASH_CMD=%LOCALAPPDATA%\Programs\Git\bin\bash.exe"
+if not defined BASH_CMD if exist "%ProgramFiles%\Git\bin\bash.exe" set "BASH_CMD=%ProgramFiles%\Git\bin\bash.exe"
+if not defined BASH_CMD (
+  echo [ERROR] Git for Windows installed but bin\bash.exe was not found afterwards.
+  exit /b 1
+)
+:bash_ready
+echo [OK] Using the Git for Windows bash at "%BASH_CMD%".
 exit /b 0
