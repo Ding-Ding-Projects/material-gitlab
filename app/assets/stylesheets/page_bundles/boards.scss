@@ -1,5 +1,35 @@
 @import 'mixins_and_variables_and_functions';
 
+.m3-epic-board-surface {
+  color: var(--m3-color-on-surface);
+  background: var(--m3-color-surface-container);
+
+  .boards-app,
+  .board-swimlanes,
+  .board-card {
+    border-radius: var(--m3-shape-corner-large);
+  }
+
+  .board,
+  .board-card {
+    background: var(--m3-color-surface);
+    border-color: var(--m3-color-outline);
+    box-shadow: var(--m3-shell-elevation);
+  }
+
+  .board-title,
+  .board-new-issue {
+    border-radius: 999px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-epic-board-surface,
+  .m3-epic-board-surface * {
+    transition: none !important;
+  }
+}
+
 $focus-mode-z-index: 9000;
 
 .is-ghost {

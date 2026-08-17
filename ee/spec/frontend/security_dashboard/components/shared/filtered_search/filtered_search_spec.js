@@ -1,9 +1,10 @@
 import { nextTick, markRaw } from 'vue';
-import { GlFilteredSearch } from '@gitlab/ui';
+import { GlFilteredSearch, GlFormInput } from '@gitlab/ui';
 import { shallowMountExtended } from 'helpers/vue_test_utils_helper';
 import setWindowLocation from 'helpers/set_window_location_helper';
 import FilteredSearch from 'ee/security_dashboard/components/shared/filtered_search/filtered_search.vue';
 import { ALL_ID } from 'ee/security_dashboard/components/shared/filtered_search/constants';
+import AnchoredRegexBuilder from 'ee/security_dashboard/components/shared/anchored_regex_builder.vue';
 import {
   OPERATORS_OR,
   OPERATORS_OR_NOT,
@@ -70,6 +71,8 @@ describe('Security Dashboard Filtered Search', () => {
   };
 
   const findFilteredSearch = () => wrapper.findComponent(GlFilteredSearch);
+  const findTokenSearch = () => wrapper.findComponent(GlFormInput);
+  const findRegexBuilder = () => wrapper.findComponent(AnchoredRegexBuilder);
 
   // When using this function you need to provide all token values each time.
   // Because it sets the value with `input` event, it does not take into account the previous
@@ -114,6 +117,25 @@ describe('Security Dashboard Filtered Search', () => {
       availableTokens: [TEST_TOKEN_A_DEFINITION, TEST_TOKEN_B_DEFINITION],
       value: [],
     });
+  });
+
+  it('locally narrows available filter controls with plain text', async () => {
+    createWrapper();
+
+    findTokenSearch().vm.$emit('input', 'Token A');
+    await nextTick();
+
+    expect(findFilteredSearch().props('availableTokens')).toEqual([TEST_TOKEN_A_DEFINITION]);
+    expect(wrapper.emitted('filters-changed')).toHaveLength(1);
+  });
+
+  it('locally narrows available filter controls with the shared regex builder', async () => {
+    createWrapper();
+
+    findRegexBuilder().vm.$emit('apply', { pattern: 'B$', flags: 'i' });
+    await nextTick();
+
+    expect(findFilteredSearch().props('availableTokens')).toEqual([TEST_TOKEN_B_DEFINITION]);
   });
 
   describe('filters-changed event', () => {

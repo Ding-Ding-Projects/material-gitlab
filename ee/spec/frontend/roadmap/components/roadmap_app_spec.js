@@ -120,6 +120,21 @@ describe('RoadmapApp', () => {
   );
 
   describe('roadmap view', () => {
+    it('filters loaded epics locally without changing the GraphQL variables', async () => {
+      createComponent();
+      await waitForPromises();
+
+      findRoadmapFilters().vm.$emit('local-search', {
+        pattern: 'a pattern that does not exist',
+        flags: 'i',
+        regex: false,
+      });
+      await Vue.nextTick();
+
+      expect(findEpicsListEmpty().exists()).toBe(true);
+      expect(groupEpicsWithColorQueryHandler).toHaveBeenCalledTimes(1);
+    });
+
     it('disables search when epicIid is present', () => {
       createComponent({ epicIid: '1' });
 

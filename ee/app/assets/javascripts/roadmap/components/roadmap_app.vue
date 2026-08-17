@@ -41,6 +41,11 @@ export default {
       epicsFetchFailure: false,
       epicsFetchNextPageInProgress: false,
       localRoadmapSettings: null,
+      localSearch: {
+        pattern: '',
+        flags: 'i',
+        regex: false,
+      },
     };
   },
   apollo: {
@@ -120,6 +125,8 @@ export default {
     epics() {
       const epics = this.rawEpics.nodes || [];
       return epics.reduce((filteredEpics, epic) => {
+        if (!this.matchesLocalSearch(epic)) return filteredEpics;
+
         const { presetType, timeframe } = this;
         const formattedEpic = formatRoadmapItemDetails(
           epic,
@@ -137,6 +144,11 @@ export default {
 
         return filteredEpics;
       }, []);
+    },
+    localSearchSample() {
+      return (this.rawEpics.nodes || [])
+        .map((epic) => [epic.title, epic.reference, epic.fullReference].filter(Boolean).join(' '))
+        .join('\n');
     },
     epicsFetchResultEmpty() {
       return this.epics.length === 0;
@@ -168,6 +180,22 @@ export default {
     },
   },
   methods: {
+    updateLocalSearch(localSearch) {
+      this.localSearch = localSearch;
+    },
+    matchesLocalSearch(epic) {
+      const { pattern, flags, regex } = this.localSearch;
+      if (!pattern) return true;
+
+      const value = [epic.title, epic.reference, epic.fullReference].filter(Boolean).join(' ');
+      const source = regex ? pattern : pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      try {
+        return new RegExp(source, flags.replace(/[gy]/g, '')).test(value);
+      } catch {
+        return true;
+      }
+    },
     toggleSettings() {
       this.isSettingsSidebarOpen = !this.isSettingsSidebarOpen;
     },
@@ -195,10 +223,16 @@ export default {
 </script>
 
 <template>
-  <div class="roadmap-app-container gl-h-full">
+  <section
+    class="roadmap-app-container m3-roadmap-surface gl-h-full"
+    data-material-surface="roadmap"
+    :aria-label="s__('GroupRoadmap|Epics and roadmap')"
+  >
     <roadmap-filters
       ref="roadmapFilters"
       :view-only="!showFilteredSearchbar || Boolean(epicIid)"
+      :local-search-sample="localSearchSample"
+      @local-search="updateLocalSearch"
       @toggle-settings="toggleSettings"
     />
     <div
@@ -229,5 +263,5 @@ export default {
       data-testid="roadmap-settings"
       @toggle-settings="toggleSettings"
     />
-  </div>
+  </section>
 </template>
