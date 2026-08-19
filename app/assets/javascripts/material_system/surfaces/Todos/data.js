@@ -1,8 +1,4 @@
-/**
- * View model for the To-Do list surface. Shapes match what a real API response
- * would look like, so `createSeedTodos()` is the only thing a live data source
- * needs to replace (see `docs/` for the intended GET /api/v4/todos mapping).
- */
+/** View model and GraphQL transport adapters for the To-Do list surface. */
 
 export const TODO_VIEWS = Object.freeze({ PENDING: 'pending', DONE: 'done' });
 
@@ -17,70 +13,81 @@ export function resolveTodoTone(icon) {
   return TONE_BY_ICON[icon] || 'primary';
 }
 
-/** Sample to-dos matching the design's mock data. Replace with a real API call. */
-export function createSeedTodos() {
-  return [
-    {
-      id: 1,
-      actor: 'Dana Weiss',
-      action: 'assigned you merge request',
-      target: { label: '!1285 tonal container colors', href: '#/merge_requests/1285' },
-      project: 'acme-corp/phoenix-api',
-      when: '2h ago',
-      icon: 'call_merge',
-      state: TODO_VIEWS.PENDING,
-    },
-    {
-      id: 2,
-      actor: 'Omar Haddad',
-      action: 'mentioned you on issue',
-      target: { label: '#4312 boards render slowly', href: '#/issues/4312' },
-      project: 'acme-corp/phoenix-api',
-      when: '4h ago',
-      icon: 'alternate_email',
-      state: TODO_VIEWS.PENDING,
-    },
-    {
-      id: 3,
-      actor: 'Pipeline',
-      action: 'failed for',
-      target: { label: '#8820 fix/badge-contrast', href: '#/pipelines/8820' },
-      project: 'acme-corp/phoenix-api',
-      when: '6h ago',
-      icon: 'cancel',
-      state: TODO_VIEWS.PENDING,
-    },
-    {
-      id: 4,
-      actor: 'Priya Nair',
-      action: 'requested review on',
-      target: { label: '!1278 regex mode for MR search', href: '#/merge_requests/1278' },
-      project: 'acme-corp/phoenix-api',
-      when: '1d ago',
-      icon: 'rate_review',
-      state: TODO_VIEWS.PENDING,
-    },
-    {
-      id: 5,
-      actor: 'Security bot',
-      action: 'reported a critical finding in',
-      target: { label: 'issues search parameter', href: '#/security' },
-      project: 'acme-corp/phoenix-api',
-      when: '2d ago',
-      icon: 'security',
-      state: TODO_VIEWS.PENDING,
-    },
-    {
-      id: 6,
-      actor: 'Jun Park',
-      action: 'approved your merge request',
-      target: { label: '!1281 poll backoff', href: '#/merge_requests/1281' },
-      project: 'acme-corp/phoenix-api',
-      when: '3d ago',
-      icon: 'verified',
-      state: TODO_VIEWS.DONE,
-    },
-  ];
+const TODO_QUERY = `query materialTodos($state: [TodoStateEnum!], $first: Int, $after: String, $before: String, $last: Int) {
+  currentUser {
+    id
+    todos(first: $first, last: $last, after: $after, before: $before, state: $state) {
+      nodes {
+        id state action createdAt targetType targetUrl
+        author { id name webUrl }
+        project { id nameWithNamespace }
+        targetEntity { name ... on Issue { reference webPath } ... on MergeRequest { reference webPath } }
+      }
+      pageInfo { hasNextPage hasPreviousPage startCursor endCursor }
+    }
+  }
+}`;
+
+const config = () => {
+  if (typeof window === 'undefined') return {};
+  if (window.__MATERIAL_TODOS_CONFIG__) return window.__MATERIAL_TODOS_CONFIG__;
+  const root = document.querySelector('[data-material-todos]');
+  return root ? { ...root.dataset } : {};
+};
+
+const actionCopy = {
+  assigned: 'assigned you', mentioned: 'mentioned you on', build_failed: 'failed for', review_requested: 'requested review on',
+};
+
+const normalizeTodo = (todo) => ({
+  id: todo.id,
+  actor: todo.author?.name || '',
+  action: actionCopy[todo.action] || todo.action || '',
+  target: { label: todo.targetEntity?.reference || todo.targetEntity?.name || '', href: todo.targetEntity?.webPath || todo.targetUrl || '#' },
+  project: todo.project?.nameWithNamespace || '',
+  when: todo.createdAt || '',
+  icon: todo.action === 'build_failed' ? 'cancel' : todo.action === 'review_requested' ? 'rate_review' : 'alternate_email',
+  state: todo.state,
+  raw: todo,
+});
+
+export async function fetchTodos(options = {}) {
+  const settings = { ...config(), ...options };
+  const endpoint = settings.endpoint || settings.graphqlEndpoint || '/api/graphql';
+  const request = settings.fetcher || (typeof fetch === 'function' ? fetch : null);
+  if (!request) throw new Error('To-do data transport is unavailable');
+  const response = await request(endpoint, {
+    method: 'POST', credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ query: TODO_QUERY, variables: { state: options.state || ['pending'], first: options.first || 20, after: options.after || null, before: options.before || null, last: options.last || null } }),
+  });
+  if (!response.ok) throw new Error(`To-do request failed (${response.status})`);
+  const payload = await response.json();
+  if (payload.errors?.length) throw new Error(payload.errors.map((error) => error.message).join('; '));
+  const todos = payload.data?.currentUser?.todos || {};
+  return { todos: (todos.nodes || []).map(normalizeTodo), pageInfo: todos.pageInfo || {} };
+}
+
+export async function mutateTodoState({ id, state, options = {} }) {
+  const settings = { ...config(), ...options };
+  const endpoint = settings.mutationEndpoint || settings.graphqlEndpoint || '/api/graphql';
+  const request = settings.fetcher || (typeof fetch === 'function' ? fetch : null);
+  if (!request) throw new Error('To-do mutation transport is unavailable');
+  const mutation = state === TODO_VIEWS.DONE ? 'todoMarkDone' : 'todoRestore';
+  const response = await request(endpoint, {
+    method: 'POST', credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ query: `mutation materialTodoState($id: TodoID!) { result: ${mutation}(input: { id: $id }) { todo { id state } errors } }`, variables: { id } }),
+  });
+  if (!response.ok) throw new Error(`To-do update failed (${response.status})`);
+  const payload = await response.json();
+  const errors = payload.errors || payload.data?.result?.errors || [];
+  if (errors.length) throw new Error(errors.map((error) => error.message || error).join('; '));
+  return payload.data?.result?.todo;
+}
+
+export async function mutateTodosState({ ids, state, options = {} }) {
+  return Promise.all(ids.map((id) => mutateTodoState({ id, state, options })));
 }
 
 /** Flat text a search/regex matcher runs against for a given to-do. */

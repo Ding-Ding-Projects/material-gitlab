@@ -10,7 +10,9 @@ import RegexBuilderPopover from './components/RegexBuilderPopover.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import {
   TODO_VIEWS,
-  createSeedTodos,
+  fetchTodos as defaultFetchTodos,
+  mutateTodoState as defaultMutateTodoState,
+  mutateTodosState as defaultMutateTodosState,
   createNavSections,
   todoSearchText,
   createTextMatcher,
@@ -37,10 +39,13 @@ export default {
       type: Boolean,
       default: true,
     },
+    fetchTodos: { type: Function, default: defaultFetchTodos },
+    mutateTodoState: { type: Function, default: defaultMutateTodoState },
+    mutateTodosState: { type: Function, default: defaultMutateTodosState },
   },
   data() {
     return {
-      todos: createSeedTodos(),
+      todos: [],
       navSectionsAll: createNavSections(),
       view: TODO_VIEWS.PENDING,
       search: '',
@@ -53,6 +58,8 @@ export default {
       settings: loadSettings(),
       systemPrefersDark: false,
       lastFocused: null,
+      loading: false,
+      loadError: null,
     };
   },
   computed: {
@@ -117,6 +124,8 @@ export default {
     },
   },
   mounted() {
+    const state = new URLSearchParams(window.location.search).get('state');
+    if (state === TODO_VIEWS.DONE) this.view = TODO_VIEWS.DONE;
     this._onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -138,6 +147,7 @@ export default {
     this._unsubscribeSettings = subscribeSettings((next) => {
       this.settings = next;
     });
+    this.loadTodos();
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this._onKeydown);
@@ -163,6 +173,24 @@ export default {
     changeView(view) {
       this.view = view;
       this.selectedIds = [];
+      const params = new URLSearchParams(window.location.search);
+      if (view === TODO_VIEWS.PENDING) params.delete('state');
+      else params.set('state', view);
+      window.history.replaceState(null, '', `${window.location.pathname}${params.toString() ? `?${params}` : ''}`);
+      this.loadTodos();
+    },
+    async loadTodos() {
+      this.loading = true;
+      this.loadError = null;
+      try {
+        const result = await this.fetchTodos({ state: [this.view] });
+        this.todos = result.todos;
+      } catch (error) {
+        this.loadError = error;
+        notificationCenter.notify({ title: 'To-dos unavailable', message: error.message, severity: 'error' });
+      } finally {
+        this.loading = false;
+      }
     },
     openRegexBuilder(target) {
       this.lastFocused = document.activeElement;
@@ -200,20 +228,23 @@ export default {
       const result = updateSettings({ theme: next });
       if (result.ok) this.settings = result.value;
     },
-    setTodoState(id, state) {
+    async setTodoState(id, state) {
+      await this.mutateTodoState({ id, state });
       this.todos = this.todos.map((todo) => (todo.id === id ? { ...todo, state } : todo));
     },
-    markDone(id) {
-      this.setTodoState(id, TODO_VIEWS.DONE);
+    async markDone(id) {
+      try { await this.setTodoState(id, TODO_VIEWS.DONE); } catch (error) { notificationCenter.notify({ title: 'To-do was not completed', message: error.message, severity: 'error' }); return; }
       this.selectedIds = this.selectedIds.filter((selectedId) => selectedId !== id);
     },
-    restore(id) {
-      this.setTodoState(id, TODO_VIEWS.PENDING);
+    async restore(id) {
+      try { await this.setTodoState(id, TODO_VIEWS.PENDING); } catch (error) { notificationCenter.notify({ title: 'To-do was not restored', message: error.message, severity: 'error' }); return; }
       this.selectedIds = this.selectedIds.filter((selectedId) => selectedId !== id);
     },
-    markAllDone() {
+    async markAllDone() {
       const count = this.pendingTodos.length;
       if (count === 0) return;
+      try { await this.mutateTodosState({ ids: this.pendingTodos.map((todo) => todo.id), state: TODO_VIEWS.DONE }); }
+      catch (error) { notificationCenter.notify({ title: 'To-dos were not updated', message: error.message, severity: 'error' }); return; }
       this.todos = this.todos.map((todo) => ({ ...todo, state: TODO_VIEWS.DONE }));
       this.selectedIds = [];
       notificationCenter.notify({
@@ -242,10 +273,12 @@ export default {
       const inverted = visibleIds.filter((id) => !this.selectedIds.includes(id));
       this.selectedIds = [...kept, ...inverted];
     },
-    bulkMarkDone() {
+    async bulkMarkDone() {
       const targets = this.visibleTodos.filter((todo) => this.selectedIds.includes(todo.id));
       if (targets.length === 0) return;
       const ids = new Set(targets.map((todo) => todo.id));
+      try { await this.mutateTodosState({ ids: [...ids], state: TODO_VIEWS.DONE }); }
+      catch (error) { notificationCenter.notify({ title: 'To-dos were not updated', message: error.message, severity: 'error' }); return; }
       this.todos = this.todos.map((todo) => (ids.has(todo.id) ? { ...todo, state: TODO_VIEWS.DONE } : todo));
       this.clearSelection();
       notificationCenter.notify({
@@ -254,10 +287,12 @@ export default {
         severity: 'success',
       });
     },
-    bulkRestore() {
+    async bulkRestore() {
       const targets = this.visibleTodos.filter((todo) => this.selectedIds.includes(todo.id));
       if (targets.length === 0) return;
       const ids = new Set(targets.map((todo) => todo.id));
+      try { await this.mutateTodosState({ ids: [...ids], state: TODO_VIEWS.PENDING }); }
+      catch (error) { notificationCenter.notify({ title: 'To-dos were not restored', message: error.message, severity: 'error' }); return; }
       this.todos = this.todos.map((todo) => (ids.has(todo.id) ? { ...todo, state: TODO_VIEWS.PENDING } : todo));
       this.clearSelection();
       notificationCenter.notify({
@@ -318,7 +353,14 @@ export default {
           @bulk-restore="bulkRestore"
         />
 
+        <div v-if="loading" class="md-todos__empty" role="status">Loading your to-dos…</div>
+        <div v-else-if="loadError" class="md-todos__empty" role="alert">
+          <strong>To-dos could not be loaded.</strong>
+          <span>{{ loadError.message }}</span>
+          <button type="button" class="md-todos__link-button" @click="loadTodos">Retry</button>
+        </div>
         <todo-list
+          v-else
           :todos="visibleTodos"
           :view="view"
           :selected-ids="selectedIds"

@@ -1,10 +1,9 @@
 /**
  * View model for the Epics surface (epic tree + roadmap).
  *
- * Field names deliberately mirror the group epics GraphQL API
- * (ee/app/assets/javascripts/roadmap/queries/epic.fragment.graphql) so `loadEpics()`
- * below is a drop-in point for a real `client.query()` call: swap the resolved mock
- * array for the `group.epics.nodes` payload and the rest of the surface is unaffected.
+ * Field names deliberately mirror the group epics GraphQL API. The surface
+ * never carries a fixture fallback: the server mount must provide `fullPath`
+ * and the GraphQL endpoint (or an injected client in tests).
  */
 
 export const EPIC_STATE = Object.freeze({ OPEN: 'opened', CLOSED: 'closed' });
@@ -13,96 +12,92 @@ export const EPIC_STATE = Object.freeze({ OPEN: 'opened', CLOSED: 'closed' });
 export const ROADMAP_MONTHS = Object.freeze(['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']);
 export const ROADMAP_YEAR = 2026;
 
-const epic = (fields) => ({
-  id: `gid://gitlab/Epic/${fields.iid}`,
-  reference: `&${fields.iid}`,
-  state: EPIC_STATE.OPEN,
-  confidential: false,
-  group: { fullPath: 'acme-corp', fullName: 'Acme Corp' },
-  children: [],
-  ...fields,
-});
-
-export const MOCK_EPICS = Object.freeze([
-  epic({
-    iid: 12,
-    title: 'Material 3 UI rewrite',
-    state: EPIC_STATE.OPEN,
-    startDate: '2026-03-01',
-    dueDate: '2026-07-31',
-    descendantCounts: { closedIssues: 21, openedIssues: 13 },
-    children: [
-      epic({
-        iid: 14,
-        title: 'Token layer and theming',
-        state: EPIC_STATE.CLOSED,
-        startDate: '2026-03-01',
-        dueDate: '2026-04-30',
-        descendantCounts: { closedIssues: 8, openedIssues: 0 },
-      }),
-      epic({
-        iid: 15,
-        title: 'Issues & boards surfaces',
-        state: EPIC_STATE.OPEN,
-        startDate: '2026-04-01',
-        dueDate: '2026-05-31',
-        descendantCounts: { closedIssues: 7, openedIssues: 3 },
-      }),
-      epic({
-        iid: 16,
-        title: 'MR & pipeline surfaces',
-        state: EPIC_STATE.OPEN,
-        startDate: '2026-05-01',
-        dueDate: '2026-07-31',
-        descendantCounts: { closedIssues: 6, openedIssues: 10 },
-      }),
-    ],
-  }),
-  epic({
-    iid: 18,
-    title: 'Regex search everywhere',
-    state: EPIC_STATE.OPEN,
-    startDate: '2026-04-01',
-    dueDate: '2026-06-30',
-    descendantCounts: { closedIssues: 5, openedIssues: 6 },
-    children: [
-      epic({
-        iid: 19,
-        title: 'Shared builder component',
-        state: EPIC_STATE.CLOSED,
-        startDate: '2026-04-01',
-        dueDate: '2026-04-30',
-        descendantCounts: { closedIssues: 4, openedIssues: 0 },
-      }),
-      epic({
-        iid: 20,
-        title: 'Per-surface adoption',
-        state: EPIC_STATE.OPEN,
-        startDate: '2026-05-01',
-        dueDate: '2026-06-30',
-        descendantCounts: { closedIssues: 1, openedIssues: 6 },
-      }),
-    ],
-  }),
-  epic({
-    iid: 22,
-    title: 'Agent memory integration',
-    state: EPIC_STATE.OPEN,
-    startDate: '2026-06-01',
-    dueDate: '2026-08-31',
-    descendantCounts: { closedIssues: 1, openedIssues: 9 },
-    children: [],
-  }),
-]);
-
 const clone = (value) => JSON.parse(JSON.stringify(value));
 
-/**
- * Structured as an async loader so a real implementation can await a GraphQL
- * client query here without changing any caller in the surface.
- */
-export function loadEpics() {
-  return Promise.resolve(clone(MOCK_EPICS));
+const EPICS_QUERY = `query materialPlanningEpics($fullPath: ID!, $after: String) {
+  group(fullPath: $fullPath) {
+    epics(first: 50, after: $after) {
+      nodes {
+        id iid title state startDate dueDate
+        descendantCounts { closedIssues openedIssues }
+        group { id fullPath fullName }
+      }
+      pageInfo { hasNextPage endCursor }
+    }
+  }
+}`;
+
+const config = () => {
+  if (typeof window === 'undefined') return {};
+  if (window.__MATERIAL_EPICS_CONFIG__) return window.__MATERIAL_EPICS_CONFIG__;
+  const root = document.querySelector('[data-material-epics]');
+  return root ? { ...root.dataset } : {};
+};
+
+async function graphqlRequest({ endpoint, fullPath, after = null, fetcher }) {
+  const request = fetcher || (typeof fetch === 'function' ? fetch : null);
+  if (!request) throw new Error('Epics data transport is unavailable');
+  const response = await request(endpoint, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify({ query: EPICS_QUERY, variables: { fullPath, after } }),
+  });
+  if (!response.ok) throw new Error(`Epics request failed (${response.status})`);
+  const payload = await response.json();
+  if (payload.errors?.length) throw new Error(payload.errors.map((error) => error.message).join('; '));
+  return payload.data?.group?.epics || { nodes: [], pageInfo: {} };
+}
+
+export async function loadEpics(options = {}) {
+  const settings = { ...config(), ...options };
+  const endpoint = settings.endpoint || settings.graphqlEndpoint || '/api/graphql';
+  const fullPath = settings.fullPath || settings.groupFullPath;
+  if (!fullPath) throw new Error('Epics group path is not configured by the server mount');
+  const nodes = [];
+  let after = null;
+  do {
+    const page = await graphqlRequest({ endpoint, fullPath, after, fetcher: settings.fetcher });
+    nodes.push(...(page.nodes || []).map((item) => ({
+      ...clone(item),
+      reference: item.reference || `&${item.iid}`,
+      children: item.children || [],
+      confidential: Boolean(item.confidential),
+    })));
+    after = page.pageInfo?.hasNextPage ? page.pageInfo.endCursor : null;
+  } while (after);
+  return nodes;
+}
+
+export async function mutateEpic({ id, changes, options = {} }) {
+  const settings = { ...config(), ...options };
+  const endpoint = settings.updateEndpoint || settings.epicUpdateEndpoint;
+  if (!endpoint) throw new Error('Epic update route is not configured by the server mount');
+  const request = settings.fetcher || (typeof fetch === 'function' ? fetch : null);
+  if (!request) throw new Error('Epic mutation transport is unavailable');
+  const response = await request(endpoint.replace(/\/$/, '') + `/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    body: JSON.stringify(changes),
+  });
+  if (!response.ok) throw new Error(`Epic update failed (${response.status})`);
+  return response.json();
+}
+
+export async function deleteEpic({ id, options = {} }) {
+  const settings = { ...config(), ...options };
+  const endpoint = settings.deleteEndpoint || settings.epicDeleteEndpoint;
+  if (!endpoint) throw new Error('Epic delete route is not configured by the server mount');
+  const request = settings.fetcher || (typeof fetch === 'function' ? fetch : null);
+  if (!request) throw new Error('Epic mutation transport is unavailable');
+  const response = await request(endpoint.replace(/\/$/, '') + `/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+  });
+  if (!response.ok) throw new Error(`Epic delete failed (${response.status})`);
+  return response.json();
 }
 
 export function progressTotal(descendantCounts) {

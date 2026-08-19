@@ -14,6 +14,8 @@ import ConfirmDialog from './components/ConfirmDialog.vue';
 import {
   EPIC_STATE,
   loadEpics,
+  mutateEpic as defaultMutateEpic,
+  deleteEpic as defaultDeleteEpic,
   flattenEpics,
   searchableText,
   updateEpicsByIds,
@@ -54,6 +56,9 @@ export default {
       type: Object,
       default: () => ({ name: __('Jordan Diaz'), initials: 'JD' }),
     },
+    mutateEpic: { type: Function, default: defaultMutateEpic },
+    deleteEpic: { type: Function, default: defaultDeleteEpic },
+    fetchEpicsData: { type: Function, default: loadEpics },
   },
   data() {
     return {
@@ -68,6 +73,7 @@ export default {
       view: 'tree',
       collapsedIds: [],
       selectedIds: [],
+      fetchError: null,
     };
   },
   computed: {
@@ -209,8 +215,12 @@ export default {
   methods: {
     async fetchEpics() {
       this.loading = true;
+      this.fetchError = null;
       try {
-        this.epics = await loadEpics();
+        this.epics = await this.fetchEpicsData();
+      } catch (error) {
+        this.fetchError = error;
+        notificationCenter.notify({ title: __('Epics unavailable'), message: error.message, severity: 'error' });
       } finally {
         this.loading = false;
       }
@@ -275,12 +285,17 @@ export default {
     },
     bulkSetState(state) {
       const count = this.selectedIds.length;
-      this.epics = updateEpicsByIds(this.epics, this.selectedIds, () => ({ state }));
-      const message =
-        state === EPIC_STATE.CLOSED
-          ? n__('%d epic closed.', '%d epics closed.', count)
-          : n__('%d epic reopened.', '%d epics reopened.', count);
-      notificationCenter.notify({ title: __('Epics updated'), message, severity: 'success' });
+      Promise.all(this.selectedIds.map((id) => this.mutateEpic({ id, changes: { state } })))
+        .then(() => {
+          this.epics = updateEpicsByIds(this.epics, this.selectedIds, () => ({ state }));
+          const message =
+            state === EPIC_STATE.CLOSED
+              ? n__('%d epic closed.', '%d epics closed.', count)
+              : n__('%d epic reopened.', '%d epics reopened.', count);
+          notificationCenter.notify({ title: __('Epics updated'), message, severity: 'success' });
+          this.selectedIds = [];
+        })
+        .catch((error) => notificationCenter.notify({ title: __('Epics were not updated'), message: error.message, severity: 'error' }));
     },
     exportSelected(format) {
       const selectedSet = new Set(this.selectedIds);
@@ -320,14 +335,18 @@ export default {
     },
     confirmDelete() {
       const count = this.selectedIds.length;
-      this.epics = removeEpicsByIds(this.epics, this.selectedIds);
-      this.selectedIds = [];
-      this.confirmDeleteOpen = false;
-      notificationCenter.notify({
-        title: __('Epics deleted'),
-        message: n__('%d epic deleted.', '%d epics deleted.', count),
-        severity: 'warning',
-      });
+      Promise.all(this.selectedIds.map((id) => this.deleteEpic({ id })))
+        .then(() => {
+          this.epics = removeEpicsByIds(this.epics, this.selectedIds);
+          this.selectedIds = [];
+          this.confirmDeleteOpen = false;
+          notificationCenter.notify({
+            title: __('Epics deleted'),
+            message: n__('%d epic deleted.', '%d epics deleted.', count),
+            severity: 'warning',
+          });
+        })
+        .catch((error) => notificationCenter.notify({ title: __('Epics were not deleted'), message: error.message, severity: 'error' }));
     },
     deleteConfirmMessage() {
       return n__(
@@ -364,8 +383,13 @@ export default {
       @clear="clearSelection"
     />
     <main class="gl-mds-epics__main">
+      <div v-if="fetchError" class="gl-mds-epics__empty" role="alert">
+        <h2 class="gl-mds-epics__empty-title">Epics could not be loaded</h2>
+        <p class="gl-mds-epics__empty-text">{{ fetchError.message }}</p>
+        <button type="button" class="gl-mds-epics__btn gl-mds-epics__btn--filled" @click="fetchEpics">Retry</button>
+      </div>
       <epic-tree
-        v-if="view === 'tree'"
+        v-else-if="view === 'tree'"
         :rows="visibleTreeRows"
         :total-count="flatEpics.length"
         :selected-ids="selectedIds"
