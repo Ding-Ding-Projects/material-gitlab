@@ -12,6 +12,7 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
+    "test": "node --test test/*.test.mjs",
     "start": "electron .",
     "package:squirrel": "electron-builder --win squirrel --publish never"
   },
