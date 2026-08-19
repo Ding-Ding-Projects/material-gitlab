@@ -6,8 +6,9 @@
       <input
         type="text"
         class="st-field__input"
-        :value="projectName"
-        @input="$emit('update:project-name', $event.target.value)"
+        :value="draftName"
+        @input="draftName = $event.target.value"
+        @blur="$emit('update:project-name', draftName)"
       />
     </label>
     <div class="st-field">
@@ -43,7 +44,12 @@ export default {
     visibility: { type: String, required: true },
   },
   data() {
-    return { options: VISIBILITY_OPTIONS };
+    return { options: VISIBILITY_OPTIONS, draftName: this.projectName };
+  },
+  watch: {
+    projectName(value) {
+      this.draftName = value;
+    },
   },
 };
 </script>

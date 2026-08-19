@@ -34,3 +34,4 @@ export { default as IntegrationsTab } from './components/IntegrationsTab.vue';
 export { default as IntegrationRow } from './components/IntegrationRow.vue';
 
 export * from './data';
+export * from './adapter';

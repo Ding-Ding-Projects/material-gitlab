@@ -37,7 +37,7 @@ export default {
   },
   computed: {
     shownValue() {
-      return this.variable.revealed ? this.variable.value : maskedValue();
+      return this.variable.revealed ? this.variable.value : (this.variable.maskedValue || maskedValue());
     },
   },
 };

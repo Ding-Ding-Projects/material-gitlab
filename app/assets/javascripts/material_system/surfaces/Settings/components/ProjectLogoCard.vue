@@ -56,7 +56,7 @@ export default {
   methods: {
     onUpload(event) {
       const file = event.target.files && event.target.files[0];
-      if (file) this.$emit('upload-logo', file.name);
+      if (file) this.$emit('upload-logo', file);
     },
   },
 };
