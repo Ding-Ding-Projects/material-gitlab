@@ -9,6 +9,12 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const inventoryPath = path.join(root, 'design', 'parity-inventory.json');
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
 
+test('resolves design contracts from the repository root', () => {
+  const mainSource = fs.readFileSync(new URL('../src/main.cjs', import.meta.url), 'utf8');
+  assert.match(mainSource, /path\.resolve\(__dirname, '\.\.', '\.\.', '\.\.'\)/);
+  assert.doesNotMatch(mainSource, /path\.resolve\(__dirname, '\.\.', '\.\.'\);/);
+});
+
 test('hand-written inventory contains exactly the 25 checked-in references', () => {
   const verdict = validateInventory(inventory, { root });
   assert.equal(verdict.valid, true, verdict.errors.join('\n'));

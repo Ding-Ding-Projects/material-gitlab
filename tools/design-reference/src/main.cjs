@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+const ROOT = path.resolve(__dirname, '..', '..', '..');
 const DESIGN_ROOT = path.join(ROOT, 'design');
 const INVENTORY_PATH = path.join(DESIGN_ROOT, 'parity-inventory.json');
 const inventory = JSON.parse(fs.readFileSync(INVENTORY_PATH, 'utf8'));
