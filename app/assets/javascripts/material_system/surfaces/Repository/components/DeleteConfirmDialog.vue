@@ -45,7 +45,7 @@ export default {
         <h2 id="delete-confirm-title" class="confirm-dialog__title">Delete {{ items.length }} item{{ items.length === 1 ? '' : 's' }}?</h2>
       </div>
       <p id="delete-confirm-desc" class="confirm-dialog__desc">
-        This removes the following from {{ scopeLabel }} in this preview. This action cannot be undone.
+        This removes the following from {{ scopeLabel }} on the selected branch. This action cannot be undone.
       </p>
       <ul class="confirm-dialog__list">
         <li v-for="name in items" :key="name">{{ name }}</li>
