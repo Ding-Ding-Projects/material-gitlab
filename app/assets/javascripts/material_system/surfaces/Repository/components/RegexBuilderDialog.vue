@@ -55,7 +55,7 @@ export default {
     },
     highlighter() {
       // Powers the test-text highlight + capture groups: always global so every
-      // occurrence in the sample is found, matching the design's own behavior.
+      // occurrence in the repository corpus is found, matching the design's own behavior.
       return new RegexBuilder({ pattern: this.draft, sample: this.testText, flags: this.highlightFlags, regex: true });
     },
     valid() {

@@ -1,8 +1,8 @@
 /**
- * View model for the Settings surface, ported from design/Settings.dc.html's
- * renderVals(). Kept as plain data + pure functions so a real settings API
- * can replace the in-memory arrays without touching any component — every
- * mutation below returns a new array/object rather than mutating in place.
+ * View model helpers for the Settings surface. The checked-in design is a
+ * visual contract only; production state must arrive through settingsAdapter.
+ * These helpers deliberately contain no project, member, variable, branch,
+ * integration, or secret-like fixture data.
  */
 
 export const TABS = Object.freeze([
@@ -35,53 +35,22 @@ export const CONVERTIBLE_TYPES = Object.freeze({
   'text/markdown': 'HTML',
 });
 
-export function defaultMembers() {
-  return [
-    { id: 'mb-1', name: 'Jun Park', handle: 'junpark', role: 'Maintainer' },
-    { id: 'mb-2', name: 'Dana Weiss', handle: 'dweiss', role: 'Owner' },
-    { id: 'mb-3', name: 'Omar Haddad', handle: 'ohaddad', role: 'Developer' },
-    { id: 'mb-4', name: 'Priya Nair', handle: 'pnair', role: 'Reporter' },
-  ];
-}
-
-export function defaultVariables() {
-  return [
-    { id: 'var-1', key: 'DEPLOY_TOKEN', value: 'glpat-9f2ke1', protected: true, revealed: false },
-    { id: 'var-2', key: 'SENTRY_DSN', value: 'https://a1b2@sentry.io/42', protected: false, revealed: false },
-    { id: 'var-3', key: 'REGISTRY_PASSWORD', value: 's3cr3t-r3g', protected: true, revealed: false },
-  ];
-}
-
-export function defaultProtectedBranches() {
-  return [
-    { id: 'pb-1', name: 'main', merge: 'Maintainers', push: 'No one' },
-    { id: 'pb-2', name: 'release/*', merge: 'Maintainers', push: 'Maintainers' },
-  ];
-}
-
-export function defaultIntegrations() {
-  return [
-    { id: 'ig-1', name: 'Slack notifications', icon: 'notifications', desc: 'Pipeline and MR events to #phoenix-dev', on: true },
-    { id: 'ig-2', name: 'Jira', icon: 'link', desc: 'Cross-reference issues by key', on: false },
-    { id: 'ig-3', name: 'Prometheus', icon: 'monitoring', desc: 'Metrics scraping for environments', on: true },
-    { id: 'ig-4', name: 'Mattermost', icon: 'forum', desc: 'Slash commands', on: false },
-  ];
-}
-
 export function createInitialState(overrides = {}) {
   return {
     tab: 'general',
-    projectName: 'phoenix-api',
-    visibility: 'Internal',
+    projectName: '',
+    visibility: '',
     logoColor: LOGO_PRESET_COLORS[0],
     logoFileName: '',
     vocabularyStatus: 'No vocabulary loaded',
     vocabularyOk: null,
     converterStatus: 'No file chosen',
-    members: defaultMembers(),
-    variables: defaultVariables(),
-    protectedBranches: defaultProtectedBranches(),
-    integrations: defaultIntegrations(),
+    members: [],
+    variables: [],
+    protectedBranches: [],
+    integrations: [],
+    permissions: {},
+    errors: [],
     ...overrides,
   };
 }
@@ -146,26 +115,4 @@ export function converterStatusFor(fileName, mimeType) {
   const targets = CONVERTIBLE_TYPES[mimeType];
   if (targets) return `${fileName} (${mimeType || 'unknown'}) → available targets: ${targets}`;
   return `${fileName}: unsupported type — no conversion offered (honest handling)`;
-}
-
-export function withRole(members, id, role) {
-  return members.map((member) => (member.id === id ? { ...member, role } : member));
-}
-
-export function withoutIds(list, ids) {
-  const removed = new Set(ids);
-  return list.filter((item) => !removed.has(item.id));
-}
-
-export function withToggledReveal(variables, id) {
-  return variables.map((variable) => (variable.id === id ? { ...variable, revealed: !variable.revealed } : variable));
-}
-
-export function nextVariableDraft(existingCount) {
-  return { id: `var-${Date.now()}-${existingCount}`, key: `NEW_VARIABLE_${existingCount + 1}`, value: 'value', protected: false, revealed: true };
-}
-
-export function withToggledIntegrations(integrations, ids, on) {
-  const targeted = new Set(ids);
-  return integrations.map((integration) => (targeted.has(integration.id) ? { ...integration, on } : integration));
 }

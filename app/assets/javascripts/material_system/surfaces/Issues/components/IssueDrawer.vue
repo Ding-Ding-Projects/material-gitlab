@@ -48,7 +48,7 @@
             class="gl-mds-drawer__assignee-chip"
             :class="{ 'gl-mds-drawer__assignee-chip--on': person.on }"
             :aria-pressed="person.on"
-            @click="$emit('pick-assignee', person.name)"
+            @click="$emit('pick-assignee', person)"
           >
             <span class="gl-mds-drawer__assignee-avatar">{{ person.avatar }}</span>{{ person.name }}
           </button>
