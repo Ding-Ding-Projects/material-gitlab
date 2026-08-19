@@ -11,6 +11,9 @@ These instructions are specifically for those wanting to make UX design contribu
 
 The UX department at GitLab uses [Figma](https://www.figma.com/) for all of its designs, and you can see our [Design Repository documentation](https://gitlab.com/gitlab-org/gitlab-design/blob/master/README.md#getting-started) for details on working with our files.
 
+The Material shell implementation and its production mount contract are documented in
+[Material shell contracts](material-shells.md).
+
 You may leverage the [Pajamas UI Kit](https://www.figma.com/community/file/781156790581391771/component-library/component-library) in Figma to create mockups for your proposals. However, we will also gladly accept handmade drawings and sketches, wireframes, manipulated DOM screenshots, or prototypes. You can find design resources documentation in our [Design System](https://design.gitlab.com/). Use it to understand where and when to use common design solutions.
 
 ## Contributing to Pajamas
