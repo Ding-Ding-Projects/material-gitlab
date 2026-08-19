@@ -246,7 +246,7 @@ jobs:
           foreach ($application in @('material-gitlab-deployer', 'material-gitlab-instant')) {
             $assetsForApplication = @($manifest | Where-Object { $_.Application -eq $application })
             $fullPackages = @($assetsForApplication | Where-Object { $_.Asset -match '-full\.nupkg$' })
-            $setupAssets = @($assetsForApplication | Where-Object { $_.Asset -match '-Setup\.exe$' })
+            $setupAssets = @($assetsForApplication | Where-Object { $_.Asset -eq 'Setup.exe' })
             if ($setupAssets.Count -ne 1 -or -not ($assetsForApplication.Asset -contains 'RELEASES') -or $fullPackages.Count -lt 1) {
               throw "Refusing publication because $application lacks its complete Squirrel asset set."
             }
