@@ -13,6 +13,9 @@ test('resolves design contracts from the repository root', () => {
   const mainSource = fs.readFileSync(new URL('../src/main.cjs', import.meta.url), 'utf8');
   assert.match(mainSource, /path\.resolve\(__dirname, '\.\.', '\.\.', '\.\.'\)/);
   assert.doesNotMatch(mainSource, /path\.resolve\(__dirname, '\.\.', '\.\.'\);/);
+  assert.match(mainSource, /material-symbols-outlined\.woff2/);
+  assert.match(mainSource, /frame: false/);
+  assert.match(mainSource, /autoHideMenuBar: true/);
 });
 
 test('hand-written inventory contains exactly the 25 checked-in references', () => {

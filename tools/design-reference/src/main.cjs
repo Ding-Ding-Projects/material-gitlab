@@ -56,7 +56,8 @@ function freezeScript(tuple) {
 function transformDesign(source, row, tuple) {
   const reactPath = '/vendor/react.production.min.js';
   const reactDomPath = '/vendor/react-dom.production.min.js';
-  const injection = `<base href="/design/"><script src="${reactPath}"></script><script src="${reactDomPath}"></script>${freezeScript({ ...row, tuple, deterministic: row.deterministic })}`;
+  const localFonts = `<style data-design-reference-fonts>@font-face{font-family:'Material Symbols Outlined';font-style:normal;font-weight:100 700;src:url('/vendor/material-symbols-outlined.woff2') format('woff2')}.material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased}</style>`;
+  const injection = `<base href="/design/"><script src="${reactPath}"></script><script src="${reactDomPath}"></script>${localFonts}${freezeScript({ ...row, tuple, deterministic: row.deterministic })}`;
   return source.replace(/<head>/i, `<head>${injection}`);
 }
 
@@ -111,6 +112,13 @@ function startServer() {
           res.writeHead(200, { 'content-type': 'text/javascript; charset=utf-8', 'cache-control': 'no-store' });
           return fs.createReadStream(file).pipe(res);
         }
+        if (url.pathname === '/vendor/material-symbols-outlined.woff2') {
+          const packageRoot = path.dirname(require.resolve('material-symbols/package.json'));
+          const file = path.join(packageRoot, 'material-symbols-outlined.woff2');
+          if (!fs.existsSync(file)) return json(res, 404, { error: 'missing bundled Material Symbols font' });
+          res.writeHead(200, { 'content-type': 'font/woff2', 'cache-control': 'no-store' });
+          return fs.createReadStream(file).pipe(res);
+        }
         return json(res, 404, { error: 'not found' });
       } catch (error) {
         return json(res, 400, { error: error instanceof Error ? error.message : String(error) });
@@ -153,6 +161,8 @@ async function createWindow(port) {
     minWidth: 640,
     minHeight: 480,
     title: 'GitLab design reference',
+    frame: false,
+    autoHideMenuBar: true,
     backgroundColor: options.theme === 'dark' ? '#141218' : '#f4effa',
     webPreferences: { partition, contextIsolation: true, nodeIntegration: false, backgroundThrottling: false, sandbox: true },
   });
