@@ -163,3 +163,5 @@ CLAUDE.local.md
 # a stale duplicate of what CI produces.
 /site/dist/
 /tools/material-gitlab-deployer/dist/
+/tools/material-gitlab-instant/app-dist/
+/tools/material-gitlab-instant/installer/
