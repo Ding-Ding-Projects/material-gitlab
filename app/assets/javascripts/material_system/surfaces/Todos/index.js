@@ -21,6 +21,9 @@ export * from './data';
 export function initTodosSurface(el) {
   const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
   if (!mountEl) return null;
+  if (mountEl.dataset.materialTodos) {
+    window.__MATERIAL_TODOS_CONFIG__ = { ...window.__MATERIAL_TODOS_CONFIG__, ...mountEl.dataset };
+  }
   return new Vue({
     el: mountEl,
     render: (h) => h(Todos),

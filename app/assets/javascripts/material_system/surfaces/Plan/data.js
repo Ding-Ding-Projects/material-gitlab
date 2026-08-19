@@ -1,7 +1,9 @@
 /**
- * View model for the Plan surface, ported from Plan.dc.html's state and
- * renderVals(). Kept as plain data plus pure functions so a real API can
- * replace the fetch* functions without touching any component.
+ * View model and transport adapters for the Plan surface.
+ *
+ * The design reference is a visual contract only. Production data comes from
+ * routes supplied by the Rails mount (or the explicit function seams used by
+ * tests); this module intentionally has no fixture or seed fallback.
  */
 
 export const PLAN_TABS = Object.freeze(['Milestones', 'Iterations', 'Wiki', 'Requirements']);
@@ -22,88 +24,92 @@ export const STATUS_META = Object.freeze({
   missing: ['var(--gl-mds-warnc)', 'var(--gl-mds-warn)'],
 });
 
-function clone(value) {
-  return JSON.parse(JSON.stringify(value));
+const rootConfig = () => {
+  if (typeof window === 'undefined') return {};
+  const configured = window.__MATERIAL_PLAN_ENDPOINTS__;
+  if (configured && typeof configured === 'object') return configured;
+  const root = document.querySelector('[data-material-plan]');
+  return root ? { ...root.dataset } : {};
+};
+
+export function endpointFor(resource, options = {}) {
+  const config = options.endpoints || rootConfig();
+  const endpoint = options.endpoint || config[resource] || config[`${resource}Endpoint`];
+  if (!endpoint) {
+    throw new Error(`Plan ${resource} route is not configured by the server mount`);
+  }
+  return endpoint;
 }
 
-const DEFAULT_MILESTONES = [
-  { id: 'ms-17-3', name: '17.3 — Regex everywhere', sub: 'Aug 1 – Aug 31 · 11 issues', pct: 45, state: 'active' },
-  { id: 'ms-17-2', name: '17.2 — Material milestone', sub: 'Jul 1 – Jul 31 · 34 issues', pct: 100, state: 'closed' },
-  { id: 'ms-17-4', name: '17.4 — Agent memory GA', sub: 'Sep 1 – Sep 30 · 10 issues', pct: 10, state: 'upcoming' },
-];
-
-const DEFAULT_ITERATIONS = [
-  { id: 'it-34', name: 'Sprint 34', sub: 'Aug 11 – Aug 22 · current', pct: 38, state: 'active' },
-  { id: 'it-33', name: 'Sprint 33', sub: 'Jul 28 – Aug 8', pct: 92, state: 'closed' },
-  { id: 'it-35', name: 'Sprint 35', sub: 'Aug 25 – Sep 5', pct: 0, state: 'upcoming' },
-];
-
-const DEFAULT_REQUIREMENTS = [
-  { id: 'rq-1', name: 'REQ-1 Search accepts valid ECMAScript regex', sub: 'satisfied by search/regex.spec.js', status: 'satisfied' },
-  { id: 'rq-2', name: 'REQ-2 Board drag persists ordering across reload', sub: 'verified in nightly run', status: 'satisfied' },
-  { id: 'rq-3', name: 'REQ-3 All badges meet WCAG AA in both themes', sub: 'failing for warning badge in dark', status: 'failed' },
-  { id: 'rq-4', name: 'REQ-4 Palette reachable from every surface', sub: 'awaiting test', status: 'missing' },
-];
-
-const DEFAULT_WIKI_PAGES = [
-  {
-    id: 'wiki-home',
-    title: 'Home',
-    body:
-      'Welcome to the phoenix-api wiki.\n\nStart with Development setup, then read the MD3 rewrite notes. The regex search spec documents the builder contract shared by every surface.',
-    meta: 'last edited by dweiss · 3h ago',
-  },
-  {
-    id: 'wiki-dev-setup',
-    title: 'Development setup',
-    body: '1. bundle install && yarn install\n2. bin/rails db:setup\n3. bin/rails s + yarn dev\n\nUse mise for toolchain pins. Runner images match .gitlab-ci.yml.',
-    meta: 'last edited by junpark · 2d ago',
-  },
-  {
-    id: 'wiki-md3-notes',
-    title: 'MD3 rewrite notes',
-    body:
-      'Token layer lives in app/assets/stylesheets/tokens.\n\nRules:\n- container pairs for all status colors\n- pill nav, 20px card radius\n- no raw hex outside the token layer',
-    meta: 'last edited by dweiss · 1d ago',
-  },
-  {
-    id: 'wiki-regex-spec',
-    title: 'Regex search spec',
-    body:
-      'Every search bar exposes:\n- a .* mode toggle\n- the shared builder (flags i g m s, snippets, live preview, capture groups)\n- invalid patterns fall back to substring match and surface an error chip',
-    meta: 'last edited by junpark · 5h ago',
-  },
-];
-
-export function createInitialState(overrides = {}) {
-  return {
-    milestones: clone(DEFAULT_MILESTONES),
-    iterations: clone(DEFAULT_ITERATIONS),
-    requirements: clone(DEFAULT_REQUIREMENTS),
-    wiki: clone(DEFAULT_WIKI_PAGES),
-    ...overrides,
-  };
+export async function requestJson(url, options = {}) {
+  const { fetcher: injectedFetcher, endpoint: _endpoint, ...requestOptions } = options;
+  const fetcher = injectedFetcher || (typeof fetch === 'function' ? fetch : null);
+  if (!fetcher) throw new Error('Plan data transport is unavailable');
+  const response = await fetcher(url, {
+    credentials: 'same-origin',
+    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...(options.headers || {}) },
+    ...requestOptions,
+  });
+  if (!response.ok) {
+    const error = new Error(`Plan data request failed (${response.status})`);
+    error.status = response.status;
+    throw error;
+  }
+  return response.json();
 }
 
-/**
- * Default local loaders. Mirror the design's inline mock state — each
- * resolves the bundled fixture. Replace by passing matching props into
- * <Plan fetch-milestones="..."> etc. to point the surface at a real API.
- */
-export async function fetchMilestones() {
-  return clone(DEFAULT_MILESTONES);
+const listPayload = (payload) => {
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.nodes)) return payload.nodes;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.data?.nodes)) return payload.data.nodes;
+  if (Array.isArray(payload?.data?.items)) return payload.data.items;
+  return [];
+};
+const normalizeEntity = (entity) => ({
+  ...entity,
+  id: entity.id ?? entity.iid ?? entity.reference,
+  name: entity.name ?? entity.title ?? entity.label ?? '',
+  sub: entity.sub ?? entity.description ?? entity.dueDate ?? '',
+  pct: entity.pct ?? entity.progress ?? undefined,
+  state: entity.state ?? entity.status ?? 'upcoming',
+  status: entity.status,
+});
+
+export async function fetchResource(resource, options = {}) {
+  const payload = await requestJson(endpointFor(resource, options), options);
+  return listPayload(payload).map(normalizeEntity);
 }
 
-export async function fetchIterations() {
-  return clone(DEFAULT_ITERATIONS);
+export const fetchMilestones = (options = {}) => fetchResource('milestones', options);
+export const fetchIterations = (options = {}) => fetchResource('iterations', options);
+export const fetchRequirements = (options = {}) => fetchResource('requirements', options);
+
+export async function fetchWikiPages(options = {}) {
+  const payload = await requestJson(endpointFor('wiki', options), options);
+  return listPayload(payload).map((page) => ({
+    ...page,
+    id: page.id ?? page.slug ?? page.title,
+    title: page.title ?? page.name ?? '',
+    body: page.content ?? page.body ?? page.format ?? '',
+    meta: page.updatedAt || page.updated_at || page.author?.name || '',
+  }));
 }
 
-export async function fetchRequirements() {
-  return clone(DEFAULT_REQUIREMENTS);
+export async function mutatePlanEntity({ resource, id, changes, options = {} }) {
+  const endpoint = endpointFor(resource, options).replace(/\/$/, '') + `/${encodeURIComponent(id)}`;
+  return requestJson(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(changes), headers: { 'Content-Type': 'application/json' } });
 }
 
-export async function fetchWikiPages() {
-  return clone(DEFAULT_WIKI_PAGES);
+export async function saveWikiPage({ id, body, options = {} }) {
+  const endpoint = endpointFor('wiki', options).replace(/\/$/, '') + `/${encodeURIComponent(id)}`;
+  return requestJson(endpoint, { ...options, method: 'PUT', body: JSON.stringify({ content: body }), headers: { 'Content-Type': 'application/json' } });
+}
+
+export async function deletePlanEntity({ resource, id, options = {} }) {
+  const endpoint = endpointFor(resource, options).replace(/\/$/, '') + `/${encodeURIComponent(id)}`;
+  return requestJson(endpoint, { ...options, method: 'DELETE' });
 }
 
 /** Builds a row view model for a milestone/iteration/requirement, mirrors mkRow(). */

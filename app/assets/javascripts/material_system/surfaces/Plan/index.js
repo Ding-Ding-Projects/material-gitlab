@@ -21,12 +21,14 @@ export * from './regexPlanSearch';
 
 /**
  * Mounts the Plan surface into `el`. `props` may override any of Plan's
- * fetch* functions to point the surface at a real API instead of the
- * bundled mock data.
+ * fetch* functions to point the surface at a server-backed API.
  */
 export function mountPlan(el, props = {}) {
   const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
   if (!mountEl) return null;
+  if (mountEl.dataset.materialPlan) {
+    window.__MATERIAL_PLAN_ENDPOINTS__ = { ...window.__MATERIAL_PLAN_ENDPOINTS__, ...mountEl.dataset };
+  }
   return new Vue({
     name: 'PlanRoot',
     render: (h) => h(Plan, { props }),

@@ -36,6 +36,11 @@
 
       <main class="gl-mds-plan__content">
         <div v-if="loading" class="gl-mds-plan__loading" role="status">Loading…</div>
+        <div v-else-if="loadError" class="gl-mds-plan__error" role="alert">
+          <strong>Plan data could not be loaded.</strong>
+          <span>{{ loadError.message }}</span>
+          <button type="button" @click="loadAll">Retry</button>
+        </div>
         <template v-else>
           <wiki-panel
             v-if="activeTab === 'Wiki'"
@@ -100,6 +105,9 @@ import {
   fetchIterations as defaultFetchIterations,
   fetchRequirements as defaultFetchRequirements,
   fetchWikiPages as defaultFetchWikiPages,
+  mutatePlanEntity as defaultMutatePlanEntity,
+  deletePlanEntity as defaultDeletePlanEntity,
+  saveWikiPage as defaultSaveWikiPage,
 } from './data';
 
 const ENTITY_FIELD_BY_TAB = { Milestones: 'state', Iterations: 'state', Requirements: 'status' };
@@ -122,6 +130,9 @@ export default {
     fetchIterations: { type: Function, default: defaultFetchIterations },
     fetchRequirements: { type: Function, default: defaultFetchRequirements },
     fetchWikiPages: { type: Function, default: defaultFetchWikiPages },
+    mutateEntity: { type: Function, default: defaultMutatePlanEntity },
+    deleteEntity: { type: Function, default: defaultDeletePlanEntity },
+    saveWiki: { type: Function, default: defaultSaveWikiPage },
     avatarInitials: { type: String, default: 'JD' },
   },
   data() {
@@ -141,6 +152,7 @@ export default {
       wikiEditing: false,
       selection: { Milestones: [], Iterations: [], Requirements: [] },
       confirmState: null,
+      loadError: null,
     };
   },
   computed: {
@@ -232,17 +244,27 @@ export default {
   methods: {
     async loadAll() {
       this.loading = true;
-      const [milestones, iterations, requirements, wikiPages] = await Promise.all([
-        this.fetchMilestones(),
-        this.fetchIterations(),
-        this.fetchRequirements(),
-        this.fetchWikiPages(),
-      ]);
-      this.milestones = milestones;
-      this.iterations = iterations;
-      this.requirements = requirements;
-      this.wikiPages = wikiPages;
-      this.activeWikiPageId = wikiPages[0] ? wikiPages[0].id : '';
+      this.loadError = null;
+      try {
+        const [milestones, iterations, requirements, wikiPages] = await Promise.all([
+          this.fetchMilestones(),
+          this.fetchIterations(),
+          this.fetchRequirements(),
+          this.fetchWikiPages(),
+        ]);
+        this.milestones = milestones;
+        this.iterations = iterations;
+        this.requirements = requirements;
+        this.wikiPages = wikiPages;
+        this.activeWikiPageId = wikiPages[0] ? wikiPages[0].id : '';
+      } catch (error) {
+        this.loadError = error;
+        notificationCenter.notify({
+          title: 'Plan unavailable',
+          message: error?.message || 'The server could not load planning records.',
+          severity: 'error',
+        });
+      }
       this.loading = false;
     },
     selectTab(tab) {
@@ -283,8 +305,12 @@ export default {
     },
     toggleWikiEdit() {
       if (this.wikiEditing) {
-        this.wikiPages = markWikiSaved(this.wikiPages, this.activeWikiPageId);
-        notificationCenter.notify({ title: 'Wiki page saved', message: `"${this.activePage.title}" was updated.`, severity: 'success' });
+        this.saveWiki({ id: this.activePage.id, body: this.activePage.body })
+          .then(() => {
+            this.wikiPages = markWikiSaved(this.wikiPages, this.activeWikiPageId);
+            notificationCenter.notify({ title: 'Wiki page saved', message: `"${this.activePage.title}" was updated.`, severity: 'success' });
+          })
+          .catch((error) => notificationCenter.notify({ title: 'Wiki page not saved', message: error.message, severity: 'error' }));
       }
       this.wikiEditing = !this.wikiEditing;
     },
@@ -327,9 +353,13 @@ export default {
       const value = BULK_VALUE_BY_ACTION[actionId];
       if (!field || !value) return;
       const listKey = tab.toLowerCase();
-      this[listKey] = withField(this[listKey], ids, field, value);
-      notificationCenter.notify({ title: `${tab} updated`, message: `${ids.length} ${tab.toLowerCase()} marked ${value}.`, severity: 'success' });
-      this.selection = { ...this.selection, [tab]: [] };
+      Promise.all(ids.map((id) => this.mutateEntity({ resource: tab.toLowerCase(), id, changes: { [field]: value } })))
+        .then(() => {
+          this[listKey] = withField(this[listKey], ids, field, value);
+          notificationCenter.notify({ title: `${tab} updated`, message: `${ids.length} ${tab.toLowerCase()} marked ${value}.`, severity: 'success' });
+          this.selection = { ...this.selection, [tab]: [] };
+        })
+        .catch((error) => notificationCenter.notify({ title: `${tab} was not updated`, message: error.message, severity: 'error' }));
     },
     requestDeleteRequirements(ids) {
       this.confirmState = {
@@ -337,14 +367,18 @@ export default {
         message: `This permanently removes ${ids.length} requirement${ids.length === 1 ? '' : 's'} from this project. This cannot be undone.`,
         confirmLabel: 'Delete',
         onConfirm: () => {
-          this.requirements = withoutIds(this.requirements, ids);
-          this.selection = { ...this.selection, Requirements: [] };
-          notificationCenter.notify({
-            title: 'Requirements deleted',
-            message: `${ids.length} requirement${ids.length === 1 ? '' : 's'} removed.`,
-            severity: 'success',
-          });
-          this.confirmState = null;
+          Promise.all(ids.map((id) => this.deleteEntity({ resource: 'requirements', id })))
+            .then(() => {
+              this.requirements = withoutIds(this.requirements, ids);
+              this.selection = { ...this.selection, Requirements: [] };
+              notificationCenter.notify({
+                title: 'Requirements deleted',
+                message: `${ids.length} requirement${ids.length === 1 ? '' : 's'} removed.`,
+                severity: 'success',
+              });
+              this.confirmState = null;
+            })
+            .catch((error) => notificationCenter.notify({ title: 'Requirements were not deleted', message: error.message, severity: 'error' }));
         },
       };
     },
