@@ -6,6 +6,8 @@ description: SSH key limits, 2FA, tokens, hardening.
 title: Secure GitLab
 ---
 
+- [Material security surfaces](material_security_surfaces.md)
+
 {{< details >}}
 
 - Tier: Free, Premium, Ultimate

@@ -1,10 +1,10 @@
 /**
  * View model for the Deploy surface (Releases, Feature flags, Packages, Containers),
  * ported from Deploy.dc.html's state + renderVals(). Field names mirror GitLab's real
- * Releases, Feature Flags, Package Registry, and Container Registry API payloads so a
- * live fetch can replace each `createInitial*()` fixture without touching the components
- * that consume them.
+ * Releases, Feature Flags, Package Registry, and Container Registry API payloads.
  */
+
+import { assertCollection, requestJson, requireEndpoint } from '../live-data';
 
 export const DEPLOY_TABS = Object.freeze([
   { id: 'releases', label: 'Releases' },
@@ -147,4 +147,34 @@ export function formatBytes(bytes) {
   if (!Number.isFinite(bytes) || bytes < 0) return '';
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(bytes >= 100 * 1024 * 1024 ? 0 : 1)} MB`;
+}
+
+/** Fetch live Deploy collections. There is intentionally no fixture fallback. */
+export async function fetchDeployData({ endpoints, fetchImpl } = {}) {
+  const [releases, flags, packages, containers] = await Promise.all([
+    requestJson(requireEndpoint(endpoints, 'releases'), { fetchImpl }),
+    requestJson(requireEndpoint(endpoints, 'featureFlags'), { fetchImpl }),
+    requestJson(requireEndpoint(endpoints, 'packages'), { fetchImpl }),
+    requestJson(requireEndpoint(endpoints, 'containers'), { fetchImpl }),
+  ]);
+  return {
+    releases: assertCollection(releases, 'releases'),
+    flags: assertCollection(flags, 'feature flags'),
+    packages: assertCollection(packages, 'packages'),
+    containers: assertCollection(containers, 'containers'),
+  };
+}
+
+export function updateFeatureFlag({ endpoints, id, enabled, fetchImpl } = {}) {
+  return requestJson(requireEndpoint(endpoints, 'updateFeatureFlag').replace(':id', encodeURIComponent(id)), {
+    fetchImpl,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ enabled }),
+  });
+}
+
+export function deleteDeployItem({ endpoints, kind, id, fetchImpl } = {}) {
+  const endpoint = requireEndpoint(endpoints, kind).replace(':id', encodeURIComponent(id));
+  return requestJson(endpoint, { fetchImpl, method: 'DELETE' });
 }

@@ -3,8 +3,10 @@
  * `Security.dc.html` DCLogic state. Field names track GitLab's real vulnerability
  * data (severity, scanner, location, state, identifiers, detectedAt, description)
  * so a real fetch (e.g. the project `vulnerabilities` GraphQL connection) can
- * replace `createSeedVulnerabilities()` without any component needing to change.
+ * The test-only fixture factory is not used by the production mount.
  */
+
+import { assertCollection, requestJson, requireEndpoint } from '../live-data';
 
 export const SEVERITIES = Object.freeze(['critical', 'high', 'medium', 'low']);
 
@@ -156,4 +158,19 @@ export function createMatcher(query, regexMode) {
 /** Sample lines for the regex builder's corpus preview, one per vulnerability. */
 export function buildRegexCorpus(vulnerabilities) {
   return vulnerabilities.map((vuln) => `${vuln.severity}  ${vuln.title}  ${vuln.location}`);
+}
+
+/** Fetch the vulnerability connection from the host's real API/GraphQL adapter. */
+export async function fetchVulnerabilities({ endpoint, fetchImpl } = {}) {
+  const payload = await requestJson(requireEndpoint({ vulnerabilities: endpoint }, 'vulnerabilities'), { fetchImpl });
+  return assertCollection(payload, 'vulnerabilities');
+}
+
+export async function updateVulnerabilityStatus({ endpoint, id, status, fetchImpl } = {}) {
+  return requestJson(requireEndpoint({ vulnerability: endpoint }, 'vulnerability').replace(':id', encodeURIComponent(id)), {
+    fetchImpl,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  });
 }

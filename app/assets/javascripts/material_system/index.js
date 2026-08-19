@@ -21,6 +21,11 @@ export * from './school-mode';
 export * from './status-hub';
 export * from './tabs';
 export * from './vocabulary';
+export { Deploy as DeploySurface, mountDeploy } from './surfaces/Deploy';
+export { OperateSurface, mountOperate } from './surfaces/Operate';
+export { MonitorSurface, mountMonitor } from './surfaces/Monitor';
+export { SecureSurface, mountSecureSurface } from './surfaces/Secure';
+export { SecurityDashboard, mountSecurityDashboard } from './surfaces/Security';
 
 export { default as notificationCenter } from './notifications';
 export { default as RegexBuilder } from './regex-builder';

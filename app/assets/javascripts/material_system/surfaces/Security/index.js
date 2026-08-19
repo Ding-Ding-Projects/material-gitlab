@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import SecurityDashboard from './Security.vue';
+import { readSurfaceConfig, resolveSurfaceElement, parseSurfacePayload } from '../live-data';
 
 import './security.scss';
 
@@ -25,13 +26,19 @@ export * from './data';
  * that owns the sidebar, per the design's `dc-import name="Sidebar"` block.
  */
 export function mountSecurityDashboard(selector = '#js-security-dashboard') {
-  const el = typeof selector === 'string' ? document.querySelector(selector) : selector;
+  const el = resolveSurfaceElement(selector, '#js-security-dashboard');
   if (!el) return null;
 
+  const payload = parseSurfacePayload(el);
   return new Vue({
     el,
     name: 'SecurityDashboardRoot',
-    render: (h) => h(SecurityDashboard),
+    render: (h) => h(SecurityDashboard, {
+      props: {
+        endpoints: readSurfaceConfig(el),
+        initialVulnerabilities: Array.isArray(payload) ? payload : payload?.vulnerabilities || [],
+      },
+    }),
   });
 }
 
