@@ -6,6 +6,8 @@
  * client can replace the body without touching call sites in Secure.vue.
  */
 
+import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+
 export const SECURE_TAB_IDS = Object.freeze({
   DEPENDENCIES: 'dependencies',
   AUDIT_EVENTS: 'audit-events',
@@ -28,9 +30,8 @@ export const ROW_TONES = Object.freeze({
   WARNING: 'warning',
 });
 
-// Mock seeds mirror Secure.dc.html's state exactly. A real integration
-// swaps the fetch* function bodies below for REST/GraphQL calls while
-// keeping the same resolved shape.
+// Test-only fixture factories mirror Secure.dc.html's shape. Production
+// entries never call these factories; they require host-provided endpoints.
 const seedDependencies = () => [
   {
     id: 'dep-1',
@@ -83,37 +84,43 @@ const seedOnDemandScans = () => [
   { id: 'scan-3', name: 'Container scan — v17.2.0 image', sub: 'on-demand', status: 'ready' },
 ];
 
-const withLatency = (value) => Promise.resolve(value);
-
-export function fetchDependencies() {
-  return withLatency(seedDependencies());
+async function fetchCollection(endpoint, label, fetchImpl) {
+  const payload = await requestJson(endpoint, { fetchImpl });
+  return assertCollection(payload, label);
 }
 
-export function fetchAuditEvents() {
-  return withLatency(seedAuditEvents());
+export function fetchDependencies({ endpoint, fetchImpl } = {}) {
+  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'dependencies', fetchImpl);
 }
 
-export function fetchScanPolicies() {
-  return withLatency(seedScanPolicies());
+export function fetchAuditEvents({ endpoint, fetchImpl } = {}) {
+  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'audit events', fetchImpl);
 }
 
-export function fetchOnDemandScans() {
-  return withLatency(seedOnDemandScans());
+export function fetchScanPolicies({ endpoint, fetchImpl } = {}) {
+  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'scan policies', fetchImpl);
 }
 
-/** Real API integration point: flip enforcement for one scan policy. */
-export function updateScanPolicyEnforcement(policyId, enforced) {
-  return withLatency({ id: policyId, enforced });
+export function fetchOnDemandScans({ endpoint, fetchImpl } = {}) {
+  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'on-demand scans', fetchImpl);
 }
 
-/** Real API integration point: start or cancel one on-demand scan. */
-export function updateScanStatus(scanId, status) {
-  return withLatency({ id: scanId, status });
+export function updateScanPolicyEnforcement(policyId, enforced, { endpoint, fetchImpl } = {}) {
+  return requestJson(requireEndpoint({ value: endpoint }, 'value').replace(':id', encodeURIComponent(policyId)), {
+    fetchImpl, method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enforced }),
+  });
 }
 
-/** Real API integration point: file a tracking issue for selected dependencies. */
-export function createIssuesForDependencies(dependencyIds) {
-  return withLatency({ created: dependencyIds.length });
+export function updateScanStatus(scanId, status, { endpoint, fetchImpl } = {}) {
+  return requestJson(requireEndpoint({ value: endpoint }, 'value').replace(':id', encodeURIComponent(scanId)), {
+    fetchImpl, method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
+  });
+}
+
+export function createIssuesForDependencies(dependencyIds, { endpoint, fetchImpl } = {}) {
+  return requestJson(requireEndpoint({ value: endpoint }, 'value'), {
+    fetchImpl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dependencyIds }),
+  });
 }
 
 export function toDependencyRow(dependency) {

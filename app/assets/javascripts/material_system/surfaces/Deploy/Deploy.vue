@@ -1,5 +1,5 @@
 <template>
-  <div class="dp-surface" :data-theme="themeAttr">
+  <div class="dp-surface" data-surface-id="surface.deploy" :data-theme="themeAttr">
     <div class="dp-shell">
       <DeploySidebar :items="sidebarItems" :sub-items="subNavItems" :active-tab-id="activeTabId" @select-tab="selectTab" />
 
@@ -28,7 +28,9 @@
           <DeployTabs :tabs="tabs" :active-id="activeTabId" :instance-id="instanceId" @select="selectTab" />
         </div>
 
-        <DeployRowList
+        <p v-if="loading" class="dp-live-state" role="status">Loading live Deploy data…</p>
+        <p v-else-if="loadError" class="dp-live-state dp-live-state--error" role="alert">{{ loadError }} <button type="button" @click="loadLiveData">Retry</button></p>
+        <DeployRowList v-else
           :key="activeTabId"
           :instance-id="instanceId"
           :rows="rows"
@@ -94,10 +96,6 @@ import {
   DEPLOY_TABS,
   DEPLOY_SIDEBAR_ITEMS,
   DEPLOY_SUBNAV,
-  createInitialReleases,
-  createInitialFlags,
-  createInitialPackages,
-  createInitialImages,
   createSearchMatcher,
   releaseCorpus,
   flagCorpus,
@@ -105,6 +103,9 @@ import {
   containerCorpus,
   formatRelativeTime,
   formatBytes,
+  fetchDeployData,
+  updateFeatureFlag,
+  deleteDeployItem,
 } from './data';
 
 const ITEM_LABELS = Object.freeze({
@@ -127,11 +128,14 @@ export default {
     NotificationHost,
   },
   props: {
-    // Swap these for a real API fetch by passing already-loaded arrays into the surface.
-    initialReleases: { type: Array, default: () => createInitialReleases() },
-    initialFlags: { type: Array, default: () => createInitialFlags() },
-    initialPackages: { type: Array, default: () => createInitialPackages() },
-    initialImages: { type: Array, default: () => createInitialImages() },
+    // Arrays are accepted for isolated tests only. Production mounts pass
+    // endpoints and start with an honest empty/loading state.
+    initialReleases: { type: Array, default: () => [] },
+    initialFlags: { type: Array, default: () => [] },
+    initialPackages: { type: Array, default: () => [] },
+    initialImages: { type: Array, default: () => [] },
+    endpoints: { type: Object, default: () => ({}) },
+    fetchImpl: { type: Function, default: undefined },
     // Optional standalone notification centre override, for host-app wiring/tests.
     notifications: { type: Object, default: () => notificationCenter },
   },
@@ -150,6 +154,8 @@ export default {
       images: this.initialImages,
       selection: { releases: [], 'feature-flags': [], packages: [], containers: [] },
       confirm: null,
+      loading: Boolean(Object.keys(this.endpoints).length),
+      loadError: null,
     };
   },
   computed: {
@@ -275,6 +281,7 @@ export default {
     },
   },
   created() {
+    if (Object.keys(this.endpoints).length) this.loadLiveData();
     this.unsubscribeSettings = subscribeSettings(() => {
       this.themeAttr = this.resolveThemeAttr();
     });
@@ -296,6 +303,21 @@ export default {
     if (this.unsubscribeSettings) this.unsubscribeSettings();
   },
   methods: {
+    async loadLiveData() {
+      this.loading = true;
+      this.loadError = null;
+      try {
+        const live = await fetchDeployData({ endpoints: this.endpoints, fetchImpl: this.fetchImpl });
+        this.releases = live.releases;
+        this.flags = live.flags;
+        this.packages = live.packages;
+        this.images = live.containers;
+      } catch (error) {
+        this.loadError = error instanceof Error ? error.message : 'Live Deploy data could not be loaded.';
+      } finally {
+        this.loading = false;
+      }
+    },
     resolveThemeAttr() {
       const { theme } = loadSettings();
       return theme === 'light' || theme === 'dark' ? theme : undefined;
@@ -358,6 +380,15 @@ export default {
       const flag = this.flags.find((f) => f.id === id);
       if (!flag) return;
       const next = !flag.on;
+      if (Object.keys(this.endpoints).length) {
+        updateFeatureFlag({ endpoints: this.endpoints, id, enabled: next, fetchImpl: this.fetchImpl })
+          .then(() => {
+            this.flags = this.flags.map((f) => (f.id === id ? { ...f, on: next } : f));
+            this.notify({ title: flag.name, message: `${flag.name} is now ${next ? 'enabled' : 'disabled'}.`, severity: 'success' });
+          })
+          .catch((error) => this.notify({ title: 'Update failed', message: error.message, severity: 'error' }));
+        return;
+      }
       this.flags = this.flags.map((f) => (f.id === id ? { ...f, on: next } : f));
       this.notify({ title: flag.name, message: `${flag.name} is now ${next ? 'enabled' : 'disabled'}.`, severity: 'success' });
     },
@@ -438,11 +469,16 @@ export default {
     },
     deleteRows(kind, ids) {
       const idSet = new Set(ids);
-      if (kind === 'packages') this.packages = this.packages.filter((p) => !idSet.has(p.id));
-      else this.images = this.images.filter((image) => !idSet.has(image.id));
-      this.setSelection(this.selectedIds.filter((id) => !idSet.has(id)));
-      const noun = kind === 'packages' ? 'package' : 'container image';
-      this.notify({ title: 'Deleted', message: `${ids.length} ${noun}${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
+      const commit = Object.keys(this.endpoints).length
+        ? Promise.all(ids.map((id) => deleteDeployItem({ endpoints: this.endpoints, kind, id, fetchImpl: this.fetchImpl })))
+        : Promise.resolve();
+      commit.then(() => {
+        if (kind === 'packages') this.packages = this.packages.filter((p) => !idSet.has(p.id));
+        else this.images = this.images.filter((image) => !idSet.has(image.id));
+        this.setSelection(this.selectedIds.filter((id) => !idSet.has(id)));
+        const noun = kind === 'packages' ? 'package' : 'container image';
+        this.notify({ title: 'Deleted', message: `${ids.length} ${noun}${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
+      }).catch((error) => this.notify({ title: 'Delete failed', message: error.message, severity: 'error' }));
     },
     confirmAction() {
       if (this.confirm && typeof this.confirm.run === 'function') this.confirm.run();

@@ -1,5 +1,5 @@
 <template>
-  <div class="secure-surface" :class="{ 'secure-surface--dark': isDark }">
+  <div class="secure-surface" data-surface-id="surface.secure" :class="{ 'secure-surface--dark': isDark }">
     <slot name="sidebar" />
     <div class="secure-surface__main">
       <secure-top-bar
@@ -135,6 +135,8 @@ export default {
     // Real route to the Security dashboard surface. Left null when the host
     // app has not wired routing yet; see SecurePageHeader for the fallback.
     securityDashboardPath: { type: String, default: null },
+    endpoints: { type: Object, default: () => ({}) },
+    fetchImpl: { type: Function, default: undefined },
   },
   data() {
     return {
@@ -250,10 +252,10 @@ export default {
   },
   methods: {
     loadAllTabs() {
-      this.loadTab(SECURE_TAB_IDS.DEPENDENCIES, fetchDependencies, 'dependencies');
-      this.loadTab(SECURE_TAB_IDS.AUDIT_EVENTS, fetchAuditEvents, 'auditEvents');
-      this.loadTab(SECURE_TAB_IDS.SCAN_POLICIES, fetchScanPolicies, 'scanPolicies');
-      this.loadTab(SECURE_TAB_IDS.ON_DEMAND_SCANS, fetchOnDemandScans, 'onDemandScans');
+      this.loadTab(SECURE_TAB_IDS.DEPENDENCIES, () => fetchDependencies({ endpoint: this.endpoints.dependencies, fetchImpl: this.fetchImpl }), 'dependencies');
+      this.loadTab(SECURE_TAB_IDS.AUDIT_EVENTS, () => fetchAuditEvents({ endpoint: this.endpoints.auditEvents, fetchImpl: this.fetchImpl }), 'auditEvents');
+      this.loadTab(SECURE_TAB_IDS.SCAN_POLICIES, () => fetchScanPolicies({ endpoint: this.endpoints.scanPolicies, fetchImpl: this.fetchImpl }), 'scanPolicies');
+      this.loadTab(SECURE_TAB_IDS.ON_DEMAND_SCANS, () => fetchOnDemandScans({ endpoint: this.endpoints.onDemandScans, fetchImpl: this.fetchImpl }), 'onDemandScans');
     },
     loadTab(tabId, fetchFn, dataKey) {
       this.$set(this.loading, tabId, true);
@@ -270,10 +272,10 @@ export default {
     },
     retryCurrentTab() {
       const loaders = {
-        [SECURE_TAB_IDS.DEPENDENCIES]: [fetchDependencies, 'dependencies'],
-        [SECURE_TAB_IDS.AUDIT_EVENTS]: [fetchAuditEvents, 'auditEvents'],
-        [SECURE_TAB_IDS.SCAN_POLICIES]: [fetchScanPolicies, 'scanPolicies'],
-        [SECURE_TAB_IDS.ON_DEMAND_SCANS]: [fetchOnDemandScans, 'onDemandScans'],
+        [SECURE_TAB_IDS.DEPENDENCIES]: [() => fetchDependencies({ endpoint: this.endpoints.dependencies, fetchImpl: this.fetchImpl }), 'dependencies'],
+        [SECURE_TAB_IDS.AUDIT_EVENTS]: [() => fetchAuditEvents({ endpoint: this.endpoints.auditEvents, fetchImpl: this.fetchImpl }), 'auditEvents'],
+        [SECURE_TAB_IDS.SCAN_POLICIES]: [() => fetchScanPolicies({ endpoint: this.endpoints.scanPolicies, fetchImpl: this.fetchImpl }), 'scanPolicies'],
+        [SECURE_TAB_IDS.ON_DEMAND_SCANS]: [() => fetchOnDemandScans({ endpoint: this.endpoints.onDemandScans, fetchImpl: this.fetchImpl }), 'onDemandScans'],
       }[this.activeTabId];
       this.loadTab(this.activeTabId, loaders[0], loaders[1]);
     },
@@ -445,12 +447,12 @@ export default {
       });
     },
     createIssuesFor(ids) {
-      return createIssuesForDependencies(ids).then((result) => {
+      return createIssuesForDependencies(ids, { endpoint: this.endpoints.createIssues, fetchImpl: this.fetchImpl }).then((result) => {
         this.notify({ severity: 'success', title: 'Issues created', message: `Drafted ${result.created} tracking issues.` });
       });
     },
     bulkSetPolicyEnforced(ids, enforced) {
-      return Promise.all(ids.map((id) => updateScanPolicyEnforcement(id, enforced))).then(() => {
+      return Promise.all(ids.map((id) => updateScanPolicyEnforcement(id, enforced, { endpoint: this.endpoints.updatePolicy, fetchImpl: this.fetchImpl }))).then(() => {
         this.scanPolicies = this.scanPolicies.map((policy) =>
           ids.includes(policy.id) ? { ...policy, enforced } : policy,
         );
@@ -462,7 +464,7 @@ export default {
       });
     },
     bulkSetScanStatus(ids, status) {
-      return Promise.all(ids.map((id) => updateScanStatus(id, status))).then(() => {
+      return Promise.all(ids.map((id) => updateScanStatus(id, status, { endpoint: this.endpoints.updateScan, fetchImpl: this.fetchImpl }))).then(() => {
         this.onDemandScans = this.onDemandScans.map((scan) => (ids.includes(scan.id) ? { ...scan, status } : scan));
         this.notify({
           severity: status === 'running' ? 'info' : 'warning',

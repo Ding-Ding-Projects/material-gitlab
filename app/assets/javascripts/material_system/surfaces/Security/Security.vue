@@ -11,12 +11,13 @@ import NotificationStack from './components/NotificationStack.vue';
 import {
   SEVERITIES,
   CLOSED_STATUSES,
-  createSeedVulnerabilities,
   createMatcher,
   buildRegexCorpus,
   severityColorVars,
   severityLabel,
   vulnerabilitySearchText,
+  fetchVulnerabilities,
+  updateVulnerabilityStatus,
 } from './data';
 
 /**
@@ -36,6 +37,11 @@ export default {
     CommandPalette,
     NotificationStack,
   },
+  props: {
+    initialVulnerabilities: { type: Array, default: () => [] },
+    endpoints: { type: Object, default: () => ({}) },
+    fetchImpl: { type: Function, default: undefined },
+  },
   data() {
     const settings = loadSettings();
     return {
@@ -49,7 +55,9 @@ export default {
       severityFilter: {},
       selectedMap: {},
       issueCreatedMap: {},
-      vulnerabilities: createSeedVulnerabilities(),
+      vulnerabilities: this.initialVulnerabilities,
+      loading: Boolean(this.endpoints.vulnerabilities),
+      loadError: null,
     };
   },
   computed: {
@@ -134,6 +142,7 @@ export default {
     },
   },
   mounted() {
+    if (this.endpoints.vulnerabilities) this.loadLiveVulnerabilities();
     this.onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -168,6 +177,17 @@ export default {
     }
   },
   methods: {
+    async loadLiveVulnerabilities() {
+      this.loading = true;
+      this.loadError = null;
+      try {
+        this.vulnerabilities = await fetchVulnerabilities({ endpoint: this.endpoints.vulnerabilities, fetchImpl: this.fetchImpl });
+      } catch (error) {
+        this.loadError = error instanceof Error ? error.message : 'Live vulnerability data could not be loaded.';
+      } finally {
+        this.loading = false;
+      }
+    },
     systemPrefersDark() {
       return Boolean(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
     },
@@ -207,7 +227,12 @@ export default {
     },
     setStatus(id, status) {
       const vuln = this.vulnerabilities.find((entry) => entry.id === id);
-      if (vuln) vuln.status = status;
+      if (!vuln) return;
+      if (this.endpoints.vulnerability) {
+        updateVulnerabilityStatus({ endpoint: this.endpoints.vulnerability, id, status, fetchImpl: this.fetchImpl })
+          .then(() => { vuln.status = status; })
+          .catch((error) => notificationCenter.notify({ title: 'Status update failed', message: error.message, severity: 'error' }));
+      } else vuln.status = status;
     },
     createIssue(id) {
       this.$set(this.issueCreatedMap, id, true);
@@ -294,7 +319,7 @@ export default {
 </script>
 
 <template>
-  <div class="security-dashboard" :data-theme="isDark ? 'dark' : 'light'">
+  <div class="security-dashboard" data-surface-id="surface.security" :data-theme="isDark ? 'dark' : 'light'">
     <top-bar
       :search="search"
       :regex-mode="regexMode"
@@ -315,7 +340,10 @@ export default {
       <span class="sec-plan-badge">ULTIMATE</span>
     </div>
 
-    <severity-cards :cards="severityCards" @toggle="toggleSeverityFilter" />
+    <p v-if="loading" class="sec-live-state" role="status">Loading live vulnerability data…</p>
+    <p v-else-if="loadError" class="sec-live-state sec-live-state--error" role="alert">{{ loadError }} <button type="button" @click="loadLiveVulnerabilities">Retry</button></p>
+
+    <severity-cards v-if="!loading && !loadError" :cards="severityCards" @toggle="toggleSeverityFilter" />
 
     <main class="sec-main">
       <bulk-action-bar
@@ -325,7 +353,7 @@ export default {
         @export="bulkExportSelected"
         @clear="clearSelection"
       />
-      <vulnerability-list
+      <vulnerability-list v-if="!loading && !loadError"
         :vulnerabilities="filteredVulnerabilities"
         :selected-ids="selectedMap"
         @open="openVulnerability"

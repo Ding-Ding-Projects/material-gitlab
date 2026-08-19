@@ -5,6 +5,8 @@
  * replace these fixtures without changing how the components consume them.
  */
 
+import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+
 export const OPERATE_TABS = Object.freeze([
   { id: 'environments', label: 'Environments', icon: 'cloud' },
   { id: 'kubernetes', label: 'Kubernetes', icon: 'hub' },
@@ -157,6 +159,19 @@ export function buildTerraformRows(states) {
     actionLabel: state.status === 'locked' ? 'Force unlock' : 'Lock',
     actionDestructive: state.status === 'locked',
   }));
+}
+
+export async function fetchOperateData({ endpoints, fetchImpl } = {}) {
+  const [environments, clusters, terraform] = await Promise.all([
+    requestJson(requireEndpoint(endpoints, 'environments'), { fetchImpl }),
+    requestJson(requireEndpoint(endpoints, 'kubernetes'), { fetchImpl }),
+    requestJson(requireEndpoint(endpoints, 'terraform'), { fetchImpl }),
+  ]);
+  return {
+    environments: assertCollection(environments, 'environments'),
+    clusters: assertCollection(clusters, 'Kubernetes clusters'),
+    terraform: assertCollection(terraform, 'Terraform states'),
+  };
 }
 
 /** Placeholder routes — swap for real Rails paths once this surface is mounted in-app. */

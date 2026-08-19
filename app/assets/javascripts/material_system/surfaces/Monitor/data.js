@@ -2,9 +2,11 @@
  * View-model data for the Monitor surface, ported from the design's
  * `Monitor.dc.html` DCLogic state and `renderVals()`. Field names track what a
  * real fetch would return per tab (Incident/Alert/error-tracking group, on-call
- * rotation, Service Desk ticket) so a real API can replace `createSeedMonitorData()`
- * without any component needing to change.
+ * rotation, Service Desk ticket). The test-only fixture factory is never used
+ * by the production mount.
  */
+
+import { assertCollection, requestJson, requireEndpoint } from '../live-data';
 
 export const TABS = Object.freeze(['Incidents', 'Alerts', 'Errors', 'On-call', 'Service desk']);
 
@@ -319,4 +321,14 @@ export function buildRegexCorpus(data) {
     ...data.errors.map((row) => row.name),
     ...data.tickets.map((row) => row.name),
   ];
+}
+
+export async function fetchMonitorData({ endpoints, fetchImpl } = {}) {
+  const result = {};
+  for (const tab of TABS) {
+    const key = TAB_COLLECTION_KEY[tab];
+    const payload = await requestJson(requireEndpoint(endpoints, key), { fetchImpl });
+    result[key] = assertCollection(payload, key);
+  }
+  return result;
 }
