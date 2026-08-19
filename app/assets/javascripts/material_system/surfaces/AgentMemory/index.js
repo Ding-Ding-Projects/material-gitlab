@@ -24,6 +24,16 @@ export function initAgentMemoryApp(el = AGENT_MEMORY_MOUNT_SELECTOR) {
     el: target,
     name: 'AgentMemoryRoot',
     component: AgentMemory,
+    propsData: {
+      initialData: (() => {
+        try {
+          return target.dataset.agentMemory ? JSON.parse(target.dataset.agentMemory) : {};
+        } catch (_error) {
+          return {};
+        }
+      })(),
+      dataEndpoint: target.dataset.agentMemoryEndpoint || '',
+    },
   });
 }
 

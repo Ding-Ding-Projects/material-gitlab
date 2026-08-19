@@ -18,7 +18,7 @@
     <PageHeader :title="title" :tabs="ADMIN_TABS" :active="tab" @select-tab="setTab" />
 
     <main class="gl-mds-admin__main">
-      <OverviewPanel v-if="tab === 'Overview'" :stat-cards="STAT_CARDS" :health="INSTANCE_HEALTH" />
+      <OverviewPanel v-if="tab === 'Overview'" :stat-cards="statCards" :health="instanceHealth" />
 
       <ListPanel
         v-else
@@ -68,8 +68,6 @@ import { loadSettings, subscribeSettings, updateSettings } from '../../settings'
 import notificationCenter from '../../notifications';
 import {
   ADMIN_TABS,
-  STAT_CARDS,
-  INSTANCE_HEALTH,
   BULK_ACTIONS,
   ACTION_VERBS,
   ACTION_PAST_TENSE,
@@ -92,18 +90,28 @@ export default {
   components: { TopBar, PageHeader, OverviewPanel, ListPanel, CommandPalette, ConfirmDialog, ToastStack },
   props: {
     title: { type: String, default: 'Admin area' },
-    accountName: { type: String, default: 'Jordan Diaz' },
-    accountInitials: { type: String, default: 'JD' },
+    accountName: { type: String, default: '' },
+    accountInitials: { type: String, default: '' },
+    initialData: { type: Object, default: () => ({}) },
+    statCards: { type: Array, default: () => [] },
+    instanceHealth: { type: Array, default: () => [] },
+    permissions: { type: Object, default: () => ({}) },
+    actionAdapter: { type: Function, default: null },
     // Optional standalone notification centre override, for host-app wiring/tests.
     notifications: { type: Object, default: () => notificationCenter },
   },
   data() {
     return {
-      ...createInitialState(),
+      ...createInitialState({
+        ...(this.initialData || {}),
+        users: this.initialData.users || [],
+        runners: this.initialData.runners || [],
+        projects: this.initialData.projects || [],
+      }),
       themeAttr: this.resolveThemeAttr(),
       ADMIN_TABS,
-      STAT_CARDS,
-      INSTANCE_HEALTH,
+      statCards: this.statCards,
+      instanceHealth: this.instanceHealth,
     };
   },
   computed: {
@@ -130,7 +138,9 @@ export default {
       return this.selectedByTab[this.tab] || [];
     },
     bulkActions() {
-      return BULK_ACTIONS[this.tab] || [];
+      const actions = BULK_ACTIONS[this.tab] || [];
+      const allowed = this.permissions[this.tab];
+      return Array.isArray(allowed) ? actions.filter((action) => allowed.includes(action.id)) : actions;
     },
     paletteActions() {
       return paletteDescriptors().map((descriptor) => {
@@ -200,7 +210,17 @@ export default {
       this.listQuery = '';
       this.listRegexMode = false;
     },
-    performEntityAction(tab, actionId, ids) {
+    async performEntityAction(tab, actionId, ids) {
+      if (this.actionAdapter) {
+        const result = await this.actionAdapter({ tab, actionId, ids });
+        if (!result || result.ok === false) throw new Error((result && result.error) || 'The action was not completed.');
+        if (result.data) {
+          this.users = result.data.users || this.users;
+          this.runners = result.data.runners || this.runners;
+          this.projects = result.data.projects || this.projects;
+        }
+        return;
+      }
       if (tab === 'Users') {
         if (actionId === 'block') this.users = setUsersBlocked(this.users, ids, true);
         if (actionId === 'unblock') this.users = setUsersBlocked(this.users, ids, false);
@@ -222,8 +242,13 @@ export default {
       const verb = ACTION_VERBS[actionId] || actionId;
       const noun = entityNoun(this.tab, ids.length);
       const label = descriptor ? descriptor.label.replace(' selected', '') : verb;
-      const run = () => {
-        this.performEntityAction(this.tab, actionId, ids);
+      const run = async () => {
+        try {
+          await this.performEntityAction(this.tab, actionId, ids);
+        } catch (error) {
+          this.notifications.notify({ title: 'Action failed', message: error.message, severity: 'error' });
+          return;
+        }
         this.notifications.notify({
           title: label,
           message: `${ids.length} ${noun} ${ACTION_PAST_TENSE[actionId] || 'updated'}.`,

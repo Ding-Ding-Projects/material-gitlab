@@ -705,6 +705,7 @@ constraints(Projects::ProjectUrlConstraint.new) do
         post :generate_new_export
         get :download_export
         get :activity
+        get :manage
         get :refs
         put :new_issuable_address
         get :unfoldered_environment_names

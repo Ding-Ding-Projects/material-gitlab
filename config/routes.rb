@@ -96,6 +96,8 @@ InitializerConnections.warn_if_database_connection do
       get 'search/autocomplete' => 'search#autocomplete', as: :search_autocomplete
       get 'search/settings' => 'search#settings'
       get 'search/count' => 'search#count', as: :search_count
+      get 'agent-memory' => 'agent_memory#index', as: :agent_memory
+      get 'agent-memory/data' => 'agent_memory#data', as: :agent_memory_data, defaults: { format: :json }
       get 'search/opensearch' => 'search#opensearch', as: :search_opensearch
 
       Gitlab.ee do

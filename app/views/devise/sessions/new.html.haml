@@ -13,30 +13,30 @@
 - login_brand_title = custom_sign_in_brand_title.presence || brand_title
 - login_brand_description = custom_sign_in_description
 
-.login-m3-surface
-  .login-m3-card
-    %section.login-m3-brand-panel{ aria: { labelledby: 'login-brand-title' } }
-      .login-m3-brand-mark
+.material-login
+  .material-login__card
+    %section.material-login__brand{ aria: { labelledby: 'login-brand-title' } }
+      .material-login__brand-mark
         = brand_image
-      %h1#login-brand-title.login-m3-brand-title
+      %h1#login-brand-title.material-login__brand-title
         = login_brand_title
       - if login_brand_description.present?
-        #js-custom-sign-in-description.login-m3-brand-description.md
+        #js-custom-sign-in-description.material-login__brand-tagline.md
           = login_brand_description
       - else
-        %p.login-m3-brand-description
+        %p.material-login__brand-tagline
           = _("Plan, build, secure, and deliver software together from one platform.")
 
-    %section.login-m3-form-panel{ aria: { labelledby: 'login-form-title' } }
-      .login-m3-form-header
-        %h2#login-form-title.login-m3-form-title
+    %section.material-login__form{ aria: { labelledby: 'login-form-title' } }
+      .material-login__header
+        %h2#login-form-title.material-login__heading
           = _("Sign in")
-        %p.login-m3-form-supporting-text
+        %p.material-login__supporting-text
           = _("Use your account credentials or another configured sign-in method.")
 
       = render "layouts/flash"
 
-      .login-m3-auth-stack
+      .material-login__auth-stack
         .js-non-oauth-login
           - if any_form_based_providers_enabled?
             = render 'devise/shared/tabs_ldap', admin_mode: false
@@ -45,20 +45,20 @@
 
         -# Show a message if none of the mechanisms above are enabled
         - if !password_authentication_enabled_for_web? && !ldap_sign_in_enabled? && !(omniauth_enabled? && devise_mapping.omniauthable?)
-          .login-m3-state-message{ role: 'status' }
+          .material-login__alert{ role: 'status' }
             = _('No authentication methods configured.')
 
         - if omniauth_enabled? && devise_mapping.omniauthable? && button_based_providers_enabled?
-          .login-m3-provider-box
+          .material-login__oauth-box
             = render 'devise/shared/omniauth_box'
 
         - if Gitlab::CurrentSettings.current_application_settings.terms
-          .login-m3-terms
+          .material-login__terms
             = html_escape(s_("SignUp|By signing in you accept the %{link_start}Terms of Use and acknowledge the Privacy Statement and Cookie Policy%{link_end}.")) % { link_start: "<a href='#{terms_path}' target='_blank' rel='noreferrer noopener'>".html_safe,
             link_end: '</a>'.html_safe }
 
         - if allow_signup?
-          .login-m3-register
+          .material-login__register
             = _("Don't have an account yet?")
             = link_to _("Register now"),
               new_registration_path(:user, invite_email: @invite_email),
