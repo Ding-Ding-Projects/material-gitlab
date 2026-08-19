@@ -13,7 +13,9 @@ This repository is being bootstrapped as an original overlay project. It records
 
 ## Verification
 
-Build and packaging evidence remains the accepted boundary for this issue lane. The lane does not require tests, lint, accessibility, or screenshot workflows.
+The design-contract lane now requires local tests, the supported frontend build, packaged runtime
+interaction, and deterministic design-parity evidence. Evidence is bound to the commit that produced
+it; a later commit supersedes an earlier build or capture verdict.
 
 ## Remaining work
 
@@ -66,10 +68,10 @@ Read `git log --oneline` before starting. Already present:
 
 ## What remains
 
-The exact 25 checked-in design surfaces are now recorded in `design/reference-registry.json`.
-The registry is validated by `scripts/verify-design-reference-foundation.mjs`; it is a foundation
-record only, so reference-app, built-app, capture, side-by-side, and visual-diff evidence remain
-explicitly unverified.
+The exact 25 checked-in design surfaces are recorded in `design/reference-registry.json` and the
+explicit parity matrix lives in `design/parity-inventory.json`. The old disconnected surface branch
+has been merged, its production seed data has been replaced with explicit Rails, REST, GraphQL, and
+store adapters, and the shared shells are mounted on real application layouts.
 
 Working list, from the registry:
 
@@ -108,10 +110,33 @@ rejection recorded above before reaching for it as the whole answer.
 
 ## Verification state
 
-No automated test suite, linter, or capture has been run against the work described here. Nothing
-in this document should be read as a test result.
+Verified locally during the 2026-08-19 pass:
+
+- Design foundation guard: 25 exact contracts and references.
+- Material-system focused Jest suites: 7 suites, 37 tests passed.
+- Design-reference package: 6 tests passed, 25 inventory rows validated, and 600 deliberate
+  negative-regression cases passed.
+- SCSS webpack loader: focused Node and Jest tests passed; `build.bat /s` completed successfully.
+- Electron dependency audits: zero advisories for Deployer, Instant, and the design-reference tool
+  after the Electron 43.4.1 upgrade.
+- Unsigned Squirrel.Windows packaging completed for Deployer and Instant.
+- Deployer packaged runtime rendered and generated all four lifecycle-plan steps through its isolated
+  preload bridge.
+- Instant packaged runtime rendered and loaded its loopback-only configuration through its isolated
+  preload bridge.
+- The Issues reference capture was produced through the approved hidden-desktop route at 1280x800;
+  the renderer used bundled local fonts and no external network.
+
+Still unverified:
+
+- Production-side visual parity for the Rails GitLab routes. This Windows host has no runnable GitLab
+  Rails server, and the packaged desktop applications are configuration shells rather than the Rails
+  product. No mock capture was substituted.
+- Full side-by-side and pixel-diff evidence for all 25 rows remains pending until a real built Rails
+  instance is available at the recorded commit.
 
 ## Next owner action
 
-Implement the dedicated reference app and per-surface built-artifact parity evidence against the
-25 entries in `design/reference-registry.json`.
+Launch a real built GitLab Rails instance at the recorded commit, drive every production route with
+the same tuples as `design/parity-inventory.json`, and complete the raw built captures, Material
+audits, labelled comparisons, and machine-readable diffs without changing the reference inputs.
