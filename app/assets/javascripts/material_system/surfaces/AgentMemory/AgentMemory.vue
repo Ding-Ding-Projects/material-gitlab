@@ -134,12 +134,6 @@ import TabStrip from './components/TabStrip.vue';
 import TopBar from './components/TopBar.vue';
 import {
   TABS,
-  fetchHistoryEntries,
-  fetchInstructionBlocks,
-  fetchSessions,
-  fetchSkills,
-  fetchSyncSteps,
-  fetchSyncTargets,
   nextHistoryRevisionId,
   withStartedAt,
 } from './data';
@@ -169,6 +163,10 @@ export default {
     ConfirmDialog,
     CommandPalette,
     NotificationToastHost,
+  },
+  props: {
+    initialData: { type: Object, default: () => ({}) },
+    dataEndpoint: { type: String, default: '' },
   },
   data() {
     return {
@@ -379,30 +377,30 @@ export default {
   },
   methods: {
     loadAll() {
-      fetchSyncTargets().then((data) => {
-        this.targets = data;
-        this.loading.targets = false;
-      });
-      fetchInstructionBlocks().then((data) => {
-        this.blocks = data;
-        this.loading.blocks = false;
-      });
-      fetchSkills().then((data) => {
-        this.skills = data;
-        this.loading.skills = false;
-      });
-      fetchSessions().then((data) => {
-        this.sessions = withStartedAt(data, this.now);
-        this.loading.sessions = false;
+      const apply = (payload) => {
+        const data = payload || {};
+        this.targets = data.targets || [];
+        this.blocks = data.blocks || [];
+        this.skills = data.skills || [];
+        this.sessions = withStartedAt(data.sessions || [], this.now);
+        this.history = data.history || [];
+        this.baseSyncSteps = data.syncSteps || [];
+        this.loading = { targets: false, blocks: false, skills: false, sessions: false, history: false };
         this.lastRefreshedAt = Date.now();
-      });
-      fetchHistoryEntries().then((data) => {
-        this.history = data;
-        this.loading.history = false;
-      });
-      fetchSyncSteps().then((data) => {
-        this.baseSyncSteps = data;
-      });
+      };
+
+      if (Object.keys(this.initialData || {}).length) {
+        apply(this.initialData);
+        return;
+      }
+      if (!this.dataEndpoint) {
+        apply({});
+        return;
+      }
+      fetch(this.dataEndpoint, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+        .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Agent Memory data is unavailable.'))))
+        .then(apply)
+        .catch(() => apply({}));
     },
     clearSearch() {
       this.search = '';
@@ -633,7 +631,9 @@ export default {
       }
     },
     refreshNow(silent) {
-      fetchSessions().then((data) => {
+      if (!this.dataEndpoint) return;
+      fetch(this.dataEndpoint, { credentials: 'same-origin', headers: { Accept: 'application/json' } }).then((response) => response.json()).then((payload) => {
+        const data = payload.sessions || [];
         const byId = new Map(this.sessions.map((session) => [session.id, session]));
         const merged = data.map((incoming) => {
           const existing = byId.get(incoming.id);

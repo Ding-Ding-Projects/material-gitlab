@@ -113,9 +113,12 @@ export function createInitialState(overrides = {}) {
     notificationsOpen: false,
     confirmRequest: null,
     selectedByTab: { Users: [], Runners: [], Projects: [] },
-    users: createInitialUsers(),
-    runners: createInitialRunners(),
-    projects: createInitialProjects(),
+    // Production mounts must provide server-backed data.  Keep the empty
+    // collections here so a missing payload is an honest empty state rather
+    // than silently showing the design fixture.
+    users: [],
+    runners: [],
+    projects: [],
     ...overrides,
   };
 }

@@ -89,10 +89,7 @@ import notificationCenter from '../../notifications';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import {
   MANAGE_TABS,
-  DEFAULT_MANAGE_ROUTES,
   DEFAULT_SIDEBAR_ITEMS,
-  createInitialEvents,
-  createInitialLabels,
   eventCorpus,
   labelCorpus,
   createSearchMatcher,
@@ -111,11 +108,13 @@ export default {
     NotificationHost,
   },
   props: {
-    // Real API data can be passed in; fixtures from the design are the default.
-    initialEvents: { type: Array, default: null },
-    initialLabels: { type: Array, default: null },
-    routes: { type: Object, default: () => DEFAULT_MANAGE_ROUTES },
-    currentUser: { type: Object, default: () => ({ name: 'Jordan Diaz', initials: 'JD' }) },
+    // Production mounts provide server-backed data. Empty arrays are an
+    // honest empty state; the design fixtures are never a runtime fallback.
+    initialEvents: { type: Array, default: () => [] },
+    initialLabels: { type: Array, default: () => [] },
+    routes: { type: Object, default: () => ({}) },
+    currentUser: { type: Object, default: () => ({ name: '', initials: '' }) },
+    deleteLabel: { type: Function, default: null },
   },
   data() {
     return {
@@ -125,8 +124,8 @@ export default {
       regexMode: false,
       regexOpen: false,
       paletteOpen: false,
-      events: this.initialEvents || createInitialEvents(),
-      labels: this.initialLabels || createInitialLabels(),
+      events: this.initialEvents,
+      labels: this.initialLabels,
       selectedEventIds: [],
       selectedLabelIds: [],
       pendingDeletion: null,
@@ -320,9 +319,17 @@ export default {
       const names = this.labels.filter((label) => ids.includes(label.id)).map((label) => label.name);
       this.pendingDeletion = { mode, ids, names };
     },
-    confirmDeleteLabels() {
+    async confirmDeleteLabels() {
       if (!this.pendingDeletion) return;
       const { ids, names } = this.pendingDeletion;
+      if (this.deleteLabel) {
+        try {
+          await Promise.all(ids.map((id) => this.deleteLabel(id)));
+        } catch (error) {
+          notificationCenter.notify({ title: 'Label deletion failed', message: error.message, severity: 'error' });
+          return;
+        }
+      }
       this.labels = this.labels.filter((label) => !ids.includes(label.id));
       this.selectedLabelIds = this.selectedLabelIds.filter((id) => !ids.includes(id));
       notificationCenter.notify({
