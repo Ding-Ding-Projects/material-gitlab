@@ -14,11 +14,41 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
-const root = process.cwd();
-const args = new Set(process.argv.slice(2));
-const jsonOutput = args.has('--json');
-const requestedRevision = process.argv.find((arg) => arg.startsWith('--revision='))?.slice('--revision='.length) ?? 'HEAD';
+export function parseCommitMetadataBatch(output, batch, offset = 0) {
+  const fields = output.split('\0');
+  if (fields.at(-1) === '\n' || fields.at(-1) === '\r\n') fields.pop();
+  if (fields.length !== batch.length * 4 || fields.length % 4 !== 0) {
+    throw new Error(`git log returned malformed commit metadata for batch starting at ${offset}`);
+  }
+  const requested = new Set(batch);
+  const seen = new Set();
+  const records = [];
+  for (let index = 0; index < fields.length; index += 4) {
+    const [rawCommit, author, email, trailers] = fields.slice(index, index + 4);
+    const commit = rawCommit.replace(/^\r?\n/, '');
+    if (!/^[0-9a-f]{40}$/.test(commit) || !requested.has(commit) || seen.has(commit)) {
+      throw new Error(`git log returned malformed commit identity: ${commit}`);
+    }
+    seen.add(commit);
+    records.push({
+      commit,
+      author: author || 'Unknown',
+      email: email || '',
+      trailers,
+      automation: /(bot|automation|agent|claude|codex)/i.test(`${author} ${email} ${trailers}`),
+    });
+  }
+  if (seen.size !== requested.size) throw new Error(`git log omitted commit metadata in batch starting at ${offset}`);
+  return records;
+}
+
+async function main() {
+  const root = process.cwd();
+  const args = new Set(process.argv.slice(2));
+  const jsonOutput = args.has('--json');
+  const requestedRevision = process.argv.find((arg) => arg.startsWith('--revision='))?.slice('--revision='.length) ?? 'HEAD';
 
 function git(...gitArgs) {
   const result = spawnSync('git', ['-C', root, ...gitArgs], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
@@ -183,27 +213,9 @@ async function loadCommitIdentities(commits) {
   for (let offset = 0; offset < commits.length; offset += batchSize) {
     const batch = commits.slice(offset, offset + batchSize);
     const output = await gitAsyncWithInput(`${batch.join('\n')}\n`, 'log', '--no-walk', '--stdin', '--format=%H%x00%an%x00%ae%x00%(trailers:only,unfold=true)%x00');
-    const fields = output.split('\0');
-    if (fields.at(-1) === '') fields.pop();
-    if (fields.length !== batch.length * 4 || fields.length % 4 !== 0) {
-      throw new Error(`git log returned malformed commit metadata for batch starting at ${offset}`);
+    for (const { commit, author, email, automation } of parseCommitMetadataBatch(output, batch, offset)) {
+      commitCache.set(commit, { author, email, automation });
     }
-    const requested = new Set(batch);
-    const seen = new Set();
-    for (let index = 0; index < fields.length; index += 4) {
-      const [commit, author, email, trailers] = fields.slice(index, index + 4);
-      if (!/^[0-9a-f]{40}$/.test(commit) || !requested.has(commit) || seen.has(commit)) {
-        throw new Error(`git log returned malformed commit identity: ${commit}`);
-      }
-      seen.add(commit);
-      const identity = {
-        author: author || 'Unknown',
-        email: email || '',
-        automation: /(bot|automation|agent|claude|codex)/i.test(`${author} ${email} ${trailers}`),
-      };
-      commitCache.set(commit, identity);
-    }
-    if (seen.size !== requested.size) throw new Error(`git log omitted commit metadata in batch starting at ${offset}`);
   }
   for (const commit of commits) {
     if (!commitCache.has(commit)) throw new Error(`git log omitted commit metadata for ${commit}`);
@@ -265,3 +277,7 @@ if (jsonOutput) {
   console.log(`Agent-attributed surviving lines: ${report.attribution.agentLines}`);
   for (const author of report.attribution.authors) console.log(`  ${author.lines}: ${author.author} <${author.email}>${author.automation ? ' [automation]' : ''}`);
 }
+
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main();
