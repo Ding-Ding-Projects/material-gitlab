@@ -41,7 +41,7 @@ describe('operations and security design contracts', () => {
 
   it('negative regression: removing the mount selector is detected', () => {
     const index = source('Deploy/index.js');
-    const broken = index.replace('#js-material-deploy', '#js-material-deploy-removed');
+    const broken = index.replaceAll("'#js-material-deploy'", "'#js-material-deploy-removed'");
     expect(broken).not.toContain('#js-material-deploy\'');
     expect(index).toContain('#js-material-deploy');
   });

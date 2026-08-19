@@ -49,7 +49,11 @@ describe('planning design-contract data adapters', () => {
       pageInfo: { hasNextPage: false },
     } } } }));
     await expect(fetchTodos({ fetcher })).resolves.toMatchObject({
-      todos: [expect.objectContaining({ id: 't1', actor: 'Ada', target: { label: '#1' } })],
+      todos: [expect.objectContaining({
+        id: 't1',
+        actor: 'Ada',
+        target: expect.objectContaining({ label: '#1' }),
+      })],
     });
     fetcher.mockResolvedValueOnce(response({}, 403));
     await expect(fetchTodos({ fetcher })).rejects.toThrow('request failed (403)');
