@@ -5,6 +5,7 @@
 
 import { createSurfaceInventory } from '../../registry';
 import CodeSurface from './Code.vue';
+import Vue from 'vue';
 
 export { default as CodeSurface } from './Code.vue';
 export { default } from './Code.vue';
@@ -25,7 +26,7 @@ export {
   fetchTags,
   fetchSnippets,
   runCompareRequest,
-  createCodeSeedState,
+  createCodeState,
 } from './data';
 
 export const CODE_SURFACE_ID = 'surface.code';
@@ -43,4 +44,11 @@ export function createCodeSurfaceInventory() {
 /** Convenience factory for mounting the surface with Vue.extend consumers. */
 export function createCodeSurfaceComponent() {
   return CodeSurface;
+}
+
+export function mountCodeSurface(el, { propsData = {} } = {}) {
+  const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
+  const projectPath = propsData.projectPath || mountEl?.dataset?.projectPath;
+  if (!projectPath) throw new Error('Code surface requires data-project-path.');
+  return new Vue({ el: mountEl, render: (h) => h(CodeSurface, { props: { ...propsData, projectPath } }) });
 }

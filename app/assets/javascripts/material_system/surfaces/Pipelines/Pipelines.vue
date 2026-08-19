@@ -44,7 +44,7 @@
       @back="backToList"
       @retry="retryPipeline"
       @cancel="cancelPipeline"
-      @pick-job="activeJobKey = $event"
+      @pick-job="selectJob"
       @retry-job="retryJob"
     />
 
@@ -74,13 +74,16 @@
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import { notificationCenter } from '../../notifications';
 import {
-  createInitialPipelines,
+  fetchPipelines,
+  fetchPipelineDetail,
+  fetchJobTrace,
   createManualPipeline,
   retriedPipeline,
   canceledPipeline,
   retriedJob,
   buildJobLog,
 } from './data';
+import { createGitLabClient } from '../gitlabApi';
 import TopBar from './components/TopBar.vue';
 import ListHeader from './components/ListHeader.vue';
 import FilterBar from './components/FilterBar.vue';
@@ -106,6 +109,9 @@ export default {
     ConfirmDialog,
     ToastStack,
   },
+  props: {
+    projectPath: { type: String, required: true },
+  },
   data() {
     return {
       settings: loadSettings(),
@@ -117,7 +123,9 @@ export default {
       detailId: null,
       activeJobKey: null,
       filters: { failed: false, running: false },
-      pipelines: createInitialPipelines(),
+      pipelines: [],
+      loading: true,
+      loadError: null,
       selectedIds: [],
       confirmAction: null,
       pendingConfirmFn: null,
@@ -187,6 +195,11 @@ export default {
     },
   },
   mounted() {
+    this.api = createGitLabClient(this.projectPath);
+    fetchPipelines({ projectPath: this.projectPath, client: this.api })
+      .then((pipelines) => { this.pipelines = pipelines; })
+      .catch((error) => { this.loadError = error; })
+      .finally(() => { this.loading = false; });
     this.onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -222,6 +235,10 @@ export default {
     }
   },
   methods: {
+    selectJob(jobKey) {
+      this.activeJobKey = jobKey;
+      this.loadJobTrace(jobKey);
+    },
     matcher() {
       const query = this.search;
       if (!query) return () => true;
@@ -252,17 +269,25 @@ export default {
     updatePipeline(id, transform) {
       this.pipelines = this.pipelines.map((p) => (p.id === id ? transform(p) : p));
     },
-    openDetail(id) {
+    async openDetail(id) {
       this.detailId = id;
       this.activeJobKey = null;
+      try {
+        const detail = await fetchPipelineDetail({ projectPath: this.projectPath, id, client: this.api });
+        this.updatePipeline(id, () => detail);
+      } catch (error) {
+        notificationCenter.notify({ title: 'Pipeline details unavailable', message: error.message, severity: 'error' });
+      }
     },
     backToList() {
       this.detailId = null;
       this.activeJobKey = null;
     },
-    runPipeline() {
-      const created = createManualPipeline(this.pipelines);
-      this.pipelines = [created, ...this.pipelines];
+    async runPipeline() {
+      try {
+        const response = await this.api.createPipeline('main');
+        const created = createManualPipeline(response);
+        this.pipelines = [created, ...this.pipelines];
       notificationCenter.notify({
         title: 'Pipeline started',
         message: `Pipeline #${created.id} is running on ${created.branch}.`,
@@ -277,12 +302,34 @@ export default {
           },
         ],
       });
+      } catch (error) {
+        notificationCenter.notify({ title: 'Pipeline could not start', message: error.message, severity: 'error' });
+      }
     },
-    retryPipeline() {
+    async loadJobTrace(jobKey) {
+      const job = this.activeJob;
+      if (!job) return;
+      try {
+        const trace = await fetchJobTrace({ projectPath: this.projectPath, jobId: job.id || job.key, client: this.api });
+        this.updatePipeline(this.detail.id, (pipeline) => ({
+          ...pipeline,
+          stages: pipeline.stages.map((stage) => ({
+            ...stage,
+            jobs: stage.jobs.map((item) => item.key === jobKey ? { ...item, trace } : item),
+          })),
+        }));
+      } catch (error) {
+        notificationCenter.notify({ title: 'Job log unavailable', message: error.message, severity: 'error' });
+      }
+    },
+    async retryPipeline() {
       if (!this.detail) return;
       const id = this.detail.id;
-      this.updatePipeline(id, retriedPipeline);
-      notificationCenter.notify({ title: 'Retrying pipeline', message: `Pipeline #${id} is running again.`, severity: 'info' });
+      try {
+        const response = await this.api.retryPipeline(id);
+        this.updatePipeline(id, () => ({ ...retriedPipeline(this.detail), ...response }));
+        notificationCenter.notify({ title: 'Retrying pipeline', message: `Pipeline #${id} is running again.`, severity: 'info' });
+      } catch (error) { notificationCenter.notify({ title: 'Pipeline retry failed', message: error.message, severity: 'error' }); }
     },
     cancelPipeline() {
       if (!this.detail) return;
@@ -293,17 +340,22 @@ export default {
         confirmLabel: 'Cancel pipeline',
       };
       this.pendingConfirmFn = () => {
-        this.updatePipeline(id, canceledPipeline);
-        notificationCenter.notify({ title: 'Pipeline canceled', message: `Pipeline #${id} was canceled.`, severity: 'warning' });
+        this.api.cancelPipeline(id).then((response) => {
+          this.updatePipeline(id, () => ({ ...canceledPipeline(this.detail), ...response }));
+          notificationCenter.notify({ title: 'Pipeline canceled', message: `Pipeline #${id} was canceled.`, severity: 'warning' });
+        }).catch((error) => notificationCenter.notify({ title: 'Pipeline cancel failed', message: error.message, severity: 'error' }));
       };
     },
-    retryJob() {
+    async retryJob() {
       if (!this.detail || !this.activeJobKey) return;
       const id = this.detail.id;
       const key = this.activeJobKey;
       const jobName = this.activeJob ? this.activeJob.name : 'Job';
-      this.updatePipeline(id, (p) => retriedJob(p, key));
-      notificationCenter.notify({ title: 'Retrying job', message: `${jobName} is running again.`, severity: 'info' });
+      try {
+        const response = await this.api.retryJob(key);
+        this.updatePipeline(id, (p) => ({ ...retriedJob(p, key), ...response }));
+        notificationCenter.notify({ title: 'Retrying job', message: `${jobName} is running again.`, severity: 'info' });
+      } catch (error) { notificationCenter.notify({ title: 'Job retry failed', message: error.message, severity: 'error' }); }
     },
     toggleSelect(id) {
       this.selectedIds = this.selectedIds.includes(id)
@@ -329,12 +381,14 @@ export default {
       });
       this.selectedIds = Array.from(selectedSet);
     },
-    bulkRetry() {
+    async bulkRetry() {
       const ids = this.selectedVisibleIds;
       if (!ids.length) return;
-      const idSet = new Set(ids);
-      this.pipelines = this.pipelines.map((p) => (idSet.has(p.id) ? retriedPipeline(p) : p));
-      notificationCenter.notify({ title: 'Retrying pipelines', message: `Retried ${ids.length} pipeline${ids.length === 1 ? '' : 's'}.`, severity: 'info' });
+      try {
+        await Promise.all(ids.map((id) => this.api.retryPipeline(id)));
+        this.pipelines = this.pipelines.map((p) => ids.includes(p.id) ? retriedPipeline(p) : p);
+        notificationCenter.notify({ title: 'Retrying pipelines', message: `Retried ${ids.length} pipeline${ids.length === 1 ? '' : 's'}.`, severity: 'info' });
+      } catch (error) { notificationCenter.notify({ title: 'Pipeline retry failed', message: error.message, severity: 'error' }); }
     },
     bulkCancel() {
       const ids = this.selectedVisibleIds;
@@ -345,10 +399,11 @@ export default {
         confirmLabel: 'Cancel pipelines',
       };
       this.pendingConfirmFn = () => {
-        const idSet = new Set(ids);
-        this.pipelines = this.pipelines.map((p) => (idSet.has(p.id) ? canceledPipeline(p) : p));
-        notificationCenter.notify({ title: 'Pipelines canceled', message: `Canceled ${ids.length} pipeline${ids.length === 1 ? '' : 's'}.`, severity: 'warning' });
-        this.selectedIds = [];
+        Promise.all(ids.map((id) => this.api.cancelPipeline(id))).then(() => {
+          this.pipelines = this.pipelines.map((p) => ids.includes(p.id) ? canceledPipeline(p) : p);
+          notificationCenter.notify({ title: 'Pipelines canceled', message: `Canceled ${ids.length} pipeline${ids.length === 1 ? '' : 's'}.`, severity: 'warning' });
+          this.selectedIds = [];
+        }).catch((error) => notificationCenter.notify({ title: 'Pipeline cancel failed', message: error.message, severity: 'error' }));
       };
     },
     bulkDelete() {
@@ -362,9 +417,11 @@ export default {
       this.pendingConfirmFn = () => {
         const idSet = new Set(ids);
         if (this.detailId !== null && idSet.has(this.detailId)) this.backToList();
-        this.pipelines = this.pipelines.filter((p) => !idSet.has(p.id));
-        notificationCenter.notify({ title: 'Pipelines deleted', message: `Deleted ${ids.length} pipeline record${ids.length === 1 ? '' : 's'}.`, severity: 'success' });
-        this.selectedIds = [];
+        Promise.all(ids.map((id) => this.api.deletePipeline(id))).then(() => {
+          this.pipelines = this.pipelines.filter((p) => !ids.includes(p.id));
+          notificationCenter.notify({ title: 'Pipelines deleted', message: `Deleted ${ids.length} pipeline record${ids.length === 1 ? '' : 's'}.`, severity: 'success' });
+          this.selectedIds = [];
+        }).catch((error) => notificationCenter.notify({ title: 'Pipeline delete failed', message: error.message, severity: 'error' }));
       };
     },
     acceptConfirm() {
