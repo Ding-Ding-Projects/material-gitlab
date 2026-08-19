@@ -511,7 +511,23 @@ module.exports = {
         },
       },
       {
-        test: /.css$/,
+        test: /\.scss$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: 'global',
+              localIdentName: '[name].[contenthash:8].[ext]',
+            },
+          },
+          {
+            loader: path.join(ROOT_PATH, 'config/webpack/loaders/material_scss_loader.js'),
+          },
+        ],
+      },
+      {
+        test: /\.css$/,
         use: [
           'style-loader',
           {
