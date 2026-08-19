@@ -18,10 +18,13 @@ export * from './data';
  */
 export function mountBuildSurface(el, { Vue, propsData = {} } = {}) {
   if (!Vue) throw new Error('mountBuildSurface requires a Vue constructor to be provided.');
+  const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
+  const projectPath = propsData.projectPath || mountEl?.dataset?.projectPath;
+  if (!projectPath) throw new Error('Build surface requires data-project-path.');
   return new Vue({
     name: 'BuildSurfaceRoot',
-    render: (h) => h(Build, { props: propsData }),
-  }).$mount(el);
+    render: (h) => h(Build, { props: { ...propsData, projectPath } }),
+  }).$mount(mountEl);
 }
 
 export default Build;

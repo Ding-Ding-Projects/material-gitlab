@@ -81,6 +81,7 @@ import MrConfirmDialog from './components/MrConfirmDialog.vue';
 import MrToastHost from './components/MrToastHost.vue';
 import {
   fetchMergeRequests,
+  fetchMergeRequestDetail,
   matchesFilters,
   buildQueryMatcher,
   searchableText,
@@ -89,10 +90,10 @@ import {
   appendComment,
   toggleThreadResolved,
   closeMergeRequests,
-  CURRENT_USER_AVATAR_INITIALS,
   DEFAULT_FILTERS,
   FILTER_DEFS,
 } from './data';
+import { createGitLabClient } from '../gitlabApi';
 import notificationCenter from '~/material_system/notifications';
 import { loadSettings, updateSettings } from '~/material_system/settings';
 
@@ -109,6 +110,10 @@ export default {
     MrConfirmDialog,
     MrToastHost,
   },
+  props: {
+    projectPath: { type: String, required: true },
+    currentUser: { type: Object, default: () => ({ name: '', initials: '' }) },
+  },
   data() {
     return {
       dark: false,
@@ -121,15 +126,16 @@ export default {
       selectedIds: [],
       mrs: [],
       loading: true,
-      avatarInitials: CURRENT_USER_AVATAR_INITIALS,
+      avatarInitials: this.currentUser.initials || '',
       avatarLabel: 'Signed in user',
       confirmDialog: { open: false, title: '', message: '', confirmLabel: 'Confirm', action: null },
+      loadError: null,
     };
   },
   computed: {
     filteredMrs() {
       const matches = buildQueryMatcher(this.search, this.regexMode);
-      return this.mrs.filter((mr) => matchesFilters(mr, this.filters) && matches(searchableText(mr)));
+      return this.mrs.filter((mr) => matchesFilters(mr, this.filters, this.currentUser.name) && matches(searchableText(mr)));
     },
     currentDetail() {
       return this.mrs.find((mr) => mr.id === this.detailId) || null;
@@ -172,10 +178,12 @@ export default {
     this.dark = settings.theme === 'dark' || prefersDark;
   },
   mounted() {
-    fetchMergeRequests().then((mrs) => {
+    this.api = createGitLabClient(this.projectPath);
+    fetchMergeRequests({ projectPath: this.projectPath, client: this.api }).then((mrs) => {
       this.mrs = mrs;
-      this.loading = false;
-    });
+    }).catch((error) => {
+      this.loadError = error;
+    }).finally(() => { this.loading = false; });
     this.onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -206,16 +214,9 @@ export default {
         timeout: 3000,
       });
     },
-    openDetail(id) {
-      this.detailId = id;
-    },
     createMergeRequest() {
       this.$emit('create-merge-request');
-      notificationCenter.notify({
-        title: 'New merge request',
-        message: 'Creating a merge request needs this surface connected to the GitLab API — not available in this preview build.',
-        severity: 'info',
-      });
+      window.location.assign(`/${this.projectPath}/-/merge_requests/new`);
     },
     toggleSelect(id) {
       this.selectedIds = this.selectedIds.includes(id)
@@ -248,18 +249,30 @@ export default {
       this.confirmDialog = { ...this.confirmDialog, open: false };
       if (action) action();
     },
-    closeSelectedMrs() {
+    async closeSelectedMrs() {
       const ids = [...this.selectedIds];
-      this.mrs = closeMergeRequests(this.mrs, ids);
-      this.selectedIds = [];
-      notificationCenter.notify({
-        title: 'Merge requests closed',
-        message: `${ids.length} merge request${ids.length === 1 ? '' : 's'} closed.`,
-        severity: 'success',
-      });
+      try {
+        await Promise.all(ids.map((id) => {
+          const mr = this.mrs.find((item) => item.id === id);
+          return this.api.updateMergeRequest(mr.iid, { state_event: 'close' });
+        }));
+        this.mrs = closeMergeRequests(this.mrs, ids);
+        this.selectedIds = [];
+        notificationCenter.notify({ title: 'Merge requests closed', message: `${ids.length} merge request${ids.length === 1 ? '' : 's'} closed.`, severity: 'success' });
+      } catch (error) {
+        notificationCenter.notify({ title: 'Could not close merge requests', message: error.message, severity: 'error' });
+      }
     },
-    onToggleApprove(mrId) {
-      this.mrs = this.mrs.map((mr) => (mr.id === mrId ? toggleApproval(mr) : mr));
+    async onToggleApprove(mrId) {
+      const current = this.mrs.find((mr) => mr.id === mrId);
+      if (!current) return;
+      try {
+        await (current.approvedByMe ? this.api.unapproveMergeRequest(current.iid) : this.api.approveMergeRequest(current.iid));
+        this.mrs = this.mrs.map((mr) => (mr.id === mrId ? toggleApproval(mr) : mr));
+      } catch (error) {
+        notificationCenter.notify({ title: 'Approval update failed', message: error.message, severity: 'error' });
+        return;
+      }
       const updated = this.mrs.find((mr) => mr.id === mrId);
       notificationCenter.notify({
         title: updated.approvedByMe ? 'Approved' : 'Approval removed',
@@ -268,8 +281,16 @@ export default {
         timeout: 4000,
       });
     },
-    onMergeComplete(mrId) {
-      this.mrs = this.mrs.map((mr) => (mr.id === mrId ? markMerged(mr) : mr));
+    async onMergeComplete(mrId) {
+      const current = this.mrs.find((mr) => mr.id === mrId);
+      if (!current) return;
+      try {
+        await this.api.mergeMergeRequest(current.iid, { should_remove_source_branch: false });
+        this.mrs = this.mrs.map((mr) => (mr.id === mrId ? markMerged(mr) : mr));
+      } catch (error) {
+        notificationCenter.notify({ title: 'Merge failed', message: error.message, severity: 'error' });
+        return;
+      }
       const merged = this.mrs.find((mr) => mr.id === mrId);
       notificationCenter.notify({
         title: 'Merged',
@@ -277,12 +298,38 @@ export default {
         severity: 'success',
       });
     },
-    onAddComment({ mrId, text }) {
-      this.mrs = this.mrs.map((mr) => (mr.id === mrId ? appendComment(mr, text) : mr));
-      notificationCenter.notify({ title: 'Comment added', message: 'Your comment was posted.', severity: 'success', timeout: 3000 });
+    async onAddComment({ mrId, text }) {
+      const current = this.mrs.find((mr) => mr.id === mrId);
+      if (!current || !String(text || '').trim()) return;
+      try {
+        await this.api.createMergeRequestNote(current.iid, text);
+        this.mrs = this.mrs.map((mr) => (mr.id === mrId ? appendComment(mr, text, this.currentUser.name || 'Current user') : mr));
+        notificationCenter.notify({ title: 'Comment added', message: 'Your comment was posted.', severity: 'success', timeout: 3000 });
+      } catch (error) {
+        notificationCenter.notify({ title: 'Comment failed', message: error.message, severity: 'error' });
+      }
     },
-    onToggleResolve({ mrId, threadIndex }) {
-      this.mrs = this.mrs.map((mr) => (mr.id === mrId ? toggleThreadResolved(mr, threadIndex) : mr));
+    async onToggleResolve({ mrId, threadIndex }) {
+      const current = this.mrs.find((mr) => mr.id === mrId);
+      const thread = current?.threads?.[threadIndex];
+      if (!current || !thread?.id) return;
+      try {
+        await this.api.resolveMergeRequestDiscussion(current.iid, thread.id, !thread.resolved);
+        this.mrs = this.mrs.map((mr) => (mr.id === mrId ? toggleThreadResolved(mr, threadIndex) : mr));
+      } catch (error) {
+        notificationCenter.notify({ title: 'Discussion update failed', message: error.message, severity: 'error' });
+      }
+    },
+    async openDetail(id) {
+      this.detailId = id;
+      const current = this.mrs.find((mr) => mr.id === id);
+      if (!current) return;
+      try {
+        const detail = await fetchMergeRequestDetail({ projectPath: this.projectPath, iid: current.iid, client: this.api });
+        this.mrs = this.mrs.map((mr) => (mr.id === id ? detail : mr));
+      } catch (error) {
+        notificationCenter.notify({ title: 'Merge request details unavailable', message: error.message, severity: 'error' });
+      }
     },
   },
 };

@@ -62,7 +62,6 @@ import { loadSettings, updateSettings, subscribeSettings } from '../../settings'
 import { notificationCenter } from '../../notifications';
 import {
   CODE_TABS,
-  DEFAULT_COMPARE_REFS,
   PIPELINE_STATUS_META,
   createMatcher,
   filterBranches,
@@ -70,9 +69,14 @@ import {
   filterTags,
   filterSnippets,
   buildRegexCorpus,
+  fetchBranches,
+  fetchCommits,
+  fetchTags,
+  fetchSnippets,
   runCompareRequest,
-  createCodeSeedState,
+  createCodeState,
 } from './data';
+import { createGitLabClient } from '../gitlabApi';
 import CodeTopBar from './components/CodeTopBar.vue';
 import CodeTabs from './components/CodeTabs.vue';
 import CompareCard from './components/CompareCard.vue';
@@ -101,22 +105,24 @@ export default {
     ConfirmDialog,
   },
   props: {
-    userInitials: { type: String, default: 'JD' },
+    userInitials: { type: String, default: '' },
+    projectPath: { type: String, required: true },
   },
   data() {
     return {
-      entities: createCodeSeedState(),
+      entities: createCodeState(),
       search: '',
       regexMode: false,
       regexOpen: false,
       paletteOpen: false,
       activeTab: 'Branches',
-      compFrom: DEFAULT_COMPARE_REFS[0],
-      compTo: DEFAULT_COMPARE_REFS[1],
+      compFrom: '',
+      compTo: '',
       compResult: null,
       comparePending: false,
       selectedByTab: { Branches: [], Commits: [], Tags: [], Snippets: [] },
       confirmState: null,
+      loadError: null,
       settings: loadSettings(),
       systemPrefersDark: typeof window !== 'undefined' && window.matchMedia
         ? window.matchMedia('(prefers-color-scheme: dark)').matches
@@ -125,7 +131,7 @@ export default {
   },
   computed: {
     tabs() { return CODE_TABS; },
-    compareRefs() { return DEFAULT_COMPARE_REFS; },
+    compareRefs() { return [...new Set(this.entities.branches.map((branch) => branch.name))]; },
     isDark() {
       if (this.settings.theme === 'dark') return true;
       if (this.settings.theme === 'light') return false;
@@ -168,6 +174,21 @@ export default {
     },
   },
   mounted() {
+    this.api = createGitLabClient(this.projectPath);
+    Promise.all([
+      fetchBranches({ projectPath: this.projectPath, client: this.api }),
+      fetchCommits({ projectPath: this.projectPath, client: this.api }),
+      fetchTags({ projectPath: this.projectPath, client: this.api }),
+      fetchSnippets({ projectPath: this.projectPath, client: this.api }),
+    ]).then(([branches, commits, tags, snippets]) => {
+      this.entities = { branches, commits, tags, snippets };
+      const refs = branches.map((branch) => branch.name);
+      this.compFrom = refs[0] || '';
+      this.compTo = refs[1] || refs[0] || '';
+    }).catch((error) => {
+      this.loadError = error;
+      notificationCenter.notify({ title: 'Code data unavailable', message: error.message, severity: 'error' });
+    });
     this._onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -219,7 +240,7 @@ export default {
     async runCompare() {
       this.comparePending = true;
       try {
-        const { message } = await runCompareRequest(this.compFrom, this.compTo);
+        const { message } = await runCompareRequest(this.projectPath, this.compFrom, this.compTo, this.api);
         this.compResult = message;
       } finally {
         this.comparePending = false;

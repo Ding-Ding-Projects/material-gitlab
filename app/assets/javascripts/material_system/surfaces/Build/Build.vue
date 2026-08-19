@@ -100,8 +100,7 @@ import {
   deleteArtifact,
   deleteArtifacts,
 } from './data';
-
-const FETCHERS = { jobs: fetchJobs, schedules: fetchSchedules, testCases: fetchTestCases, artifacts: fetchArtifacts };
+import { createGitLabClient } from '../gitlabApi';
 
 export default {
   name: 'BuildSurface',
@@ -115,12 +114,10 @@ export default {
     NotificationHost,
   },
   props: {
-    // A real integration passes GitLab's current_user here; the fallback
-    // keeps the surface fully working (and matches the design's static "JD"
-    // avatar) when no user context is supplied.
+    projectPath: { type: String, required: true },
     currentUser: {
       type: Object,
-      default: () => ({ name: 'Jamie Doe', initials: 'JD' }),
+      default: () => ({ name: '', initials: '' }),
     },
   },
   data() {
@@ -260,6 +257,7 @@ export default {
     },
   },
   created() {
+    this.api = createGitLabClient(this.projectPath);
     this.loadAll();
   },
   mounted() {
@@ -290,20 +288,21 @@ export default {
   },
   methods: {
     async loadAll() {
-      Object.keys(FETCHERS).forEach((key) => this.reload(key));
+      ['jobs', 'schedules', 'testCases', 'artifacts'].forEach((key) => this.reload(key));
       try {
-        this.yaml = await fetchPipelineYaml();
-      } catch (_error) {
-        // Keep the default draft — the editor is still fully usable.
+        this.yaml = await fetchPipelineYaml({ projectPath: this.projectPath, client: this.api });
+      } catch (error) {
+        this.$set(this.loadError, 'editor', error.message);
       }
     },
     async reload(tab) {
-      const fetcher = FETCHERS[tab];
+      const fetchers = { jobs: fetchJobs, schedules: fetchSchedules, testCases: fetchTestCases, artifacts: fetchArtifacts };
+      const fetcher = fetchers[tab];
       if (!fetcher) return;
       this.$set(this.loading, tab, true);
       this.$set(this.loadError, tab, null);
       try {
-        const data = await fetcher();
+        const data = await fetcher({ projectPath: this.projectPath, client: this.api });
         this[tab] = data;
       } catch (error) {
         this.$set(this.loadError, tab, (error && error.message) || `${this.tabs.find((t) => t.id === tab).label} could not be loaded.`);
@@ -337,7 +336,7 @@ export default {
       if (!lint.valid || this.yamlBusy) return;
       this.yamlBusy = true;
       try {
-        await commitPipelineYaml(this.yaml);
+        await commitPipelineYaml({ projectPath: this.projectPath, yaml: this.yaml, client: this.api });
         this.yamlCommitted = true;
         notificationCenter.notify({
           title: 'Pipeline configuration committed',
@@ -422,7 +421,7 @@ export default {
     },
     async retryOne(job) {
       try {
-        const result = await retryJob(job.id);
+        const result = await retryJob({ projectPath: this.projectPath, id: job.id, client: this.api });
         this.jobs = this.jobs.map((item) => (item.id === job.id ? { ...item, status: result.status, when: result.when } : item));
         notificationCenter.notify({ title: 'Job retried', message: `${job.name} is running again.`, severity: 'info' });
       } catch (error) {
@@ -431,7 +430,7 @@ export default {
     },
     async retryMany(jobs) {
       try {
-        await Promise.all(jobs.map((job) => retryJob(job.id)));
+        await Promise.all(jobs.map((job) => retryJob({ projectPath: this.projectPath, id: job.id, client: this.api })));
         const ids = jobs.map((job) => job.id);
         this.jobs = this.jobs.map((item) => (ids.includes(item.id) ? { ...item, status: 'running', when: '00:01' } : item));
         this.clearSelection('jobs');
@@ -443,7 +442,7 @@ export default {
     async toggleScheduleOne(schedule) {
       const next = !schedule.active;
       try {
-        await setScheduleActive(schedule.id, next);
+        await setScheduleActive({ projectPath: this.projectPath, id: schedule.id, active: next, client: this.api });
         this.schedules = this.schedules.map((item) => (item.id === schedule.id ? { ...item, active: next } : item));
         notificationCenter.notify({ title: next ? 'Schedule resumed' : 'Schedule paused', message: schedule.name, severity: 'info' });
       } catch (error) {
@@ -452,7 +451,7 @@ export default {
     },
     async setManySchedules(schedules, active) {
       try {
-        await Promise.all(schedules.map((schedule) => setScheduleActive(schedule.id, active)));
+        await Promise.all(schedules.map((schedule) => setScheduleActive({ projectPath: this.projectPath, id: schedule.id, active, client: this.api })));
         const ids = schedules.map((schedule) => schedule.id);
         this.schedules = this.schedules.map((item) => (ids.includes(item.id) ? { ...item, active } : item));
         this.clearSelection('schedules');
@@ -463,7 +462,7 @@ export default {
     },
     async setManyTestCaseStatus(testCases, status) {
       try {
-        await Promise.all(testCases.map((testCase) => setTestCaseStatus(testCase.id, status)));
+        await Promise.all(testCases.map((testCase) => setTestCaseStatus({ projectPath: this.projectPath, id: testCase.id, status, client: this.api })));
         const ids = testCases.map((testCase) => testCase.id);
         this.testCases = this.testCases.map((item) => (ids.includes(item.id) ? { ...item, status } : item));
         this.clearSelection('testCases');
@@ -474,7 +473,7 @@ export default {
     },
     async setManyArtifactsKept(artifacts, kept) {
       try {
-        await Promise.all(artifacts.map((artifact) => setArtifactKept(artifact.id, kept)));
+        await Promise.all(artifacts.map((artifact) => setArtifactKept({ projectPath: this.projectPath, id: artifact.id, kept, client: this.api })));
         const ids = artifacts.map((artifact) => artifact.id);
         this.artifacts = this.artifacts.map((item) => (ids.includes(item.id) ? { ...item, kept } : item));
         this.clearSelection('artifacts');
@@ -495,7 +494,7 @@ export default {
         cancelLabel: 'Cancel',
         destructive: true,
         onConfirm: async () => {
-          await deleteArtifact(artifact.id);
+          await deleteArtifact({ projectPath: this.projectPath, id: artifact.id, client: this.api });
           this.artifacts = this.artifacts.filter((item) => item.id !== artifact.id);
           this.selected.artifacts = this.selected.artifacts.filter((id) => id !== artifact.id);
           notificationCenter.notify({ title: 'Artifact deleted', message: `${artifact.name} was deleted.`, severity: 'success' });
@@ -513,7 +512,7 @@ export default {
         destructive: true,
         onConfirm: async () => {
           const ids = rows.map((row) => row.id);
-          await deleteArtifacts(ids);
+          await deleteArtifacts({ projectPath: this.projectPath, ids, client: this.api });
           this.artifacts = this.artifacts.filter((item) => !ids.includes(item.id));
           this.selected.artifacts = this.selected.artifacts.filter((id) => !ids.includes(id));
           notificationCenter.notify({ title: `${ids.length} artifacts deleted`, severity: 'success' });

@@ -29,9 +29,13 @@ export function initMergeRequests(el) {
   const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
   if (!mountEl) return null;
 
+  const projectPath = mountEl.dataset.projectPath || mountEl.dataset.projectPathEncoded;
+  if (!projectPath) throw new Error('Merge requests surface requires data-project-path.');
+
   return new Vue({
     el: mountEl,
-    render: (createElement) => createElement(MergeRequests),
+    propsData: { projectPath },
+    render: (createElement) => createElement(MergeRequests, { props: { projectPath } }),
   });
 }
 

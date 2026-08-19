@@ -15,7 +15,9 @@ export {
   statusMeta,
   worstJobStatus,
   buildJobLog,
-  createInitialPipelines,
+  fetchPipelines,
+  fetchPipelineDetail,
+  fetchJobTrace,
   createManualPipeline,
   retriedPipeline,
   canceledPipeline,
@@ -35,9 +37,12 @@ export function createPipelinesSurfaceInventory() {
 
 /** Mounts the Pipelines surface onto `el`. Returns the live Vue instance so a host app can destroy it. */
 export function mountPipelines(el, { propsData } = {}) {
+  const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
+  const projectPath = propsData?.projectPath || mountEl?.dataset?.projectPath;
+  if (!projectPath) throw new Error('Pipelines surface requires data-project-path.');
   return new Vue({
-    el,
-    render: (h) => h(Pipelines, { props: propsData }),
+    el: mountEl,
+    render: (h) => h(Pipelines, { props: { ...propsData, projectPath } }),
   });
 }
 
