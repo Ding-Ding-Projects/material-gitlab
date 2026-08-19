@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="To-Do list" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">To-Do list</h1>
+      <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px">
+        <div onClick="{{ showPending }}" style="padding:7px 18px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ pendBg }};color:{{ pendFg }}">To do · {{ pendingCount }}</div>
+        <div onClick="{{ showDone }}" style="padding:7px 18px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ doneBg }};color:{{ doneFg }}">Done</div>
+      </div>
+      <div onClick="{{ markAllDone }}" style="margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--outl);border-radius:999px;padding:9px 18px;font-weight:500;font-size:13.5px;cursor:pointer;color:var(--onprimc)"><span class="material-symbols-outlined" style="font-size:18px">done_all</span>Mark all done</div>
+    </div>
+    <main style="flex:1;overflow-y:auto;padding:8px 24px 24px">
+      <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:920px">
+        <sc-for list="{{ visibleTodos }}" as="td" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:14px;padding:14px 20px;border-bottom:1px solid var(--outlv)">
+            <span class="material-symbols-outlined" style="color:{{ td.iconColor }}">{{ td.icon }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13.5px"><b>{{ td.who }}</b> {{ td.action }} <a href="{{ td.href }}">{{ td.target }}</a></div>
+              <div style="font-size:12px;color:var(--onsurfv);margin-top:1px">{{ td.project }} · {{ td.when }}</div>
+            </div>
+            <sc-if value="{{ td.pending }}" hint-placeholder-val="{{ true }}">
+              <div onClick="{{ td.done }}" style="display:flex;align-items:center;gap:6px;border:1px solid var(--outl);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--onprimc)"><span class="material-symbols-outlined" style="font-size:16px">check</span>Done</div>
+            </sc-if>
+            <sc-if value="{{ td.isDone }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ td.restore }}" style="display:flex;align-items:center;gap:6px;border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:500;cursor:pointer;color:var(--onsurfv)"><span class="material-symbols-outlined" style="font-size:16px">undo</span>Restore</div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:44px;text-align:center;color:var(--onsurfv);font-size:13.5px;display:flex;flex-direction:column;align-items:center;gap:10px">
+            <span class="material-symbols-outlined" style="font-size:40px;color:var(--good)">task_alt</span>
+            Good job! Your to-do list is empty.
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches in to-dos" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false, view: 'pending',
+    todos: [
+      {id:1, who:'Dana Weiss', action:'assigned you merge request', target:'!1285 tonal container colors', href:'Merge Requests.dc.html', project:'acme-corp/phoenix-api', when:'2h ago', icon:'call_merge', state:'pending'},
+      {id:2, who:'Omar Haddad', action:'mentioned you on issue', target:'#4312 boards render slowly', href:'Issues.dc.html', project:'acme-corp/phoenix-api', when:'4h ago', icon:'alternate_email', state:'pending'},
+      {id:3, who:'Pipeline', action:'failed for', target:'#8820 fix/badge-contrast', href:'Pipelines.dc.html', project:'acme-corp/phoenix-api', when:'6h ago', icon:'cancel', state:'pending'},
+      {id:4, who:'Priya Nair', action:'requested review on', target:'!1278 regex mode for MR search', href:'Merge Requests.dc.html', project:'acme-corp/phoenix-api', when:'1d ago', icon:'rate_review', state:'pending'},
+      {id:5, who:'Security bot', action:'reported a critical finding in', target:'issues search parameter', href:'Security.dc.html', project:'acme-corp/phoenix-api', when:'2d ago', icon:'security', state:'pending'},
+      {id:6, who:'Jun Park', action:'approved your merge request', target:'!1281 poll backoff', href:'Merge Requests.dc.html', project:'acme-corp/phoenix-api', when:'3d ago', icon:'verified', state:'done'}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen: false, regexOpen: false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    const list = s.todos.filter(t => t.state === s.view.replace('pending', 'pending') && m(t.who + ' ' + t.action + ' ' + t.target))
+      .filter(t => s.view === 'pending' ? t.state === 'pending' : t.state === 'done');
+    const pending = s.todos.filter(t => t.state === 'pending');
+    const setStateOf = (id, st) => set({todos: s.todos.map(t => t.id === id ? {...t, state: st} : t)});
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — to-dos' : 'Search to-dos',
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: s.todos.map(t => t.who + ' ' + t.action + ' ' + t.target),
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [{label: 'Toggle dark theme', icon: 'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }},
+        {label: 'Mark all done', icon: 'done_all', run: () => set({todos: s.todos.map(t => ({...t, state: 'done'}))})}],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      pendingCount: pending.length,
+      showPending: () => set({view: 'pending'}), showDone: () => set({view: 'done'}),
+      pendBg: s.view === 'pending' ? 'var(--primc)' : 'transparent', pendFg: s.view === 'pending' ? 'var(--onprimc)' : 'var(--onsurfv)',
+      doneBg: s.view === 'done' ? 'var(--primc)' : 'transparent', doneFg: s.view === 'done' ? 'var(--onprimc)' : 'var(--onsurfv)',
+      markAllDone: () => set({todos: s.todos.map(t => ({...t, state: 'done'}))}),
+      visibleTodos: list.map(t => ({...t,
+        iconColor: t.icon === 'cancel' ? 'var(--err)' : t.icon === 'security' ? 'var(--err)' : t.icon === 'verified' ? 'var(--good)' : 'var(--prim)',
+        pending: t.state === 'pending', isDone: t.state === 'done',
+        done: () => setStateOf(t.id, 'done'), restore: () => setStateOf(t.id, 'pending')})),
+      emptyList: list.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>

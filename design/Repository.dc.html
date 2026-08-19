@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="Repository" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <main style="flex:1;overflow-y:auto;padding:8px 24px 24px;display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">phoenix-api</h1>
+        <span style="font-size:12px;font-weight:500;padding:4px 12px;border-radius:999px;background:var(--surfc);color:var(--onsurfv)">Internal</span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--outl);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--onprimc)"><span class="material-symbols-outlined" style="font-size:17px">star</span>Star · 214</div>
+          <div style="display:flex;align-items:center;gap:6px;border:1px solid var(--outl);border-radius:999px;padding:8px 16px;font-size:13px;font-weight:500;cursor:pointer;color:var(--onprimc)"><span class="material-symbols-outlined" style="font-size:17px">fork_right</span>Fork · 38</div>
+          <div style="display:flex;align-items:center;gap:6px;background:var(--prim);color:var(--onprim);border-radius:999px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">download</span>Code</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;font-size:12.5px;color:var(--onsurfv)">
+        <span><b style="color:var(--onsurf)">2,481</b> commits</span><span><b style="color:var(--onsurf)">14</b> branches</span><span><b style="color:var(--onsurf)">42</b> tags</span><span><b style="color:var(--onsurf)">96.2 MB</b> storage</span>
+      </div>
+      <div title="Languages" style="display:flex;height:10px;border-radius:999px;overflow:hidden;max-width:720px">
+        <span title="Ruby 51%" style="width:51%;background:var(--prim)"></span><span title="Vue 28%" style="width:28%;background:var(--good)"></span><span title="JavaScript 14%" style="width:14%;background:var(--warn)"></span><span title="Other 7%" style="width:7%;background:var(--outl)"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div onClick="{{ toggleBranchMenu }}" style="position:relative;display:flex;align-items:center;gap:8px;background:var(--surfc);border-radius:12px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer">
+          <span class="material-symbols-outlined" style="font-size:17px;color:var(--onsurfv)">account_tree</span>{{ branch }}<span class="material-symbols-outlined" style="font-size:17px;color:var(--onsurfv)">expand_more</span>
+          <sc-if value="{{ branchMenuOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="position:absolute;top:44px;left:0;background:var(--card);border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.2);padding:6px;z-index:20;min-width:200px;display:flex;flex-direction:column;gap:1px">
+              <sc-for list="{{ branches }}" as="br" hint-placeholder-count="4">
+                <div onClick="{{ br.pick }}" style="padding:8px 14px;border-radius:9px;font-size:13px;font-family:monospace;background:{{ br.bg }}" style-hover="background:var(--surfch)">{{ br.name }}</div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--onsurfv);font-family:monospace">
+          <sc-for list="{{ breadcrumbs }}" as="bc" hint-placeholder-count="2">
+            <span onClick="{{ bc.go }}" style="cursor:pointer;color:var(--onprimc)">{{ bc.name }}</span><span>/</span>
+          </sc-for>
+        </div>
+      </div>
+      <sc-if value="{{ blob }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Blob viewer" style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:980px">
+          <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--outlv)">
+            <span class="material-symbols-outlined" style="color:var(--onsurfv);font-size:18px">description</span>
+            <span style="font-family:monospace;font-size:13px;font-weight:500">{{ blob.name }}</span>
+            <span style="font-size:12px;color:var(--onsurfv)">{{ blob.size }}</span>
+            <div onClick="{{ closeBlob }}" style="margin-left:auto;width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">close</span></div>
+          </div>
+          <sc-for list="{{ blobLines }}" as="bl" hint-placeholder-count="10">
+            <div style="display:flex;font-family:monospace;font-size:12.5px;line-height:1.85">
+              <span style="width:44px;flex-shrink:0;text-align:right;padding-right:12px;color:var(--onsurfv);opacity:.55;user-select:none">{{ bl.no }}</span>
+              <span style="white-space:pre;overflow-x:auto">{{ bl.code }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showTree }}" hint-placeholder-val="{{ true }}">
+        <div style="display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start">
+          <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+            <sc-for list="{{ entries }}" as="en" hint-placeholder-count="8">
+              <div onClick="{{ en.openEntry }}" style="display:flex;align-items:center;gap:12px;padding:11px 18px;border-bottom:1px solid var(--outlv);cursor:pointer" style-hover="background:var(--surfcl)">
+                <span class="material-symbols-outlined" style="font-size:19px;color:{{ en.iconColor }}">{{ en.icon }}</span>
+                <span style="font-family:monospace;font-size:13px;min-width:180px">{{ en.name }}</span>
+                <span style="flex:1;font-size:12.5px;color:var(--onsurfv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ en.message }}</span>
+                <span style="font-size:12px;color:var(--onsurfv)">{{ en.when }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div data-screen-label="Commits" style="background:var(--card);border-radius:var(--card-r,20px);padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:12px">
+            <div style="font-size:12px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Recent commits</div>
+            <sc-for list="{{ commits }}" as="cm" hint-placeholder-count="4">
+              <div style="display:flex;gap:10px">
+                <div style="width:28px;height:28px;flex-shrink:0;border-radius:999px;background:var(--sec);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700">{{ cm.avatar }}</div>
+                <div style="min-width:0">
+                  <div style="font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ cm.message }}</div>
+                  <div style="font-size:11.5px;color:var(--onsurfv);margin-top:1px"><span style="font-family:monospace">{{ cm.sha }}</span> · {{ cm.author }} · {{ cm.when }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches in files" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Tree structure mirrors the real gitlab repo root (app/, config/, db/, doc/, ee/, lib/, spec/…)
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false,
+    branch: 'main', branchMenuOpen: false, path: [], blobName: null,
+    tree: {
+      '': [
+        ['app','dir','Move pipeline badges to tonal containers','2h ago'],
+        ['config','dir','Add regex search feature flag','1d ago'],
+        ['db','dir','Add index on issues.moved_to_id','2d ago'],
+        ['doc','dir','Document regex search mode','5h ago'],
+        ['ee','dir','Security dashboard triage drawer','3d ago'],
+        ['lib','dir','Backoff for state query polling','1d ago'],
+        ['spec','dir','Update empty-state snapshots','2h ago'],
+        ['.gitlab-ci.yml','file','Split jest into 4 shards','6h ago'],
+        ['Gemfile','file','Bump rails to 7.2.4','1w ago'],
+        ['README.md','file','Add MD3 rewrite notes','3h ago'],
+        ['package.json','file','Add virtual-scroll dependency','2h ago']
+      ],
+      'app': [
+        ['assets','dir','Tonal container colors','2h ago'],
+        ['controllers','dir','Regex param validation','1d ago'],
+        ['models','dir','Issue board position index','2d ago'],
+        ['services','dir','MergeRequests::MergeService backoff','1d ago']
+      ],
+      'app/assets': [
+        ['images','dir','Refresh ci favicons','2w ago'],
+        ['javascripts','dir','Virtualize board columns','2h ago'],
+        ['stylesheets','dir','MD3 token layer','4h ago']
+      ]
+    },
+    blobs: {
+      'README.md': {size: '4.1 KB', lines: ['# phoenix-api','','GitLab-hosted service powering the Phoenix product line.','','## Development','','```','bundle install && yarn install','bin/rails s','```','','See doc/ for the MD3 rewrite notes and the regex search spec.']},
+      '.gitlab-ci.yml': {size: '2.8 KB', lines: ['stages:','  - build','  - test','  - deploy','','jest:','  stage: test','  parallel: 4','  script:','    - yarn jest --shard $CI_NODE_INDEX/$CI_NODE_TOTAL']},
+      'Gemfile': {size: '1.2 KB', lines: ["source 'https://rubygems.org'","","gem 'rails', '~> 7.2.4'","gem 'pg'","gem 'sidekiq'"]},
+      'package.json': {size: '0.9 KB', lines: ['{','  "name": "phoenix-api",','  "dependencies": {','    "vue": "^3.4",','    "virtual-scroll": "^2.1"','  }','}']}
+    },
+    commits: [
+      {sha:'a41f9c2e', message:'Virtualize board column lists', author:'Jun Park', when:'2h ago'},
+      {sha:'7be20d11', message:'Move pipeline badges to tonal containers', author:'Dana Weiss', when:'6h ago'},
+      {sha:'90c3aa17', message:'Backoff for state query polling', author:'Omar Haddad', when:'1d ago'},
+      {sha:'5f01bd93', message:'Add regex search feature flag', author:'Jun Park', when:'1d ago'},
+      {sha:'c2d84b60', message:'Update empty-state snapshots', author:'Dana Weiss', when:'2h ago'}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen: false, regexOpen: false, branchMenuOpen: false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    const pathStr = s.path.join('/');
+    const raw = s.tree[pathStr] || [];
+    const entries = raw.filter(([name]) => m(name));
+    const blob = s.blobName ? {name: s.blobName, ...s.blobs[s.blobName]} : null;
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex filter — file names' : 'Filter files',
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: Object.values(s.tree).flat().map(e => e[0]),
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [{label: 'Toggle dark theme', icon: 'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }}],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      branch: s.branch, branchMenuOpen: s.branchMenuOpen,
+      toggleBranchMenu: () => set({branchMenuOpen: !s.branchMenuOpen}),
+      branches: ['main','perf/board-virtual','fix/badge-contrast','feat/mr-regex-search'].map(b => ({name: b, bg: b === s.branch ? 'var(--sec)' : 'transparent',
+        pick: (e) => { e.stopPropagation(); set({branch: b, branchMenuOpen: false}); }})),
+      breadcrumbs: [{name: 'phoenix-api', go: () => set({path: [], blobName: null})},
+        ...s.path.map((p, i) => ({name: p, go: () => set({path: s.path.slice(0, i + 1), blobName: null})}))],
+      showTree: !blob, blob, closeBlob: () => set({blobName: null}),
+      blobLines: blob ? blob.lines.map((code, i) => ({no: i + 1, code: code || ' '})) : [],
+      entries: entries.map(([name, kind, message, when]) => ({name, message, when,
+        icon: kind === 'dir' ? 'folder' : 'description',
+        iconColor: kind === 'dir' ? 'var(--prim)' : 'var(--onsurfv)',
+        openEntry: () => { if (kind === 'dir') { const np = [...s.path, name]; if (s.tree[np.join('/')]) set({path: np}); }
+          else if (s.blobs[name]) set({blobName: name}); }})),
+      commits: s.commits.map(c => ({...c, avatar: c.author.split(' ').map(w => w[0]).join('')}))
+    };
+  }
+}
+</script>
+</body>
+</html>

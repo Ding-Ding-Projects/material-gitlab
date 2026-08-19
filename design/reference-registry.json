@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "model": "material-gitlab.design-reference-contracts",
+  "sourceArchive": {
+    "sha256": "12E426D2A64CF05C8419B3D76825EF2A6B51C17B6526DD737112B6E9A5F4ADB1",
+    "expectedEntries": 29,
+    "expectedDcHtmlFiles": 25
+  },
+  "contracts": [
+    { "id": "surface.admin", "title": "Admin", "reference": "design/Admin.dc.html", "route": "design-reference/admin" },
+    { "id": "surface.agent-memory", "title": "Agent Memory", "reference": "design/Agent Memory.dc.html", "route": "design-reference/agent-memory" },
+    { "id": "surface.analyze", "title": "Analyze", "reference": "design/Analyze.dc.html", "route": "design-reference/analyze" },
+    { "id": "surface.build", "title": "Build", "reference": "design/Build.dc.html", "route": "design-reference/build" },
+    { "id": "surface.code", "title": "Code", "reference": "design/Code.dc.html", "route": "design-reference/code" },
+    { "id": "surface.command-palette", "title": "Command Palette", "reference": "design/Command Palette.dc.html", "route": "design-reference/command-palette" },
+    { "id": "surface.deploy", "title": "Deploy", "reference": "design/Deploy.dc.html", "route": "design-reference/deploy" },
+    { "id": "surface.epics", "title": "Epics", "reference": "design/Epics.dc.html", "route": "design-reference/epics" },
+    { "id": "surface.issues", "title": "Issues", "reference": "design/Issues.dc.html", "route": "design-reference/issues" },
+    { "id": "surface.login", "title": "Login", "reference": "design/Login.dc.html", "route": "design-reference/login" },
+    { "id": "surface.manage", "title": "Manage", "reference": "design/Manage.dc.html", "route": "design-reference/manage" },
+    { "id": "surface.merge-requests", "title": "Merge Requests", "reference": "design/Merge Requests.dc.html", "route": "design-reference/merge-requests" },
+    { "id": "surface.monitor", "title": "Monitor", "reference": "design/Monitor.dc.html", "route": "design-reference/monitor" },
+    { "id": "surface.operate", "title": "Operate", "reference": "design/Operate.dc.html", "route": "design-reference/operate" },
+    { "id": "surface.pipelines", "title": "Pipelines", "reference": "design/Pipelines.dc.html", "route": "design-reference/pipelines" },
+    { "id": "surface.plan", "title": "Plan", "reference": "design/Plan.dc.html", "route": "design-reference/plan" },
+    { "id": "surface.regex-builder", "title": "Regex Builder", "reference": "design/Regex Builder.dc.html", "route": "design-reference/regex-builder" },
+    { "id": "surface.repository", "title": "Repository", "reference": "design/Repository.dc.html", "route": "design-reference/repository" },
+    { "id": "surface.secure", "title": "Secure", "reference": "design/Secure.dc.html", "route": "design-reference/secure" },
+    { "id": "surface.security", "title": "Security", "reference": "design/Security.dc.html", "route": "design-reference/security" },
+    { "id": "surface.settings", "title": "Settings", "reference": "design/Settings.dc.html", "route": "design-reference/settings" },
+    { "id": "surface.shell-a", "title": "Shell A", "reference": "design/Shell A.dc.html", "route": "design-reference/shell-a" },
+    { "id": "surface.shell-b", "title": "Shell B", "reference": "design/Shell B.dc.html", "route": "design-reference/shell-b" },
+    { "id": "surface.sidebar", "title": "Sidebar", "reference": "design/Sidebar.dc.html", "route": "design-reference/sidebar" },
+    { "id": "surface.todos", "title": "Todos", "reference": "design/Todos.dc.html", "route": "design-reference/todos" }
+  ],
+  "evidence": {
+    "referenceApp": null,
+    "realBuiltApp": null,
+    "rawCaptures": [],
+    "sideBySide": null,
+    "visualDiff": null,
+    "status": "foundation-only; evidence unverified"
+  }
+}

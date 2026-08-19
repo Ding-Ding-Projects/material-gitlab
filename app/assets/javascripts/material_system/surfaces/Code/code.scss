@@ -1,0 +1,791 @@
+/**
+ * Code surface tokens + layout.
+ *
+ * Token names and values are ported verbatim from Code.dc.html's own <style>
+ * block. No existing module in app/assets/javascripts/material_system defines
+ * this exact custom-property set (tokens.js ships a differently-named MD3
+ * baseline consumed as JS data), so these literals are defined here and
+ * scoped under .gl-material-code so they cannot leak into the rest of the
+ * app. If a shared token stylesheet is introduced later under these same
+ * names, this block can be deleted in favor of it without touching any
+ * selector below — every rule here only ever reads var(--token-name).
+ */
+
+.gl-material-code {
+  --surf: #f4effa;
+  --surfc: #ece4f6;
+  --surfch: #e0d5f2;
+  --surfcl: #faf6ff;
+  --onsurf: #1d1b20;
+  --onsurfv: #49454f;
+  --prim: #6750c4;
+  --onprim: #ffffff;
+  --primc: #e8def8;
+  --onprimc: #4f378b;
+  --sec: #d6c9f0;
+  --outl: #cac4d0;
+  --outlv: #e7e0ec;
+  --err: #b3261e;
+  --errc: #f9dedc;
+  --good: #1a7f37;
+  --goodc: #dcf2e3;
+  --warn: #9a6700;
+  --warnc: #fff3d0;
+  --card: #ffffff;
+  --scrim: rgba(29, 27, 32, 0.35);
+  --card-r: 20px;
+  --dlg-r: 28px;
+
+  &[data-theme='dark'] {
+    --surf: #141218;
+    --surfc: #211f26;
+    --surfch: #2b2831;
+    --surfcl: #1b1922;
+    --onsurf: #e6e0e9;
+    --onsurfv: #cac4d0;
+    --prim: #cfbdfe;
+    --onprim: #381e72;
+    --primc: #4f378b;
+    --onprimc: #e8def8;
+    --sec: #4a4458;
+    --outl: #49454f;
+    --outlv: #332f3a;
+    --err: #f2b8b5;
+    --errc: #5c1a17;
+    --good: #7fd79a;
+    --goodc: #1c3a27;
+    --warn: #e2c46d;
+    --warnc: #3d3012;
+    --card: #211f26;
+    --scrim: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.gl-material-code {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100%;
+  background: var(--surf);
+  color: var(--onsurf);
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: var(--prim);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--onprimc);
+    }
+  }
+
+  ::placeholder {
+    color: var(--onsurfv);
+    opacity: 0.7;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--prim);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      transition: none !important;
+      animation: none !important;
+    }
+  }
+}
+
+/* ---- Top bar ---- */
+
+.gl-code-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px 8px;
+}
+
+.gl-code-search {
+  flex: 1;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surfc);
+  border-radius: 999px;
+  padding: 8px 8px 8px 18px;
+  color: var(--onsurfv);
+}
+
+.gl-code-search__icon {
+  flex-shrink: 0;
+  display: flex;
+}
+
+.gl-code-search__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: var(--onsurf);
+  flex: 1;
+  min-width: 0;
+}
+
+.gl-code-search__chip {
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  border: none;
+  background: var(--surfch);
+  color: var(--onsurfv);
+
+  &.is-active {
+    background: var(--prim);
+    color: var(--onprim);
+  }
+}
+
+.gl-code-iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: inherit;
+  flex-shrink: 0;
+
+  &:hover {
+    background: var(--surfch);
+  }
+}
+
+.gl-code-iconbtn--lg {
+  width: 40px;
+  height: 40px;
+  color: var(--onsurfv);
+}
+
+.gl-code-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--primc);
+  color: var(--onprimc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+/* ---- Heading + tabs ---- */
+
+.gl-code-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+  flex-wrap: wrap;
+}
+
+.gl-code-heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.gl-code-tablist {
+  display: flex;
+  background: var(--surfc);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.gl-code-tab {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--onsurfv);
+  min-height: 32px;
+
+  &.is-active {
+    background: var(--primc);
+    color: var(--onprimc);
+  }
+}
+
+.gl-code-count {
+  font-size: 12.5px;
+  color: var(--onsurfv);
+}
+
+/* ---- Main content ---- */
+
+.gl-code-main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 24px 24px;
+}
+
+.gl-code-card {
+  background: var(--card);
+  border-radius: var(--card-r);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  max-width: 980px;
+}
+
+/* ---- Compare card ---- */
+
+.gl-code-compare {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.gl-code-compare__row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.gl-code-select {
+  border: 1px solid var(--outl);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--card);
+  color: var(--onsurf);
+}
+
+.gl-code-btn {
+  background: var(--prim);
+  color: var(--onprim);
+  border: none;
+  border-radius: 999px;
+  padding: 9px 20px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.gl-code-btn--text {
+  background: transparent;
+  color: var(--onprimc);
+  padding: 10px 20px;
+}
+
+.gl-code-compare__result {
+  font-size: 13px;
+  color: var(--onsurfv);
+}
+
+/* ---- Row list ---- */
+
+.gl-code-listbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--outlv);
+  font-size: 12.5px;
+  color: var(--onsurfv);
+}
+
+.gl-code-checkbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--prim);
+}
+
+.gl-code-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--outlv);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.is-selected {
+    background: var(--surfcl);
+  }
+}
+
+.gl-code-row__icon {
+  flex-shrink: 0;
+  display: flex;
+}
+
+.gl-code-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gl-code-row__title {
+  font-weight: 500;
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--mono {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  }
+}
+
+.gl-code-row__sub {
+  font-size: 12px;
+  color: var(--onsurfv);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gl-code-badge {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.gl-code-meta {
+  font-size: 12px;
+  color: var(--onsurfv);
+  flex-shrink: 0;
+}
+
+.gl-code-row__action {
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--outl);
+  background: transparent;
+  border-radius: 999px;
+  padding: 6px 14px;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+
+.gl-code-empty {
+  padding: 36px;
+  text-align: center;
+  color: var(--onsurfv);
+  font-size: 13.5px;
+}
+
+/* ---- Bulk action bar ---- */
+
+.gl-code-bulkbar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: var(--surfch);
+  border-radius: 0 0 var(--card-r) var(--card-r);
+  font-size: 13px;
+}
+
+.gl-code-bulkbar__actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gl-code-bulkbar__btn {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  background: var(--card);
+  color: var(--onsurf);
+  min-height: 32px;
+
+  &:hover {
+    background: var(--surf);
+  }
+
+  &--danger {
+    color: var(--err);
+  }
+}
+
+/* ---- Overlays (regex builder / command palette / confirm) ---- */
+
+.gl-code-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--scrim);
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.gl-code-overlay--top {
+  align-items: flex-start;
+  padding-top: 80px;
+}
+
+.gl-code-dialog {
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  background: var(--surf);
+  border-radius: var(--dlg-r);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  color: var(--onsurf);
+}
+
+.gl-code-dialog--regex {
+  max-width: 780px;
+}
+
+.gl-code-dialog--palette {
+  max-width: 560px;
+  padding: 0;
+  gap: 0;
+  border-radius: 24px;
+}
+
+.gl-code-dialog--confirm {
+  max-width: 420px;
+}
+
+.gl-code-dialog__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.gl-code-dialog__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gl-code-flagchips {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.gl-code-flagchip {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: var(--surfc);
+  color: var(--onsurfv);
+
+  &.is-active {
+    background: var(--prim);
+    color: var(--onprim);
+  }
+}
+
+.gl-code-status-chip {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.gl-code-mono-input {
+  border: 1px solid var(--outl);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 15px;
+  background: transparent;
+  color: var(--onsurf);
+  outline: none;
+  width: 100%;
+}
+
+.gl-code-error {
+  font-size: 12.5px;
+  color: var(--err);
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+.gl-code-snippet-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gl-code-snippet-group {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.gl-code-snippet-group__label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--onsurfv);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  width: 86px;
+  flex-shrink: 0;
+}
+
+.gl-code-snippet-chip {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12.5px;
+  padding: 5px 11px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  background: var(--surfc);
+  color: var(--onsurf);
+
+  &:hover {
+    background: var(--surfch);
+  }
+}
+
+.gl-code-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 560px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.gl-code-field-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--onsurfv);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gl-code-textarea {
+  border: 1px solid var(--outl);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12.5px;
+  background: transparent;
+  color: var(--onsurf);
+  outline: none;
+  resize: vertical;
+  width: 100%;
+}
+
+.gl-code-panel {
+  background: var(--surfcl);
+  border-radius: 12px;
+  padding: 10px 12px;
+  min-height: 40px;
+}
+
+.gl-code-highlight {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.gl-code-highlight .gl-code-match {
+  background: var(--primc);
+  color: var(--onprimc);
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
+.gl-code-captures {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gl-code-capture {
+  display: flex;
+  gap: 10px;
+  font-size: 12.5px;
+}
+
+.gl-code-capture__n {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  color: var(--onprimc);
+  font-weight: 700;
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.gl-code-explain {
+  max-height: 120px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.gl-code-explain__row {
+  display: flex;
+  gap: 10px;
+  font-size: 12px;
+}
+
+.gl-code-explain__tok {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  color: var(--onprimc);
+  flex-shrink: 0;
+  min-width: 52px;
+}
+
+.gl-code-corpus {
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-height: 50px;
+  background: var(--surfcl);
+}
+
+.gl-code-corpus__title {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--onsurfv);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.gl-code-corpus__item {
+  font-size: 12.5px;
+  padding: 3px 0;
+  color: var(--onsurfv);
+}
+
+.gl-code-dialog__actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ---- Command palette ---- */
+
+.gl-code-palette__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--outlv);
+}
+
+.gl-code-palette__input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14.5px;
+  color: var(--onsurf);
+  flex: 1;
+  min-width: 0;
+}
+
+.gl-code-palette__kbd {
+  font-size: 11px;
+  color: var(--onsurfv);
+  border: 1px solid var(--outl);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
+
+.gl-code-palette__list {
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.gl-code-palette__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  color: var(--onsurf);
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:hover,
+  &.is-active-option {
+    background: var(--surfc);
+  }
+}
+
+.gl-code-palette__kind {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--onsurfv);
+}
+
+/* ---- Confirm dialog ---- */
+
+.gl-code-confirm__body {
+  font-size: 13.5px;
+  color: var(--onsurfv);
+  line-height: 1.5;
+}

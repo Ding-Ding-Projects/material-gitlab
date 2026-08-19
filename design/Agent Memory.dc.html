@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="Memory console" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">Agent Memory</h1>
+      <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap">
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+          <div onClick="{{ tb.pick }}" style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ tb.bg }};color:{{ tb.fg }}">{{ tb.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <main style="flex:1;overflow-y:auto;padding:8px 24px 24px;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ tabInstructions }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <sc-for list="{{ targets }}" as="tg" hint-placeholder-count="3">
+            <div style="background:var(--card);border-radius:var(--card-r,20px);padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:6px;min-width:240px">
+              <div style="display:flex;align-items:center;gap:8px;font-weight:500;font-size:14px"><span class="material-symbols-outlined" style="color:var(--prim);font-size:19px">smart_toy</span>{{ tg.runtime }}</div>
+              <div style="font-family:monospace;font-size:11.5px;color:var(--onsurfv)">{{ tg.path }}</div>
+              <span style="align-self:flex-start;font-size:11.5px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ tg.stBg }};color:{{ tg.stFg }}">{{ tg.status }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:920px">
+          <sc-for list="{{ visibleBlocks }}" as="bl" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--outlv)">
+              <span class="material-symbols-outlined" style="color:var(--onsurfv);font-size:19px">article</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:500;font-size:13.5px">{{ bl.title }}</div>
+                <div style="font-size:12px;color:var(--onsurfv);margin-top:1px">{{ bl.summary }}</div>
+              </div>
+              <span style="font-size:11.5px;color:var(--onsurfv)">{{ bl.lines }} lines</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tabSkills }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;max-width:920px">
+          <sc-for list="{{ visibleSkills }}" as="sk" hint-placeholder-count="6">
+            <div style="background:var(--card);border-radius:var(--card-r,20px);padding:16px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span class="material-symbols-outlined" style="color:var(--prim)">{{ sk.icon }}</span>
+                <span style="font-family:monospace;font-size:13px;font-weight:700">{{ sk.name }}</span>
+                <span style="margin-left:auto;font-size:11px;font-weight:500;padding:2px 10px;border-radius:999px;background:{{ sk.stBg }};color:{{ sk.stFg }}">{{ sk.status }}</span>
+              </div>
+              <div style="font-size:12.5px;color:var(--onsurfv);line-height:1.5">{{ sk.desc }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tabStatus }}" hint-placeholder-val="{{ false }}">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:980px">
+          <sc-for list="{{ visibleSessions }}" as="ss" hint-placeholder-count="4">
+            <div data-screen-label="Session card" style="background:var(--card);border-radius:var(--card-r,20px);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="width:10px;height:10px;border-radius:999px;background:{{ ss.dot }}"></span>
+                <span style="font-weight:500;font-size:14px">{{ ss.agent }}</span>
+                <span style="margin-left:auto;font-size:11.5px;color:var(--onsurfv)">{{ ss.when }}</span>
+              </div>
+              <div style="font-size:13px;line-height:1.5">{{ ss.task }}</div>
+              <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:12px">
+                <div><b>Baseline</b> · {{ ss.baseline }}</div>
+                <div><b>Evidence</b> · {{ ss.evidence }}</div>
+                <div><b>Next gate</b> · {{ ss.gate }}</div>
+              </div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input onInput="{{ ss.setReply }}" onKeyDown="{{ ss.replyKey }}" value="{{ ss.reply }}" placeholder="Reply to session inbox…" style="flex:1;border:1px solid var(--outl);border-radius:999px;padding:8px 14px;font:inherit;font-size:12.5px;background:transparent;color:var(--onsurf);outline:none">
+                <div onClick="{{ ss.send }}" style="width:34px;height:34px;border-radius:999px;background:var(--prim);color:var(--onprim);display:flex;align-items:center;justify-content:center;cursor:pointer"><span class="material-symbols-outlined" style="font-size:17px">send</span></div>
+              </div>
+              <sc-if value="{{ ss.lastReply }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:11.5px;color:var(--good)">Delivered to inbox: “{{ ss.lastReply }}”</div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tabSync }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--card);border-radius:var(--card-r,20px);padding:20px 22px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:14px;max-width:640px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="material-symbols-outlined" style="color:{{ syncColor }};font-size:26px">{{ syncIcon }}</span>
+            <div><div style="font-weight:500;font-size:15px">{{ syncTitle }}</div><div style="font-size:12.5px;color:var(--onsurfv)">{{ syncSub }}</div></div>
+            <div onClick="{{ runSync }}" style="margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--prim);color:var(--onprim);border-radius:999px;padding:10px 20px;font-weight:500;font-size:13.5px;cursor:pointer"><span class="material-symbols-outlined" style="font-size:18px">sync</span>{{ syncBtn }}</div>
+          </div>
+          <sc-for list="{{ syncSteps }}" as="sy" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:10px;font-size:13px">
+              <span class="material-symbols-outlined" style="font-size:18px;color:{{ sy.color }}">{{ sy.icon }}</span>{{ sy.label }}
+              <span style="margin-left:auto;font-size:11.5px;color:var(--onsurfv);font-family:monospace">{{ sy.note }}</span>
+            </div>
+          </sc-for>
+          <div style="font-size:11.5px;color:var(--onsurfv);border-top:1px solid var(--outlv);padding-top:10px">Timestamped backup created before every replacement · noncanonical checkouts fail closed without the authorization word.</div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ tabHistory }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:920px">
+          <sc-for list="{{ visibleHistory }}" as="hs" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--outlv)">
+              <span class="material-symbols-outlined" style="color:var(--onsurfv);font-size:19px">{{ hs.icon }}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:500;font-size:13.5px">{{ hs.title }}</div>
+                <div style="font-size:12px;color:var(--onsurfv);margin-top:1px"><span style="font-family:monospace">{{ hs.rev }}</span> · {{ hs.when }}</div>
+              </div>
+              <div onClick="{{ hs.restore }}" style="font-size:12.5px;font-weight:500;color:var(--onprimc);cursor:pointer;border:1px solid var(--outl);border-radius:999px;padding:6px 14px">Restore as new revision</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches in memory" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Surfaces mirror agent-global-memory README: managed instruction targets, skills/ catalog, Status Hub session cards with baseline/evidence/gate + inbox replies, sync with backup, append-only history with restore-as-new-revision
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false, tab: 'instructions',
+    syncPhase: 'idle', replies: {}, drafts: {},
+    blocks: [
+      {title:'Shared working agreement', summary:'Managed instruction block · unique delimiters preserved (LF/CRLF/CR)', lines: 212},
+      {title:'Status page preference', summary:'One stable live status card per substantial task, updated in place', lines: 34},
+      {title:'Delegation lifecycle', summary:'Orchestrated bounded task sessions with follow-up steering', lines: 58},
+      {title:'Presentation preferences', summary:'Bold status headings; private aliases never copied to public artifacts', lines: 41},
+      {title:'Search requirements', summary:'Regex builder in every search bar · Ctrl+Shift+F palette on every surface', lines: 27}
+    ],
+    skills: [
+      {name:'agent-global-memory', icon:'memory', desc:'Canonical instructions, sync, backup, and recovery workflows.', status:'installed'},
+      {name:'line5-ride-counter', icon:'tram', desc:'Focused counting workflow triggered from ordinary task language.', status:'installed'},
+      {name:'mat-day', icon:'cleaning_services', desc:'Authorized-cleanup presentation overlay for every workflow.', status:'installed'},
+      {name:'yum-lerng-cha', icon:'rocket_launch', desc:'Ultra-speed feature-or-fix release lane with background CI monitoring.', status:'installed'},
+      {name:'yum-tong', icon:'power_settings_new', desc:'Release-grade shutdown workflow with exhaustive proof.', status:'installed'},
+      {name:'fun-gow', icon:'extension', desc:'Repo-local convenience skill mirrored for Codex and Claude.', status:'repo-local'}
+    ],
+    sessions: [
+      {id:1, agent:'Claude Code · lane 1', dot:'var(--good)', when:'live', task:'MD3 rewrite — issues & boards surfaces', baseline:'v0.1.2810 verified', evidence:'capture 2026-08-14T09:12Z', gate:'MR !1285 review'},
+      {id:2, agent:'Slop Machine · task 8812', dot:'var(--warn)', when:'12m ago', task:'Jest shard 2/4 flake bisect', baseline:'commit a41f9c2e', evidence:'CI run 30929821528', gate:'green rerun ×3'},
+      {id:3, agent:'OpenCode · docs', dot:'var(--good)', when:'1h ago', task:'Regex search spec draft', baseline:'doc/ tree 5f01bd93', evidence:'2 captures linked', gate:'maintainer sign-off'},
+      {id:4, agent:'Claude Code · lane 2', dot:'var(--outl)', when:'archived', task:'Token layer and theming (epic &14)', baseline:'closed 100%', evidence:'release notes v17.2', gate:'—'}
+    ],
+    history: [
+      {rev:'r48', icon:'sync', title:'Managed block replaced after canonical sync', when:'today 09:02'},
+      {rev:'r47', icon:'backup', title:'Timestamped backup before replacement', when:'today 09:02'},
+      {rev:'r46', icon:'edit', title:'Added regex-builder preference to search requirements', when:'yesterday'},
+      {rev:'r45', icon:'school', title:'Installed skill yum-tong', when:'3d ago'},
+      {rev:'r44', icon:'restore', title:'Restored r41 as new revision (status heading rule)', when:'1w ago'}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen: false, regexOpen: false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); if (this._syncT) clearTimeout(this._syncT); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    const phase = s.syncPhase;
+    const stepState = (i) => phase === 'idle' ? 'pending' : phase === 'done' ? 'done' : (i < {verify:1, backup:2, block:3, skills:4}[phase] ? 'done' : i === {verify:1, backup:2, block:3, skills:4}[phase] - 1 ? 'done' : 'pending');
+    const stepsDef = [
+      ['Verify canonical origin', 'github.com/Ding-Ding-Projects'],
+      ['Create timestamped backup', '~/.claude/rules/*.bak'],
+      ['Replace managed instruction block', 'delimiters preserved'],
+      ['Install owned skills catalog', '6 skills']
+    ];
+    const order = ['verify','backup','block','skills'];
+    const activeIdx = order.indexOf(phase);
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — memory inventory' : 'Search memory, skills, sessions',
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: [...s.blocks.map(b => b.title), ...s.skills.map(k => k.name), ...s.sessions.map(x => x.agent + ' ' + x.task)],
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [{label: 'Toggle dark theme', icon: 'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }},
+        ...['instructions','skills','status','sync','history'].map(t => ({label: 'Memory: ' + t, icon: 'memory', run: () => set({tab: t})}))],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      tabs: [['instructions','Instructions'],['skills','Skills'],['status','Status Hub'],['sync','Sync'],['history','History']].map(([k, label]) => ({label,
+        pick: () => set({tab: k}), bg: s.tab === k ? 'var(--primc)' : 'transparent', fg: s.tab === k ? 'var(--onprimc)' : 'var(--onsurfv)'})),
+      tabInstructions: s.tab === 'instructions', tabSkills: s.tab === 'skills', tabStatus: s.tab === 'status', tabSync: s.tab === 'sync', tabHistory: s.tab === 'history',
+      targets: [
+        {runtime:'Claude Code', path:'~/.claude/rules/…-agent-guidance.md', status:'in sync', stBg:'var(--goodc)', stFg:'var(--good)'},
+        {runtime:'Codex', path:'~/.codex/AGENTS.md', status:'in sync', stBg:'var(--goodc)', stFg:'var(--good)'},
+        {runtime:'OpenCode', path:'~/.config/opencode/AGENTS.md', status:'stale · r47', stBg:'var(--warnc)', stFg:'var(--warn)'}
+      ],
+      visibleBlocks: s.blocks.filter(b => m(b.title + ' ' + b.summary)),
+      visibleSkills: s.skills.filter(k => m(k.name + ' ' + k.desc)).map(k => ({...k,
+        stBg: k.status === 'installed' ? 'var(--goodc)' : 'var(--surfch)', stFg: k.status === 'installed' ? 'var(--good)' : 'var(--onsurfv)'})),
+      visibleSessions: s.sessions.filter(x => m(x.agent + ' ' + x.task)).map(x => ({...x,
+        reply: s.drafts[x.id] || '', lastReply: s.replies[x.id] || null,
+        setReply: (e) => set({drafts: {...s.drafts, [x.id]: e.target.value}}),
+        replyKey: (e) => { if (e.key === 'Enter') this._send(x.id); },
+        send: () => this._send(x.id)})),
+      syncPhase: phase,
+      syncIcon: phase === 'done' ? 'check_circle' : phase === 'idle' ? 'cloud_sync' : 'sync',
+      syncColor: phase === 'done' ? 'var(--good)' : 'var(--prim)',
+      syncTitle: phase === 'done' ? 'Synchronized' : phase === 'idle' ? 'Canonical sync' : 'Synchronizing…',
+      syncSub: phase === 'done' ? 'All targets updated · backup r48 retained' : 'Managed block + owned skills only · scoped authorization',
+      syncBtn: phase === 'idle' || phase === 'done' ? 'Sync now' : 'Running…',
+      runSync: () => this._sync(),
+      syncSteps: stepsDef.map(([label, note], i) => {
+        const done = phase === 'done' || (activeIdx > -1 && i < activeIdx);
+        const active = activeIdx === i;
+        return {label, note, icon: done ? 'check_circle' : active ? 'sync' : 'radio_button_unchecked',
+          color: done ? 'var(--good)' : active ? 'var(--warn)' : 'var(--outl)'};
+      }),
+      visibleHistory: s.history.filter(h => m(h.title + ' ' + h.rev)).map(h => ({...h,
+        restore: () => set({history: [{rev:'r' + (49 + Math.floor(Math.random() * 9)), icon:'restore', title:'Restored ' + h.rev + ' as new revision', when:'just now'}, ...s.history]})}))
+    };
+  }
+  _send(id) {
+    const d = (this.state.drafts[id] || '').trim(); if (!d) return;
+    this.setState({replies: {...this.state.replies, [id]: d}, drafts: {...this.state.drafts, [id]: ''}});
+  }
+  _sync() {
+    if (this.state.syncPhase !== 'idle' && this.state.syncPhase !== 'done') return;
+    const order = ['verify','backup','block','skills','done'];
+    let i = 0;
+    const step = () => { this.setState({syncPhase: order[i]}); i++; if (i < order.length) this._syncT = setTimeout(step, 700); };
+    step();
+  }
+}
+</script>
+</body>
+</html>

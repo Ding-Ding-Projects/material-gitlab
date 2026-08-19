@@ -1,0 +1,179 @@
+// Deploy surface — Releases, feature flags, package registry, container registry.
+// Ported from design/Deploy.dc.html. Token values are the design's own literal palette
+// (its <style> block); no shared SCSS token module exists yet in material_system/, so the
+// set is declared locally, scoped under .dp-surface to avoid leaking into any sibling
+// surface sharing this bundle.
+
+@mixin dp-dark-tokens {
+  --dp-surf: #141218;
+  --dp-surfc: #211f26;
+  --dp-surfch: #2b2831;
+  --dp-surfcl: #1b1922;
+  --dp-onsurf: #e6e0e9;
+  --dp-onsurfv: #cac4d0;
+  --dp-prim: #cfbdfe;
+  --dp-onprim: #381e72;
+  --dp-primc: #4f378b;
+  --dp-onprimc: #e8def8;
+  --dp-sec: #4a4458;
+  --dp-outl: #49454f;
+  --dp-outlv: #332f3a;
+  --dp-err: #f2b8b5;
+  --dp-errc: #5c1a17;
+  --dp-good: #7fd79a;
+  --dp-goodc: #1c3a27;
+  --dp-warn: #e2c46d;
+  --dp-warnc: #3d3012;
+  --dp-card: #211f26;
+  --dp-scrim: rgba(0, 0, 0, 0.5);
+}
+
+.dp-surface {
+  --dp-surf: #f4effa;
+  --dp-surfc: #ece4f6;
+  --dp-surfch: #e0d5f2;
+  --dp-surfcl: #faf6ff;
+  --dp-onsurf: #1d1b20;
+  --dp-onsurfv: #49454f;
+  --dp-prim: #6750c4;
+  --dp-onprim: #ffffff;
+  --dp-primc: #e8def8;
+  --dp-onprimc: #4f378b;
+  --dp-sec: #d6c9f0;
+  --dp-outl: #cac4d0;
+  --dp-outlv: #e7e0ec;
+  --dp-err: #b3261e;
+  --dp-errc: #f9dedc;
+  --dp-good: #1a7f37;
+  --dp-goodc: #dcf2e3;
+  --dp-warn: #9a6700;
+  --dp-warnc: #fff3d0;
+  --dp-card: #ffffff;
+  --dp-scrim: rgba(29, 27, 32, 0.35);
+
+  --dp-font:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  font-family: var(--dp-font);
+  background: var(--dp-surf);
+  color: var(--dp-onsurf);
+
+  &[data-theme='dark'] {
+    @include dp-dark-tokens;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .dp-surface:not([data-theme='light']) {
+    @include dp-dark-tokens;
+  }
+}
+
+// Shared primitives + layout, all scoped under .dp-surface.
+.dp-surface {
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: var(--dp-prim);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--dp-onprimc);
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--dp-prim);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+  }
+
+  ::placeholder {
+    color: var(--dp-onsurfv);
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+.dp-shell {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.dp-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.dp-heading-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+  flex-wrap: wrap;
+}
+
+.dp-heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.dp-bulk-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--dp-card);
+  color: var(--dp-onsurf);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background: var(--dp-surfch);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--dp-prim);
+    outline-offset: 2px;
+  }
+
+  &--danger {
+    color: var(--dp-err);
+  }
+}
+
+// Narrow layouts — the sidebar collapses to an icon rail (see DeploySidebar.vue) and
+// the heading row wraps, so nothing clips at supported widths.
+@media (max-width: 640px) {
+  .dp-heading-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>body{margin:0;font-family:'Google Sans Text','Google Sans',sans-serif}a{color:#6750c4}a:hover{color:#4f378b}</style>
+</helmet>
+<div style="display:flex;height:100vh;background:#fdf8ff;color:#1d1b20">
+  <nav style="width:240px;background:#fdf8ff;border-right:1px solid #cac4d0;padding:12px 8px;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;font-family:'Google Sans';font-weight:700;font-size:15px"><div style="width:24px;height:24px;border-radius:6px;background:#6750c4"></div>GitLab M3</div>
+    <div style="padding:8px 12px;border-radius:8px;background:#e8def8;font-weight:500;font-size:13.5px;color:#4f378b">Issues</div>
+    <div style="padding:8px 12px;border-radius:8px;font-size:13.5px" style-hover="background:#f1ecf7">Merge requests</div>
+    <div style="padding:8px 12px;border-radius:8px;font-size:13.5px" style-hover="background:#f1ecf7">Pipelines</div>
+    <div style="padding:8px 12px;border-radius:8px;font-size:13.5px" style-hover="background:#f1ecf7">Boards</div>
+  </nav>
+  <main style="flex:1;padding:20px 28px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:center;gap:12px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:20px;font-weight:500">Issues</h1>
+      <div style="margin-left:auto;background:#6750c4;color:#fff;border-radius:999px;padding:8px 18px;font-weight:500;font-size:13.5px">New issue</div>
+    </div>
+    <div style="border:1px solid #cac4d0;border-radius:12px;overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid #e7e0ec">
+        <div style="font-weight:500;font-size:14px">Boards render slow with 500+ cards</div>
+        <div style="font-size:12.5px;color:#49454f;margin-top:2px">#4312 · opened 2d ago</div>
+      </div>
+      <div style="padding:14px 18px">
+        <div style="font-weight:500;font-size:14px">Pipeline badge contrast in dark mode</div>
+        <div style="font-size:12.5px;color:#49454f;margin-top:2px">#4308 · opened 3d ago</div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

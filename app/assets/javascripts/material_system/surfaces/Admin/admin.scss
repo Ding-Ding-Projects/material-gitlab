@@ -1,0 +1,1139 @@
+// Admin surface — ported from design/Admin.dc.html.
+//
+// Token values are the design's own literal palette (its <style> block).
+// Declared as --gl-mds-* custom properties scoped under .gl-mds-admin, the
+// same convention the Issues surface uses, so a later shared token module
+// can absorb every surface's copy without a rename.
+
+.gl-mds-admin {
+  --gl-mds-surf: #f4effa;
+  --gl-mds-surfc: #ece4f6;
+  --gl-mds-surfch: #e0d5f2;
+  --gl-mds-surfcl: #faf6ff;
+  --gl-mds-onsurf: #1d1b20;
+  --gl-mds-onsurfv: #49454f;
+  --gl-mds-prim: #6750c4;
+  --gl-mds-onprim: #ffffff;
+  --gl-mds-primc: #e8def8;
+  --gl-mds-onprimc: #4f378b;
+  --gl-mds-sec: #d6c9f0;
+  --gl-mds-outl: #cac4d0;
+  --gl-mds-outlv: #e7e0ec;
+  --gl-mds-err: #b3261e;
+  --gl-mds-errc: #f9dedc;
+  --gl-mds-good: #1a7f37;
+  --gl-mds-goodc: #dcf2e3;
+  --gl-mds-warn: #9a6700;
+  --gl-mds-warnc: #fff3d0;
+  --gl-mds-card: #ffffff;
+  --gl-mds-scrim: rgba(29, 27, 32, 0.35);
+
+  &[data-theme='dark'] {
+    --gl-mds-surf: #141218;
+    --gl-mds-surfc: #211f26;
+    --gl-mds-surfch: #2b2831;
+    --gl-mds-surfcl: #1b1922;
+    --gl-mds-onsurf: #e6e0e9;
+    --gl-mds-onsurfv: #cac4d0;
+    --gl-mds-prim: #cfbdfe;
+    --gl-mds-onprim: #381e72;
+    --gl-mds-primc: #4f378b;
+    --gl-mds-onprimc: #e8def8;
+    --gl-mds-sec: #4a4458;
+    --gl-mds-outl: #49454f;
+    --gl-mds-outlv: #332f3a;
+    --gl-mds-err: #f2b8b5;
+    --gl-mds-errc: #5c1a17;
+    --gl-mds-good: #7fd79a;
+    --gl-mds-goodc: #1c3a27;
+    --gl-mds-warn: #e2c46d;
+    --gl-mds-warnc: #3d3012;
+    --gl-mds-card: #211f26;
+    --gl-mds-scrim: rgba(0, 0, 0, 0.5);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .gl-mds-admin:not([data-theme='light']) {
+    --gl-mds-surf: #141218;
+    --gl-mds-surfc: #211f26;
+    --gl-mds-surfch: #2b2831;
+    --gl-mds-surfcl: #1b1922;
+    --gl-mds-onsurf: #e6e0e9;
+    --gl-mds-onsurfv: #cac4d0;
+    --gl-mds-prim: #cfbdfe;
+    --gl-mds-onprim: #381e72;
+    --gl-mds-primc: #4f378b;
+    --gl-mds-onprimc: #e8def8;
+    --gl-mds-sec: #4a4458;
+    --gl-mds-outl: #49454f;
+    --gl-mds-outlv: #332f3a;
+    --gl-mds-err: #f2b8b5;
+    --gl-mds-errc: #5c1a17;
+    --gl-mds-good: #7fd79a;
+    --gl-mds-goodc: #1c3a27;
+    --gl-mds-warn: #e2c46d;
+    --gl-mds-warnc: #3d3012;
+    --gl-mds-card: #211f26;
+    --gl-mds-scrim: rgba(0, 0, 0, 0.5);
+  }
+}
+
+@mixin gl-mds-admin-focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--gl-mds-prim);
+    outline-offset: 2px;
+  }
+}
+
+@mixin gl-mds-admin-touch-target($size: 40px) {
+  min-width: $size;
+  min-height: $size;
+}
+
+.gl-mds-admin {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: var(--gl-mds-surf);
+  color: var(--gl-mds-onsurf);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: var(--gl-mds-prim);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--gl-mds-onprimc);
+    }
+  }
+}
+
+.gl-mds-admin__heading-font {
+  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+// --- Top bar -----------------------------------------------------------
+
+.gl-mds-admin__topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px 8px;
+  flex-wrap: wrap;
+}
+
+.gl-mds-admin__topbar-search {
+  flex: 1;
+  max-width: 600px;
+  min-width: 220px;
+}
+
+// --- Search field --------------------------------------------------------
+
+.gl-mds-admin-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gl-mds-surfc);
+  border-radius: 999px;
+  padding: 8px 8px 8px 16px;
+  color: var(--gl-mds-onsurfv);
+
+  &--compact {
+    background: var(--gl-mds-card);
+    border: 1px solid var(--gl-mds-outlv);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    padding: 6px 6px 6px 14px;
+  }
+}
+
+.gl-mds-admin-search__icon {
+  flex-shrink: 0;
+}
+
+.gl-mds-admin-search__input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--gl-mds-onsurf);
+
+  &::placeholder {
+    color: var(--gl-mds-onsurfv);
+    opacity: 0.75;
+  }
+
+  // Suppress the native search-field decorations so our own chip/button pair reads clearly.
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-decoration {
+    appearance: none;
+  }
+}
+
+.gl-mds-admin-search__chip {
+  border: none;
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--gl-mds-surfch);
+  color: var(--gl-mds-onsurfv);
+  @include gl-mds-admin-focus-ring;
+
+  .gl-mds-admin-search--regex & {
+    background: var(--gl-mds-prim);
+    color: var(--gl-mds-onprim);
+  }
+}
+
+// --- Icon buttons --------------------------------------------------------
+
+.gl-mds-admin-iconbtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  @include gl-mds-admin-touch-target(40px);
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gl-mds-onsurfv);
+  cursor: pointer;
+  flex-shrink: 0;
+  @include gl-mds-admin-focus-ring;
+
+  &:hover {
+    background: var(--gl-mds-surfch);
+  }
+
+  &--sm {
+    @include gl-mds-admin-touch-target(28px);
+  }
+
+  &[aria-pressed='true'] {
+    background: var(--gl-mds-primc);
+    color: var(--gl-mds-onprimc);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// --- Anchored popovers (regex builder, notifications, account menu) ------
+
+.gl-mds-admin-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  width: min(380px, 90vw);
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--gl-mds-card);
+  border: 1px solid var(--gl-mds-outlv);
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  padding: 16px;
+  color: var(--gl-mds-onsurf);
+
+  &--account {
+    width: max-content;
+    min-width: 200px;
+    gap: 4px;
+  }
+}
+
+.gl-mds-admin-popover__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.gl-mds-admin-popover__title {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.gl-mds-admin-popover__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.gl-mds-admin-popover__label {
+  color: var(--gl-mds-onsurfv);
+  font-weight: 500;
+}
+
+.gl-mds-admin-popover__flags {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.gl-mds-admin-flag {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  font-family: monospace;
+  cursor: pointer;
+}
+
+.gl-mds-admin-popover__error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--gl-mds-err);
+  background: var(--gl-mds-errc);
+  border-radius: 8px;
+  padding: 6px 10px;
+}
+
+.gl-mds-admin-popover__preview {
+  border-top: 1px solid var(--gl-mds-outlv);
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gl-mds-admin-popover__preview-count {
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+}
+
+.gl-mds-admin-popover__preview-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 140px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gl-mds-admin-popover__preview-item {
+  font-family: monospace;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: var(--gl-mds-surfc);
+}
+
+.gl-mds-admin-popover__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.gl-mds-admin-input {
+  border: 1px solid var(--gl-mds-outl);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  font-size: 13px;
+  background: transparent;
+  color: var(--gl-mds-onsurf);
+  outline: none;
+  width: 100%;
+  @include gl-mds-admin-focus-ring;
+
+  &--mono {
+    font-family: monospace;
+  }
+}
+
+// --- Buttons ---------------------------------------------------------------
+
+.gl-mds-admin-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  @include gl-mds-admin-focus-ring;
+
+  &--filled {
+    background: var(--gl-mds-prim);
+    color: var(--gl-mds-onprim);
+
+    &:hover:not(:disabled) {
+      background: var(--gl-mds-onprimc);
+    }
+  }
+
+  &--tonal {
+    background: var(--gl-mds-primc);
+    color: var(--gl-mds-onprimc);
+
+    &:hover:not(:disabled) {
+      background: var(--gl-mds-sec);
+    }
+  }
+
+  &--text {
+    background: transparent;
+    color: var(--gl-mds-onprimc);
+
+    &:hover:not(:disabled) {
+      background: var(--gl-mds-surfch);
+    }
+  }
+
+  &--danger {
+    background: var(--gl-mds-errc);
+    color: var(--gl-mds-err);
+
+    &:hover:not(:disabled) {
+      background: var(--gl-mds-err);
+      color: var(--gl-mds-onprim, #fff);
+    }
+  }
+
+  &--sm {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// --- Notification bell -----------------------------------------------------
+
+.gl-mds-admin-bell {
+  position: relative;
+}
+
+.gl-mds-admin-bell__dot {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--gl-mds-err);
+  border: 2px solid var(--gl-mds-surf);
+}
+
+.gl-mds-admin-bell__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gl-mds-admin-bell__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 10px;
+
+  &:hover {
+    background: var(--gl-mds-surfc);
+  }
+
+  &--dismissed {
+    opacity: 0.55;
+  }
+}
+
+.gl-mds-admin-bell__item-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gl-mds-admin-bell__item-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gl-mds-admin-bell__item-message {
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+}
+
+.gl-mds-admin-bell__item-time {
+  font-size: 11px;
+  color: var(--gl-mds-onsurfv);
+  margin-top: 2px;
+}
+
+.gl-mds-admin-bell__empty {
+  margin: 0;
+  padding: 12px 4px;
+  font-size: 12.5px;
+  color: var(--gl-mds-onsurfv);
+  text-align: center;
+}
+
+// --- Account menu ------------------------------------------------------
+
+.gl-mds-admin-account {
+  position: relative;
+}
+
+.gl-mds-admin-account__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--gl-mds-primc);
+  color: var(--gl-mds-onprimc);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  @include gl-mds-admin-focus-ring;
+}
+
+.gl-mds-admin-account__name {
+  padding: 6px 10px 8px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--gl-mds-onsurfv);
+  border-bottom: 1px solid var(--gl-mds-outlv);
+  margin-bottom: 4px;
+}
+
+.gl-mds-admin-account__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  font-size: 13px;
+  color: var(--gl-mds-onsurf);
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  @include gl-mds-admin-focus-ring;
+
+  &:hover {
+    background: var(--gl-mds-surfch);
+  }
+
+  &--button {
+    font: inherit;
+  }
+}
+
+// --- Page header + tabs ------------------------------------------------
+
+.gl-mds-admin__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 24px;
+  flex-wrap: wrap;
+}
+
+.gl-mds-admin__heading {
+  margin: 0;
+  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.gl-mds-admin__scope-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--gl-mds-errc);
+  color: var(--gl-mds-err);
+  letter-spacing: 0.5px;
+}
+
+.gl-mds-admin-tabs {
+  display: flex;
+  background: var(--gl-mds-surfc);
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+.gl-mds-admin-tabs__tab {
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  color: var(--gl-mds-onsurfv);
+  font: inherit;
+  @include gl-mds-admin-focus-ring;
+
+  &--active {
+    background: var(--gl-mds-primc);
+    color: var(--gl-mds-onprimc);
+  }
+}
+
+// --- Main / overview -----------------------------------------------------
+
+.gl-mds-admin__main {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gl-mds-admin-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gl-mds-admin-overview__stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.gl-mds-admin-card {
+  background: var(--gl-mds-card);
+  border-radius: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.gl-mds-admin-stat {
+  background: var(--gl-mds-card);
+  border-radius: 16px;
+  padding: 14px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 128px;
+}
+
+.gl-mds-admin-stat__value {
+  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.gl-mds-admin-stat__label {
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+}
+
+.gl-mds-admin-health {
+  padding: 18px 20px;
+  max-width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gl-mds-admin-health__title {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gl-mds-onsurfv);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gl-mds-admin-health-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.gl-mds-admin-health-row__icon {
+  &--good {
+    color: var(--gl-mds-good);
+  }
+
+  &--warn {
+    color: var(--gl-mds-warn);
+  }
+
+  &--danger {
+    color: var(--gl-mds-err);
+  }
+}
+
+.gl-mds-admin-health-row__note {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+  font-family: monospace;
+}
+
+// --- List filter bar -------------------------------------------------------
+
+.gl-mds-admin-filterbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 980px;
+  flex-wrap: wrap;
+}
+
+.gl-mds-admin-filterbar__search {
+  flex: 1;
+  min-width: 220px;
+}
+
+.gl-mds-admin-filterbar__count {
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+  white-space: nowrap;
+}
+
+// --- List panel + toolbar --------------------------------------------------
+
+.gl-mds-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gl-mds-admin-list__card {
+  max-width: 980px;
+  overflow: hidden;
+}
+
+.gl-mds-admin-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--gl-mds-outlv);
+  flex-wrap: wrap;
+}
+
+.gl-mds-admin-toolbar__select-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--gl-mds-onsurfv);
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gl-mds-prim);
+  }
+}
+
+.gl-mds-admin-toolbar__spacer {
+  flex: 1;
+}
+
+.gl-mds-admin-toolbar__count {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--gl-mds-onsurf);
+}
+
+// --- Rows --------------------------------------------------------------
+
+.gl-mds-admin-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--gl-mds-outlv);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.gl-mds-admin-row__select {
+  display: flex;
+  align-items: center;
+  @include gl-mds-admin-touch-target(24px);
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--gl-mds-prim);
+  }
+}
+
+.gl-mds-admin-row__icon {
+  flex-shrink: 0;
+
+  &--primary {
+    color: var(--gl-mds-prim);
+  }
+
+  &--danger {
+    color: var(--gl-mds-err);
+  }
+}
+
+.gl-mds-admin-row__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.gl-mds-admin-row__title {
+  font-weight: 500;
+  font-size: 13.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &--mono {
+    font-family: monospace;
+  }
+}
+
+.gl-mds-admin-row__sub {
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gl-mds-admin-row__meta {
+  font-size: 12px;
+  color: var(--gl-mds-onsurfv);
+  white-space: nowrap;
+}
+
+.gl-mds-admin-row__action {
+  font-size: 12.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--gl-mds-outl);
+  border-radius: 999px;
+  padding: 6px 14px;
+  background: transparent;
+  white-space: nowrap;
+  @include gl-mds-admin-focus-ring;
+
+  &--primary {
+    color: var(--gl-mds-onprimc);
+  }
+
+  &--danger {
+    color: var(--gl-mds-err);
+    border-color: var(--gl-mds-err);
+  }
+
+  &:hover {
+    background: var(--gl-mds-surfch);
+  }
+}
+
+// --- Chips / badges ------------------------------------------------------
+
+.gl-mds-admin-chip {
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+
+  &--danger {
+    background: var(--gl-mds-errc);
+    color: var(--gl-mds-err);
+  }
+
+  &--warn {
+    background: var(--gl-mds-warnc);
+    color: var(--gl-mds-warn);
+  }
+
+  &--good {
+    background: var(--gl-mds-goodc);
+    color: var(--gl-mds-good);
+  }
+
+  &--primary {
+    background: var(--gl-mds-primc);
+    color: var(--gl-mds-onprimc);
+  }
+
+  &--neutral {
+    background: var(--gl-mds-surfch);
+    color: var(--gl-mds-onsurfv);
+  }
+}
+
+// --- Empty state -----------------------------------------------------------
+
+.gl-mds-admin-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 44px 24px;
+  text-align: center;
+  color: var(--gl-mds-onsurfv);
+}
+
+.gl-mds-admin-empty__icon {
+  opacity: 0.6;
+}
+
+.gl-mds-admin-empty__text {
+  margin: 0;
+  font-size: 13.5px;
+}
+
+// --- Scrim + dialogs -----------------------------------------------------
+
+.gl-mds-admin-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: var(--gl-mds-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+
+  &--palette {
+    align-items: flex-start;
+    padding-top: 12vh;
+  }
+}
+
+.gl-mds-admin-dialog {
+  width: min(420px, 100%);
+  background: var(--gl-mds-card);
+  color: var(--gl-mds-onsurf);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.gl-mds-admin-dialog__icon {
+  color: var(--gl-mds-err);
+}
+
+.gl-mds-admin-dialog__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.gl-mds-admin-dialog__desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--gl-mds-onsurfv);
+  line-height: 1.5;
+}
+
+.gl-mds-admin-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+// --- Command palette ---------------------------------------------------
+
+.gl-mds-admin-palette {
+  width: min(560px, 100%);
+  max-height: 70vh;
+  background: var(--gl-mds-card);
+  color: var(--gl-mds-onsurf);
+  border-radius: 20px;
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.gl-mds-admin-palette__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gl-mds-admin-palette__option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  cursor: pointer;
+
+  &--active {
+    background: var(--gl-mds-primc);
+    color: var(--gl-mds-onprimc);
+  }
+}
+
+.gl-mds-admin-palette__empty {
+  margin: 0;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--gl-mds-onsurfv);
+}
+
+// --- Toast stack ---------------------------------------------------------
+
+.gl-mds-admin-toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 8px;
+  max-width: min(360px, calc(100vw - 40px));
+}
+
+.gl-mds-admin-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: var(--gl-mds-card);
+  color: var(--gl-mds-onsurf);
+  border-radius: 14px;
+  padding: 12px 12px 12px 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  border-left: 4px solid var(--gl-mds-prim);
+
+  &--success {
+    border-left-color: var(--gl-mds-good);
+  }
+
+  &--warning {
+    border-left-color: var(--gl-mds-warn);
+  }
+
+  &--error {
+    border-left-color: var(--gl-mds-err);
+  }
+}
+
+.gl-mds-admin-toast__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.gl-mds-admin-toast__title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gl-mds-admin-toast__message {
+  font-size: 12.5px;
+  color: var(--gl-mds-onsurfv);
+}
+
+.gl-mds-admin-toast__actions {
+  display: flex;
+  gap: 4px;
+}
+
+// --- Reduced motion --------------------------------------------------------
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-mds-admin * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+// --- Narrow layouts ----------------------------------------------------
+
+@media (max-width: 720px) {
+  .gl-mds-admin__topbar {
+    padding: 10px 14px 6px;
+  }
+
+  .gl-mds-admin__header {
+    padding: 6px 14px;
+  }
+
+  .gl-mds-admin__main {
+    padding: 6px 14px 24px;
+  }
+
+  .gl-mds-admin-row {
+    flex-wrap: wrap;
+    padding: 12px 14px;
+  }
+
+  .gl-mds-admin-row__meta {
+    order: 5;
+    margin-left: 34px;
+  }
+
+  .gl-mds-admin-popover {
+    right: auto;
+    left: 0;
+    width: min(340px, calc(100vw - 28px));
+  }
+
+  .gl-mds-admin-toasts {
+    right: 12px;
+    left: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+}
