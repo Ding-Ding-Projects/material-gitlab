@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -10,6 +11,7 @@ const args = Object.fromEntries(process.argv.slice(2).filter((arg) => arg.starts
 function fail(message) { console.error(`design-reference-capture: ${message}`); process.exitCode = 1; }
 function hash(file) { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); }
 function rowFor(id) { const row = inventory.contracts.find((candidate) => candidate.id === id); if (!row) throw new Error(`unknown inventory row ${id}`); return row; }
+function currentCommit() { return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); }
 function pngInfo(file) {
   const bytes = fs.readFileSync(file);
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -29,6 +31,9 @@ else {
       process.exitCode = 2;
     } else if (!fs.existsSync(output)) fail(`raw capture does not exist: ${output}`);
     else {
+      const sourceCommit = String(args.commit || '');
+      if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error('capture receipt requires a full 40-character source commit');
+      if (sourceCommit !== currentCommit()) throw new Error(`capture source commit ${sourceCommit} does not match current HEAD`);
       const info = pngInfo(output);
       const expectedWidth = Math.round(row.tuple.viewport.width * row.tuple.scale);
       const expectedHeight = Math.round(row.tuple.viewport.height * row.tuple.scale);
@@ -44,7 +49,7 @@ else {
         tuple: row.tuple,
         deterministic: row.deterministic,
         raw: { path: path.relative(ROOT, output).replaceAll('\\', '/'), sha256: hash(output), ...info },
-        sourceCommit: String(args.commit || 'UNSET'),
+        sourceCommit,
         transport: 'cheap Lowlevel headless route',
         tool: 'tools/design-reference/scripts/capture.mjs',
         network: 'deny-external',

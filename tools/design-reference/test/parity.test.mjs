@@ -18,6 +18,12 @@ test('resolves design contracts from the repository root', () => {
   assert.match(mainSource, /autoHideMenuBar: true/);
 });
 
+test('binds capture receipts to the exact current commit', () => {
+  const captureSource = fs.readFileSync(new URL('../scripts/capture.mjs', import.meta.url), 'utf8');
+  assert.match(captureSource, /sourceCommit !== currentCommit\(\)/);
+  assert.match(captureSource, /full 40-character source commit/);
+});
+
 test('hand-written inventory contains exactly the 25 checked-in references', () => {
   const verdict = validateInventory(inventory, { root });
   assert.equal(verdict.valid, true, verdict.errors.join('\n'));
