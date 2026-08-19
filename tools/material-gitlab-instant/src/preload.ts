@@ -1,6 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import { BRIDGE_VERSION } from './shared/bridge';
-import { CHANNELS } from './shared/channels';
+
+const BRIDGE_VERSION = 1 as const;
+const CHANNELS = Object.freeze({
+  config: 'gitlab-instant/config',
+  setConfig: 'gitlab-instant/set-config',
+  readiness: 'gitlab-instant/readiness',
+  open: 'gitlab-instant/open',
+});
 
 contextBridge.exposeInMainWorld('gitlabInstant', Object.freeze({
   version: BRIDGE_VERSION,

@@ -1,4 +1,20 @@
-import type { LocalGitLabConfig, ReadinessResult } from '../shared/bridge';
+type LocalGitLabConfig = { readonly schemaVersion: 1; readonly origin: string; readonly readinessPath: string };
+type ReadinessResult = {
+  readonly state: 'ready' | 'not-ready' | 'unreachable' | 'invalid';
+  readonly origin: string;
+  readonly checkedAt: string;
+  readonly status?: number;
+  readonly reason?: 'http-error' | 'timeout' | 'network-error' | 'not-ready' | 'invalid-config';
+};
+
+type InstantBridge = {
+  getConfig(): Promise<LocalGitLabConfig>;
+  setConfig(config: unknown): Promise<LocalGitLabConfig>;
+  checkReadiness(): Promise<ReadinessResult>;
+  openVerifiedInstance(): Promise<{ opened: boolean; origin: string; readiness: ReadinessResult }>;
+};
+
+const instantBridge = (window as typeof window & { gitlabInstant?: InstantBridge }).gitlabInstant;
 
 const root = document.querySelector<HTMLDivElement>('#app')!;
 if (!root) throw new Error('Renderer root is missing.');
@@ -26,29 +42,29 @@ function statusClass(): string {
 }
 
 async function loadConfig(): Promise<void> {
-  if (!window.gitlabInstant) { message = 'The local bridge is unavailable; this window cannot open an instance.'; render(); return; }
-  try { config = await window.gitlabInstant.getConfig(); message = 'Configuration loaded. Verification is still required.'; } catch { message = 'Configuration could not be loaded from the local bridge.'; }
+  if (!instantBridge) { message = 'The local bridge is unavailable; this window cannot open an instance.'; render(); return; }
+  try { config = await instantBridge.getConfig(); message = 'Configuration loaded. Verification is still required.'; } catch { message = 'Configuration could not be loaded from the local bridge.'; }
   render();
 }
 
 async function saveConfig(): Promise<void> {
   const input = document.querySelector<HTMLInputElement>('#origin');
-  if (!input || !window.gitlabInstant) return;
-  try { config = await window.gitlabInstant.setConfig({ schemaVersion: 1, origin: input.value.trim(), readinessPath: '/-/readiness' }); readiness = undefined; message = 'Configuration saved locally. Verify the existing instance before opening it.'; } catch (error) { message = error instanceof Error ? error.message : 'Configuration was rejected.'; }
+  if (!input || !instantBridge) return;
+  try { config = await instantBridge.setConfig({ schemaVersion: 1, origin: input.value.trim(), readinessPath: '/-/readiness' }); readiness = undefined; message = 'Configuration saved locally. Verify the existing instance before opening it.'; } catch (error) { message = error instanceof Error ? error.message : 'Configuration was rejected.'; }
   render();
 }
 
 async function verify(): Promise<void> {
-  if (!window.gitlabInstant) return;
+  if (!instantBridge) return;
   busy = true; message = 'Reading the configured readiness endpoint. No deployment or mutation is performed.'; render();
-  try { readiness = await window.gitlabInstant.checkReadiness(); message = readiness.state === 'ready' ? 'The existing instance answered successfully. This does not prove deployment or production safety.' : `Verification did not pass (${readiness.reason ?? readiness.state}).`; } catch { readiness = undefined; message = 'The readiness check failed before returning a result.'; }
+  try { readiness = await instantBridge.checkReadiness(); message = readiness.state === 'ready' ? 'The existing instance answered successfully. This does not prove deployment or production safety.' : `Verification did not pass (${readiness.reason ?? readiness.state}).`; } catch { readiness = undefined; message = 'The readiness check failed before returning a result.'; }
   busy = false; render();
 }
 
 async function openVerified(): Promise<void> {
-  if (!window.gitlabInstant || readiness?.state !== 'ready') return;
+  if (!instantBridge || readiness?.state !== 'ready') return;
   busy = true; message = 'Rechecking readiness immediately before opening the existing instance.'; render();
-  try { const result = await window.gitlabInstant.openVerifiedInstance(); readiness = result.readiness; message = result.opened ? 'Opened the verified existing instance. No deployment was performed.' : 'Opening was refused because the instance was no longer ready.'; } catch { message = 'Opening was refused because verification could not be completed.'; }
+  try { const result = await instantBridge.openVerifiedInstance(); readiness = result.readiness; message = result.opened ? 'Opened the verified existing instance. No deployment was performed.' : 'Opening was refused because the instance was no longer ready.'; } catch { message = 'Opening was refused because verification could not be completed.'; }
   busy = false; render();
 }
 
