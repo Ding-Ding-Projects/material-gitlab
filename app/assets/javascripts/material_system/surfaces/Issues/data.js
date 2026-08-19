@@ -1,8 +1,5 @@
-/**
- * View model for the Issues surface, ported from the design's `state.issues`
- * and `renderVals()`. Shaped as an async-looking API module so a real backend
- * can replace `issuesApi` without touching the components that consume it.
- */
+import Api from '~/api';
+import axios from '~/lib/utils/axios_utils';
 
 export const COLUMN_DEFS = Object.freeze([
   { key: 'todo', name: 'To do', dotVar: '--gl-mds-warn' },
@@ -11,103 +8,180 @@ export const COLUMN_DEFS = Object.freeze([
   { key: 'done', name: 'Done', dotVar: '--gl-mds-good' },
 ]);
 
-export const ASSIGNABLE_PEOPLE = Object.freeze(['Jun Park', 'Dana Weiss', 'Omar Haddad']);
-
-// The signed-in user in the ported mock. A real integration would read this
-// from the current session instead of a fixed name.
-export const CURRENT_USER = 'Jun Park';
-
 export const LABEL_TAXONOMY = Object.freeze({
-  performance: 'warn',
-  frontend: 'primary',
-  ui: 'info',
-  a11y: 'good',
-  bug: 'error',
-  feature: 'primary',
-  search: 'info',
-  ci: 'warn',
-  backend: 'neutral',
+  performance: 'warn', frontend: 'primary', ui: 'info', a11y: 'good', bug: 'error',
+  feature: 'primary', search: 'info', ci: 'warn', backend: 'neutral',
 });
 
 export const ALL_LABELS = Object.freeze(Object.keys(LABEL_TAXONOMY));
 
-/**
- * Maps a label name to the CSS custom property pair that renders it, so the
- * chip stays theme-correct in dark mode instead of a fixed hex pair.
- */
 export function labelToken(name) {
   const category = LABEL_TAXONOMY[name] || 'neutral';
-  return {
-    name,
-    bg: `var(--gl-mds-label-${category}-bg)`,
-    fg: `var(--gl-mds-label-${category}-fg)`,
-  };
+  return { name, bg: `var(--gl-mds-label-${category}-bg)`, fg: `var(--gl-mds-label-${category}-fg)` };
 }
 
 export function avatarInitials(name) {
-  return String(name || '')
-    .split(' ')
-    .filter(Boolean)
-    .map((word) => word[0])
-    .join('')
-    .toUpperCase();
+  return String(name || '').split(' ').filter(Boolean).map((word) => word[0]).join('').toUpperCase();
 }
 
-function seedIssues() {
-  return [
-    { id: 1, iid: 4312, title: 'Boards render slowly with 500+ cards', body: 'Rendering a board with more than 500 cards causes noticeable frame drops during scroll. Virtualize the column lists.', state: 'Open', col: 'todo', labels: ['performance', 'frontend'], assignee: 'Jun Park', opened: '2d ago' },
-    { id: 2, iid: 4308, title: 'Pipeline badge contrast fails in dark mode', body: 'The success badge uses a green that fails WCAG AA against the dark surface. Move to the tonal container pair.', state: 'Open', col: 'doing', labels: ['ui', 'a11y'], assignee: 'Dana Weiss', opened: '3d ago' },
-    { id: 3, iid: 4301, title: 'Merge request diff viewer loses scroll position', body: 'Switching between file tabs resets the scroll position of the diff pane.', state: 'Open', col: 'todo', labels: ['frontend', 'bug'], assignee: 'Omar Haddad', opened: '4d ago' },
-    { id: 4, iid: 4296, title: 'Add regex mode to global search', body: 'Search bars should accept regular expressions with a builder UI and live match preview.', state: 'Open', col: 'doing', labels: ['search', 'feature'], assignee: 'Jun Park', opened: '5d ago' },
-    { id: 5, iid: 4290, title: 'Runner autoscaling flaps under burst load', body: 'Autoscaler scales down too aggressively between pipeline bursts, causing cold starts.', state: 'Open', col: 'review', labels: ['ci', 'backend'], assignee: 'Dana Weiss', opened: '1w ago' },
-    { id: 6, iid: 4275, title: 'Wiki sidebar collapses on mobile', body: 'Fixed in 17.2 — the wiki sidebar now uses the standard drawer breakpoints.', state: 'Closed', col: 'done', labels: ['ui'], assignee: 'Omar Haddad', opened: '2w ago' },
-    { id: 7, iid: 4260, title: 'Container registry cleanup policy skips tags', body: 'Closed as duplicate of #4188.', state: 'Closed', col: 'done', labels: ['backend', 'bug'], assignee: 'Jun Park', opened: '3w ago' },
-  ];
-}
+const normalizeLabel = (label) => (typeof label === 'string' ? label : label?.name);
 
-let nextIid = 4320;
-
-/**
- * In-memory implementation of the Issues data source. Every method returns a
- * Promise so a real API client can be swapped in without changing callers.
- */
-export function createIssuesApi(initial = seedIssues()) {
-  let issues = initial.map((issue) => ({ ...issue, labels: [...issue.labels] }));
-
-  const clone = () => issues.map((issue) => ({ ...issue, labels: [...issue.labels] }));
+export function normalizeIssue(raw = {}) {
+  const labels = Array.isArray(raw.labels) ? raw.labels.map(normalizeLabel).filter(Boolean) : [];
+  const assignees = Array.isArray(raw.assignees) ? raw.assignees.filter(Boolean) : raw.assignee ? [raw.assignee] : [];
+  const assignee = assignees[0] || null;
+  const state = String(raw.state || '').toLowerCase() === 'closed' ? 'Closed' : 'Open';
+  const column = raw.board_list_id ?? raw.list_id ?? raw.column ?? (state === 'Closed' ? 'done' : 'todo');
 
   return {
-    async list() {
-      return clone();
-    },
-    async create({ title, body = '', col = 'todo' }) {
-      const issue = {
-        id: Date.now() + Math.random(),
-        iid: nextIid++,
-        title: String(title).trim(),
-        body: String(body || ''),
-        state: col === 'done' ? 'Closed' : 'Open',
-        col,
-        labels: [],
-        assignee: CURRENT_USER,
-        opened: 'just now',
-      };
-      issues = [issue, ...issues];
-      return { ...issue, labels: [...issue.labels] };
-    },
-    async update(id, patch) {
-      let updated = null;
-      issues = issues.map((issue) => {
-        if (issue.id !== id) return issue;
-        updated = { ...issue, ...(typeof patch === 'function' ? patch(issue) : patch) };
-        return updated;
+    ...raw,
+    id: raw.id ?? raw.iid,
+    iid: raw.iid ?? raw.id,
+    title: String(raw.title || ''),
+    body: String(raw.description ?? raw.body ?? ''),
+    state,
+    col: String(column),
+    boardListId: raw.board_list_id ?? raw.list_id ?? null,
+    labels,
+    assignee: assignee?.name || assignee?.username || '',
+    assigneeId: assignee?.id ?? null,
+    assignees: assignees.map((person) => ({ id: person.id, name: person.name || person.username || '' })),
+    opened: raw.created_at || raw.updated_at || 'unknown',
+    permissions: raw.permissions || null,
+  };
+}
+
+function currentProjectId() {
+  return globalThis.gon?.current_project_id || globalThis.gl?.snowplowStandardContext?.data?.project_id || globalThis.gl?.project_id || null;
+}
+
+function apiUrl(path, projectId) {
+  if (typeof globalThis.gon?.api_version === 'string') {
+    return Api.buildUrl(path).replace(':id', encodeURIComponent(projectId));
+  }
+  const root = globalThis.gon?.relative_url_root || '';
+  return `${root}/api/v4/projects/${encodeURIComponent(projectId)}/issues`;
+}
+
+function errorFor(error, fallback) {
+  const wrapped = new Error(String(error?.response?.data?.message || error?.response?.data?.error || error?.message || fallback));
+  wrapped.status = error?.response?.status;
+  wrapped.response = error?.response;
+  return wrapped;
+}
+
+function paginationFrom(response) {
+  const headers = response?.headers || {};
+  return {
+    page: Number(headers['x-page'] || 1),
+    perPage: Number(headers['x-per-page'] || 20),
+    total: Number(headers['x-total'] || response?.data?.length || 0),
+    totalPages: Number(headers['x-total-pages'] || 1),
+  };
+}
+
+function issuePath(projectId, iid) {
+  return `${apiUrl('/api/:version/projects/:id/issues', projectId)}/${encodeURIComponent(iid)}`;
+}
+
+function updatePayload(patch = {}) {
+  const payload = { ...patch };
+  delete payload.assignee;
+  delete payload.assigneeId;
+  delete payload.col;
+  delete payload.boardListId;
+  if (Array.isArray(patch.labels)) payload.labels = patch.labels.join(',');
+  if (patch.assigneeId !== undefined) payload.assignee_ids = patch.assigneeId == null ? [] : [patch.assigneeId];
+  if (patch.state) payload.state_event = patch.state === 'Closed' ? 'close' : 'reopen';
+  if (patch.boardListId !== undefined) payload.move_to_id = patch.boardListId;
+  return payload;
+}
+
+export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http = axios } = {}) {
+  if (projectId === null || projectId === undefined || projectId === '') {
+    throw new Error('Issues surface requires a real project adapter and project id');
+  }
+
+  const byId = new Map();
+  const listPage = async ({ page = 1, perPage = 20, state = 'all', scope = 'all', search = '' } = {}) => {
+    try {
+      const response = await http.get(apiUrl('/api/:version/projects/:id/issues', projectId), {
+        params: { page, per_page: perPage, state, scope, ...(search ? { search } : {}) },
       });
-      return updated ? { ...updated, labels: [...updated.labels] } : null;
+      const issues = (Array.isArray(response.data) ? response.data : []).map((raw) => {
+        const issue = normalizeIssue(raw);
+        byId.set(issue.id, issue.iid);
+        return issue;
+      });
+      return { issues, pagination: paginationFrom(response) };
+    } catch (error) {
+      throw errorFor(error, 'Unable to load issues');
+    }
+  };
+
+  return {
+    async list(options) {
+      return (await listPage(options)).issues;
+    },
+    listPage,
+    async create({ title, body = '', labels = [], assigneeId = null, state = 'Open' } = {}) {
+      if (!String(title || '').trim()) throw new Error('Issue title is required');
+      try {
+        const response = await http.post(apiUrl('/api/:version/projects/:id/issues', projectId), {
+          title: String(title).trim(), description: String(body || ''),
+          labels: Array.isArray(labels) ? labels.join(',') : labels,
+          ...(assigneeId == null ? {} : { assignee_ids: [assigneeId] }),
+          ...(state === 'Closed' ? { state_event: 'close' } : {}),
+        });
+        const issue = normalizeIssue(response.data);
+        byId.set(issue.id, issue.iid);
+        return issue;
+      } catch (error) {
+        throw errorFor(error, 'Unable to create issue');
+      }
+    },
+    async update(id, patch = {}) {
+      const iid = byId.get(id) || id;
+      try {
+        const response = await http.put(issuePath(projectId, iid), updatePayload(patch));
+        const issue = normalizeIssue(response.data);
+        byId.set(issue.id, issue.iid);
+        return issue;
+      } catch (error) {
+        throw errorFor(error, 'Unable to update issue');
+      }
+    },
+    async moveToBoardList(id, boardListId) {
+      if (boardListId === 'done' || boardListId === 'todo') {
+        return this.update(id, { state: boardListId === 'done' ? 'Closed' : 'Open' });
+      }
+      if (!/^\d+$/.test(String(boardListId))) {
+        throw new Error('Issue board move needs a real board-list id from GitLab');
+      }
+      return this.update(id, { boardListId: Number(boardListId) });
     },
     async remove(ids) {
-      const removeSet = new Set(Array.isArray(ids) ? ids : [ids]);
-      issues = issues.filter((issue) => !removeSet.has(issue.id));
-      return true;
+      const values = Array.isArray(ids) ? ids : [ids];
+      try {
+        await Promise.all(values.map((id) => http.delete(issuePath(projectId, byId.get(id) || id))));
+        return true;
+      } catch (error) {
+        throw errorFor(error, 'Unable to delete issue');
+      }
     },
   };
 }
+
+/** Production factory: no seeded or in-memory fallback is permitted. */
+export function createIssuesApi({ projectId = currentProjectId(), adapter = null, http = axios } = {}) {
+  if (adapter) return adapter;
+  return createGitLabIssuesAdapter({ projectId, http });
+}
+
+export function currentUser() {
+  return globalThis.gon?.current_user || globalThis.gl?.current_user || null;
+}
+
+// Kept as empty compatibility exports; production code must use API data.
+export const CURRENT_USER = '';
+export const ASSIGNABLE_PEOPLE = Object.freeze([]);

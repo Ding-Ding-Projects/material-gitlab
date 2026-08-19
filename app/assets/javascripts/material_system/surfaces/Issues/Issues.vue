@@ -29,7 +29,7 @@
     />
 
     <issue-list-view
-      v-if="view === 'list' && !loading"
+      v-if="view === 'list' && !loading && !loadError"
       :issues="visibleIssues"
       :selected-ids="selectedIds"
       @open="openDrawer"
@@ -39,7 +39,7 @@
     />
 
     <issue-board-view
-      v-else-if="!loading"
+      v-else-if="!loading && !loadError"
       :columns="columns"
       :adding-col="addingCol"
       :draft="columnDraft"
@@ -54,6 +54,18 @@
     />
 
     <div v-if="loading" class="gl-mds-issues__loading" role="status">Loading issues…</div>
+
+    <div v-else-if="loadError" class="gl-mds-issues__error" role="alert">
+      <strong>Issues could not be loaded.</strong>
+      <span>{{ loadError }}</span>
+      <button type="button" @click="loadPage">Retry</button>
+    </div>
+
+    <nav v-if="!loading && !loadError && totalPages > 1" class="gl-mds-issues__pagination" aria-label="Issue pages">
+      <button type="button" :disabled="page <= 1" @click="previousPage">Previous</button>
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <button type="button" :disabled="page >= totalPages" @click="nextPage">Next</button>
+    </nav>
 
     <issue-drawer
       v-if="drawerIssue"
@@ -110,9 +122,7 @@ import { loadSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import {
   COLUMN_DEFS,
-  ASSIGNABLE_PEOPLE,
-  ALL_LABELS,
-  CURRENT_USER,
+  currentUser,
   labelToken,
   avatarInitials,
   createIssuesApi,
@@ -149,8 +159,12 @@ export default {
   data() {
     return {
       loading: true,
+      loadError: '',
       issues: [],
       view: 'list',
+      page: 1,
+      totalPages: 1,
+      perPage: 20,
       search: '',
       regexMode: false,
       regexOpen: false,
@@ -189,7 +203,8 @@ export default {
       const { open, closed, mine } = this.filters;
       return this.issues.filter((issue) => {
         const stateOk = (open && issue.state === 'Open') || (closed && issue.state === 'Closed') || (!open && !closed);
-        const mineOk = !mine || issue.assignee === CURRENT_USER;
+        const user = currentUser();
+        const mineOk = !mine || !user || issue.assigneeId === user.id || issue.assignee === user.name || issue.assignee === user.username;
         return stateOk && mineOk && this.searchMatcher.test(issueSearchText(issue));
       });
     },
@@ -215,7 +230,8 @@ export default {
     },
     allLabelChips() {
       if (!this.drawerIssue) return [];
-      return ALL_LABELS.map((name) => {
+      const labels = [...new Set(this.issues.flatMap((issue) => issue.labels || []))].sort();
+      return labels.map((name) => {
         const on = this.drawerIssue.labels.includes(name);
         const token = labelToken(name);
         return { name, on, bg: token.bg, fg: token.fg };
@@ -223,10 +239,14 @@ export default {
     },
     assigneeChips() {
       if (!this.drawerIssue) return [];
-      return ASSIGNABLE_PEOPLE.map((person) => ({
-        name: person,
-        avatar: avatarInitials(person),
-        on: this.drawerIssue.assignee === person,
+      const people = this.issues
+        .flatMap((issue) => issue.assignees || [])
+        .filter((person) => person.name)
+        .reduce((all, person) => (all.some((entry) => entry.id === person.id) ? all : [...all, person]), []);
+      return people.map((person) => ({
+        ...person,
+        avatar: avatarInitials(person.name),
+        on: this.drawerIssue.assigneeId === person.id || this.drawerIssue.assignee === person.name,
       }));
     },
     regexEvaluation() {
@@ -243,9 +263,13 @@ export default {
     },
   },
   async created() {
-    this._api = createIssuesApi();
-    this.issues = await this._api.list();
-    this.loading = false;
+    try {
+      this._api = createIssuesApi();
+      await this.loadPage();
+    } catch (error) {
+      this.loadError = error.message;
+      this.loading = false;
+    }
   },
   mounted() {
     this._unsubscribeSettings = subscribeSettings((next) => {
@@ -325,15 +349,21 @@ export default {
     },
     async createIssue() {
       if (!this.newTitle.trim()) return;
-      const issue = await this._api.create({ title: this.newTitle, body: this.newBody, col: 'todo' });
-      this.issues = [issue, ...this.issues];
-      this.newOpen = false;
-      this.newTitle = '';
-      this.newBody = '';
-      notificationCenter.notify({ message: `Issue #${issue.iid} “${issue.title}” created.`, severity: 'success' });
+      try {
+        const issue = await this._api.create({ title: this.newTitle, body: this.newBody });
+        this.issues = [issue, ...this.issues];
+        this.newOpen = false;
+        this.newTitle = '';
+        this.newBody = '';
+        notificationCenter.notify({ message: `Issue #${issue.iid} “${issue.title}” created.`, severity: 'success' });
+      } catch (error) {
+        this.notifyApiError(error, 'create this issue');
+      }
     },
     toggleFilter(key) {
       this.filters = { ...this.filters, [key]: !this.filters[key] };
+      this.page = 1;
+      this.loadPage();
     },
     openDrawer(id) {
       this.drawerId = id;
@@ -342,9 +372,14 @@ export default {
       this.drawerId = null;
     },
     async applyPatch(id, patch) {
-      const updated = await this._api.update(id, patch);
-      if (updated) this.issues = this.issues.map((issue) => (issue.id === id ? updated : issue));
-      return updated;
+      try {
+        const updated = await this._api.update(id, patch);
+        if (updated) this.issues = this.issues.map((issue) => (issue.id === id ? updated : issue));
+        return updated;
+      } catch (error) {
+        this.notifyApiError(error, 'update this issue');
+        return null;
+      }
     },
     async toggleDrawerLabel(label) {
       const issue = this.drawerIssue;
@@ -357,7 +392,7 @@ export default {
     async pickAssignee(person) {
       const issue = this.drawerIssue;
       if (!issue) return;
-      await this.applyPatch(issue.id, { assignee: person });
+      await this.applyPatch(issue.id, { assigneeId: person.id });
     },
     async toggleDrawerState() {
       const issue = this.drawerIssue;
@@ -379,10 +414,14 @@ export default {
     },
     async confirmAddCard(colKey) {
       if (!this.columnDraft.trim()) return;
-      const issue = await this._api.create({ title: this.columnDraft, col: colKey });
-      this.issues = [...this.issues, issue];
-      this.addingCol = null;
-      this.columnDraft = '';
+      try {
+        const issue = await this._api.create({ title: this.columnDraft });
+        this.issues = [...this.issues, issue];
+        this.addingCol = null;
+        this.columnDraft = '';
+      } catch (error) {
+        this.notifyApiError(error, 'create this issue');
+      }
     },
     onDragStart(id) {
       this.dragId = id;
@@ -397,8 +436,15 @@ export default {
     },
     async moveToColumn(id, colKey) {
       const columnName = (COLUMN_DEFS.find((def) => def.key === colKey) || {}).name || colKey;
-      await this.applyPatch(id, { col: colKey, state: colKey === 'done' ? 'Closed' : 'Open' });
-      notificationCenter.notify({ message: `Moved to ${columnName}.`, severity: 'success', timeout: 3000 });
+      try {
+        const updated = this._api.moveToBoardList
+          ? await this._api.moveToBoardList(id, colKey)
+          : await this._api.update(id, { col: colKey, state: colKey === 'done' ? 'Closed' : 'Open' });
+        if (updated) this.issues = this.issues.map((issue) => (issue.id === id ? updated : issue));
+        notificationCenter.notify({ message: `Moved to ${columnName}.`, severity: 'success', timeout: 3000 });
+      } catch (error) {
+        this.notifyApiError(error, 'move this issue on the board');
+      }
     },
     toggleSelect(id) {
       this.selectedIds = this.selectedIds.includes(id)
@@ -429,11 +475,59 @@ export default {
     },
     async performBulkDelete() {
       const ids = [...this.selectedIds];
-      await this._api.remove(ids);
-      this.issues = this.issues.filter((issue) => !ids.includes(issue.id));
-      this.selectedIds = [];
-      this.confirmDelete = false;
-      notificationCenter.notify({ message: `${ids.length} issue${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
+      try {
+        await this._api.remove(ids);
+        this.issues = this.issues.filter((issue) => !ids.includes(issue.id));
+        this.selectedIds = [];
+        this.confirmDelete = false;
+        notificationCenter.notify({ message: `${ids.length} issue${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
+      } catch (error) {
+        this.notifyApiError(error, 'delete the selected issues');
+      }
+    },
+    serverState() {
+      if (this.filters.open && !this.filters.closed) return 'opened';
+      if (this.filters.closed && !this.filters.open) return 'closed';
+      return 'all';
+    },
+    async loadPage() {
+      this.loading = true;
+      this.loadError = '';
+      try {
+        if (typeof this._api.listPage !== 'function') {
+          this.issues = await this._api.list();
+          this.totalPages = 1;
+        } else {
+          const result = await this._api.listPage({
+            page: this.page,
+            perPage: this.perPage,
+            state: this.serverState(),
+            scope: this.filters.mine ? 'assigned_to_me' : 'all',
+          });
+          this.issues = result.issues;
+          this.totalPages = result.pagination.totalPages;
+        }
+      } catch (error) {
+        this.loadError = error.message;
+      } finally {
+        this.loading = false;
+      }
+    },
+    previousPage() {
+      if (this.page > 1) {
+        this.page -= 1;
+        this.loadPage();
+      }
+    },
+    nextPage() {
+      if (this.page < this.totalPages) {
+        this.page += 1;
+        this.loadPage();
+      }
+    },
+    notifyApiError(error, action) {
+      const message = error?.status === 403 ? `You do not have permission to ${action}.` : error?.message || `Unable to ${action}.`;
+      notificationCenter.notify({ title: 'Issue action failed', message, severity: 'error', persistent: true });
     },
   },
 };
@@ -464,5 +558,43 @@ export default {
   justify-content: center;
   color: var(--gl-mds-onsurfv);
   font-size: 13.5px;
+}
+
+.gl-mds-issues__error,
+.gl-mds-issues__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px 24px;
+  color: var(--gl-mds-onsurfv);
+}
+
+.gl-mds-issues__error {
+  flex-direction: column;
+  color: var(--gl-mds-err);
+}
+
+.gl-mds-issues__error button,
+.gl-mds-issues__pagination button {
+  border: 1px solid var(--gl-mds-outl);
+  border-radius: 999px;
+  background: var(--gl-mds-surf);
+  color: var(--gl-mds-onsurf);
+  padding: 8px 16px;
+  cursor: pointer;
+  font: inherit;
+}
+
+.gl-mds-issues__error button:focus-visible,
+.gl-mds-issues__pagination button:focus-visible {
+  outline: 2px solid var(--gl-mds-prim);
+  outline-offset: 2px;
+}
+
+.gl-mds-issues__error button:disabled,
+.gl-mds-issues__pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 </style>
