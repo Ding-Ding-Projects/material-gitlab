@@ -219,11 +219,12 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="login-m3-form">
     <gl-form
       :id="$options.formId"
       :action="formAction"
       method="post"
+      class="login-m3-credentials-form"
       aria-live="assertive"
       novalidate
       data-testid="sign-in-form"
@@ -236,14 +237,6 @@ export default {
         :validate-on-blur="false"
         @submit="onSubmit"
       >
-        <template #group(password)-description>
-          <div class="gl-text-right">
-            <gl-link v-if="isUnconfirmedEmail" :href="newUserConfirmationPath">{{
-              __('Resend confirmation email')
-            }}</gl-link>
-            <gl-link v-else :href="newPasswordPath">{{ __('Forgot your password?') }}</gl-link>
-          </div>
-        </template>
         <template #input(password)="{ id, validation, value, input }">
           <password-input
             :id="id"
@@ -257,48 +250,58 @@ export default {
         </template>
       </gl-form-fields>
 
-      <div
-        v-if="showCaptcha"
-        ref="captcha"
-        class="gl-mb-5 gl-flex gl-justify-center"
-        data-testid="captcha-el"
-      ></div>
+      <div v-if="showCaptcha" ref="captcha" class="login-m3-captcha" data-testid="captcha-el"></div>
 
-      <div v-if="isRememberMeEnabled" class="gl-mb-3">
-        <input type="hidden" :name="rememberMeNameAttr" :value="rememberMe" />
-        <gl-form-checkbox
-          id="user_remember_me"
-          v-model="rememberMe"
-          value="1"
-          unchecked-value="0"
-          autocomplete="off"
-        >
-          {{ __('Remember me') }}
-        </gl-form-checkbox>
+      <div v-if="isRememberMeEnabled || showPasswordField" class="login-m3-form-options">
+        <div v-if="isRememberMeEnabled">
+          <input type="hidden" :name="rememberMeNameAttr" :value="rememberMe" />
+          <gl-form-checkbox
+            id="user_remember_me"
+            v-model="rememberMe"
+            value="1"
+            unchecked-value="0"
+            autocomplete="off"
+          >
+            {{ __('Remember me') }}
+          </gl-form-checkbox>
+        </div>
+        <gl-link v-if="showPasswordField && isUnconfirmedEmail" :href="newUserConfirmationPath">
+          {{ __('Resend confirmation email') }}
+        </gl-link>
+        <gl-link v-else-if="showPasswordField" :href="newPasswordPath">{{
+          __('Forgot your password?')
+        }}</gl-link>
       </div>
       <gl-button
         type="submit"
         variant="confirm"
-        class="js-no-auto-disable"
+        class="js-no-auto-disable login-m3-primary-action"
         data-testid="sign-in-button"
         block
         :disabled="isSubmitDisabled"
         :loading="loading"
-        >{{ submitButtonText }}</gl-button
       >
+        {{ submitButtonText }}
+      </gl-button>
     </gl-form>
     <gl-form
       v-if="showPasskeySignIn"
       :action="passkeysSignInPath"
       method="post"
-      class="gl-mt-3"
+      class="login-m3-passkey-form"
       data-testid="passkey-form"
     >
       <input type="hidden" name="authenticity_token" :value="$options.csrf.token" />
       <input type="hidden" name="remember_me" :value="rememberMe" />
-      <gl-button icon="passkey" type="submit" block data-testid="passkey-login-button">{{
-        s__('PasskeyAuthentication|Passkey')
-      }}</gl-button>
+      <gl-button
+        icon="passkey"
+        type="submit"
+        class="login-m3-secondary-action"
+        block
+        data-testid="passkey-login-button"
+      >
+        {{ s__('PasskeyAuthentication|Passkey') }}
+      </gl-button>
     </gl-form>
   </div>
 </template>

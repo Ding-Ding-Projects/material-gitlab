@@ -1,0 +1,269 @@
+name: Windows release
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+  CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+jobs:
+  build-release:
+    runs-on: windows-2022
+    timeout-minutes: 120
+    steps:
+      - name: Check out the exact triggering commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - name: Record workflow start
+        id: timing
+        shell: pwsh
+        run: |
+          $runStartedAt = (& gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:GITHUB_RUN_ID" --jq .run_started_at 2>&1 | Out-String).Trim()
+          $ghExit = $LASTEXITCODE
+          if ($ghExit -ne 0 -or [string]::IsNullOrWhiteSpace($runStartedAt)) {
+            throw "GitHub Actions run metadata did not provide run_started_at (exit $ghExit)."
+          }
+          try {
+            $start = [DateTimeOffset]::Parse($runStartedAt).ToUniversalTime()
+          } catch {
+            throw "GitHub Actions run metadata provided an invalid run_started_at value: $runStartedAt"
+          }
+          $startedText = $start.ToString('o')
+          "WORKFLOW_STARTED=$startedText" >> $env:GITHUB_ENV
+          "WORKFLOW_START_TICKS=$($start.UtcTicks)" >> $env:GITHUB_ENV
+          "workflow_started=$startedText" >> $env:GITHUB_OUTPUT
+          "workflow_start_ticks=$($start.UtcTicks)" >> $env:GITHUB_OUTPUT
+
+      - name: Build both Windows application installers
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $applications = @(
+            [pscustomobject]@{
+              Id = 'material-gitlab-deployer'
+              Root = 'tools\material-gitlab-deployer'
+              OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows'
+            },
+            [pscustomobject]@{
+              Id = 'material-gitlab-instant'
+              Root = 'tools\material-gitlab-instant'
+              OutputRoot = 'tools\material-gitlab-instant\installer\squirrel-windows'
+            }
+          )
+          foreach ($application in $applications) {
+            $installer = Join-Path $application.Root 'build-installer.bat'
+            if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
+              throw "Required installer entry point is missing: $installer"
+            }
+            $squirrelOutput = Join-Path (Get-Location).Path $application.OutputRoot
+            if (Test-Path -LiteralPath $squirrelOutput -PathType Container) {
+              Remove-Item -LiteralPath $squirrelOutput -Recurse -Force
+            }
+            & $installer /s
+            if ($LASTEXITCODE -ne 0) {
+              throw "Unsigned Squirrel.Windows installer build failed for $($application.Id) (exit $LASTEXITCODE)."
+            }
+          }
+
+      - name: Collect and validate installer assets
+        id: collect
+        if: ${{ always() }}
+        env:
+          WORKFLOW_STARTED: ${{ steps.timing.outputs.workflow_started }}
+          WORKFLOW_START_TICKS: ${{ steps.timing.outputs.workflow_start_ticks }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $expected = '${{ github.sha }}'
+          $actual = (git rev-parse HEAD).Trim()
+          if ($actual -ne $expected) { throw "Installer was not built from $expected (checkout is $actual)." }
+
+          $stage = Join-Path $env:RUNNER_TEMP 'windows-release-assets'
+          if (Test-Path -LiteralPath $stage) { Remove-Item -LiteralPath $stage -Recurse -Force }
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          $applications = @(
+            [pscustomobject]@{ Id = 'material-gitlab-deployer'; Root = 'tools\material-gitlab-deployer'; OutputRoot = 'tools\material-gitlab-deployer\dist\squirrel-windows' },
+            [pscustomobject]@{ Id = 'material-gitlab-instant'; Root = 'tools\material-gitlab-instant'; OutputRoot = 'tools\material-gitlab-instant\installer\squirrel-windows' }
+          )
+          $manifest = @()
+          foreach ($application in $applications) {
+            $outputRoot = Join-Path (Get-Location).Path $application.OutputRoot
+            if (-not (Test-Path -LiteralPath $outputRoot -PathType Container)) {
+              throw "$($application.Id) produced no Squirrel.Windows output directory at $outputRoot."
+            }
+            $setup = @(Get-ChildItem -LiteralPath $outputRoot -File -Filter 'Setup.exe')
+            if ($setup.Count -ne 1) {
+              throw "$($application.Id) must produce exactly one fresh literal Setup.exe in its Squirrel output root; found $($setup.Count)."
+            }
+            $releaseIndex = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter 'RELEASES')
+            if ($releaseIndex.Count -ne 1) {
+              throw "$($application.Id) must produce one fresh RELEASES index beside Setup.exe; found $($releaseIndex.Count)."
+            }
+            $fullPackage = @(Get-ChildItem -LiteralPath $setup[0].DirectoryName -File -Filter '*-full.nupkg' | Where-Object { $_.Length -gt 0 })
+            if ($fullPackage.Count -ne 1) {
+              throw "$($application.Id) must produce exactly one fresh non-empty Squirrel full .nupkg beside Setup.exe; found $($fullPackage.Count)."
+            }
+            $releaseText = Get-Content -Raw -LiteralPath $releaseIndex[0].FullName
+            if ($releaseText -notmatch [regex]::Escape($fullPackage[0].Name)) {
+              throw "$($application.Id) RELEASES does not reference its fresh full package $($fullPackage[0].Name)."
+            }
+            $signature = Get-AuthenticodeSignature -LiteralPath $setup[0].FullName
+            if ($signature.Status -ne 'NotSigned') {
+              throw "Code signing is prohibited; $($application.Id) Setup.exe has signature status $($signature.Status)."
+            }
+            $contractFiles = @($setup[0], $releaseIndex[0]) + $fullPackage
+            foreach ($file in $contractFiles) {
+              $publishedAsset = "$($application.Id)-$($file.Name)"
+              Copy-Item -LiteralPath $file.FullName -Destination (Join-Path $stage $publishedAsset) -Force
+              $manifest += [pscustomobject]@{
+                Application = $application.Id
+                Asset = $file.Name
+                PublishedAsset = $publishedAsset
+                Bytes = $file.Length
+                Sha256 = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+              }
+            }
+          }
+          $manifest | ConvertTo-Json -Depth 3 | Set-Content -LiteralPath (Join-Path $stage 'SQUIRREL-ASSET-MANIFEST.json') -Encoding utf8
+          $hashes = Get-ChildItem -LiteralPath $stage -Recurse -File | Get-FileHash -Algorithm SHA256
+          $hashes | ForEach-Object { "$($_.Path.Substring($stage.Length + 1)) $($_.Hash)" } | Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Encoding utf8
+          "RELEASE_ASSET_DIR=$stage" >> $env:GITHUB_ENV
+          "RELEASE_ASSET_COUNT=$((Get-ChildItem -LiteralPath $stage -Recurse -File).Count)" >> $env:GITHUB_ENV
+          "asset_dir=$stage" >> $env:GITHUB_OUTPUT
+          "asset_count=$((Get-ChildItem -LiteralPath $stage -Recurse -File).Count)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload installer evidence
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer-${{ github.sha }}
+          path: ${{ runner.temp }}/windows-release-assets
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Resolve a published dim-sum code name and photo
+        id: dimsum
+        if: ${{ steps.collect.outcome == 'success' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $catalogUrl = 'https://raw.githubusercontent.com/Ding-Ding-Projects/dim-sum-photos/main/catalog/index.json'
+          $apiHeaders = @{ 'User-Agent' = 'material-gitlab-windows-release'; Accept = 'application/vnd.github+json' }
+          $catalogPath = Join-Path $env:RUNNER_TEMP 'dim-sum-catalog.json'
+          Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $catalogUrl -OutFile $catalogPath
+          $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
+          $assets = @()
+          $maxReleasePages = 10
+          for ($releasePage = 1; $releasePage -le $maxReleasePages; $releasePage++) {
+            $releases = @(Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/Ding-Ding-Projects/dim-sum-photos/releases?per_page=100&page=$releasePage")
+            $assets += @($releases |
+              Where-Object { $_.tag_name -match '^catalog-v1(?:$|-)' } |
+              ForEach-Object { $_.assets } |
+              Where-Object { $_.name -match '^hk-dish-\d{4}-.+\.(png|jpg|jpeg)$' })
+            if ($releases.Count -eq 0) { break }
+          }
+          if (-not $assets) { throw 'No published catalog-v1 photo assets were found.' }
+          $prior = Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100"
+          $used = (($prior | ForEach-Object { $_.body }) -join "`n")
+          $chosen = $null
+          foreach ($dish in $catalog.dishes) {
+            $leaf = [IO.Path]::GetFileName($dish.image.path)
+            $asset = $assets | Where-Object { $_.name -eq $leaf } | Select-Object -First 1
+            $code = "$($dish.name.en) · $($dish.name.zhHant)"
+            if ($asset -and $used -notmatch [regex]::Escape($code)) { $chosen = [pscustomobject]@{ Dish = $dish; Asset = $asset; Code = $code }; break }
+          }
+          if (-not $chosen) { throw 'No unused catalog dish with a published photo asset is available.' }
+          $photoPath = Join-Path $env:RUNNER_TEMP $chosen.Asset.name
+          Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $chosen.Asset.browser_download_url -OutFile $photoPath
+          $bytes = [IO.File]::ReadAllBytes($photoPath)
+          $extension = [IO.Path]::GetExtension($chosen.Asset.name).ToLowerInvariant()
+          $isPng = $bytes.Length -ge 8 -and $bytes[0] -eq 0x89 -and $bytes[1] -eq 0x50 -and $bytes[2] -eq 0x4e -and $bytes[3] -eq 0x47 -and $bytes[4] -eq 0x0d -and $bytes[5] -eq 0x0a -and $bytes[6] -eq 0x1a -and $bytes[7] -eq 0x0a
+          $isJpeg = $bytes.Length -ge 3 -and $bytes[0] -eq 0xff -and $bytes[1] -eq 0xd8 -and $bytes[2] -eq 0xff
+          if (($extension -eq '.png' -and -not $isPng) -or ($extension -in '.jpg','.jpeg' -and -not $isJpeg)) { throw "Published dim-sum photo signature does not match $extension." }
+          "DIM_SUM_CODE=$($chosen.Code)" >> $env:GITHUB_ENV
+          "DIM_SUM_PHOTO_URL=$($chosen.Asset.browser_download_url)" >> $env:GITHUB_ENV
+          "code_name=$($chosen.Code)" >> $env:GITHUB_OUTPUT
+          "photo_url=$($chosen.Asset.browser_download_url)" >> $env:GITHUB_OUTPUT
+
+      - name: Prepare release notes and verify timing
+        id: notes
+        if: ${{ steps.collect.outcome == 'success' && steps.dimsum.outcome == 'success' }}
+        env:
+          WORKFLOW_STARTED: ${{ steps.timing.outputs.workflow_started }}
+          WORKFLOW_START_TICKS: ${{ steps.timing.outputs.workflow_start_ticks }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $completed = [DateTimeOffset]::UtcNow
+          $started = [DateTimeOffset]::Parse($env:WORKFLOW_STARTED)
+          $sha = '${{ github.sha }}'
+          $duration = $completed - $started
+          $durationText = '{0:00}:{1:00}:{2:00}' -f [int]$duration.TotalHours, $duration.Minutes, $duration.Seconds
+          $lineCountPath = Join-Path $env:RUNNER_TEMP 'line-count.json'
+          $lineCountOutput = & node scripts/release/line_count.mjs --json "--revision=$sha" 2>&1
+          if ($LASTEXITCODE -ne 0) { throw "Committed line counter failed: $($lineCountOutput -join ' ')" }
+          $lineCountOutput -join "`n" | Set-Content -LiteralPath $lineCountPath -Encoding utf8
+          $lineCount = Get-Content -Raw -LiteralPath $lineCountPath | ConvertFrom-Json
+          $lineCountJson = Get-Content -Raw -LiteralPath $lineCountPath
+          $notes = @("## Windows release", "", "Target commit: $sha", "Dim-sum code name: **$env:DIM_SUM_CODE**", "Photo: $env:DIM_SUM_PHOTO_URL", "", "### Workflow timing (UTC)", "- Workflow started: $($started.ToString('o'))", "- Workflow completed: $($completed.ToString('o'))", "- Workflow duration: $durationText", "", "### Exact committed line-count report", '```json', $lineCountJson.Trim(), '```', "", "Artifacts are unsigned Windows Squirrel.Windows assets. No tests, lint, type checks, or static-analysis jobs run in this workflow.")
+          $notesPath = Join-Path $env:RUNNER_TEMP 'windows-release-notes.md'
+          $notes -join "`n" | Set-Content -LiteralPath $notesPath -Encoding utf8
+          "RELEASE_NOTES_PATH=$notesPath" >> $env:GITHUB_ENV
+          $tag = "windows-${{ github.run_number }}-$($sha.Substring(0, 12))"
+          "release_tag=$tag" >> $env:GITHUB_OUTPUT
+
+      - name: Publish one unique non-draft release
+        if: ${{ steps.collect.outcome == 'success' && steps.dimsum.outcome == 'success' && steps.notes.outcome == 'success' && env.RELEASE_ASSET_COUNT != '' }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = '${{ steps.notes.outputs.release_tag }}'
+          $sha = '${{ github.sha }}'
+          # Test gh's exit code, not its output. `*> $null` discards every
+          # stream, so the previous `if (gh release view ... *> $null)` form was
+          # always testing $null and never fired - including when the tag really
+          # did exist, which is the one case it was written to catch.
+          gh release view $tag --repo '${{ github.repository }}' *> $null
+          $tagLookup = $LASTEXITCODE
+          $global:LASTEXITCODE = 0
+          if ($tagLookup -eq 0) { throw "Release tag $tag already exists; refusing to overwrite it." }
+          $manifestPath = Join-Path $env:RELEASE_ASSET_DIR 'SQUIRREL-ASSET-MANIFEST.json'
+          if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) { throw 'Refusing publication without the Squirrel asset manifest.' }
+          $manifest = @(Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json)
+          foreach ($application in @('material-gitlab-deployer', 'material-gitlab-instant')) {
+            $assetsForApplication = @($manifest | Where-Object { $_.Application -eq $application })
+            $fullPackages = @($assetsForApplication | Where-Object { $_.Asset -match '-full\.nupkg$' })
+            $setupAssets = @($assetsForApplication | Where-Object { $_.Asset -eq 'Setup.exe' })
+            if ($setupAssets.Count -ne 1 -or -not ($assetsForApplication.Asset -contains 'RELEASES') -or $fullPackages.Count -lt 1) {
+              throw "Refusing publication because $application lacks its complete Squirrel asset set."
+            }
+          }
+          $assets = Get-ChildItem -LiteralPath $env:RELEASE_ASSET_DIR -Recurse -File | ForEach-Object { $_.FullName }
+          gh release create $tag --repo '${{ github.repository }}' --target $sha --title "Windows $tag" --notes-file $env:RELEASE_NOTES_PATH @assets
+          $release = gh api "repos/${{ github.repository }}/releases/tags/$tag" | ConvertFrom-Json
+          if ($release.draft -ne $false -or $release.target_commitish -ne $sha) { throw 'Published release did not resolve to the exact non-draft target commit.' }
+          $required = @('SHA256SUMS.txt', 'SQUIRREL-ASSET-MANIFEST.json')
+          foreach ($name in $required) {
+            $asset = $release.assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
+            if (-not $asset -or [int64]$asset.size -le 0) { throw "Published release is missing non-empty $name." }
+          }
+          foreach ($application in @('material-gitlab-deployer', 'material-gitlab-instant')) {
+            $contract = @($manifest | Where-Object { $_.Application -eq $application })
+            foreach ($entry in $contract) {
+              $asset = $release.assets | Where-Object { $_.name -eq $entry.PublishedAsset } | Select-Object -First 1
+              if (-not $asset -or [int64]$asset.size -ne [int64]$entry.Bytes) { throw "Published release is missing the verified $application asset $($entry.Asset)." }
+            }
+          }

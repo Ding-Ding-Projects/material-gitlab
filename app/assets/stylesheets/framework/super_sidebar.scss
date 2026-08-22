@@ -297,6 +297,303 @@ $command-palette-spacing: px-to-rem(14px);
   }
 }
 
+/**
+ * Material navigation surface
+ *
+ * This is the persistent shell structure used by the shared CE component.
+ * Edition-specific menu payloads continue to flow through the same component
+ * boundary, while the rendered navigation no longer depends on GlNavItem.
+ */
+.super-sidebar.m3-shell-sidebar {
+  color: var(--m3-color-on-surface);
+  background: var(--m3-color-surface);
+  border-inline-end: 1px solid var(--m3-color-outline);
+  border-radius: 0 var(--m3-shape-corner-large) var(--m3-shape-corner-large) 0;
+  box-shadow: var(--m3-shell-elevation);
+  overflow: hidden;
+}
+
+.m3-shell-sidebar-content {
+  min-width: 0;
+  padding-block: var(--m3-space-3);
+}
+
+.m3-shell-sidebar-header {
+  display: grid;
+  gap: var(--m3-space-3);
+  padding: 0 var(--m3-space-4) var(--m3-space-3);
+}
+
+.m3-shell-sidebar-brand {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  gap: var(--m3-space-3);
+  padding-inline: var(--m3-space-3);
+  color: var(--m3-color-on-surface);
+}
+
+.m3-shell-sidebar-brand-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: 0 0 1.75rem;
+  color: var(--m3-color-on-primary);
+  background: var(--super-sidebar-theme-accent-color);
+  border-radius: var(--m3-shape-corner-medium);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.m3-shell-sidebar-brand-name {
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.m3-shell-sidebar-context-card {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  min-height: 3.25rem;
+  gap: var(--m3-space-3);
+  padding: var(--m3-space-3);
+  color: var(--m3-color-on-surface);
+  background: var(--m3-color-surface-container-high);
+  border-radius: 0.75rem;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--m3-color-on-surface);
+    background: var(--gl-nav-item-background-color-hover);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--super-sidebar-theme-accent-color);
+    outline-offset: 2px;
+  }
+}
+
+.m3-shell-sidebar-context-card-static {
+  cursor: default;
+
+  &:hover {
+    background: var(--m3-color-surface-container-high);
+  }
+}
+
+.m3-shell-sidebar-context-copy {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.m3-shell-sidebar-context-name,
+.m3-shell-sidebar-context-namespace {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.m3-shell-sidebar-context-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+.m3-shell-sidebar-context-namespace {
+  color: var(--m3-color-on-surface-variant);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.m3-shell-sidebar-search {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.5rem;
+  gap: var(--m3-space-3);
+  padding: var(--m3-space-2) var(--m3-space-3);
+  color: var(--m3-color-on-surface-variant);
+  background: var(--m3-color-surface-container-high);
+  border: 1px solid var(--m3-color-outline);
+  border-radius: 999px;
+  font: inherit;
+  text-align: start;
+
+  &:hover {
+    color: var(--m3-color-on-surface);
+    background: var(--gl-nav-item-background-color-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--super-sidebar-theme-accent-color);
+    outline-offset: 2px;
+  }
+}
+
+.m3-shell-sidebar-search-label {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.m3-shell-sidebar-search-shortcut {
+  padding: 0 var(--m3-space-2);
+  color: var(--m3-color-on-surface-variant);
+  background: transparent;
+  border: 1px solid var(--m3-color-outline);
+  border-radius: var(--m3-shape-corner-small);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1rem;
+}
+
+.m3-shell-sidebar-menu {
+  padding: 0 var(--m3-space-4) var(--m3-space-3);
+}
+
+.m3-shell-nav-item,
+.m3-shell-nav-section {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 2.5rem;
+  gap: var(--m3-space-3);
+  margin: 0 0 var(--m3-space-1);
+  padding: var(--m3-space-3) var(--m3-space-4);
+  color: var(--gl-nav-item-foreground-color-default);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-align: start;
+  text-decoration: none;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--gl-nav-item-foreground-color-hover);
+    background: var(--gl-nav-item-background-color-hover);
+    text-decoration: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--super-sidebar-theme-accent-color);
+    outline-offset: -2px;
+  }
+}
+
+.m3-shell-nav-item-active,
+.m3-shell-nav-section-active {
+  color: var(--gl-nav-item-selected-foreground-color-default);
+  background: var(--gl-nav-item-selected-background-color-default);
+  font-weight: 600;
+}
+
+.m3-shell-nav-section {
+  min-height: 2rem;
+  margin-block-start: var(--m3-space-3);
+  padding: var(--m3-space-2) var(--m3-space-4);
+  border-radius: var(--m3-shape-corner-medium);
+  color: var(--m3-color-on-surface-variant);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1rem;
+  text-transform: uppercase;
+}
+
+.m3-shell-nav-item-icon,
+.m3-shell-nav-section-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 1.5rem;
+  color: var(--m3-color-on-surface-variant);
+}
+
+.m3-shell-nav-item-label,
+.menu-section-button-label {
+  min-width: 0;
+  flex: 1;
+}
+
+.m3-shell-nav-item-badge {
+  flex: 0 0 auto;
+  color: var(--m3-color-on-surface-variant);
+}
+
+.m3-shell-nav-section-chevron {
+  flex: 0 0 auto;
+  color: var(--m3-color-on-surface-variant);
+}
+
+.m3-shell-nav-section-items {
+  margin-block-end: var(--m3-space-2);
+  padding-inline-start: 0;
+}
+
+.m3-shell-nav-subitem {
+  margin-inline: var(--m3-space-2);
+  width: calc(100% - (2 * var(--m3-space-2)));
+}
+
+.m3-shell-nav-flyout-item {
+  padding-inline-start: var(--m3-space-5);
+}
+
+.m3-shell-nav-action {
+  cursor: pointer;
+}
+
+.super-sidebar-is-icon-only {
+  .m3-shell-sidebar-content {
+    padding-inline: var(--m3-space-2);
+  }
+
+  .m3-shell-sidebar-menu {
+    padding-inline: 0;
+  }
+
+  .m3-shell-nav-item,
+  .m3-shell-nav-section {
+    justify-content: center;
+    padding-inline: var(--m3-space-3);
+  }
+
+  .m3-shell-nav-section {
+    min-height: 2.5rem;
+    margin-block-start: var(--m3-space-1);
+    border-radius: 999px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-shell-nav-item,
+  .m3-shell-nav-section,
+  .m3-shell-sidebar-context-card,
+  .m3-shell-sidebar-search {
+    transition: none !important;
+  }
+}
+
 @include media-breakpoint-down(lg) {
   .page-with-super-sidebar:not(.super-sidebar-has-css-transitions-blocked) .super-sidebar {
     position: fixed;
@@ -776,7 +1073,7 @@ $scroll-scrim-height: 2.25rem;
   // Raise the nav item's icon and label above the overlay so the content stays
   // visible while the pseudo-element is drawn on top of the nav item's own
   // background.
-  .gl-nav-item-slot,
+  .m3-shell-nav-item-icon,
   .gl-nav-item-label {
     position: relative;
     z-index: 1;

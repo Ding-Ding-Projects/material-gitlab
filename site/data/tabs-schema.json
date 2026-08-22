@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Material GitLab browser tabs state",
+  "type": "object",
+  "required": ["version", "dock", "activeTab", "tabs", "groups", "searches"],
+  "properties": {
+    "version": { "const": 1 },
+    "dock": { "enum": ["left", "right", "top", "bottom"] },
+    "activeTab": { "type": "string" },
+    "tabs": { "type": "array", "items": { "$ref": "#/$defs/tab" } },
+    "groups": { "type": "array", "items": { "$ref": "#/$defs/group" } },
+    "searches": {
+      "type": "object",
+      "required": ["strip", "groupMembers", "groupNames", "master"],
+      "additionalProperties": false,
+      "properties": {
+        "strip": { "$ref": "#/$defs/search" },
+        "groupMembers": { "$ref": "#/$defs/search" },
+        "groupNames": { "$ref": "#/$defs/search" },
+        "master": { "$ref": "#/$defs/search" }
+      }
+    }
+  },
+  "$defs": {
+    "tab": { "type": "object", "required": ["id", "label", "route", "groupId", "pinned"], "properties": { "id": { "type": "string" }, "label": { "type": "string" }, "route": { "type": "string" }, "groupId": { "type": ["string", "null"] }, "pinned": { "type": "boolean" }, "locked": { "type": "boolean" } }, "additionalProperties": false },
+    "group": { "type": "object", "required": ["id", "label", "collapsed"], "properties": { "id": { "type": "string" }, "label": { "type": "string" }, "collapsed": { "type": "boolean" }, "color": { "type": "string" } }, "additionalProperties": false },
+    "search": { "type": "object", "required": ["query", "regex", "pattern", "flags", "error"], "properties": { "query": { "type": "string" }, "regex": { "type": "boolean" }, "pattern": { "type": "string" }, "flags": { "type": "string" }, "error": { "type": "string" } }, "additionalProperties": false }
+  }
+}

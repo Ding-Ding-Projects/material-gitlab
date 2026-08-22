@@ -1,0 +1,8 @@
+{
+  "schemaVersion": 1,
+  "adapters": [
+    { "id": "json-to-json", "category": "Structured Data/Spreadsheets", "sourceMime": ["application/json"], "targetMime": ["application/json"], "extensions": [".json"], "bundled": true },
+    { "id": "text-to-markdown", "category": "Code/Text", "sourceMime": ["text/plain"], "targetMime": ["text/markdown"], "extensions": [".txt", ".md"], "bundled": true },
+    { "id": "pdf-offline", "category": "Documents/PDF", "sourceMime": ["application/pdf"], "targetMime": ["application/pdf"], "extensions": [".pdf"], "bundled": false, "reason": "PDF engine is not bundled in this site." }
+  ]
+}

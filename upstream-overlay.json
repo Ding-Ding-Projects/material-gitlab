@@ -1,0 +1,5 @@
+{
+  "official_upstream_repository": "https://gitlab.com/gitlab-org/gitlab.git",
+  "official_upstream_commit": "9479feaa8d186fa47fc98321d9721b8f87199b26",
+  "overlay_boundary": "This repository contains original overlay code, tooling, and documentation. It references the pinned upstream GitLab commit for provenance, but it does not republish upstream EE source."
+}

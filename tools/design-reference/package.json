@@ -1,0 +1,26 @@
+{
+  "name": "material-gitlab-design-reference",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Dedicated deterministic renderer for checked-in GitLab design contracts.",
+  "main": "src/main.cjs",
+  "scripts": {
+    "validate": "node scripts/parity-guard.mjs",
+    "negative-regression": "node scripts/parity-guard.mjs --negative",
+    "test": "node --test test/*.test.mjs",
+    "capture": "node scripts/capture.mjs",
+    "diff": "node scripts/diff.mjs",
+    "side-by-side": "node scripts/side-by-side.mjs",
+    "start": "electron ."
+  },
+  "dependencies": {
+    "material-symbols": "0.46.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "electron": "43.4.1",
+    "pngjs": "7.0.0"
+  },
+  "engines": {"node": ">=20"}
+}

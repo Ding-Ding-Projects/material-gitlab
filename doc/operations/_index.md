@@ -14,5 +14,6 @@ Visualize and analyze errors and incidents related to your application and its i
 - [Error tracking](error_tracking.md)
 - [Incident management](incident_management/_index.md)
 - [Observability](observability.md)
+- [Material operations surfaces](material_design_surfaces.md)
 
 {{< /cards >}}

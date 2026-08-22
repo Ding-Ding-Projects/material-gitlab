@@ -1,0 +1,21 @@
+// Material 3 prototype layer entry point. Import order is load-bearing:
+// primitives (tokens, typography, shape, elevation, motion) before the
+// components built on them, and the dark token overrides last so they
+// win the cascade against the light values declared in _tokens.scss.
+
+@import 'tokens';
+@import 'typography';
+@import 'shape';
+@import 'elevation';
+@import 'motion';
+
+@import 'components/buttons';
+@import 'components/cards';
+@import 'components/chips';
+@import 'components/dialogs';
+@import 'components/forms';
+@import 'components/navigation';
+@import 'components/sidebar';
+@import 'components/topbar';
+
+@import 'tokens_dark';

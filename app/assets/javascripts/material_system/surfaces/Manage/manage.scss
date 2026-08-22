@@ -1,0 +1,120 @@
+// Material 3 token layer for the Manage surface (Activity + Labels), ported from
+// Manage.dc.html's <style> block. Scoped entirely to .mg-surface so nothing here
+// leaks into the rest of the app, and nothing outside can bleed in.
+
+@mixin mg-dark-tokens {
+  --mg-surf: #141218;
+  --mg-surfc: #211f26;
+  --mg-surfch: #2b2831;
+  --mg-surfcl: #1b1922;
+  --mg-onsurf: #e6e0e9;
+  --mg-onsurfv: #cac4d0;
+  --mg-prim: #cfbdfe;
+  --mg-onprim: #381e72;
+  --mg-primc: #4f378b;
+  --mg-onprimc: #e8def8;
+  --mg-sec: #4a4458;
+  --mg-outl: #49454f;
+  --mg-outlv: #332f3a;
+  --mg-err: #f2b8b5;
+  --mg-errc: #5c1a17;
+  --mg-good: #7fd79a;
+  --mg-goodc: #1c3a27;
+  --mg-warn: #e2c46d;
+  --mg-warnc: #3d3012;
+  --mg-card: #211f26;
+  --mg-scrim: rgba(0, 0, 0, 0.5);
+}
+
+.mg-surface {
+  --mg-surf: #f4effa;
+  --mg-surfc: #ece4f6;
+  --mg-surfch: #e0d5f2;
+  --mg-surfcl: #faf6ff;
+  --mg-onsurf: #1d1b20;
+  --mg-onsurfv: #49454f;
+  --mg-prim: #6750c4;
+  --mg-onprim: #ffffff;
+  --mg-primc: #e8def8;
+  --mg-onprimc: #4f378b;
+  --mg-sec: #d6c9f0;
+  --mg-outl: #cac4d0;
+  --mg-outlv: #e7e0ec;
+  --mg-err: #b3261e;
+  --mg-errc: #f9dedc;
+  --mg-good: #1a7f37;
+  --mg-goodc: #dcf2e3;
+  --mg-warn: #9a6700;
+  --mg-warnc: #fff3d0;
+  --mg-card: #ffffff;
+  --mg-scrim: rgba(29, 27, 32, 0.35);
+
+  --mg-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mg-radius-card: 20px;
+  --mg-radius-pill: 999px;
+  --mg-radius-field: 12px;
+  --mg-touch: 40px;
+  --mg-elevation-1: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --mg-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.22);
+
+  font-family: var(--mg-font);
+  background: var(--mg-surf);
+  color: var(--mg-onsurf);
+
+  &[data-mg-theme='dark'] {
+    @include mg-dark-tokens;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .mg-surface:not([data-mg-theme='light']) {
+    @include mg-dark-tokens;
+  }
+}
+
+// Shared primitives available to every component in this surface without a per-file import,
+// because CSS custom properties and these utility classes are set on the surface root and
+// inherit/apply through the DOM regardless of Vue's per-component style scoping.
+.mg-surface {
+  .mg-visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  a {
+    color: var(--mg-prim);
+    text-decoration: none;
+
+    &:hover {
+      color: var(--mg-onprimc);
+      text-decoration: underline;
+    }
+  }
+
+  ::placeholder {
+    color: var(--mg-onsurfv);
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

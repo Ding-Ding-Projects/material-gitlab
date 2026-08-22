@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder,textarea::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="Jobs" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">Build</h1>
+      <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap">
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+          <div onClick="{{ tb.pick }}" style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ tb.bg }};color:{{ tb.fg }}">{{ tb.label }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <main style="flex:1;overflow-y:auto;padding:8px 24px 24px;display:flex;flex-direction:column;gap:14px">
+      <sc-if value="{{ isEditor }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Pipeline editor" style="display:grid;grid-template-columns:1fr 320px;gap:14px;max-width:1040px;align-items:start">
+          <textarea onInput="{{ setYaml }}" value="{{ yaml }}" rows="18" spellcheck="false" style="border:1px solid var(--outl);border-radius:16px;padding:14px 16px;font-family:monospace;font-size:12.5px;line-height:1.7;background:var(--card);color:var(--onsurf);outline:none;resize:vertical"></textarea>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:12px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Lint</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span class="material-symbols-outlined" style="font-size:18px;color:{{ lintColor }}">{{ lintIcon }}</span>{{ lintMsg }}</div>
+            </div>
+            <div style="background:var(--card);border-radius:16px;padding:14px 16px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:12px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Visualized stages</div>
+              <sc-for list="{{ yamlStages }}" as="ys" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-family:monospace"><span class="material-symbols-outlined" style="font-size:16px;color:var(--prim)">circle</span>{{ ys }}</div>
+              </sc-for>
+            </div>
+            <div onClick="{{ commitYaml }}" style="background:var(--prim);color:var(--onprim);border-radius:999px;padding:11px;text-align:center;font-weight:500;font-size:13.5px;cursor:pointer">{{ commitLabel }}</div>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showRows }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:980px">
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+            <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--outlv)">
+              <span class="material-symbols-outlined" style="color:{{ r.iconColor }};font-size:19px">{{ r.icon }}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:500;font-size:13.5px;font-family:{{ r.titleFont }}">{{ r.title }}</div>
+                <div style="font-size:12px;color:var(--onsurfv);margin-top:1px">{{ r.sub }}</div>
+              </div>
+              <sc-if value="{{ r.badge }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:11.5px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ r.badgeBg }};color:{{ r.badgeFg }}">{{ r.badge }}</span>
+              </sc-if>
+              <span style="font-size:12px;color:var(--onsurfv)">{{ r.meta }}</span>
+              <sc-if value="{{ r.action }}" hint-placeholder-val="{{ false }}">
+                <div onClick="{{ r.act }}" style="font-size:12.5px;font-weight:500;color:{{ r.actionColor }};cursor:pointer;border:1px solid var(--outl);border-radius:999px;padding:6px 14px">{{ r.action }}</div>
+              </sc-if>
+            </div>
+          </sc-for>
+          <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:36px;text-align:center;color:var(--onsurfv);font-size:13.5px">Nothing matches.</div>
+          </sc-if>
+        </div>
+      </sc-if>
+    </main>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Tabs mirror build_menu.rb: jobs, pipelines_editor, pipeline_schedules, test_cases, artifacts (pipelines → Pipelines.dc.html)
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false, tab: 'Jobs', committed: false,
+    yaml: 'stages:\n  - build\n  - test\n  - deploy\n\ncompile-assets:\n  stage: build\n  script: yarn build\n\njest:\n  stage: test\n  parallel: 4\n  script: yarn jest --shard $CI_NODE_INDEX/$CI_NODE_TOTAL\n\nreview-app:\n  stage: deploy\n  environment: review\n  script: bin/deploy review',
+    jobs: [
+      {name:'jest 2/4', sub:'#8821 · test · runner saas-linux-medium', status:'running', when:'02:38'},
+      {name:'rspec unit', sub:'#8821 · test · runner saas-linux-large', status:'running', when:'03:05'},
+      {name:'jest 1/2', sub:'#8820 · test · runner saas-linux-medium', status:'failed', when:'05:22'},
+      {name:'compile-assets', sub:'#8821 · build · cache hit', status:'success', when:'01:44'},
+      {name:'review-app', sub:'#8821 · deploy · waiting on test', status:'created', when:'—'},
+      {name:'pages', sub:'#8818 · deploy · manual gate', status:'manual', when:'—'}
+    ],
+    schedules: [
+      {name:'Nightly full suite', sub:'0 2 * * * · main · next run in 9h', active:true},
+      {name:'Weekly dependency scan', sub:'0 4 * * 1 · main · next run Mon', active:true},
+      {name:'Docs link check', sub:'0 6 * * 6 · main · paused', active:false}
+    ],
+    testCases: [
+      {name:'Board drag persists column', sub:'boards/drag.spec.js · quarantined', status:'quarantined'},
+      {name:'MR widget merges when checks pass', sub:'mr/widget.spec.js', status:'passing'},
+      {name:'Regex builder rejects catastrophic patterns', sub:'search/regex.spec.js', status:'passing'},
+      {name:'Empty board renders CTA', sub:'boards/empty.spec.js · flaky 3%', status:'flaky'}
+    ],
+    artifacts: [
+      {name:'coverage/index.html', sub:'#8821 jest 1/4 · coverage report', size:'2.1 MB', keep:'2d left'},
+      {name:'dist/assets.tar.gz', sub:'#8821 compile-assets · build output', size:'18.4 MB', keep:'6d left'},
+      {name:'junit.xml', sub:'#8820 jest 1/2 · test report', size:'204 KB', keep:'1d left'}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen: false, regexOpen: false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    const stMeta = {success:['check_circle','var(--good)','var(--goodc)'], running:['sync','var(--warn)','var(--warnc)'], failed:['cancel','var(--err)','var(--errc)'], created:['pending','var(--onsurfv)','var(--surfch)'], manual:['play_circle','var(--onprimc)','var(--primc)'], passing:['check_circle','var(--good)','var(--goodc)'], flaky:['warning','var(--warn)','var(--warnc)'], quarantined:['do_not_disturb_on','var(--err)','var(--errc)']};
+    let rows = [];
+    if (s.tab === 'Jobs') rows = s.jobs.filter(j => m(j.name + ' ' + j.sub)).map((j, i) => { const sm = stMeta[j.status];
+      return {icon:sm[0], iconColor:sm[1], title:j.name, titleFont:'monospace', sub:j.sub, badge:j.status, badgeBg:sm[2], badgeFg:sm[1], meta:j.when,
+        action: j.status === 'failed' ? 'Retry' : j.status === 'manual' ? 'Play' : null, actionColor:'var(--onprimc)',
+        act:() => set({jobs: s.jobs.map((x, k) => k === i ? {...x, status:'running', when:'00:01'} : x)})}; });
+    if (s.tab === 'Schedules') rows = s.schedules.filter(x => m(x.name + ' ' + x.sub)).map((x, i) => ({
+      icon:'calendar_clock', iconColor:'var(--prim)', title:x.name, titleFont:'inherit', sub:x.sub,
+      badge:x.active ? 'active' : 'paused', badgeBg:x.active ? 'var(--goodc)' : 'var(--surfch)', badgeFg:x.active ? 'var(--good)' : 'var(--onsurfv)', meta:'',
+      action:x.active ? 'Pause' : 'Resume', actionColor:'var(--onprimc)',
+      act:() => set({schedules: s.schedules.map((y, k) => k === i ? {...y, active: !y.active} : y)})}));
+    if (s.tab === 'Test cases') rows = s.testCases.filter(x => m(x.name + ' ' + x.sub)).map(x => { const sm = stMeta[x.status];
+      return {icon:'labs', iconColor:'var(--prim)', title:x.name, titleFont:'inherit', sub:x.sub, badge:x.status, badgeBg:sm[2], badgeFg:sm[1], meta:'', action:null}; });
+    if (s.tab === 'Artifacts') rows = s.artifacts.filter(x => m(x.name + ' ' + x.sub)).map((x, i) => ({
+      icon:'inventory_2', iconColor:'var(--prim)', title:x.name, titleFont:'monospace', sub:x.sub, badge:x.keep, badgeBg:'var(--surfch)', badgeFg:'var(--onsurfv)', meta:x.size,
+      action:'Delete', actionColor:'var(--err)', act:() => set({artifacts: s.artifacts.filter((_, k) => k !== i)})}));
+    const lintOk = /stages:/.test(s.yaml) && !/\t/.test(s.yaml);
+    const yamlStages = (s.yaml.match(/^stages:\n((?:\s+-\s+.+\n?)+)/m) || ['',''])[1].split('\n').map(l => l.replace(/\s+-\s+/, '').trim()).filter(Boolean);
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — ' + s.tab.toLowerCase() : 'Search ' + s.tab.toLowerCase(),
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: [...s.jobs.map(j => j.name + ' ' + j.status), ...s.schedules.map(x => x.name), ...s.testCases.map(x => x.name), ...s.artifacts.map(x => x.name)],
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [{label:'Toggle dark theme', icon:'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }},
+        ...['Jobs','Editor','Schedules','Test cases','Artifacts'].map(t => ({label:'Build: ' + t, icon:'construction', run: () => set({tab: t})}))],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      tabs: ['Jobs','Editor','Schedules','Test cases','Artifacts'].map(t => ({label:t, pick:() => set({tab:t}),
+        bg: s.tab === t ? 'var(--primc)' : 'transparent', fg: s.tab === t ? 'var(--onprimc)' : 'var(--onsurfv)'})),
+      isEditor: s.tab === 'Editor', showRows: s.tab !== 'Editor',
+      yaml: s.yaml, setYaml: (e) => set({yaml: e.target.value, committed: false}),
+      lintIcon: lintOk ? 'check_circle' : 'cancel', lintColor: lintOk ? 'var(--good)' : 'var(--err)',
+      lintMsg: lintOk ? 'Syntax is valid · ' + yamlStages.length + ' stages detected' : 'Invalid: tabs not allowed / missing stages block',
+      yamlStages,
+      commitLabel: s.committed ? 'Committed to main ✓' : 'Commit changes',
+      commitYaml: () => lintOk && set({committed: true}),
+      rows, emptyList: rows.length === 0 && s.tab !== 'Editor'
+    };
+  }
+}
+</script>
+</body>
+</html>

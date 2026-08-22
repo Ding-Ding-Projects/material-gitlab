@@ -1,0 +1,120 @@
+// Material 3 color token contract for the MD3 prototype layer.
+// Values below are the light-mode column of the authoritative token table
+// and must be copied verbatim - never invented, rounded, or "improved".
+// Dark-mode overrides live in _tokens_dark.scss and restate only the
+// custom properties whose value actually changes.
+
+:root {
+  // Base tokens
+  --gl-md3-surf: #f4effa;
+  --gl-md3-surfc: #ece4f6;
+  --gl-md3-surfch: #e0d5f2;
+  --gl-md3-surfcl: #faf6ff;
+  --gl-md3-onsurf: #1d1b20;
+  --gl-md3-onsurfv: #49454f;
+  --gl-md3-prim: #6750c4;
+  --gl-md3-onprim: #ffffff;
+  --gl-md3-primc: #e8def8;
+  --gl-md3-onprimc: #4f378b;
+  --gl-md3-sec: #d6c9f0;
+  --gl-md3-outl: #cac4d0;
+  --gl-md3-outlv: #e7e0ec;
+  --gl-md3-err: #b3261e;
+  --gl-md3-errc: #f9dedc;
+  --gl-md3-good: #1a7f37;
+  --gl-md3-goodc: #dcf2e3;
+  --gl-md3-warn: #9a6700;
+  --gl-md3-warnc: #fff3d0;
+  --gl-md3-card: #ffffff;
+  --gl-md3-scrim: rgba(29, 27, 32, 0.35);
+  --gl-md3-addbg: #dcf2e3;
+  --gl-md3-addfg: #0f5223;
+  --gl-md3-delbg: #f9dedc;
+  --gl-md3-delfg: #8c1d18;
+
+  // Semantic aliases: components should read these, not the short names
+  // above, so intent stays legible at the call site. Because custom
+  // properties resolve at used-value time, each alias automatically
+  // tracks its underlying token through the dark-mode overrides too.
+  --gl-md3-surface: var(--gl-md3-surf);
+  --gl-md3-surface-container: var(--gl-md3-surfc);
+  --gl-md3-surface-container-high: var(--gl-md3-surfch);
+  --gl-md3-surface-container-low: var(--gl-md3-surfcl);
+  --gl-md3-on-surface: var(--gl-md3-onsurf);
+  --gl-md3-on-surface-variant: var(--gl-md3-onsurfv);
+  --gl-md3-primary: var(--gl-md3-prim);
+  --gl-md3-on-primary: var(--gl-md3-onprim);
+  --gl-md3-primary-container: var(--gl-md3-primc);
+  --gl-md3-on-primary-container: var(--gl-md3-onprimc);
+  --gl-md3-secondary-container: var(--gl-md3-sec);
+  --gl-md3-outline: var(--gl-md3-outl);
+  --gl-md3-outline-variant: var(--gl-md3-outlv);
+  --gl-md3-error: var(--gl-md3-err);
+  --gl-md3-error-container: var(--gl-md3-errc);
+  --gl-md3-success: var(--gl-md3-good);
+  --gl-md3-success-container: var(--gl-md3-goodc);
+  --gl-md3-warning: var(--gl-md3-warn);
+  --gl-md3-warning-container: var(--gl-md3-warnc);
+  --gl-md3-diff-addition-background: var(--gl-md3-addbg);
+  --gl-md3-diff-addition-foreground: var(--gl-md3-addfg);
+  --gl-md3-diff-deletion-background: var(--gl-md3-delbg);
+  --gl-md3-diff-deletion-foreground: var(--gl-md3-delfg);
+}
+
+// SCSS-side mirrors of the light values above, for math/functions that need
+// a compile-time color rather than a runtime custom property.
+$gl-md3-surf: #f4effa;
+$gl-md3-surfc: #ece4f6;
+$gl-md3-surfch: #e0d5f2;
+$gl-md3-surfcl: #faf6ff;
+$gl-md3-onsurf: #1d1b20;
+$gl-md3-onsurfv: #49454f;
+$gl-md3-prim: #6750c4;
+$gl-md3-onprim: #ffffff;
+$gl-md3-primc: #e8def8;
+$gl-md3-onprimc: #4f378b;
+$gl-md3-sec: #d6c9f0;
+$gl-md3-outl: #cac4d0;
+$gl-md3-outlv: #e7e0ec;
+$gl-md3-err: #b3261e;
+$gl-md3-errc: #f9dedc;
+$gl-md3-good: #1a7f37;
+$gl-md3-goodc: #dcf2e3;
+$gl-md3-warn: #9a6700;
+$gl-md3-warnc: #fff3d0;
+$gl-md3-card: #ffffff;
+$gl-md3-scrim: rgba(29, 27, 32, 0.35);
+$gl-md3-addbg: #dcf2e3;
+$gl-md3-addfg: #0f5223;
+$gl-md3-delbg: #f9dedc;
+$gl-md3-delfg: #8c1d18;
+
+// Iterable map of the same tokens keyed by short name, so other MD3
+// stylesheets can loop over the full set instead of hand-copying it.
+$gl-md3-tokens: (
+  'surf': $gl-md3-surf,
+  'surfc': $gl-md3-surfc,
+  'surfch': $gl-md3-surfch,
+  'surfcl': $gl-md3-surfcl,
+  'onsurf': $gl-md3-onsurf,
+  'onsurfv': $gl-md3-onsurfv,
+  'prim': $gl-md3-prim,
+  'onprim': $gl-md3-onprim,
+  'primc': $gl-md3-primc,
+  'onprimc': $gl-md3-onprimc,
+  'sec': $gl-md3-sec,
+  'outl': $gl-md3-outl,
+  'outlv': $gl-md3-outlv,
+  'err': $gl-md3-err,
+  'errc': $gl-md3-errc,
+  'good': $gl-md3-good,
+  'goodc': $gl-md3-goodc,
+  'warn': $gl-md3-warn,
+  'warnc': $gl-md3-warnc,
+  'card': $gl-md3-card,
+  'scrim': $gl-md3-scrim,
+  'addbg': $gl-md3-addbg,
+  'addfg': $gl-md3-addfg,
+  'delbg': $gl-md3-delbg,
+  'delfg': $gl-md3-delfg,
+);

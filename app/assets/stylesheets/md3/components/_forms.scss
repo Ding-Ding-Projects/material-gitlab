@@ -1,0 +1,430 @@
+// Material 3 form controls: filled/outlined text fields with a floating
+// label, select, checkbox, radio, switch, and the pill-shaped search field
+// used in the design's top bar (999px radius, leading search icon).
+
+.md3-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.md3-field__input {
+  order: 1;
+  width: 100%;
+  height: 56px;
+  padding: 20px 16px 6px;
+  border: 0;
+  background-color: transparent;
+  color: var(--gl-md3-onsurf);
+  outline: none;
+  @include gl-md3-body-large;
+  @include gl-md3-motion-standard(unquote('border-color, box-shadow'));
+
+  &::placeholder {
+    color: transparent;
+  }
+}
+
+textarea.md3-field__input {
+  height: auto;
+  min-height: 96px;
+  padding-top: 22px;
+  resize: vertical;
+}
+
+.md3-field__label {
+  order: 2;
+  position: absolute;
+  left: 16px;
+  top: 28px;
+  transform: translateY(-50%);
+  transform-origin: left center;
+  color: var(--gl-md3-onsurfv);
+  pointer-events: none;
+  @include gl-md3-body-large;
+  @include gl-md3-motion-standard(unquote('top, color, font-size'));
+}
+
+// The input needs placeholder=" " (a single space) so :placeholder-shown
+// can drive this floated-vs-resting label state without any JS.
+.md3-field__input:focus + .md3-field__label,
+.md3-field__input:not(:placeholder-shown) + .md3-field__label,
+.md3-field--populated .md3-field__label {
+  top: 14px;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+.md3-field__input:focus + .md3-field__label {
+  color: var(--gl-md3-prim);
+}
+
+.md3-field__supporting-text {
+  order: 3;
+  margin-top: 4px;
+  padding: 0 16px;
+  color: var(--gl-md3-onsurfv);
+  @include gl-md3-body-small;
+}
+
+// Filled variant: a surface-container fill with a bottom active indicator
+// that thickens and tints primary on focus.
+.md3-field--filled .md3-field__input {
+  background-color: var(--gl-md3-surfc);
+  border-bottom: 1px solid var(--gl-md3-onsurfv);
+  border-radius: var(--gl-md3-shape-xs) var(--gl-md3-shape-xs) 0 0;
+}
+
+.md3-field--filled .md3-field__input:focus {
+  border-bottom: 2px solid var(--gl-md3-prim);
+  padding-bottom: 5px;
+}
+
+.md3-field--filled .md3-field__input:hover:not(:focus):not(:disabled) {
+  background-color: var(--gl-md3-surfch);
+}
+
+// Outlined variant: a full border that notches around the floated label,
+// matching the corner radius the design's own text inputs use (12px).
+.md3-field--outlined .md3-field__input {
+  height: 56px;
+  padding: 16px;
+  border: 1px solid var(--gl-md3-outl);
+  border-radius: var(--gl-md3-shape-m);
+  background-color: transparent;
+}
+
+.md3-field--outlined .md3-field__input:hover:not(:focus):not(:disabled) {
+  border-color: var(--gl-md3-onsurf);
+}
+
+.md3-field--outlined .md3-field__input:focus {
+  border: 2px solid var(--gl-md3-prim);
+  padding: 15px;
+}
+
+.md3-field--outlined .md3-field__label {
+  top: 28px;
+}
+
+// Floated, the label sits on the border line and needs an opaque backdrop
+// to notch through the outline. Default assumes a page backdrop; pass
+// md3-field--on-card when the field sits on a card instead.
+.md3-field--outlined .md3-field__input:focus + .md3-field__label,
+.md3-field--outlined .md3-field__input:not(:placeholder-shown) + .md3-field__label,
+.md3-field--outlined.md3-field--populated .md3-field__label {
+  top: 0;
+  padding: 0 4px;
+  margin-left: -4px;
+  background-color: var(--gl-md3-surf);
+}
+
+.md3-field--outlined.md3-field--on-card .md3-field__input:focus + .md3-field__label,
+.md3-field--outlined.md3-field--on-card .md3-field__input:not(:placeholder-shown) + .md3-field__label,
+.md3-field--outlined.md3-field--on-card.md3-field--populated .md3-field__label {
+  background-color: var(--gl-md3-card);
+}
+
+.md3-field--leading-icon .md3-field__input {
+  padding-left: 48px;
+}
+
+.md3-field--leading-icon .md3-field__label {
+  left: 48px;
+}
+
+.md3-field--leading-icon.md3-field--outlined .md3-field__input:focus + .md3-field__label,
+.md3-field--leading-icon.md3-field--outlined .md3-field__input:not(:placeholder-shown) + .md3-field__label,
+.md3-field--leading-icon.md3-field--outlined.md3-field--populated .md3-field__label {
+  left: 16px;
+}
+
+.md3-field__icon {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  color: var(--gl-md3-onsurfv);
+  pointer-events: none;
+}
+
+.md3-field--trailing-icon .md3-field__input {
+  padding-right: 48px;
+}
+
+.md3-field__trailing-icon {
+  position: absolute;
+  top: 16px;
+  right: 12px;
+}
+
+.md3-field--error .md3-field__input {
+  border-color: var(--gl-md3-err);
+}
+
+.md3-field--error .md3-field__input:focus {
+  border-color: var(--gl-md3-err);
+}
+
+.md3-field--error .md3-field__label,
+.md3-field--error .md3-field__input:focus + .md3-field__label {
+  color: var(--gl-md3-err);
+}
+
+.md3-field--error .md3-field__supporting-text {
+  color: var(--gl-md3-err);
+}
+
+.md3-field__input:disabled {
+  cursor: not-allowed;
+  color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+  border-color: color-mix(in srgb, var(--gl-md3-onsurf) 12%, transparent);
+  background-color: color-mix(in srgb, var(--gl-md3-onsurf) 4%, transparent);
+}
+
+// Select reuses the field shell; the trailing chevron is CSS-drawn so it
+// never depends on the icon font being loaded.
+select.md3-field__input {
+  appearance: none;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+.md3-field--select {
+  position: relative;
+}
+
+.md3-field--select::after {
+  content: '';
+  position: absolute;
+  right: 18px;
+  top: 26px;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--gl-md3-onsurfv);
+  border-bottom: 2px solid var(--gl-md3-onsurfv);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.md3-field--select .md3-field__label {
+  top: 14px;
+  font-size: 11px;
+  line-height: 14px;
+}
+
+// Checkbox, radio and switch share a row layout: a 40px hit target wrapping
+// a smaller visible control, plus an inline label.
+.md3-checkbox,
+.md3-radio,
+.md3-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  @include gl-md3-body-medium;
+  color: var(--gl-md3-onsurf);
+
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+  }
+}
+
+.md3-checkbox__input,
+.md3-radio__input {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.md3-checkbox__box {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--gl-md3-outl);
+  border-radius: 2px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px 12px;
+  @include gl-md3-motion-standard(unquote('background-color, border-color'));
+}
+
+.md3-checkbox__input:checked + .md3-checkbox__box,
+.md3-checkbox__input:indeterminate + .md3-checkbox__box {
+  background-color: var(--gl-md3-prim);
+  border-color: var(--gl-md3-prim);
+}
+
+.md3-checkbox__input:checked + .md3-checkbox__box {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 12 9 18 20 6'/%3E%3C/svg%3E");
+}
+
+.md3-checkbox__input:indeterminate + .md3-checkbox__box {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round'%3E%3Cline x1='4' y1='12' x2='20' y2='12'/%3E%3C/svg%3E");
+}
+
+.md3-checkbox__input:focus-visible + .md3-checkbox__box {
+  outline: 2px solid var(--gl-md3-prim);
+  outline-offset: 2px;
+}
+
+.md3-checkbox[aria-disabled='true'] .md3-checkbox__box {
+  border-color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+}
+
+.md3-radio__box {
+  position: relative;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--gl-md3-outl);
+  border-radius: var(--gl-md3-shape-full);
+  @include gl-md3-motion-standard(border-color);
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    border-radius: var(--gl-md3-shape-full);
+    background-color: var(--gl-md3-prim);
+    transform: scale(0);
+    @include gl-md3-motion-standard(transform);
+  }
+}
+
+.md3-radio__input:checked + .md3-radio__box {
+  border-color: var(--gl-md3-prim);
+
+  &::after {
+    transform: scale(1);
+  }
+}
+
+.md3-radio__input:focus-visible + .md3-radio__box {
+  outline: 2px solid var(--gl-md3-prim);
+  outline-offset: 2px;
+}
+
+.md3-radio[aria-disabled='true'] .md3-radio__box {
+  border-color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+}
+
+// Switch: fixed-size thumb sliding within the track, matching the design's
+// own toggle transition duration (150ms, the motion scale's short3 anchor).
+.md3-switch__input {
+  position: absolute;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.md3-switch__track {
+  position: relative;
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  border: 2px solid var(--gl-md3-outl);
+  border-radius: var(--gl-md3-shape-full);
+  background-color: var(--gl-md3-surfch);
+  transition: background-color var(--gl-md3-motion-duration-short3) var(--gl-md3-motion-easing-standard),
+    border-color var(--gl-md3-motion-duration-short3) var(--gl-md3-motion-easing-standard);
+}
+
+.md3-switch__thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--gl-md3-shape-full);
+  background-color: var(--gl-md3-outl);
+  transition: transform var(--gl-md3-motion-duration-short3) var(--gl-md3-motion-easing-standard),
+    width var(--gl-md3-motion-duration-short3) var(--gl-md3-motion-easing-standard),
+    height var(--gl-md3-motion-duration-short3) var(--gl-md3-motion-easing-standard),
+    background-color var(--gl-md3-motion-duration-short3) var(--gl-md3-motion-easing-standard);
+}
+
+.md3-switch__input:checked + .md3-switch__track {
+  background-color: var(--gl-md3-prim);
+  border-color: var(--gl-md3-prim);
+}
+
+.md3-switch__input:checked + .md3-switch__track .md3-switch__thumb {
+  top: 3px;
+  left: 22px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--gl-md3-onprim);
+}
+
+.md3-switch__input:focus-visible + .md3-switch__track {
+  outline: 2px solid var(--gl-md3-prim);
+  outline-offset: 2px;
+}
+
+.md3-switch[aria-disabled='true'] .md3-switch__track {
+  border-color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+  background-color: color-mix(in srgb, var(--gl-md3-onsurf) 8%, transparent);
+}
+
+// Search field: the pill-shaped top-bar search from the design — leading
+// search icon, free-text input, and an optional trailing keyboard hint.
+.md3-search-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 8px 8px 18px;
+  background-color: var(--gl-md3-surfc);
+  color: var(--gl-md3-onsurfv);
+  @include gl-md3-shape('full');
+  @include gl-md3-motion-standard(box-shadow);
+
+  &:focus-within {
+    box-shadow: inset 0 0 0 2px var(--gl-md3-prim);
+  }
+
+  .material-symbols-outlined {
+    flex-shrink: 0;
+  }
+}
+
+.md3-search-field__input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background-color: transparent;
+  color: var(--gl-md3-onsurf);
+  @include gl-md3-body-large;
+
+  &::placeholder {
+    color: var(--gl-md3-onsurfv);
+    opacity: 0.7;
+  }
+}
+
+.md3-search-field__hint {
+  flex-shrink: 0;
+  border: 1px solid var(--gl-md3-outl);
+  border-radius: 6px;
+  padding: 2px 7px;
+  font-size: 11px;
+  color: var(--gl-md3-onsurfv);
+  white-space: nowrap;
+}
+
+.md3-search-field__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}

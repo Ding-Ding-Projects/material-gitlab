@@ -179,6 +179,41 @@ class ProjectsController < Projects::ApplicationController
     end
   end
 
+  def manage
+    return access_denied! unless can?(current_user, :read_project, @project)
+
+    load_events
+    @material_manage_events = @events.first(100).map.with_index do |event, index|
+      {
+        id: event.id || "event-#{index}",
+        author: { name: event.author_name.to_s, initials: event.author_name.to_s.split.map { |part| part[0] }.join.first(2).upcase },
+        actionName: event.action_name.to_s,
+        targetTitle: event.target_title.to_s,
+        targetUrl: project_path(@project),
+        createdAt: event.created_at&.iso8601,
+        icon: event.action_name.to_s.match?(/merge/i) ? 'merge' : event.action_name.to_s.match?(/deploy/i) ? 'cloud' : 'commit',
+      }
+    end
+    @material_manage_labels = @project.labels.order(:title).limit(100).map do |label|
+      { id: label.id.to_s, name: label.title, description: label.description.to_s, color: label.color, textColor: label.text_color, openIssuesCount: label.open_issues_count }
+    end
+    @material_manage_routes = {
+      overview: project_path(@project),
+      manage: manage_project_path(@project),
+      plan: project_issues_path(@project),
+      code: project_tree_path(@project),
+      build: project_pipelines_path(@project),
+      secure: project_path(@project),
+      deploy: project_environments_path(@project),
+      operate: project_environments_path(@project),
+      monitor: project_path(@project),
+      analyze: project_path(@project),
+      settings: edit_project_path(@project),
+      labels: project_labels_path(@project),
+      members: project_project_members_path(@project),
+    }
+  end
+
   def show
     @id = @ref = repository_root
     @path = ''

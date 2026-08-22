@@ -271,9 +271,12 @@ describe('SignInForm', () => {
 
       await waitForPromises();
 
-      expect(grecaptcha.render).toHaveBeenCalledWith(wrapper.findByTestId('captcha-el').element, {
+      const captcha = wrapper.findByTestId('captcha-el');
+
+      expect(grecaptcha.render).toHaveBeenCalledWith(captcha.element, {
         sitekey: mockRecaptchaKey,
       });
+      expect(captcha.classes()).toContain('login-m3-captcha');
     });
 
     describe('when captcha fails to render', () => {
@@ -338,6 +341,8 @@ describe('SignInForm', () => {
       it('renders form with passkeys button', () => {
         const form = findPasskeysForm();
         const submitButton = form.findComponent(GlButton);
+
+        expect(form.classes()).toContain('login-m3-passkey-form');
         expect(form.attributes()).toMatchObject({
           method: 'post',
           action: defaultPropsData.passkeysSignInPath,

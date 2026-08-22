@@ -254,6 +254,7 @@ namespace :admin do
   concerns :clusterable
 
   get '/dashboard/stats', to: 'dashboard#stats'
+  post '/dashboard/actions', to: 'dashboard#actions', as: :dashboard_actions
 
   get 'organization', to: 'organizations/dashboard#index', as: :organization_dashboard
 

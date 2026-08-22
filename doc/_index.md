@@ -9,6 +9,8 @@ title: GitLab Docs
 Visit <https://docs.gitlab.com> for the latest version of this help information with enhanced navigation,
 formatting, and search.
 
+See the [Material GitLab project Pages destination](https://ding-ding-projects.github.io/material-gitlab/) for the project guide and design reference.
+
 Explore the different areas of the documentation:
 
 |                         |                         |

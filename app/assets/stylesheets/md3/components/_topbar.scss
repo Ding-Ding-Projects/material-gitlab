@@ -1,0 +1,116 @@
+// Material 3 top app bar for the MD3 prototype layer: the global search
+// field with its regex-mode toggle, the command-palette trigger, the
+// theme toggle and the account avatar.
+// Composes with md3/components/_forms.scss (.md3-search-field) for the
+// search shell and md3/components/_buttons.scss (.md3-icon-button) for
+// the circular action buttons.
+// Requires md3/_tokens.scss, md3/_shape.scss, md3/_elevation.scss,
+// md3/_motion.scss and md3/_typography.scss to already be loaded.
+
+.md3-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px 8px;
+}
+
+// Sizes and positions .md3-search-field within the top bar; the field's
+// own background/padding/radius/focus ring come from _forms.scss.
+.md3-topbar__search {
+  flex: 1;
+  max-width: 600px;
+}
+
+.md3-topbar__search-error {
+  flex-shrink: 0;
+  color: var(--gl-md3-err);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+// The ".*" regex-mode pill: smaller and more compact than a standard
+// .md3-chip, so it is defined here rather than reused from _chips.scss.
+.md3-topbar__search-mode-toggle {
+  padding: 5px 10px;
+  border: 0;
+  background-color: var(--gl-md3-surfch);
+  color: var(--gl-md3-onsurfv);
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  @include gl-md3-shape('full');
+  @include gl-md3-motion-standard(background-color);
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+}
+
+.md3-topbar__search-mode-toggle--active {
+  background-color: var(--gl-md3-prim);
+  color: var(--gl-md3-onprim);
+}
+
+// A 32px icon action, smaller than the shared 40px .md3-icon-button, to
+// match the design's in-field regex-builder trigger.
+.md3-topbar__search-builder-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background-color: transparent;
+  color: var(--gl-md3-onsurfv);
+  cursor: pointer;
+  @include gl-md3-shape('full');
+  @include gl-md3-motion-standard(background-color);
+
+  &:hover {
+    background-color: var(--gl-md3-surfch);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+}
+
+// Applied alongside .md3-icon-button on the palette trigger and theme
+// toggle so they keep their spacing in the top bar's flex row.
+.md3-topbar__action {
+  flex-shrink: 0;
+}
+
+.md3-topbar__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background-color: var(--gl-md3-primc);
+  color: var(--gl-md3-onprimc);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--gl-md3-shape-full);
+}
+
+@media (max-width: 599px) {
+  .md3-topbar {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .md3-topbar__search {
+    max-width: none;
+  }
+}

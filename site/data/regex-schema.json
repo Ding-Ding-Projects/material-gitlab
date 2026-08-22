@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "engine": "ECMAScript RegExp",
+  "limits": { "patternBytes": 4096, "sampleBytes": 65536, "matches": 200, "captureGroups": 64 },
+  "flags": ["d", "g", "i", "m", "s", "u", "v", "y"],
+  "tokens": [
+    { "id": "literal", "label": "Literal", "value": "" },
+    { "id": "class", "label": "Character class", "value": "[]" },
+    { "id": "anchor", "label": "Anchor", "value": "^" },
+    { "id": "group", "label": "Capture group", "value": "()" },
+    { "id": "alternation", "label": "Alternation", "value": "|" },
+    { "id": "quantifier", "label": "Quantifier", "value": "*" }
+  ]
+}

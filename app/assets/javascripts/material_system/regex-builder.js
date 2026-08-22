@@ -1,12 +1,31 @@
 export const REGEX_LIMITS = Object.freeze({ pattern: 2048, sample: 10000, matches: 1000 });
 
+export const REGEX_FRAGMENTS = Object.freeze({
+  literal: (value = '') => escapeRegExp(String(value)),
+  characterClass: (value = '') => `[${String(value).replace(/([\\\]])/g, '\\$1')}]`,
+  startAnchor: () => '^',
+  endAnchor: () => '$',
+  group: (value = '') => `(${value})`,
+  nonCapturingGroup: (value = '') => `(?:${value})`,
+  alternation: (...values) => values.join('|'),
+  optional: (value = '') => `(?:${value})?`,
+  oneOrMore: (value = '') => `(?:${value})+`,
+  zeroOrMore: (value = '') => `(?:${value})*`,
+});
+
 const escapeRegExp = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const bounded = (value, limit) => String(value ?? '').slice(0, limit);
 
 /** A plain-data regex builder model suitable for an anchored popover or inline editor. */
 export class RegexBuilder {
-  constructor({ pattern = '', sample = '', flags = '', regex = false, limits = REGEX_LIMITS } = {}) {
+  constructor({
+    pattern = '',
+    sample = '',
+    flags = '',
+    regex = false,
+    limits = REGEX_LIMITS,
+  } = {}) {
     this.limits = limits;
     this.state = {
       pattern: bounded(pattern, limits.pattern),
@@ -23,7 +42,12 @@ export class RegexBuilder {
   }
 
   snapshot() {
-    return { ...this.state, syntax: { ...this.state.syntax }, matches: [...this.state.matches], captures: [...this.state.captures] };
+    return {
+      ...this.state,
+      syntax: { ...this.state.syntax },
+      matches: [...this.state.matches],
+      captures: [...this.state.captures],
+    };
   }
 
   update(changes = {}) {
@@ -52,14 +76,22 @@ export class RegexBuilder {
     if (input && (this.state.flags.includes('g') || this.state.flags.includes('y'))) {
       let match;
       while ((match = expression.exec(input)) && matches.length < this.limits.matches) {
-        matches.push({ value: match[0], index: match.index, groups: match.groups ? { ...match.groups } : {} });
+        matches.push({
+          value: match[0],
+          index: match.index,
+          groups: match.groups ? { ...match.groups } : {},
+        });
         captures.push(match.slice(1));
         if (match[0] === '') expression.lastIndex += 1;
       }
     } else if (input) {
       const match = expression.exec(input);
       if (match) {
-        matches.push({ value: match[0], index: match.index, groups: match.groups ? { ...match.groups } : {} });
+        matches.push({
+          value: match[0],
+          index: match.index,
+          groups: match.groups ? { ...match.groups } : {},
+        });
         captures.push(match.slice(1));
       }
     }
@@ -83,8 +115,29 @@ export class RegexBuilder {
 
   exportState() {
     this.state.exported = true;
-    return JSON.stringify({ pattern: this.state.pattern, sample: this.state.sample, flags: this.state.flags, regex: this.state.regex });
+    return JSON.stringify({
+      pattern: this.state.pattern,
+      sample: this.state.sample,
+      flags: this.state.flags,
+      regex: this.state.regex,
+    });
   }
+
+  appendFragment(fragment) {
+    return this.update({ pattern: `${this.state.pattern}${String(fragment ?? '')}`, regex: true });
+  }
+}
+
+export const createRegexBuilderState = (options) => new RegexBuilder(options);
+
+export function evaluateRegex({
+  pattern = '',
+  sample = '',
+  flags = '',
+  regex = true,
+  limits = REGEX_LIMITS,
+} = {}) {
+  return new RegexBuilder({ pattern, sample, flags, regex, limits }).snapshot();
 }
 
 export default RegexBuilder;

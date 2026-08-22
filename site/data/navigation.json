@@ -1,0 +1,16 @@
+{
+  "dock": "left",
+  "activeTab": "overview",
+  "tabs": [
+    { "id": "overview", "label": "Overview", "group": "Core", "pinned": true, "route": "#overview" },
+    { "id": "guides", "label": "Guides", "group": "Core", "pinned": false, "route": "#guides" },
+    { "id": "reference", "label": "Reference", "group": "Core", "pinned": false, "route": "#reference" },
+    { "id": "library", "label": "Live library", "group": "Docs", "pinned": false, "route": "#library" }
+  ],
+  "search": {
+    "tab": { "placeholder": "Search tabs", "regexBuilder": true },
+    "settings": { "placeholder": "Search settings", "regexBuilder": true },
+    "palette": { "shortcut": "Ctrl+Shift+F", "placeholder": "Search commands", "regexBuilder": true }
+  },
+  "docks": ["left", "right", "top", "bottom"]
+}

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35);
+--addbg:#dcf2e3;--addfg:#0f5223;--delbg:#f9dedc;--delfg:#8c1d18}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5);
+--addbg:#1c3a27;--addfg:#a5e8b8;--delbg:#5c1a17;--delfg:#f5c0bd}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="Merge requests" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <sc-if value="{{ isListPage }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+        <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">Merge requests</h1>
+        <span style="align-self:center;font-size:12.5px;color:var(--onsurfv)">{{ countLabel }}</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--prim);color:var(--onprim);border-radius:999px;padding:10px 20px;font-weight:500;font-size:14px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)"><span class="material-symbols-outlined">add</span>New merge request</div>
+      </div>
+      <div data-screen-label="Filter bar" style="display:flex;gap:8px;padding:6px 24px 12px;flex-wrap:wrap">
+        <sc-for list="{{ filterChips }}" as="ch" hint-placeholder-count="4">
+          <div onClick="{{ ch.toggle }}" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid {{ ch.border }};background:{{ ch.bg }};color:{{ ch.fg }}">
+            <sc-if value="{{ ch.on }}" hint-placeholder-val="{{ false }}"><span class="material-symbols-outlined" style="font-size:16px">check</span>
+</sc-if>{{ ch.label }}
+          </div>
+        </sc-for>
+      </div>
+      <main style="flex:1;overflow-y:auto;padding:0 24px 24px">
+        <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+          <sc-for list="{{ visibleMrs }}" as="mr" hint-placeholder-count="6">
+            <div onClick="{{ mr.open }}" style="display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--outlv);cursor:pointer" style-hover="background:var(--surfcl)">
+              <span class="material-symbols-outlined" style="color:{{ mr.stateColor }}">{{ mr.stateIcon }}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:500;font-size:14px">{{ mr.title }}</div>
+                <div style="font-size:12.5px;color:var(--onsurfv);margin-top:2px">!{{ mr.iid }} · {{ mr.branch }} → {{ mr.target }} · {{ mr.meta }}</div>
+              </div>
+              <span title="Pipeline" class="material-symbols-outlined" style="color:{{ mr.pipeColor }};font-size:19px">{{ mr.pipeIcon }}</span>
+              <div style="display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--onsurfv)"><span class="material-symbols-outlined" style="font-size:17px">verified</span>{{ mr.approvals }}</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:12.5px;color:var(--onsurfv)"><span class="material-symbols-outlined" style="font-size:17px">chat_bubble</span>{{ mr.threads }}</div>
+              <div title="{{ mr.author }}" style="width:28px;height:28px;border-radius:999px;background:var(--sec);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">{{ mr.avatar }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:36px;text-align:center;color:var(--onsurfv);font-size:13.5px">No merge requests match your filters.</div>
+          </sc-if>
+        </div>
+      </main>
+    </sc-if>
+    <sc-if value="{{ detail }}" hint-placeholder-val="{{ false }}">
+      <main data-screen-label="MR detail" style="flex:1;overflow-y:auto;padding:8px 24px 24px;display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div onClick="{{ backToList }}" style="width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">arrow_back</span></div>
+          <h1 style="margin:0;font-family:'Google Sans';font-size:21px;font-weight:500;flex:1">{{ detail.title }}</h1>
+          <span style="font-size:12px;font-weight:500;padding:4px 14px;border-radius:999px;background:{{ detailStateBg }};color:{{ detailStateFg }}">{{ detail.state }}</span>
+        </div>
+        <div style="font-size:13px;color:var(--onsurfv);display:flex;align-items:center;gap:8px;padding-left:46px">
+          !{{ detail.iid }} · <span style="font-family:monospace;background:var(--surfc);border-radius:6px;padding:2px 8px">{{ detail.branch }}</span> → <span style="font-family:monospace;background:var(--surfc);border-radius:6px;padding:2px 8px">{{ detail.target }}</span> · {{ detail.meta }}
+        </div>
+        <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px;align-self:flex-start;margin-left:46px">
+          <sc-for list="{{ detailTabs }}" as="tb" hint-placeholder-count="3">
+            <div onClick="{{ tb.pick }}" style="padding:7px 18px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ tb.bg }};color:{{ tb.fg }}">{{ tb.label }}</div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ tabOverview }}" hint-placeholder-val="{{ true }}">
+          <div style="margin-left:46px;display:flex;flex-direction:column;gap:14px;max-width:860px">
+            <div style="background:var(--card);border-radius:var(--card-r,20px);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+              <p style="margin:0;font-size:13.5px;line-height:1.6;color:var(--onsurfv)">{{ detail.body }}</p>
+            </div>
+            <div data-screen-label="Merge widget" style="background:var(--card);border-radius:var(--card-r,20px);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:12px">
+              <sc-for list="{{ mergeChecks }}" as="mc" hint-placeholder-count="3">
+                <div style="display:flex;align-items:center;gap:10px;font-size:13.5px">
+                  <span class="material-symbols-outlined" style="color:{{ mc.color }};font-size:19px">{{ mc.icon }}</span>{{ mc.label }}
+                  <span style="margin-left:auto;font-size:12px;color:var(--onsurfv)">{{ mc.note }}</span>
+                </div>
+              </sc-for>
+              <div style="display:flex;align-items:center;gap:12px;border-top:1px solid var(--outlv);padding-top:14px">
+                <div onClick="{{ doMerge }}" style="display:flex;align-items:center;gap:8px;border-radius:999px;padding:10px 22px;font-weight:500;font-size:14px;cursor:pointer;background:{{ mergeBg }};color:{{ mergeFg }}"><span class="material-symbols-outlined">call_merge</span>{{ mergeLabel }}</div>
+                <sc-if value="{{ mergingPhrase }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px;color:var(--onsurfv)">{{ mergingPhrase }}</span></sc-if>
+                <div onClick="{{ toggleApprove }}" style="margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--outl);border-radius:999px;padding:9px 18px;font-weight:500;font-size:13.5px;cursor:pointer;color:{{ approveFg }};background:{{ approveBg }}"><span class="material-symbols-outlined" style="font-size:18px">verified</span>{{ approveLabel }}</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tabChanges }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-left:46px;display:flex;gap:14px;align-items:flex-start">
+            <div style="width:240px;flex-shrink:0;background:var(--surfc);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:2px">
+              <sc-for list="{{ diffFiles }}" as="df" hint-placeholder-count="3">
+                <div onClick="{{ df.pick }}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;font-size:12.5px;cursor:pointer;background:{{ df.bg }}" style-hover="background:var(--surfch)">
+                  <span class="material-symbols-outlined" style="font-size:16px;color:var(--onsurfv)">description</span>
+                  <span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:monospace">{{ df.name }}</span>
+                  <span style="font-size:11px;color:var(--good)">+{{ df.add }}</span><span style="font-size:11px;color:var(--err)">−{{ df.del }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:1;background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+              <div style="padding:10px 16px;border-bottom:1px solid var(--outlv);font-family:monospace;font-size:12.5px;color:var(--onsurfv)">{{ activeFileName }}</div>
+              <sc-for list="{{ diffLines }}" as="dl" hint-placeholder-count="8">
+                <div style="display:flex;font-family:monospace;font-size:12px;line-height:1.9;background:{{ dl.bg }};color:{{ dl.fg }}">
+                  <span style="width:44px;flex-shrink:0;text-align:right;padding-right:10px;color:var(--onsurfv);opacity:.6;user-select:none">{{ dl.no }}</span>
+                  <span style="width:18px;flex-shrink:0;user-select:none">{{ dl.sign }}</span>
+                  <span style="white-space:pre;overflow-x:auto">{{ dl.code }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tabDiscussion }}" hint-placeholder-val="{{ false }}">
+          <div style="margin-left:46px;display:flex;flex-direction:column;gap:12px;max-width:760px">
+            <sc-for list="{{ threads }}" as="th" hint-placeholder-count="3">
+              <div style="background:var(--card);border-radius:var(--card-r,20px);padding:16px 18px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;gap:12px">
+                <div style="width:32px;height:32px;flex-shrink:0;border-radius:999px;background:var(--sec);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700">{{ th.avatar }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:13px"><span style="font-weight:500">{{ th.author }}</span><span style="color:var(--onsurfv);font-size:12px">{{ th.when }}</span>
+                    <sc-if value="{{ th.resolved }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:500;padding:2px 10px;border-radius:999px;background:var(--goodc);color:var(--good)">Resolved</span></sc-if>
+                  </div>
+                  <div style="font-size:13.5px;margin-top:4px;line-height:1.55">{{ th.text }}</div>
+                  <div onClick="{{ th.toggleResolve }}" style="margin-top:8px;font-size:12.5px;font-weight:500;color:var(--onprimc);cursor:pointer">{{ th.resolveLabel }}</div>
+                </div>
+              </div>
+            </sc-for>
+            <div style="display:flex;gap:10px">
+              <input onInput="{{ setComment }}" onKeyDown="{{ commentKey }}" value="{{ comment }}" placeholder="Write a comment…" style="flex:1;border:1px solid var(--outl);border-radius:999px;padding:11px 18px;font:inherit;font-size:13.5px;background:transparent;color:var(--onsurf);outline:none">
+              <div onClick="{{ addComment }}" style="display:flex;align-items:center;gap:6px;background:var(--prim);color:var(--onprim);border-radius:999px;padding:10px 20px;font-weight:500;font-size:13.5px;cursor:pointer"><span class="material-symbols-outlined" style="font-size:18px">send</span>Comment</div>
+            </div>
+          </div>
+        </sc-if>
+      </main>
+    </sc-if>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches in merge requests" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div></x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // States and merge phrases mirror app/assets/javascripts/vue_merge_request_widget/constants.js (IDLE/MERGING/MERGED + MERGE_ACTIVE_STATUS_PHRASES)
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false,
+    detailId: null, tab: 'overview', activeFile: 0, comment: '', mergePhase: 'IDLE',
+    filters: { open: true, merged: false, mine: false },
+    mrs: [
+      {id:1, iid:1287, title:'Virtualize board column lists', branch:'perf/board-virtual', target:'main', state:'Open', author:'Jun Park', when:'2h ago', pipeline:'success', approvals:'2/2', approvedByMe:true, canMerge:true,
+        body:'Replaces the naive v-for over cards with a virtualized list. Scroll FPS on a 700-card board goes from 22 to 58 on the reference machine.',
+        files:[{name:'board_column.vue', add:64, del:31, lines:[[210,' ','const visible = computed(() => {'],[211,'-','  return props.cards'],[211,'+','  const {start, end} = range.value'],[212,'+','  return props.cards.slice(start, end)'],[213,' ','})']]},
+               {name:'virtual_scroll.js', add:118, del:0, lines:[[1,'+','export function useVirtualRange(el, rowH) {'],[2,'+','  const range = ref({start: 0, end: 40})'],[3,'+','  // recompute on scroll + resize'],[4,'+','  return range'],[5,'+','}']]}],
+        threads:[{author:'Dana Weiss', when:'1h ago', text:'Row height is hardcoded to 96 — label-heavy cards wrap to two rows. Measure the first card instead?', resolved:false},
+                 {author:'Jun Park', when:'40m ago', text:'Good catch, switched to a ResizeObserver on the first rendered card.', resolved:true}]},
+      {id:2, iid:1285, title:'Move pipeline badges to tonal container colors', branch:'fix/badge-contrast', target:'main', state:'Open', author:'Dana Weiss', when:'6h ago', pipeline:'running', approvals:'1/2', approvedByMe:false, canMerge:false,
+        body:'Success/failed badges now use the MD3 container pairs, fixing the AA contrast failure in dark mode reported in #4308.',
+        files:[{name:'ci_badge.vue', add:12, del:9, lines:[[34,'-','  background: $green-500;'],[34,'+','  background: var(--goodc);'],[35,'-','  color: white;'],[35,'+','  color: var(--good);']]}],
+        threads:[{author:'Omar Haddad', when:'3h ago', text:'Does this cover the favicon variants under app/assets/images/ci_favicons too?', resolved:false}]},
+      {id:3, iid:1281, title:'Retry-backoff for state query polling', branch:'fix/poll-backoff', target:'main', state:'Merged', author:'Omar Haddad', when:'1d ago', pipeline:'success', approvals:'2/2', approvedByMe:true, canMerge:false,
+        body:'Applies STATE_QUERY_POLLING_INTERVAL_BACKOFF (1.2) to the widget poll loop so idle tabs back off from the default 5s interval.',
+        files:[{name:'stores/poll.js', add:9, del:2, lines:[[18,'-','  setTimeout(poll, 5000)'],[18,'+','  delay = Math.min(delay * 1.2, 60000)'],[19,'+','  setTimeout(poll, delay)']]}],
+        threads:[]},
+      {id:4, iid:1278, title:'Regex mode for MR search bar', branch:'feat/mr-regex-search', target:'main', state:'Open', author:'Jun Park', when:'2d ago', pipeline:'failed', approvals:'0/2', approvedByMe:false, canMerge:false,
+        body:'Adds the shared regex builder to the merge request list search, matching the issues list behavior.',
+        files:[{name:'mr_search.vue', add:41, del:6, lines:[[12,'+','const re = buildRegex(query, flags)'],[13,'+','if (!re) return showError()']]}],
+        threads:[{author:'Dana Weiss', when:'1d ago', text:'Pipeline is red — the jest snapshot for the empty state needs an update.', resolved:false}]}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen:false, regexOpen:false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  avatar(n) { return n.split(' ').map(w => w[0]).join(''); }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    const f = s.filters;
+    const list = s.mrs.filter(mr =>
+      ((f.open && mr.state === 'Open') || (f.merged && mr.state === 'Merged') || (!f.open && !f.merged)) &&
+      (!f.mine || mr.author === 'Jun Park') &&
+      m(mr.title + ' ' + mr.branch + ' !' + mr.iid));
+    const detail = s.mrs.find(x => x.id === s.detailId) || null;
+    const pipe = {success:['check_circle','var(--good)'], running:['sync','var(--warn)'], failed:['cancel','var(--err)']};
+    const chip = (label, key) => ({label, on: f[key], toggle: () => set({filters: {...f, [key]: !f[key]}}),
+      bg: f[key] ? 'var(--primc)' : 'transparent', fg: f[key] ? 'var(--onprimc)' : 'var(--onsurf)', border: f[key] ? 'var(--primc)' : 'var(--outl)'});
+    const mergePhrases = ['Merging! Drum roll, please…','Merging! We\u2019re almost there…','Merging! Changes will land soon…','Merging! Lift-off in 5… 4… 3…'];
+    const activeFile = detail ? (detail.files[s.activeFile] || detail.files[0]) : null;
+    const upd = (id, fn) => set({mrs: s.mrs.map(x => x.id === id ? fn({...x}) : x)});
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — title, branch, id' : 'Search merge requests',
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: s.mrs.map(x => '!' + x.iid + '  ' + x.title + '  ' + x.branch),
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [
+        {label: 'Toggle dark theme', icon: 'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }},
+        {label: 'Toggle regex search', icon: 'construction', run: () => set({regexMode: !s.regexMode})}
+      ],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      isListPage: !detail, countLabel: list.length + ' merge requests', emptyList: list.length === 0,
+      filterChips: [chip('Open','open'), chip('Merged','merged'), chip('Authored by me','mine')],
+      visibleMrs: list.map(mr => ({...mr,
+        meta: mr.state === 'Merged' ? 'merged · ' + mr.author : 'opened ' + mr.when + ' · ' + mr.author,
+        stateIcon: mr.state === 'Merged' ? 'call_merge' : 'adjust',
+        stateColor: mr.state === 'Merged' ? 'var(--prim)' : 'var(--good)',
+        pipeIcon: pipe[mr.pipeline][0], pipeColor: pipe[mr.pipeline][1],
+        threads: mr.threads.length, avatar: this.avatar(mr.author),
+        open: () => set({detailId: mr.id, tab: 'overview', activeFile: 0, mergePhase: 'IDLE'})})),
+      detail: detail ? {...detail, meta: detail.author + ' · ' + detail.when} : null,
+      detailStateBg: detail && detail.state === 'Merged' ? 'var(--primc)' : 'var(--goodc)',
+      detailStateFg: detail && detail.state === 'Merged' ? 'var(--onprimc)' : 'var(--good)',
+      backToList: () => set({detailId: null}),
+      detailTabs: ['overview','changes','discussion'].map(t => ({label: t[0].toUpperCase() + t.slice(1), pick: () => set({tab: t}),
+        bg: s.tab === t ? 'var(--primc)' : 'transparent', fg: s.tab === t ? 'var(--onprimc)' : 'var(--onsurfv)'})),
+      tabOverview: s.tab === 'overview', tabChanges: s.tab === 'changes', tabDiscussion: s.tab === 'discussion',
+      mergeChecks: detail ? [
+        {label: 'Pipeline', icon: pipe[detail.pipeline][0], color: pipe[detail.pipeline][1], note: detail.pipeline},
+        {label: 'Approvals', icon: detail.approvals === '2/2' ? 'check_circle' : 'pending', color: detail.approvals === '2/2' ? 'var(--good)' : 'var(--warn)', note: detail.approvals + ' required approvals'},
+        {label: 'Unresolved threads', icon: detail.threads.some(t => !t.resolved) ? 'pending' : 'check_circle', color: detail.threads.some(t => !t.resolved) ? 'var(--warn)' : 'var(--good)', note: detail.threads.filter(t => !t.resolved).length + ' open'}
+      ] : [],
+      mergeLabel: s.mergePhase === 'MERGED' || (detail && detail.state === 'Merged') ? 'Merged' : s.mergePhase === 'MERGING' ? 'Merging…' : (detail && detail.canMerge ? 'Merge' : 'Merge blocked'),
+      mergeBg: detail && (detail.canMerge || detail.state === 'Merged') ? 'var(--prim)' : 'var(--surfch)',
+      mergeFg: detail && (detail.canMerge || detail.state === 'Merged') ? 'var(--onprim)' : 'var(--onsurfv)',
+      mergingPhrase: s.mergePhase === 'MERGING' ? mergePhrases[Math.floor(Date.now() / 1000) % mergePhrases.length] : null,
+      doMerge: () => { if (!detail || !detail.canMerge || detail.state === 'Merged' || s.mergePhase !== 'IDLE') return;
+        set({mergePhase: 'MERGING'});
+        setTimeout(() => { upd(detail.id, x => ({...x, state: 'Merged', canMerge: false})); this.setState({mergePhase: 'MERGED'}); }, 1600); },
+      approveLabel: detail && detail.approvedByMe ? 'Approved' : 'Approve',
+      approveBg: detail && detail.approvedByMe ? 'var(--goodc)' : 'transparent',
+      approveFg: detail && detail.approvedByMe ? 'var(--good)' : 'var(--onprimc)',
+      toggleApprove: () => detail && upd(detail.id, x => {
+        const on = !x.approvedByMe; const [a, b] = x.approvals.split('/').map(Number);
+        return {...x, approvedByMe: on, approvals: Math.max(0, Math.min(b, a + (on ? 1 : -1))) + '/' + b, canMerge: on && a + 1 >= b && x.pipeline === 'success'};
+      }),
+      diffFiles: detail ? detail.files.map((df, i) => ({...df, pick: () => set({activeFile: i}), bg: i === s.activeFile ? 'var(--sec)' : 'transparent'})) : [],
+      activeFileName: activeFile ? activeFile.name : '',
+      diffLines: activeFile ? activeFile.lines.map(([no, sign, code]) => ({no, sign: sign === ' ' ? '' : sign, code,
+        bg: sign === '+' ? 'var(--addbg)' : sign === '-' ? 'var(--delbg)' : 'transparent',
+        fg: sign === '+' ? 'var(--addfg)' : sign === '-' ? 'var(--delfg)' : 'var(--onsurf)'})) : [],
+      threads: detail ? detail.threads.map((t, i) => ({...t, avatar: this.avatar(t.author),
+        resolveLabel: t.resolved ? 'Unresolve' : 'Resolve thread',
+        toggleResolve: () => upd(detail.id, x => ({...x, threads: x.threads.map((tt, j) => j === i ? {...tt, resolved: !tt.resolved} : tt)}))})) : [],
+      comment: s.comment, setComment: (e) => set({comment: e.target.value}),
+      commentKey: (e) => { if (e.key === 'Enter') this._addComment(); },
+      addComment: () => this._addComment()
+    };
+  }
+  _addComment() {
+    const s = this.state; if (!s.comment.trim() || !s.detailId) return;
+    this.setState({mrs: s.mrs.map(x => x.id === s.detailId ? {...x, threads: [...x.threads, {author:'Jun Park', when:'just now', text: s.comment.trim(), resolved:false}]} : x), comment: ''});
+  }
+}
+</script>
+</body>
+</html>

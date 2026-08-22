@@ -1,0 +1,131 @@
+/* Framework-free Material 3 text fields for the public site. */
+
+.m3-field {
+  --m3-field-container: var(--surface, #fffbfe);
+  --m3-field-on-container: var(--on-surface, #1d1b20);
+  --m3-field-outline: var(--outline, #79747e);
+  --m3-field-primary: var(--primary, #6750a4);
+  --m3-field-error: var(--error, #ba1a1a);
+  display: grid;
+  gap: 0.35rem;
+  inline-size: min(100%, 36rem);
+  min-inline-size: 12rem;
+  position: relative;
+}
+
+.m3-field__label {
+  color: var(--m3-field-on-container);
+  font-size: 0.875rem;
+  font-weight: 650;
+  line-height: 1.25rem;
+}
+
+.m3-field__control {
+  appearance: none;
+  background: var(--m3-field-container);
+  border: 1px solid var(--m3-field-outline);
+  border-radius: 0.25rem;
+  color: var(--m3-field-on-container);
+  font: inherit;
+  inline-size: 100%;
+  min-block-size: 3.5rem;
+  min-inline-size: 0;
+  padding: 0.875rem 1rem;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+
+.m3-field__control::placeholder {
+  color: color-mix(in srgb, var(--m3-field-on-container) 62%, transparent);
+  opacity: 1;
+}
+
+.m3-field__control:hover {
+  border-color: var(--m3-field-on-container);
+}
+
+.m3-field__control:focus {
+  border-color: var(--m3-field-primary);
+  border-width: 2px;
+  outline: none;
+  padding: calc(0.875rem - 1px) calc(1rem - 1px);
+}
+
+.m3-field__control:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--m3-field-primary) 28%, transparent);
+}
+
+.m3-field__control:disabled {
+  background: color-mix(in srgb, var(--m3-field-on-container) 8%, var(--m3-field-container));
+  border-color: color-mix(in srgb, var(--m3-field-on-container) 38%, transparent);
+  color: color-mix(in srgb, var(--m3-field-on-container) 62%, transparent);
+  cursor: not-allowed;
+}
+
+.m3-field__supporting {
+  color: color-mix(in srgb, var(--m3-field-on-container) 72%, transparent);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  min-block-size: 1rem;
+}
+
+.m3-field[data-field-state='error'] .m3-field__control {
+  border-color: var(--m3-field-error);
+}
+
+.m3-field[data-field-state='error'] .m3-field__control:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--m3-field-error) 24%, transparent);
+}
+
+.m3-field[data-field-state='error'] .m3-field__supporting {
+  color: var(--m3-field-error);
+}
+
+.m3-field[data-field-state='success'] .m3-field__control {
+  border-color: var(--m3-field-primary);
+}
+
+.m3-field--filled .m3-field__control {
+  background: color-mix(in srgb, var(--m3-field-on-container) 6%, var(--m3-field-container));
+  border-color: transparent;
+  border-block-end-color: var(--m3-field-outline);
+  border-radius: 0.25rem 0.25rem 0 0;
+}
+
+.m3-field--filled .m3-field__control:focus {
+  border-block-end: 2px solid var(--m3-field-primary);
+  padding-block-end: calc(0.875rem - 1px);
+}
+
+.m3-field--textarea .m3-field__control {
+  min-block-size: 7rem;
+  resize: vertical;
+}
+
+.m3-field__meta {
+  align-items: center;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.m3-field__counter {
+  color: color-mix(in srgb, var(--m3-field-on-container) 62%, transparent);
+  font-size: 0.75rem;
+  margin-inline-start: auto;
+}
+
+@media (max-width: 42rem) {
+  .m3-field {
+    inline-size: 100%;
+  }
+
+  .m3-field__control {
+    min-block-size: 3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-field__control {
+    transition: none;
+  }
+}

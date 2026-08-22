@@ -3,7 +3,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "SILENT_MODE=0"
 if /I "%~1"=="/s" set "SILENT_MODE=1"
 if /I "%~1"=="--silent" set "SILENT_MODE=1"
-if /I "%SILENT%"=="1" set "SILENT_MODE=1"
+if "%SILENT%"=="1" set "SILENT_MODE=1"
 set "ROOT=%~dp0"
 pushd "%ROOT%" >nul
 call :log "GitLab Instant build starting"
@@ -19,14 +19,22 @@ if errorlevel 1 (
 where npm >nul 2>&1
 if errorlevel 1 call :fail "npm is unavailable after Node.js bootstrap."
 call :log "Installing declared build dependencies"
-npm install --no-audit --no-fund
-if errorlevel 1 call :fail "npm install failed; the dependency tree is incomplete."
+if exist package-lock.json (call npm ci --no-audit --no-fund) else (call npm install --no-audit --no-fund)
+if errorlevel 1 call :fail "npm dependency installation failed; the dependency tree is incomplete."
 call :log "Compiling TypeScript and copying renderer assets"
-npm run build
+call npm run build
 if errorlevel 1 call :fail "npm run build failed."
-call :log "Build complete: dist is ready"
+call :log "Build complete: app-dist is ready"
+if "%SILENT_MODE%"=="0" (
+  choice /C YN /N /M "Launch the local shell now? [Y/N] "
+  if not errorlevel 2 (
+    call npm start
+    set "LAUNCH_EXIT=!errorlevel!"
+    popd >nul
+    exit /b !LAUNCH_EXIT!
+  )
+)
 popd >nul
-if "%SILENT_MODE%"=="0" pause
 exit /b 0
 :log
 if "%SILENT_MODE%"=="0" echo [gitlab-instant] %~1
