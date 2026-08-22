@@ -1,0 +1,114 @@
+/**
+ * Tokens for the Issues surface, ported from Issues.dc.html's <style> block.
+ * Values are scoped as CSS custom properties under .gl-mds-issues so every
+ * sub-component can read var(--gl-mds-*) without re-importing anything.
+ */
+
+.gl-mds-issues {
+  --gl-mds-surf: #f4effa;
+  --gl-mds-surfc: #ece4f6;
+  --gl-mds-surfch: #e0d5f2;
+  --gl-mds-surfcl: #faf6ff;
+  --gl-mds-onsurf: #1d1b20;
+  --gl-mds-onsurfv: #49454f;
+  --gl-mds-prim: #6750c4;
+  --gl-mds-onprim: #ffffff;
+  --gl-mds-primc: #e8def8;
+  --gl-mds-onprimc: #4f378b;
+  --gl-mds-sec: #d6c9f0;
+  --gl-mds-outl: #cac4d0;
+  --gl-mds-outlv: #e7e0ec;
+  --gl-mds-err: #b3261e;
+  --gl-mds-errc: #f9dedc;
+  --gl-mds-good: #1a7f37;
+  --gl-mds-goodc: #dcf2e3;
+  --gl-mds-warn: #9a6700;
+  --gl-mds-warnc: #fff3d0;
+  --gl-mds-info: #1a5e8f;
+  --gl-mds-infoc: #d7e9f7;
+  --gl-mds-card: #ffffff;
+  --gl-mds-scrim: rgba(29, 27, 32, 0.35);
+
+  // Label taxonomy — functional data colors, exempt from the strict M3 role
+  // palette above because they encode a fixed set of categories, not chrome.
+  --gl-mds-label-warn-bg: #fff3d0;
+  --gl-mds-label-warn-fg: #9a6700;
+  --gl-mds-label-primary-bg: #e8def8;
+  --gl-mds-label-primary-fg: #4f378b;
+  --gl-mds-label-info-bg: #d7e9f7;
+  --gl-mds-label-info-fg: #1a5e8f;
+  --gl-mds-label-good-bg: #dcf2e3;
+  --gl-mds-label-good-fg: #1a7f37;
+  --gl-mds-label-error-bg: #f9dedc;
+  --gl-mds-label-error-fg: #b3261e;
+  --gl-mds-label-neutral-bg: #e5e1ec;
+  --gl-mds-label-neutral-fg: #49454f;
+
+  &[data-theme='dark'] {
+    --gl-mds-surf: #141218;
+    --gl-mds-surfc: #211f26;
+    --gl-mds-surfch: #2b2831;
+    --gl-mds-surfcl: #1b1922;
+    --gl-mds-onsurf: #e6e0e9;
+    --gl-mds-onsurfv: #cac4d0;
+    --gl-mds-prim: #cfbdfe;
+    --gl-mds-onprim: #381e72;
+    --gl-mds-primc: #4f378b;
+    --gl-mds-onprimc: #e8def8;
+    --gl-mds-sec: #4a4458;
+    --gl-mds-outl: #49454f;
+    --gl-mds-outlv: #332f3a;
+    --gl-mds-err: #f2b8b5;
+    --gl-mds-errc: #5c1a17;
+    --gl-mds-good: #7fd79a;
+    --gl-mds-goodc: #1c3a27;
+    --gl-mds-warn: #e2c46d;
+    --gl-mds-warnc: #3d3012;
+    --gl-mds-info: #9ecbf0;
+    --gl-mds-infoc: #204257;
+    --gl-mds-card: #211f26;
+    --gl-mds-scrim: rgba(0, 0, 0, 0.5);
+
+    --gl-mds-label-warn-bg: #3d3012;
+    --gl-mds-label-warn-fg: #e2c46d;
+    --gl-mds-label-primary-bg: #4f378b;
+    --gl-mds-label-primary-fg: #e8def8;
+    --gl-mds-label-info-bg: #204257;
+    --gl-mds-label-info-fg: #9ecbf0;
+    --gl-mds-label-good-bg: #1c3a27;
+    --gl-mds-label-good-fg: #7fd79a;
+    --gl-mds-label-error-bg: #5c1a17;
+    --gl-mds-label-error-fg: #f2b8b5;
+    --gl-mds-label-neutral-bg: #3a3640;
+    --gl-mds-label-neutral-fg: #cac4d0;
+  }
+
+  font-family: 'Google Sans Text', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background: var(--gl-mds-surf);
+  color: var(--gl-mds-onsurf);
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  position: relative;
+}
+
+// Shared, importable primitives so every sub-component's <style scoped>
+// block gets the same focus ring and reduced-motion behavior for free.
+@mixin gl-mds-focus-ring {
+  &:focus-visible {
+    outline: 2px solid var(--gl-mds-prim);
+    outline-offset: 2px;
+  }
+}
+
+@mixin gl-mds-reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@mixin gl-mds-touch-target($size: 40px) {
+  min-width: $size;
+  min-height: $size;
+}

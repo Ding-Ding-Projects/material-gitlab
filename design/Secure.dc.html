@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="Dependency list" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">Secure</h1>
+      <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--warnc);color:var(--warn);letter-spacing:.5px">ULTIMATE</span>
+      <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap">
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="4">
+          <div onClick="{{ tb.pick }}" style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ tb.bg }};color:{{ tb.fg }}">{{ tb.label }}</div>
+        </sc-for>
+      </div>
+      <a href="Security.dc.html" style="margin-left:auto;font-size:13px">Security dashboard →</a>
+    </div>
+    <main style="flex:1;overflow-y:auto;padding:8px 24px 24px">
+      <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:980px">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--outlv)">
+            <span class="material-symbols-outlined" style="color:{{ r.iconColor }};font-size:19px">{{ r.icon }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:500;font-size:13.5px;font-family:{{ r.titleFont }}">{{ r.title }}</div>
+              <div style="font-size:12px;color:var(--onsurfv);margin-top:1px">{{ r.sub }}</div>
+            </div>
+            <sc-if value="{{ r.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11.5px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ r.badgeBg }};color:{{ r.badgeFg }}">{{ r.badge }}</span>
+            </sc-if>
+            <span style="font-size:12px;color:var(--onsurfv)">{{ r.meta }}</span>
+            <sc-if value="{{ r.action }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ r.act }}" style="font-size:12.5px;font-weight:500;color:{{ r.actionColor }};cursor:pointer;border:1px solid var(--outl);border-radius:999px;padding:6px 14px">{{ r.action }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:36px;text-align:center;color:var(--onsurfv);font-size:13.5px">Nothing matches.</div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Tabs mirror secure_menu.rb beyond the dashboard: dependency_list, audit_events, scan_policies, on_demand_scans
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false, tab: 'Dependencies',
+    deps: [
+      {name:'sortable-tree 1.8.2', sub:'npm · transitive via boards-ui', vuln:'CVE-2026-1142 high', lic:'MIT'},
+      {name:'rails 7.2.4', sub:'gem · direct', vuln:null, lic:'MIT'},
+      {name:'sidekiq 7.3.1', sub:'gem · direct', vuln:null, lic:'LGPL-3.0'},
+      {name:'lodash 4.17.21', sub:'npm · direct', vuln:null, lic:'MIT'},
+      {name:'yaml 2.4.0', sub:'npm · transitive via pipeline-editor', vuln:'advisory pending', lic:'ISC'}
+    ],
+    audits: [
+      {name:'Member role changed: pnair Reporter → Developer', sub:'by dweiss · from 10.4.8.20', when:'2h ago'},
+      {name:'Protected branch rule added: release/*', sub:'by dweiss', when:'1d ago'},
+      {name:'CI variable REGISTRY_PASSWORD updated', sub:'by junpark · masked', when:'2d ago'},
+      {name:'Sign-in from new location', sub:'ohaddad · Berlin, DE · 2FA passed', when:'3d ago'},
+      {name:'Personal access token created (api scope)', sub:'junpark · expires in 30d', when:'5d ago'}
+    ],
+    policies: [
+      {name:'Require SAST + secret detection on all MRs', sub:'scan execution policy · enforced on main', on:true},
+      {name:'Block critical vulnerabilities from merging', sub:'merge request approval policy · 1 approval override', on:true},
+      {name:'Weekly DAST against staging', sub:'scheduled scan policy', on:false}
+    ],
+    scans: [
+      {name:'DAST — staging full crawl', sub:'on-demand · last run 42 findings triaged', status:'ready'},
+      {name:'Secret detection — full history', sub:'on-demand · long-running', status:'running'},
+      {name:'Container scan — v17.2.0 image', sub:'on-demand', status:'ready'}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen: false, regexOpen: false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    let rows = [];
+    if (s.tab === 'Dependencies') rows = s.deps.filter(x => m(x.name + ' ' + x.sub + ' ' + (x.vuln || ''))).map(x => ({
+      icon:'account_tree', iconColor: x.vuln ? 'var(--err)' : 'var(--prim)', title:x.name, titleFont:'monospace', sub:x.sub + ' · ' + x.lic,
+      badge:x.vuln, badgeBg:'var(--errc)', badgeFg:'var(--err)', meta:'', action:null}));
+    if (s.tab === 'Audit events') rows = s.audits.filter(x => m(x.name + ' ' + x.sub)).map(x => ({
+      icon:'receipt_long', iconColor:'var(--onsurfv)', title:x.name, titleFont:'inherit', sub:x.sub, badge:null, meta:x.when, action:null}));
+    if (s.tab === 'Scan policies') rows = s.policies.filter(x => m(x.name)).map((x, i) => ({
+      icon:'policy', iconColor:'var(--prim)', title:x.name, titleFont:'inherit', sub:x.sub,
+      badge:x.on ? 'enforced' : 'disabled', badgeBg:x.on ? 'var(--goodc)' : 'var(--surfch)', badgeFg:x.on ? 'var(--good)' : 'var(--onsurfv)', meta:'',
+      action:x.on ? 'Disable' : 'Enforce', actionColor:'var(--onprimc)',
+      act:() => set({policies: s.policies.map((y, k) => k === i ? {...y, on: !y.on} : y)})}));
+    if (s.tab === 'On-demand scans') rows = s.scans.filter(x => m(x.name)).map((x, i) => ({
+      icon:'radar', iconColor:'var(--prim)', title:x.name, titleFont:'inherit', sub:x.sub,
+      badge:x.status, badgeBg:x.status === 'running' ? 'var(--warnc)' : 'var(--goodc)', badgeFg:x.status === 'running' ? 'var(--warn)' : 'var(--good)', meta:'',
+      action:x.status === 'running' ? 'Cancel' : 'Run scan', actionColor:'var(--onprimc)',
+      act:() => set({scans: s.scans.map((y, k) => k === i ? {...y, status: y.status === 'running' ? 'ready' : 'running'} : y)})}));
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — ' + s.tab.toLowerCase() : 'Search ' + s.tab.toLowerCase(),
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: [...s.deps.map(x => x.name), ...s.audits.map(x => x.name), ...s.policies.map(x => x.name), ...s.scans.map(x => x.name)],
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [{label:'Toggle dark theme', icon:'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }},
+        ...['Dependencies','Audit events','Scan policies','On-demand scans'].map(t => ({label:'Secure: ' + t, icon:'security', run: () => set({tab: t})}))],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      tabs: ['Dependencies','Audit events','Scan policies','On-demand scans'].map(t => ({label:t, pick:() => set({tab:t}),
+        bg: s.tab === t ? 'var(--primc)' : 'transparent', fg: s.tab === t ? 'var(--onprimc)' : 'var(--onsurfv)'})),
+      rows, emptyList: rows.length === 0
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,3 +1,3 @@
-import initTodosApp from '~/todos';
+import { initTodosSurface } from '~/material_system/surfaces/Todos';
 
-initTodosApp();
+initTodosSurface('#js-todos-app-root');

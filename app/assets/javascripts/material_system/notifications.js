@@ -7,7 +7,11 @@ const now = () => new Date().toISOString();
  * render them as a toast stack, while this module owns lifecycle and review state.
  */
 export class NotificationCenter {
-  constructor({ clock = () => Date.now(), setTimeoutFn = setTimeout, clearTimeoutFn = clearTimeout } = {}) {
+  constructor({
+    clock = () => Date.now(),
+    setTimeoutFn = setTimeout,
+    clearTimeoutFn = clearTimeout,
+  } = {}) {
     this.clock = clock;
     this.setTimeoutFn = setTimeoutFn;
     this.clearTimeoutFn = clearTimeoutFn;
@@ -24,7 +28,10 @@ export class NotificationCenter {
   }
 
   snapshot() {
-    return this.items.map((item) => ({ ...item, actions: item.actions.map((action) => ({ ...action })) }));
+    return this.items.map((item) => ({
+      ...item,
+      actions: item.actions.map((action) => ({ ...action })),
+    }));
   }
 
   emit() {
@@ -33,7 +40,15 @@ export class NotificationCenter {
     return snapshot;
   }
 
-  notify({ title = '', message = '', severity = 'info', timeout = DEFAULT_TIMEOUT, persistent, actions = [], metadata = {} } = {}) {
+  notify({
+    title = '',
+    message = '',
+    severity = 'info',
+    timeout = DEFAULT_TIMEOUT,
+    persistent,
+    actions = [],
+    metadata = {},
+  } = {}) {
     const item = {
       id: `notification-${++this.sequence}`,
       title: String(title),
@@ -45,11 +60,15 @@ export class NotificationCenter {
       actions: actions.map((action) => ({ ...action })),
       metadata: { ...metadata },
     };
-    const staysOpen = persistent ?? (severity === 'error' || severity === 'warning' || timeout === 0);
+    const staysOpen =
+      persistent ?? (severity === 'error' || severity === 'warning' || timeout === 0);
     item.persistent = staysOpen;
     this.items = [item, ...this.items];
     if (!staysOpen && timeout > 0) {
-      this.timers.set(item.id, this.setTimeoutFn(() => this.dismiss(item.id), timeout));
+      this.timers.set(
+        item.id,
+        this.setTimeoutFn(() => this.dismiss(item.id), timeout),
+      );
     }
     this.emit();
     return item.id;
@@ -83,7 +102,9 @@ export class NotificationCenter {
     this.items.forEach((item) => {
       if (includePersistent || !item.persistent) this.dismiss(item.id);
     });
-    this.items = includePersistent ? [] : this.items.filter((item) => item.persistent && !item.dismissed);
+    this.items = includePersistent
+      ? []
+      : this.items.filter((item) => item.persistent && !item.dismissed);
     return this.emit();
   }
 
@@ -102,5 +123,6 @@ export class NotificationCenter {
 }
 
 export const notificationCenter = new NotificationCenter();
+export const createNotificationCenter = (options) => new NotificationCenter(options);
 
 export default notificationCenter;

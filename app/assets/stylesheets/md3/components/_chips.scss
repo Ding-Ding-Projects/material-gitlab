@@ -1,0 +1,146 @@
+// Material 3 chip family: assist, filter, input and suggestion chips with
+// a selected state and a removable trailing icon, matching the design's
+// filter-chip anatomy (8px radius, outlined at rest).
+
+@mixin md3-chip-state-layer {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  @include gl-md3-motion-standard(opacity);
+}
+
+.md3-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--gl-md3-outl);
+  background-color: transparent;
+  color: var(--gl-md3-onsurf);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  @include gl-md3-shape('xs');
+  @include gl-md3-label-large;
+  @include gl-md3-motion-standard(unquote('background-color, border-color, color'));
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+
+  &::before {
+    @include md3-chip-state-layer;
+  }
+
+  &:hover:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.08;
+  }
+
+  &:focus-visible:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    pointer-events: none;
+    border-color: color-mix(in srgb, var(--gl-md3-onsurf) 12%, transparent);
+    color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+  }
+
+  .material-symbols-outlined {
+    font-size: 16px;
+  }
+}
+
+.md3-chip__icon {
+  flex-shrink: 0;
+  margin-left: -4px;
+}
+
+// Assist: a fixed suggestion tied to context (e.g. "Link related MR"). Same
+// outlined base as the default; the modifier exists for explicit intent.
+.md3-chip--assist {
+  color: var(--gl-md3-onsurfv);
+}
+
+// Filter: a toggleable facet, as used in the Issues/MRs filter bars.
+.md3-chip--filter {
+  &[aria-pressed='true'],
+  &.md3-chip--selected {
+    background-color: var(--gl-md3-primc);
+    color: var(--gl-md3-onprimc);
+    border-color: transparent;
+  }
+}
+
+// Input: represents a discrete, user-entered or user-picked value (an
+// assignee, an uploaded file) and pairs naturally with a remove icon.
+.md3-chip--input {
+  padding-right: 8px;
+
+  &.md3-chip--selected {
+    background-color: var(--gl-md3-primc);
+    color: var(--gl-md3-onprimc);
+    border-color: transparent;
+  }
+}
+
+// Suggestion: the lowest-emphasis chip, used for system-offered options
+// (a quick reply, a suggested label) rather than a persistent filter.
+.md3-chip--suggestion {
+  background-color: var(--gl-md3-surfc);
+  border-color: transparent;
+  color: var(--gl-md3-onsurf);
+}
+
+.md3-chip__remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  margin-left: 2px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--gl-md3-shape-full);
+  background-color: transparent;
+  color: inherit;
+  cursor: pointer;
+  @include gl-md3-motion-standard(background-color);
+
+  &:hover {
+    background-color: var(--gl-md3-surfch);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 1px;
+  }
+
+  .material-symbols-outlined {
+    font-size: 14px;
+  }
+}
+
+.md3-chip--selected .md3-chip__remove:hover {
+  background-color: color-mix(in srgb, var(--gl-md3-onprimc) 16%, transparent);
+}
+
+.md3-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

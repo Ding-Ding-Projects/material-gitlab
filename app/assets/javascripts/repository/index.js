@@ -13,6 +13,7 @@ import RepositoryApp from './components/app.vue';
 import RepositoryBreadcrumbs from './components/header_area/breadcrumbs.vue';
 import ForkInfo from './components/fork_info.vue';
 import LastCommit from './components/last_commit.vue';
+import { mountRepositorySurface } from '~/material_system/surfaces/Repository';
 
 import apolloProvider from './graphql';
 import commitsQuery from './queries/commits.query.graphql';
@@ -43,6 +44,15 @@ export default function setupVueRepositoryList() {
     hasRevsFile,
   } = dataset;
   const router = createRouter(projectPath, escapedRef, fullName);
+
+  // Material Repository is opt-in per host page. A declared mount point must
+  // carry a real GraphQL/Rails adapter; never render a sample tree silently.
+  const materialRepositoryEl = document.getElementById('js-material-repository-app');
+  if (materialRepositoryEl) {
+    const adapter = materialRepositoryEl.__materialRepositoryAdapter;
+    if (!adapter) throw new Error('Material Repository mount requires a real repository adapter');
+    mountRepositorySurface(materialRepositoryEl, { adapter });
+  }
 
   initFileTreeBrowser(router, { projectPath, ref, refType });
 

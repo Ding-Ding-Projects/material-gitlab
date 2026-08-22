@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <nav data-screen-label="Sidebar" style="width:248px;flex-shrink:0;background:var(--surfc);display:flex;flex-direction:column;border-radius:0 16px 16px 0;overflow-y:auto;padding:12px 10px;gap:2px">
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px 14px;font-family:'Google Sans';font-weight:700;font-size:16px">
+      <div style="width:28px;height:28px;border-radius:9px;background:var(--prim);display:flex;align-items:center;justify-content:center;color:var(--onprim);font-size:15px">G</div>GitLab M3
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--surfcl);margin-bottom:8px">
+      <div style="width:26px;height:26px;border-radius:8px;background:var(--warnc);color:var(--warn);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">P</div>
+      <div style="min-width:0;flex:1"><div style="font-weight:500;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">phoenix-api</div><div style="font-size:11.5px;color:var(--onsurfv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">acme-corp</div></div>
+    </div>
+    <sc-for list="{{ navSections }}" as="sec" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--onsurfv);padding:10px 14px 4px;text-transform:uppercase">{{ sec.name }}</div>
+        <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="3">
+          <a href="{{ it.href }}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:var(--nav-r,999px);font-size:13.5px;color:var(--onsurf);background:{{ it.bg }}" style-hover="background:var(--surfch)">
+            <span class="material-symbols-outlined" style="color:var(--onsurfv)">{{ it.icon }}</span>{{ it.label }}
+          </a>
+        </sc-for>
+      </div>
+    </sc-for>
+  </nav>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <sc-if value="{{ regexError }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;color:var(--err)">invalid regex</span></sc-if>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">Issues</h1>
+      <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px">
+        <div onClick="{{ setList }}" style="padding:7px 18px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ listBg }};color:{{ listFg }}">List</div>
+        <div onClick="{{ setBoard }}" style="padding:7px 18px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ boardBg }};color:{{ boardFg }}">Board</div>
+      </div>
+      <div onClick="{{ openNew }}" style="margin-left:auto;display:flex;align-items:center;gap:8px;background:var(--prim);color:var(--onprim);border-radius:999px;padding:10px 20px;font-weight:500;font-size:14px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,.2)"><span class="material-symbols-outlined">add</span>New issue</div>
+    </div>
+    <div data-screen-label="Filter bar" style="display:flex;gap:8px;padding:6px 24px 12px;flex-wrap:wrap">
+      <sc-for list="{{ filterChips }}" as="ch" hint-placeholder-count="5">
+        <div onClick="{{ ch.toggle }}" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;border:1px solid {{ ch.border }};background:{{ ch.bg }};color:{{ ch.fg }}">
+          <sc-if value="{{ ch.on }}" hint-placeholder-val="{{ false }}"><span class="material-symbols-outlined" style="font-size:16px">check</span></sc-if>{{ ch.label }}
+        </div>
+      </sc-for>
+      <span style="align-self:center;font-size:12.5px;color:var(--onsurfv)">{{ countLabel }}</span>
+    </div>
+    <sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+      <main style="flex:1;overflow-y:auto;padding:0 24px 24px">
+        <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+          <sc-for list="{{ visibleIssues }}" as="iss" hint-placeholder-count="6">
+            <div onClick="{{ iss.open }}" style="display:flex;align-items:center;gap:14px;padding:15px 20px;border-bottom:1px solid var(--outlv);cursor:pointer" style-hover="background:var(--surfcl)">
+              <span class="material-symbols-outlined" style="color:{{ iss.stateColor }}">{{ iss.stateIcon }}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-weight:500;font-size:14px">{{ iss.title }}</div>
+                <div style="font-size:12.5px;color:var(--onsurfv);margin-top:2px">#{{ iss.iid }} · {{ iss.meta }}</div>
+              </div>
+              <div style="display:flex;gap:6px">
+                <sc-for list="{{ iss.labelChips }}" as="lb" hint-placeholder-count="2">
+                  <span style="font-size:11.5px;font-weight:500;padding:3px 10px;border-radius:999px;background:{{ lb.bg }};color:{{ lb.fg }}">{{ lb.name }}</span>
+                </sc-for>
+              </div>
+              <div title="{{ iss.assignee }}" style="width:28px;height:28px;border-radius:999px;background:var(--sec);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">{{ iss.avatar }}</div>
+            </div>
+          </sc-for>
+          <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:36px;text-align:center;color:var(--onsurfv);font-size:13.5px">No issues match your filters.</div>
+          </sc-if>
+        </div>
+      </main>
+    </sc-if>
+    <sc-if value="{{ isBoard }}" hint-placeholder-val="{{ false }}">
+      <main data-screen-label="Board" style="flex:1;overflow-x:auto;display:flex;gap:14px;padding:0 24px 24px;align-items:flex-start">
+        <sc-for list="{{ columns }}" as="col" hint-placeholder-count="4">
+          <div onDragOver="{{ col.dragOver }}" onDrop="{{ col.drop }}" style="width:290px;flex-shrink:0;background:var(--surfc);border-radius:var(--card-r,20px);padding:12px;display:flex;flex-direction:column;gap:10px;max-height:100%;overflow-y:auto">
+            <div style="display:flex;align-items:center;gap:8px;padding:2px 6px">
+              <span style="width:10px;height:10px;border-radius:999px;background:{{ col.dot }}"></span>
+              <span style="font-weight:500;font-size:13.5px">{{ col.name }}</span>
+              <span style="margin-left:auto;font-size:12px;color:var(--onsurfv);background:var(--surfch);border-radius:999px;padding:2px 9px">{{ col.count }}</span>
+            </div>
+            <sc-for list="{{ col.cards }}" as="c" hint-placeholder-count="2">
+              <div draggable="{{ true }}" onDragStart="{{ c.dragStart }}" onClick="{{ c.open }}" style="background:var(--card);border-radius:14px;padding:12px 14px;cursor:grab;box-shadow:0 1px 2px rgba(0,0,0,.1)">
+                <div style="font-weight:500;font-size:13.5px">{{ c.title }}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:8px">
+                  <sc-for list="{{ c.labelChips }}" as="lb" hint-placeholder-count="1">
+                    <span style="font-size:11px;font-weight:500;padding:2px 9px;border-radius:999px;background:{{ lb.bg }};color:{{ lb.fg }}">{{ lb.name }}</span>
+                  </sc-for>
+                  <span style="margin-left:auto;font-size:11.5px;color:var(--onsurfv)">#{{ c.iid }}</span>
+                  <span style="width:22px;height:22px;border-radius:999px;background:var(--sec);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700">{{ c.avatar }}</span>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ col.adding }}" hint-placeholder-val="{{ false }}">
+              <div style="background:var(--card);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:8px">
+                <input onInput="{{ col.setDraft }}" onKeyDown="{{ col.draftKey }}" value="{{ col.draft }}" placeholder="Issue title" style="border:1px solid var(--outl);border-radius:8px;padding:8px 10px;font:inherit;font-size:13px;background:transparent;color:var(--onsurf);outline:none">
+                <div style="display:flex;gap:8px;justify-content:flex-end">
+                  <div onClick="{{ col.cancelAdd }}" style="padding:6px 14px;border-radius:999px;font-size:12.5px;cursor:pointer;color:var(--onprimc)">Cancel</div>
+                  <div onClick="{{ col.confirmAdd }}" style="padding:6px 14px;border-radius:999px;font-size:12.5px;cursor:pointer;background:var(--prim);color:var(--onprim);font-weight:500">Add</div>
+                </div>
+              </div>
+            </sc-if>
+            <div onClick="{{ col.startAdd }}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;font-size:13px;color:var(--onprimc);cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">add</span>Add issue</div>
+          </div>
+        </sc-for>
+      </main>
+    </sc-if>
+  </div>
+  <sc-if value="{{ drawerIssue }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeDrawer }}" style="position:fixed;inset:0;background:var(--scrim);z-index:40"></div>
+    <aside data-screen-label="Issue drawer" style="position:fixed;top:12px;right:12px;bottom:12px;width:420px;background:var(--surf);border-radius:24px;z-index:41;box-shadow:0 8px 32px rgba(0,0,0,.3);padding:22px;overflow-y:auto;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:12.5px;color:var(--onsurfv)">#{{ drawerIssue.iid }}</span>
+        <span style="font-size:11.5px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ drawerStateBg }};color:{{ drawerStateFg }}">{{ drawerIssue.state }}</span>
+        <div onClick="{{ closeDrawer }}" style="margin-left:auto;width:36px;height:36px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">close</span></div>
+      </div>
+      <h2 style="margin:0;font-family:'Google Sans';font-size:19px;font-weight:500;line-height:1.35">{{ drawerIssue.title }}</h2>
+      <p style="margin:0;font-size:13.5px;line-height:1.6;color:var(--onsurfv)">{{ drawerIssue.body }}</p>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Labels</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ allLabelChips }}" as="lb" hint-placeholder-count="4">
+            <div onClick="{{ lb.toggle }}" style="font-size:12px;font-weight:500;padding:5px 13px;border-radius:999px;cursor:pointer;border:1px solid {{ lb.border }};background:{{ lb.bg }};color:{{ lb.fg }}">{{ lb.name }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Assignee</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <sc-for list="{{ assigneeChips }}" as="asg" hint-placeholder-count="3">
+            <div onClick="{{ asg.pick }}" style="display:flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 13px 5px 6px;border-radius:999px;cursor:pointer;border:1px solid {{ asg.border }};background:{{ asg.bg }};color:{{ asg.fg }}">
+              <span style="width:22px;height:22px;border-radius:999px;background:var(--sec);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700">{{ asg.avatar }}</span>{{ asg.name }}
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div onClick="{{ toggleDrawerState }}" style="margin-top:auto;align-self:flex-start;padding:10px 22px;border-radius:999px;font-weight:500;font-size:13.5px;cursor:pointer;border:1px solid var(--outl);color:var(--onprimc)">{{ drawerToggleLabel }}</div>
+    </aside>
+  </sc-if>
+  <sc-if value="{{ newOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeNew }}" style="position:fixed;inset:0;background:var(--scrim);z-index:50;display:flex;align-items:center;justify-content:center">
+      <div onClick="{{ stop }}" style="width:480px;background:var(--surf);border-radius:var(--dlg-r,28px);padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+        <h2 style="margin:0;font-family:'Google Sans';font-size:20px;font-weight:500">New issue</h2>
+        <input onInput="{{ setNewTitle }}" value="{{ newTitle }}" placeholder="Title" style="border:1px solid var(--outl);border-radius:12px;padding:12px 14px;font:inherit;font-size:14px;background:transparent;color:var(--onsurf);outline:none">
+        <textarea onInput="{{ setNewBody }}" value="{{ newBody }}" placeholder="Description (optional)" rows="4" style="border:1px solid var(--outl);border-radius:12px;padding:12px 14px;font:inherit;font-size:13.5px;background:transparent;color:var(--onsurf);outline:none;resize:vertical"></textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <div onClick="{{ closeNew }}" style="padding:10px 20px;border-radius:999px;font-size:13.5px;cursor:pointer;color:var(--onprimc)">Cancel</div>
+          <div onClick="{{ createIssue }}" style="padding:10px 22px;border-radius:999px;font-size:13.5px;font-weight:500;cursor:pointer;background:var(--prim);color:var(--onprim)">Create issue</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeRegexBuilder }}" style="position:fixed;inset:0;background:var(--scrim);z-index:50;display:flex;align-items:center;justify-content:center">
+      <div onClick="{{ stop }}" data-screen-label="Regex builder" style="width:780px;max-height:88vh;overflow-y:auto;background:var(--surf);border-radius:var(--dlg-r,28px);padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <h2 style="margin:0;font-family:'Google Sans';font-size:20px;font-weight:500">Regex builder</h2>
+          <span style="font-size:12px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ regexValidBg }};color:{{ regexValidFg }}">{{ regexValidLabel }}</span>
+          <div style="margin-left:auto;display:flex;gap:4px">
+            <sc-for list="{{ regexFlagChips }}" as="fl" hint-placeholder-count="4">
+              <div onClick="{{ fl.toggle }}" title="{{ fl.tip }}" style="font-family:monospace;font-size:13px;font-weight:700;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:{{ fl.bg }};color:{{ fl.fg }}">{{ fl.name }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <input onInput="{{ setRegexDraft }}" value="{{ regexDraft }}" placeholder="pattern, e.g. (auth|login).*fail" style="border:1px solid var(--outl);border-radius:12px;padding:12px 14px;font-family:monospace;font-size:15px;background:transparent;color:var(--onsurf);outline:none">
+        <sc-if value="{{ regexErrorMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:var(--err);font-family:monospace">{{ regexErrorMsg }}</div></sc-if>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ regexSnippetGroups }}" as="grp" hint-placeholder-count="3">
+            <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+              <span style="font-size:11px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px;width:86px;flex-shrink:0">{{ grp.name }}</span>
+              <sc-for list="{{ grp.items }}" as="sn" hint-placeholder-count="5">
+                <div onClick="{{ sn.insert }}" title="{{ sn.tip }}" style="font-family:monospace;font-size:12.5px;padding:5px 11px;border-radius:8px;cursor:pointer;background:var(--surfc);color:var(--onsurf)" style-hover="background:var(--surfch)">{{ sn.text }}</div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Test string</div>
+            <textarea onInput="{{ setRegexTestText }}" value="{{ regexTestText }}" rows="4" style="border:1px solid var(--outl);border-radius:12px;padding:10px 12px;font-family:monospace;font-size:12.5px;background:transparent;color:var(--onsurf);outline:none;resize:vertical"></textarea>
+            <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;font-family:monospace;font-size:12.5px;line-height:1.7;min-height:40px;word-break:break-word">{{ regexHighlighted }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Capture groups</div>
+            <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;min-height:40px;display:flex;flex-direction:column;gap:4px">
+              <sc-for list="{{ regexGroups }}" as="g" hint-placeholder-count="2">
+                <div style="display:flex;gap:10px;font-size:12.5px"><span style="font-family:monospace;color:var(--onprimc);font-weight:700;width:36px">{{ g.n }}</span><span style="font-family:monospace;color:var(--onsurf)">{{ g.val }}</span></div>
+              </sc-for>
+              <sc-if value="{{ regexNoGroups }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--onsurfv)">No captures on first match.</div></sc-if>
+            </div>
+            <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Explanation</div>
+            <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;max-height:120px;overflow-y:auto">
+              <sc-for list="{{ regexExplain }}" as="ex" hint-placeholder-count="3">
+                <div style="display:flex;gap:10px;font-size:12px"><span style="font-family:monospace;color:var(--onprimc);flex-shrink:0;min-width:52px">{{ ex.tok }}</span><span style="color:var(--onsurfv)">{{ ex.desc }}</span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--surfcl);border-radius:14px;padding:12px 14px;min-height:60px">
+          <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Matches in issues · {{ regexMatchCount }}</div>
+          <sc-for list="{{ regexPreview }}" as="pv" hint-placeholder-count="3">
+            <div style="font-size:12.5px;padding:3px 0;color:var(--onsurfv)">{{ pv }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <div onClick="{{ closeRegexBuilder }}" style="padding:10px 20px;border-radius:999px;font-size:13.5px;cursor:pointer;color:var(--onprimc)">Cancel</div>
+          <div onClick="{{ applyRegex }}" style="padding:10px 22px;border-radius:999px;font-size:13.5px;font-weight:500;cursor:pointer;background:var(--prim);color:var(--onprim)">Apply to search</div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closePalette }}" style="position:fixed;inset:0;background:var(--scrim);z-index:60;display:flex;justify-content:center;padding-top:80px;align-items:flex-start">
+      <div onClick="{{ stop }}" data-screen-label="Command palette" style="width:560px;background:var(--surf);border-radius:24px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.3)">
+        <div style="display:flex;align-items:center;gap:10px;padding:14px 20px;border-bottom:1px solid var(--outlv)">
+          <span class="material-symbols-outlined" style="color:var(--onsurfv)">search</span>
+          <input onInput="{{ setPaletteQuery }}" value="{{ paletteQuery }}" placeholder="Jump to page, setting, or action…" style="border:none;outline:none;background:transparent;font:inherit;font-size:14.5px;color:var(--onsurf);flex:1">
+          <span style="font-size:11px;color:var(--onsurfv);border:1px solid var(--outl);border-radius:6px;padding:2px 7px">Ctrl+Shift+F</span>
+        </div>
+        <div style="max-height:340px;overflow-y:auto;padding:8px">
+          <sc-for list="{{ paletteResults }}" as="pr" hint-placeholder-count="6">
+            <a href="{{ pr.href }}" onClick="{{ pr.act }}" style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-radius:12px;font-size:13.5px;color:var(--onsurf)" style-hover="background:var(--surfc)">
+              <span class="material-symbols-outlined" style="color:var(--onsurfv)">{{ pr.icon }}</span>{{ pr.label }}
+              <span style="margin-left:auto;font-size:11.5px;color:var(--onsurfv)">{{ pr.kind }}</span>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;density&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;comfortable&quot;, &quot;compact&quot;], &quot;default&quot;: &quot;comfortable&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Feel&quot;},
+  &quot;shape&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;options&quot;: [&quot;expressive&quot;, &quot;squared&quot;], &quot;default&quot;: &quot;expressive&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;section&quot;: &quot;Feel&quot;},
+  &quot;seedPalette&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;options&quot;: [[&quot;#6750c4&quot;, &quot;#e8def8&quot;, &quot;#d6c9f0&quot;], [&quot;#0b6e63&quot;, &quot;#cdeee8&quot;, &quot;#b2ded7&quot;], [&quot;#8f4a0e&quot;, &quot;#ffe0c2&quot;, &quot;#f3cfae&quot;], [&quot;#35618e&quot;, &quot;#d3e4f6&quot;, &quot;#bcd5ec&quot;]], &quot;default&quot;: [&quot;#6750c4&quot;, &quot;#e8def8&quot;, &quot;#d6c9f0&quot;], &quot;tsType&quot;: &quot;string[]&quot;, &quot;section&quot;: &quot;Feel&quot;}
+}">
+class Component extends DCLogic {
+  state = {
+    dark: false, view: 'list', search: '', regexMode: false, regexError: false,
+    regexOpen: false, regexDraft: '', regexFlags: {i:true, g:true, m:false, s:false},
+    regexTestText: 'auth: login failed for user 42\npipeline #8812 passed in 04:31\nERROR TokenRefresh retry_count=3',
+    paletteOpen: false, paletteQuery: '',
+    newOpen: false, newTitle: '', newBody: '', drawerId: null, dragId: null,
+    filters: { open: true, closed: false, mine: false },
+    addingCol: null, draft: '',
+    issues: [
+      {id:1, iid:4312, title:'Boards render slowly with 500+ cards', body:'Rendering a board with more than 500 cards causes noticeable frame drops during scroll. Virtualize the column lists.', state:'Open', col:'todo', labels:['performance','frontend'], assignee:'Jun Park', opened:'2d ago'},
+      {id:2, iid:4308, title:'Pipeline badge contrast fails in dark mode', body:'The success badge uses a green that fails WCAG AA against the dark surface. Move to the tonal container pair.', state:'Open', col:'doing', labels:['ui','a11y'], assignee:'Dana Weiss', opened:'3d ago'},
+      {id:3, iid:4301, title:'Merge request diff viewer loses scroll position', body:'Switching between file tabs resets the scroll position of the diff pane.', state:'Open', col:'todo', labels:['frontend','bug'], assignee:'Omar Haddad', opened:'4d ago'},
+      {id:4, iid:4296, title:'Add regex mode to global search', body:'Search bars should accept regular expressions with a builder UI and live match preview.', state:'Open', col:'doing', labels:['search','feature'], assignee:'Jun Park', opened:'5d ago'},
+      {id:5, iid:4290, title:'Runner autoscaling flaps under burst load', body:'Autoscaler scales down too aggressively between pipeline bursts, causing cold starts.', state:'Open', col:'review', labels:['ci','backend'], assignee:'Dana Weiss', opened:'1w ago'},
+      {id:6, iid:4275, title:'Wiki sidebar collapses on mobile', body:'Fixed in 17.2 — the wiki sidebar now uses the standard drawer breakpoints.', state:'Closed', col:'done', labels:['ui'], assignee:'Omar Haddad', opened:'2w ago'},
+      {id:7, iid:4260, title:'Container registry cleanup policy skips tags', body:'Closed as duplicate of #4188.', state:'Closed', col:'done', labels:['backend','bug'], assignee:'Jun Park', opened:'3w ago'}
+    ]
+  };
+  applyTweaks() {
+    const compact = (this.props.density ?? 'comfortable') === 'compact';
+    const squared = (this.props.shape ?? 'expressive') === 'squared';
+    const pal = this.props.seedPalette ?? ['#6750c4', '#e8def8', '#d6c9f0'];
+    const st = document.body.style;
+    st.setProperty('--prim', pal[0]); st.setProperty('--primc', pal[1] || '#e8def8'); st.setProperty('--sec', pal[2] || pal[1] || '#d6c9f0');
+    st.fontSize = compact ? '12.5px' : '';
+    st.setProperty('--nav-r', squared ? '10px' : '999px');
+    st.setProperty('--card-r', squared ? '10px' : '20px');
+    st.setProperty('--dlg-r', squared ? '14px' : '28px');
+  }
+  componentDidMount() {
+    this.applyTweaks();
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen:false, regexOpen:false, newOpen:false, drawerId:null});
+    };
+    window.addEventListener('keydown', this._key);
+    document.body.classList.toggle('dark', this.state.dark);
+  }
+  componentDidUpdate() { this.applyTweaks(); }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  labelColor(name) {
+    const map = {performance:['#fff3d0','#9a6700'], frontend:['#e8def8','#4f378b'], ui:['#d7e9f7','#1a5e8f'], a11y:['#dcf2e3','#1a7f37'], bug:['#f9dedc','#b3261e'], feature:['#e8def8','#4f378b'], search:['#d7e9f7','#1a5e8f'], ci:['#fff3d0','#9a6700'], backend:['#e5e1ec','#49454f']};
+    const c = map[name] || ['#e5e1ec','#49454f'];
+    return {name, bg:c[0], fg:c[1]};
+  }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) {
+      try { const re = new RegExp(q, 'i'); this._reErr = false; return (t) => re.test(t); }
+      catch { this._reErr = true; return () => true; }
+    }
+    this._reErr = false;
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  filtered() {
+    const f = this.state.filters, m = this.matcher();
+    return this.state.issues.filter(i =>
+      ((f.open && i.state === 'Open') || (f.closed && i.state === 'Closed') || (!f.open && !f.closed)) &&
+      (!f.mine || i.assignee === 'Jun Park') &&
+      m(i.title + ' ' + i.labels.join(' ') + ' #' + i.iid));
+  }
+  avatar(n) { return n.split(' ').map(w => w[0]).join(''); }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const people = ['Jun Park','Dana Weiss','Omar Haddad'];
+    const upd = (id, fn) => set({issues: s.issues.map(i => i.id === id ? fn({...i}) : i)});
+    const filteredList = this.filtered();
+    const drawer = s.issues.find(i => i.id === s.drawerId) || null;
+    const colDefs = [['todo','To do','#9a6700'],['doing','In progress','#1a5e8f'],['review','In review','#4f378b'],['done','Done','#1a7f37']];
+    const nav = (name, items) => ({name, items: items.map(([label, icon, href, active]) => ({label, icon, href: href || '#', bg: active ? 'var(--sec)' : 'transparent'}))});
+    const chip = (label, key) => ({label, on: s.filters[key],
+      toggle: () => set({filters: {...s.filters, [key]: !s.filters[key]}}),
+      bg: s.filters[key] ? 'var(--primc)' : 'transparent', fg: s.filters[key] ? 'var(--onprimc)' : 'var(--onsurf)', border: s.filters[key] ? 'var(--primc)' : 'var(--outl)'});
+    let regexPreview = [], regexMatchCount = 0, regexErrorMsg = '', regexValid = true,
+        regexHighlighted = null, regexGroups = [], regexExplain = [];
+    if (s.regexOpen) {
+      const flagStr = Object.keys(s.regexFlags).filter(f => s.regexFlags[f]).join('');
+      let re = null;
+      try { re = new RegExp(s.regexDraft || '(?!)', flagStr); }
+      catch (err) { regexValid = false; regexErrorMsg = String(err.message || err); }
+      if (re && s.regexDraft) {
+        regexPreview = s.issues.filter(i => { re.lastIndex = 0; return re.test(i.title + ' ' + i.labels.join(' ')); }).map(i => '#' + i.iid + '  ' + i.title).slice(0,5);
+        regexMatchCount = regexPreview.length + ' of ' + s.issues.length;
+        const parts = []; let last = 0, mi = 0;
+        const gre = new RegExp(s.regexDraft, flagStr.includes('g') ? flagStr : flagStr + 'g');
+        let m; while ((m = gre.exec(s.regexTestText)) && mi < 200) {
+          if (m.index > last) parts.push(s.regexTestText.slice(last, m.index));
+          parts.push(React.createElement('mark', {key: mi, style: {background:'var(--primc)', color:'var(--onprimc)', borderRadius:'3px', padding:'0 1px'}}, m[0] || '∅'));
+          last = m.index + (m[0] ? m[0].length : 1); mi++;
+          if (!m[0]) gre.lastIndex++;
+          if (mi === 1 && m.length > 1) regexGroups = m.slice(1).map((v, idx) => ({n: '$' + (idx + 1), val: v === undefined ? '—' : v}));
+        }
+        parts.push(s.regexTestText.slice(last));
+        regexHighlighted = React.createElement(React.Fragment, null, ...parts);
+        const dict = [['(?:','non-capturing group'],['(?=','lookahead'],['(?!','negative lookahead'],['(?<=','lookbehind'],['(?<!','negative lookbehind'],['(','capturing group'],[')','end group'],['[^','negated class'],['[','character class'],[']','end class'],['\\d','digit'],['\\D','non-digit'],['\\w','word char'],['\\W','non-word char'],['\\s','whitespace'],['\\S','non-whitespace'],['\\b','word boundary'],['\\B','non-boundary'],['.*','any chars (greedy)'],['.+','one or more chars'],['.','any char'],['*?','zero+ (lazy)'],['+?','one+ (lazy)'],['*','zero or more'],['+','one or more'],['??','optional (lazy)'],['?','optional'],['^','start anchor'],['$','end anchor'],['|','alternation'],['{','repetition {n,m}']];
+        let rest = s.regexDraft;
+        while (rest.length && regexExplain.length < 24) {
+          const hit = dict.find(([t]) => rest.startsWith(t));
+          if (hit) { regexExplain.push({tok: hit[0], desc: hit[1]}); rest = rest.slice(hit[0].length); }
+          else { let lit = ''; while (rest.length && !dict.some(([t]) => rest.startsWith(t))) { lit += rest[0]; rest = rest.slice(1); }
+            if (lit) regexExplain.push({tok: lit.slice(0, 8), desc: 'literal "' + lit + '"'}); }
+        }
+      }
+    }
+    const regexSnippetGroups = [
+      ['Classes', [['\\d','digit 0-9'],['\\w','word char'],['\\s','whitespace'],['[a-z]','range'],['[^ ]','not space'],['.','any char']]],
+      ['Quantifiers', [['*','zero+'],['+','one+'],['?','optional'],['{2,5}','2 to 5'],['*?','lazy zero+'],['+?','lazy one+']]],
+      ['Anchors', [['^','line start'],['$','line end'],['\\b','word boundary'],['\\B','non-boundary']]],
+      ['Groups', [['( )','capture'],['(?: )','non-capture'],['(a|b)','alternation'],['(?= )','lookahead'],['(?! )','neg lookahead'],['(?<= )','lookbehind']]],
+      ['Recipes', [['#\\d+','issue ref'],['\\d{2}:\\d{2}','duration'],['(fail|error)','failures'],['^ERROR','error lines'],['\\bretry\\w*','retry words']]]
+    ].map(([name, items]) => ({name, items: items.map(([text, tip]) => ({text, tip, insert: () => set({regexDraft: s.regexDraft + text.replace(/ /g, '')})}))}));
+    const pages = [['Issues','list_alt','Issues.dc.html','Page'],['Merge requests','call_merge','Merge Requests.dc.html','Page'],['Pipelines','conveyor_belt','Pipelines.dc.html','Page'],['Repository','code','Repository.dc.html','Page'],['Settings','settings','Settings.dc.html','Page'],['Epics & roadmap','flag','Epics.dc.html','Page'],['Security dashboard','security','Security.dc.html','Page'],['To-Do list','done_all','Todos.dc.html','Page'],['Agent Memory console','memory','Agent Memory.dc.html','Page'],['Toggle dark theme','dark_mode',null,'Action'],['Toggle regex search','construction',null,'Action'],['New issue','add',null,'Action']];
+    const pm = this.matcher.call({state:{search:s.paletteQuery, regexMode:false}});
+    const paletteResults = pages.filter(p => !s.paletteQuery || p[0].toLowerCase().includes(s.paletteQuery.toLowerCase())).map(p => ({
+      label: p[0], icon: p[1], kind: p[3], href: p[2] || '#',
+      act: (e) => { if (!p[2]) { e.preventDefault();
+        if (p[0].startsWith('Toggle dark')) { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark, paletteOpen:false}); }
+        else if (p[0].startsWith('Toggle regex')) set({regexMode: !s.regexMode, paletteOpen:false});
+        else set({newOpen:true, paletteOpen:false});
+      } else set({paletteOpen:false}); }
+    }));
+    return {
+      navSections: [
+        nav('Pinned', [['Issues','list_alt','Issues.dc.html',true],['Merge requests','call_merge','Merge Requests.dc.html'],['Pipelines','conveyor_belt','Pipelines.dc.html']]),
+        nav('Code', [['Repository','code','Repository.dc.html'],['Branches','account_tree'],['Tags','sell']]),
+        nav('Plan', [['Issues','list_alt','Issues.dc.html',true],['Boards','view_kanban'],['Milestones','flag'],['Epics & roadmap','map','Epics.dc.html'],['Wiki','menu_book']]),
+        nav('Build & Secure', [['Pipelines','conveyor_belt','Pipelines.dc.html'],['Jobs','construction'],['Security dashboard','security','Security.dc.html']]),
+        nav('Agent Memory', [['Memory console','memory','Agent Memory.dc.html'],['Status hub','monitor_heart','Agent Memory.dc.html'],['Skills catalog','school','Agent Memory.dc.html']]),
+        nav('Manage', [['To-Do list','done_all','Todos.dc.html'],['Activity','history'],['Settings','settings','Settings.dc.html']])
+      ],
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — pattern applies to title, labels, id' : 'Search or filter issues',
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexError: !!(s.regexMode && s.search && (() => { try { new RegExp(s.search); return false; } catch { return true; } })()),
+      openRegexBuilder: () => set({regexOpen:true, regexDraft: s.regexMode ? s.search : ''}),
+      closeRegexBuilder: () => set({regexOpen:false}), regexOpen: s.regexOpen,
+      regexDraft: s.regexDraft, setRegexDraft: (e) => set({regexDraft: e.target.value}),
+      regexSnippetGroups,
+      regexPreview, regexMatchCount, regexErrorMsg,
+      regexValidBg: regexValid ? 'var(--goodc)' : 'var(--errc)',
+      regexValidFg: regexValid ? 'var(--good)' : 'var(--err)',
+      regexValidLabel: regexValid ? (s.regexDraft ? 'valid' : 'empty') : 'invalid',
+      regexFlagChips: ['i','g','m','s'].map(f => ({name: f, on: s.regexFlags[f],
+        tip: {i:'case-insensitive', g:'global', m:'multiline', s:'dotall'}[f],
+        toggle: () => set({regexFlags: {...s.regexFlags, [f]: !s.regexFlags[f]}}),
+        bg: s.regexFlags[f] ? 'var(--prim)' : 'var(--surfc)', fg: s.regexFlags[f] ? 'var(--onprim)' : 'var(--onsurfv)'})),
+      regexTestText: s.regexTestText, setRegexTestText: (e) => set({regexTestText: e.target.value}),
+      regexHighlighted, regexGroups, regexNoGroups: regexGroups.length === 0, regexExplain,
+      applyRegex: () => set({search: s.regexDraft, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen:true}), closePalette: () => set({paletteOpen:false}),
+      paletteQuery: s.paletteQuery, setPaletteQuery: (e) => set({paletteQuery: e.target.value}), paletteResults,
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      isList: s.view === 'list', isBoard: s.view === 'board',
+      setList: () => set({view:'list'}), setBoard: () => set({view:'board'}),
+      listBg: s.view === 'list' ? 'var(--primc)' : 'transparent', listFg: s.view === 'list' ? 'var(--onprimc)' : 'var(--onsurfv)',
+      boardBg: s.view === 'board' ? 'var(--primc)' : 'transparent', boardFg: s.view === 'board' ? 'var(--onprimc)' : 'var(--onsurfv)',
+      filterChips: [chip('Open','open'), chip('Closed','closed'), chip('Assigned to me','mine')],
+      countLabel: filteredList.length + ' issues',
+      visibleIssues: filteredList.map(i => ({
+        ...i, meta: i.state === 'Open' ? 'opened ' + i.opened + ' · ' + i.assignee : 'closed · ' + i.assignee,
+        stateIcon: i.state === 'Open' ? 'adjust' : 'check_circle', stateColor: i.state === 'Open' ? 'var(--good)' : 'var(--onsurfv)',
+        labelChips: i.labels.map(l => this.labelColor(l)), avatar: this.avatar(i.assignee),
+        open: () => set({drawerId: i.id})
+      })),
+      emptyList: filteredList.length === 0,
+      columns: colDefs.map(([key, name, dot]) => {
+        const cards = filteredList.filter(i => i.col === key);
+        return { name, dot, count: cards.length,
+          cards: cards.map(i => ({...i, labelChips: i.labels.map(l => this.labelColor(l)).slice(0,1), avatar: this.avatar(i.assignee),
+            open: () => set({drawerId: i.id}), dragStart: () => set({dragId: i.id})})),
+          dragOver: (e) => e.preventDefault(),
+          drop: (e) => { e.preventDefault(); if (s.dragId) upd(s.dragId, i => ({...i, col: key, state: key === 'done' ? 'Closed' : 'Open'})); set({dragId:null}); },
+          adding: s.addingCol === key, draft: s.addingCol === key ? s.draft : '',
+          startAdd: () => set({addingCol: key, draft:''}), cancelAdd: () => set({addingCol:null}),
+          setDraft: (e) => set({draft: e.target.value}),
+          draftKey: (e) => { if (e.key === 'Enter') this._confirmAdd(key); },
+          confirmAdd: () => this._confirmAdd(key)
+        };
+      }),
+      drawerIssue: drawer ? {...drawer, body: drawer.body} : null,
+      drawerStateBg: drawer && drawer.state === 'Open' ? 'var(--goodc)' : 'var(--surfch)',
+      drawerStateFg: drawer && drawer.state === 'Open' ? 'var(--good)' : 'var(--onsurfv)',
+      drawerToggleLabel: drawer && drawer.state === 'Open' ? 'Close issue' : 'Reopen issue',
+      toggleDrawerState: () => drawer && upd(drawer.id, i => ({...i, state: i.state === 'Open' ? 'Closed' : 'Open', col: i.state === 'Open' ? 'done' : 'todo'})),
+      closeDrawer: () => set({drawerId:null}),
+      allLabelChips: drawer ? Object.keys({performance:1,frontend:1,ui:1,a11y:1,bug:1,feature:1,search:1,ci:1,backend:1}).map(l => {
+        const on = drawer.labels.includes(l), c = this.labelColor(l);
+        return {name:l, on, bg: on ? c.bg : 'transparent', fg: on ? c.fg : 'var(--onsurfv)', border: on ? c.bg : 'var(--outl)',
+          toggle: () => upd(drawer.id, i => ({...i, labels: on ? i.labels.filter(x => x !== l) : [...i.labels, l]}))};
+      }) : [],
+      assigneeChips: drawer ? people.map(p => { const on = drawer.assignee === p;
+        return {name:p, avatar:this.avatar(p), bg: on ? 'var(--primc)' : 'transparent', fg: on ? 'var(--onprimc)' : 'var(--onsurfv)', border: on ? 'var(--primc)' : 'var(--outl)',
+          pick: () => upd(drawer.id, i => ({...i, assignee: p}))};
+      }) : [],
+      newOpen: s.newOpen, openNew: () => set({newOpen:true}), closeNew: () => set({newOpen:false}),
+      newTitle: s.newTitle, newBody: s.newBody,
+      setNewTitle: (e) => set({newTitle: e.target.value}), setNewBody: (e) => set({newBody: e.target.value}),
+      createIssue: () => this._create(),
+      stop: (e) => e.stopPropagation()
+    };
+  }
+  _confirmAdd(col) {
+    const s = this.state; if (!s.draft.trim()) return;
+    this.setState({issues: [...s.issues, {id: Date.now(), iid: 4300 + s.issues.length + 20, title: s.draft.trim(), body:'', state: col === 'done' ? 'Closed' : 'Open', col, labels: [], assignee: 'Jun Park', opened: 'just now'}], addingCol: null, draft: ''});
+  }
+  _create() {
+    const s = this.state; if (!s.newTitle.trim()) return;
+    this.setState({issues: [{id: Date.now(), iid: 4300 + s.issues.length + 20, title: s.newTitle.trim(), body: s.newBody, state:'Open', col:'todo', labels:[], assignee:'Jun Park', opened:'just now'}, ...s.issues], newOpen:false, newTitle:'', newBody:''});
+  }
+}
+</script>
+</body>
+</html>

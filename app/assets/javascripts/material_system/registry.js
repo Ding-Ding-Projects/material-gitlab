@@ -72,6 +72,8 @@ export const UNIVERSAL_FEATURE_CONTRACTS = Object.freeze(
   ),
 );
 
+export const CANONICAL_FEATURE_IDS = Object.freeze(UNIVERSAL_FEATURE_CONTRACTS.map(({ id }) => id));
+
 const CONTRACT_IDS = new Set(UNIVERSAL_FEATURE_CONTRACTS.map(({ id }) => id));
 
 const emptyEvidence = () => ({
@@ -85,7 +87,8 @@ const emptyEvidence = () => ({
 });
 
 export const createFeatureInventory = (contractId) => {
-  if (!CONTRACT_IDS.has(contractId)) throw new Error(`Unknown universal feature contract: ${contractId}`);
+  if (!CONTRACT_IDS.has(contractId))
+    throw new Error(`Unknown universal feature contract: ${contractId}`);
   return {
     contractId,
     status: 'unverified',
@@ -107,7 +110,9 @@ export const createSurfaceInventory = ({ id, kind, title, route }) => {
     kind,
     title,
     route,
-    coverage: UNIVERSAL_FEATURE_CONTRACTS.map(({ id: contractId }) => createFeatureInventory(contractId)),
+    coverage: UNIVERSAL_FEATURE_CONTRACTS.map(({ id: contractId }) =>
+      createFeatureInventory(contractId),
+    ),
   };
 };
 
@@ -119,10 +124,11 @@ export const createRegistry = ({ surfaces = [], negativeRegression = null } = {}
   negativeRegression,
 });
 
+export const createFeatureRegistry = createRegistry;
+
 const isObject = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
 const nonEmpty = (value) => typeof value === 'string' && value.trim().length > 0;
-const verifiedRef = (value) =>
-  isObject(value) && value.verified === true && nonEmpty(value.ref);
+const verifiedRef = (value) => isObject(value) && value.verified === true && nonEmpty(value.ref);
 
 const evidenceValid = (evidence, path, errors) => {
   if (!isObject(evidence)) {
@@ -135,7 +141,11 @@ const evidenceValid = (evidence, path, errors) => {
   for (const key of EVIDENCE_SLOTS) {
     const value = evidence[key];
     if (key === 'captures') {
-      if (!Array.isArray(value) || value.length === 0 || value.some((capture) => !verifiedRef(capture))) {
+      if (
+        !Array.isArray(value) ||
+        value.length === 0 ||
+        value.some((capture) => !verifiedRef(capture))
+      ) {
         errors.push(`${path}.captures: at least one verified real capture is required`);
       }
     } else if (!verifiedRef(value)) {
@@ -147,10 +157,13 @@ const evidenceValid = (evidence, path, errors) => {
 export const validateRegistry = (registry) => {
   const errors = [];
   if (!isObject(registry)) return { valid: false, errors: ['registry must be an object'] };
-  if (registry.schemaVersion !== REGISTRY_SCHEMA_VERSION) errors.push('schemaVersion must be exactly 1');
+  if (registry.schemaVersion !== REGISTRY_SCHEMA_VERSION)
+    errors.push('schemaVersion must be exactly 1');
   if (!Array.isArray(registry.features)) errors.push('features must be an array');
-  if (!Array.isArray(registry.surfaces) || registry.surfaces.length === 0) errors.push('at least one surface inventory is required');
-  if (!verifiedRef(registry.negativeRegression)) errors.push('registry negativeRegression must be a verified ref');
+  if (!Array.isArray(registry.surfaces) || registry.surfaces.length === 0)
+    errors.push('at least one surface inventory is required');
+  if (!verifiedRef(registry.negativeRegression))
+    errors.push('registry negativeRegression must be a verified ref');
 
   const featureIds = (registry.features || []).map((feature) => feature && feature.id);
   const featureSeen = new Set();
@@ -159,7 +172,8 @@ export const validateRegistry = (registry) => {
     if (featureSeen.has(id)) errors.push(`duplicate canonical feature: ${id}`);
     featureSeen.add(id);
   }
-  for (const id of CONTRACT_IDS) if (!featureSeen.has(id)) errors.push(`missing canonical feature: ${id}`);
+  for (const id of CONTRACT_IDS)
+    if (!featureSeen.has(id)) errors.push(`missing canonical feature: ${id}`);
 
   const surfaces = registry.surfaces || [];
   const surfaceSeen = new Set();
@@ -182,14 +196,27 @@ export const validateRegistry = (registry) => {
         errors.push(`${rowPath}: contractId is required`);
         continue;
       }
-      if (!CONTRACT_IDS.has(row.contractId)) errors.push(`${rowPath}: unknown contract ${row.contractId}`);
-      if (coverageSeen.has(row.contractId)) errors.push(`${rowPath}: duplicate contract ${row.contractId}`);
+      if (!CONTRACT_IDS.has(row.contractId))
+        errors.push(`${rowPath}: unknown contract ${row.contractId}`);
+      if (coverageSeen.has(row.contractId))
+        errors.push(`${rowPath}: duplicate contract ${row.contractId}`);
       coverageSeen.add(row.contractId);
       evidenceValid(row.evidence, `${rowPath}.evidence`, errors);
-      if (!verifiedRef(row.negativeRegression)) errors.push(`${rowPath}.negativeRegression: verified ref is required`);
+      if (!verifiedRef(row.negativeRegression))
+        errors.push(`${rowPath}.negativeRegression: verified ref is required`);
     }
-    for (const id of CONTRACT_IDS) if (!coverageSeen.has(id)) errors.push(`${path}: missing contract ${id}`);
+    for (const id of CONTRACT_IDS)
+      if (!coverageSeen.has(id)) errors.push(`${path}: missing contract ${id}`);
   }
   return { valid: errors.length === 0, errors };
 };
 
+export function assertCanonicalFeatureRegistry(registry) {
+  const result = validateRegistry(registry);
+  if (!result.valid) {
+    const error = new Error(`Invalid canonical feature registry:\n${result.errors.join('\n')}`);
+    error.validationErrors = result.errors;
+    throw error;
+  }
+  return registry;
+}

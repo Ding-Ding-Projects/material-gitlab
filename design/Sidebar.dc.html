@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<nav data-screen-label="Sidebar" style="width:248px;flex-shrink:0;background:var(--surfc);display:flex;flex-direction:column;border-radius:0 16px 16px 0;overflow-y:auto;padding:12px 10px;gap:2px;height:100%;box-sizing:border-box">
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 12px 14px;font-family:'Google Sans';font-weight:700;font-size:16px">
+    <div style="width:28px;height:28px;border-radius:9px;background:var(--prim);display:flex;align-items:center;justify-content:center;color:var(--onprim);font-size:15px">G</div>GitLab M3
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:12px;background:var(--surfcl);margin-bottom:8px">
+    <div style="width:26px;height:26px;border-radius:8px;background:var(--warnc);color:var(--warn);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px">P</div>
+    <div style="min-width:0;flex:1"><div style="font-weight:500;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">phoenix-api</div><div style="font-size:11.5px;color:var(--onsurfv);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">acme-corp</div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;background:var(--surfcl);border:1px solid var(--outlv);border-radius:999px;padding:6px 8px 6px 12px;margin:0 2px 8px;color:var(--onsurfv)">
+    <span class="material-symbols-outlined" style="font-size:17px">search</span>
+    <input onInput="{{ setNavQ }}" value="{{ navQ }}" placeholder="Search or go to…" style="border:none;outline:none;background:transparent;font:inherit;font-size:12.5px;color:var(--onsurf);flex:1;min-width:0">
+    <span style="font-size:10.5px;font-weight:700;border:1px solid var(--outl);border-radius:6px;padding:1px 5px;color:var(--onsurfv)">/</span>
+  </div>
+  <sc-for list="{{ navSections }}" as="sec" hint-placeholder-count="5">
+    <div style="display:flex;flex-direction:column;gap:1px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:.6px;color:var(--onsurfv);padding:10px 14px 4px;text-transform:uppercase">{{ sec.name }}</div>
+      <sc-for list="{{ sec.items }}" as="it" hint-placeholder-count="3">
+        <a href="{{ it.href }}" style="display:flex;align-items:center;gap:12px;padding:8px 14px;border-radius:var(--nav-r,999px);font-size:13.5px;color:var(--onsurf);background:{{ it.bg }}" style-hover="background:var(--surfch)">
+          <span class="material-symbols-outlined" style="color:var(--onsurfv)">{{ it.icon }}</span>{{ it.label }}
+        </a>
+      </sc-for>
+    </div>
+  </sc-for>
+</nav>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 248, &quot;height&quot;: 720}, &quot;active&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Issues&quot;, &quot;tsType&quot;: &quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { navQ: '' };
+  renderVals() {
+    const active = this.props.active ?? '';
+    const q = this.state.navQ.toLowerCase();
+    const nav = (name, items) => ({name, items: items.filter(([label]) => !q || label.toLowerCase().includes(q)).map(([label, icon, href]) => ({label, icon, href: href || '#', bg: label === active ? 'var(--sec)' : 'transparent'}))});
+    // Mirrors lib/sidebars/projects/super_sidebar_menus/*.rb menu order and items
+    return { navQ: this.state.navQ, setNavQ: (e) => this.setState({navQ: e.target.value}), navSections: [
+      nav('Pinned', [['To-Do list','done_all','Todos.dc.html'],['Issues','list_alt','Issues.dc.html'],['Merge requests','call_merge','Merge Requests.dc.html']]),
+      nav('Manage', [['Activity','history','Manage.dc.html'],['Members','group','Settings.dc.html'],['Labels','label','Manage.dc.html']]),
+      nav('Plan', [['Issues','list_alt','Issues.dc.html'],['Boards','view_kanban','Issues.dc.html'],['Milestones','flag','Plan.dc.html'],['Iterations','update','Plan.dc.html'],['Wiki','menu_book','Plan.dc.html'],['Requirements','fact_check','Plan.dc.html'],['Epics & roadmap','map','Epics.dc.html']]),
+      nav('Code', [['Merge requests','call_merge','Merge Requests.dc.html'],['Repository','code','Repository.dc.html'],['Branches','account_tree','Code.dc.html'],['Commits','commit','Code.dc.html'],['Tags','sell','Code.dc.html'],['Compare','difference','Code.dc.html'],['Snippets','sticky_note_2','Code.dc.html']]),
+      nav('Build', [['Pipelines','conveyor_belt','Pipelines.dc.html'],['Jobs','construction','Build.dc.html'],['Pipeline editor','edit_note','Build.dc.html'],['Schedules','calendar_clock','Build.dc.html'],['Test cases','labs','Build.dc.html'],['Artifacts','inventory_2','Build.dc.html']]),
+      nav('Secure', [['Security dashboard','security','Security.dc.html'],['Vulnerability report','bug_report','Security.dc.html'],['Dependency list','account_tree','Secure.dc.html'],['Audit events','receipt_long','Secure.dc.html'],['Scan policies','policy','Secure.dc.html']]),
+      nav('Deploy', [['Releases','new_releases','Deploy.dc.html'],['Feature flags','toggle_on','Deploy.dc.html'],['Package registry','package_2','Deploy.dc.html'],['Container registry','deployed_code','Deploy.dc.html']]),
+      nav('Operate', [['Environments','cloud','Operate.dc.html'],['Kubernetes clusters','hub','Operate.dc.html'],['Terraform states','landscape','Operate.dc.html']]),
+      nav('Monitor', [['Incidents','e911_emergency','Monitor.dc.html'],['Alerts','notification_important','Monitor.dc.html'],['Error tracking','error','Monitor.dc.html'],['On-call schedules','phone_in_talk','Monitor.dc.html'],['Service desk','support_agent','Monitor.dc.html']]),
+      nav('Analyze', [['Value stream','conversion_path','Analyze.dc.html'],['CI/CD analytics','monitoring','Analyze.dc.html'],['Repository analytics','database','Analyze.dc.html'],['Contributors','diversity_3','Analyze.dc.html'],['Insights','lightbulb','Analyze.dc.html']]),
+      nav('Agent Memory', [['Memory console','memory','Agent Memory.dc.html'],['Status hub','monitor_heart','Agent Memory.dc.html'],['Skills catalog','school','Agent Memory.dc.html']]),
+      nav('Settings', [['Project settings','settings','Settings.dc.html'],['CI/CD','conveyor_belt','Settings.dc.html'],['Integrations','extension','Settings.dc.html']]),
+      nav('Instance', [['Admin area','admin_panel_settings','Admin.dc.html'],['Sign in','login','Login.dc.html']])
+    ].filter(s => s.items.length)};
+  }
+}
+</script>
+</body>
+</html>

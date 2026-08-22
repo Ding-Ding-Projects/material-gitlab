@@ -1,29 +1,28 @@
 import { app, BrowserWindow } from 'electron';
 import { join } from 'node:path';
-import { registerLifecycleBridge } from './main/lifecycle';
+import { registerPrivilegedBridge } from './main/bridge';
 
-function createWindow(): void {
+function createOnboardingWindow(): BrowserWindow {
   const window = new BrowserWindow({
     width: 1180,
     height: 780,
     minWidth: 860,
     minHeight: 620,
-    backgroundColor: '#f8f8ff',
     webPreferences: {
       preload: join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: true,
     },
   });
   void window.loadFile(join(__dirname, 'renderer', 'index.html'));
+  return window;
 }
 
 app.whenReady().then(() => {
-  registerLifecycleBridge();
-  createWindow();
+  registerPrivilegedBridge();
+  createOnboardingWindow();
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) createOnboardingWindow();
   });
 });
 

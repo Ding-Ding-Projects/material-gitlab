@@ -1,5 +1,5 @@
 <script>
-import { GlAvatar, GlBadge, GlButton, GlIcon, GlNavItem, GlTooltipDirective } from '@gitlab/ui';
+import { GlAvatar, GlBadge, GlButton, GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__, sprintf } from '~/locale';
 import {
@@ -23,7 +23,6 @@ export default {
     GlBadge,
     GlButton,
     GlIcon,
-    GlNavItem,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -155,18 +154,18 @@ export default {
     },
     computedLinkClasses() {
       return {
-        'gl-px-2 gl-mx-2 gl-leading-normal': this.isSubitem,
-        'gl-px-2': !this.isSubitem,
-        '!gl-pl-5 gl-rounded-default': this.isFlyout,
+        'm3-shell-nav-subitem': this.isSubitem,
+        'm3-shell-nav-flyout-item': this.isFlyout,
         [this.item.link_classes]: this.item.link_classes,
+        'm3-shell-nav-item-active': this.isActive,
         ...this.linkClasses,
       };
     },
+    linkComponent() {
+      return this.item.to ? 'router-link' : 'a';
+    },
     hasAvatar() {
       return Boolean(this.item.entity_id);
-    },
-    hasEndSpace() {
-      return this.hasPill || this.isPinnable || this.isFlyout;
     },
     avatarShape() {
       return this.item.avatar_shape || 'rect';
@@ -231,59 +230,58 @@ export default {
     @mouseenter="isMouseIn = true"
     @mouseleave="isMouseIn = false"
   >
-    <gl-nav-item
+    <component
+      :is="linkComponent"
       v-bind="linkProps"
-      class="super-sidebar-nav-item m3-shell-nav-item show-on-focus-or-hover--control hide-on-focus-or-hover--control gl-mb-1"
+      class="gl-nav-item super-sidebar-nav-item m3-shell-nav-item show-on-focus-or-hover--control hide-on-focus-or-hover--control"
       :class="computedLinkClasses"
       data-testid="nav-item-link"
       :aria-label="item.title"
-      :is-icon-only="!isFlyout ? isIconOnly : false"
       @click="$emit('nav-link-click')"
-      @escape="$emit('nav-item-keydown-esc')"
+      @keydown.esc="$emit('nav-item-keydown-esc')"
     >
-      <template v-if="!isFlyout" #icon>
-        <span
-          class="gl-relative gl-flex gl-h-6 gl-w-6 gl-items-center gl-justify-center"
-          :class="{
-            'gl-self-start': hasAvatar,
-            'gl-rounded-base gl-bg-default': hasAvatar && avatarShape === 'rect',
-          }"
-        >
-          <slot v-if="!hideIcon" name="icon">
-            <template
-              v-if="
-                isInPinnedSection && glFeatures.hideUnpinnedSidebarItems && itemIcon && !isIconOnly
-              "
-            >
-              <gl-icon :name="itemIcon" class="hide-on-focus-or-hover--target" />
-              <gl-icon
-                name="grip"
-                class="js-draggable-icon show-on-focus-or-hover--target gl-absolute gl-cursor-grab"
-                variant="subtle"
-              />
-            </template>
-            <gl-icon v-else-if="itemIcon" :name="itemIcon" />
+      <span
+        v-if="!isFlyout && !hideIcon"
+        class="m3-shell-nav-item-icon gl-relative gl-flex gl-h-6 gl-w-6 gl-items-center gl-justify-center"
+        :class="{
+          'gl-self-start': hasAvatar,
+          'gl-rounded-base gl-bg-default': hasAvatar && avatarShape === 'rect',
+        }"
+      >
+        <slot name="icon">
+          <template
+            v-if="
+              isInPinnedSection && glFeatures.hideUnpinnedSidebarItems && itemIcon && !isIconOnly
+            "
+          >
+            <gl-icon :name="itemIcon" class="hide-on-focus-or-hover--target" />
             <gl-icon
-              v-else-if="isInPinnedSection"
               name="grip"
-              class="js-draggable-icon show-on-focus-or-hover--target super-sidebar-mix-blend-mode gl-cursor-grab"
+              class="js-draggable-icon show-on-focus-or-hover--target gl-absolute gl-cursor-grab"
               variant="subtle"
             />
-            <gl-avatar
-              v-else-if="hasAvatar"
-              :size="24"
-              :shape="avatarShape"
-              :entity-name="item.title"
-              :entity-id="item.entity_id"
-              :src="item.avatar"
-              :alt="item.title"
-            />
-          </slot>
-        </span>
-      </template>
+          </template>
+          <gl-icon v-else-if="itemIcon" :name="itemIcon" />
+          <gl-icon
+            v-else-if="isInPinnedSection"
+            name="grip"
+            class="js-draggable-icon show-on-focus-or-hover--target super-sidebar-mix-blend-mode gl-cursor-grab"
+            variant="subtle"
+          />
+          <gl-avatar
+            v-else-if="hasAvatar"
+            :size="24"
+            :shape="avatarShape"
+            :entity-name="item.title"
+            :entity-id="item.entity_id"
+            :src="item.avatar"
+            :alt="item.title"
+          />
+        </slot>
+      </span>
       <span
         v-show="!isIconOnly"
-        class="gl-inline-block gl-grow gl-py-2 gl-leading-16 gl-break-anywhere"
+        class="gl-nav-item-label m3-shell-nav-item-label gl-inline-block gl-grow gl-break-anywhere"
         :class="{ 'nav-item-link-label': !isFlyout }"
         data-testid="nav-item-link-label"
       >
@@ -301,19 +299,17 @@ export default {
         </span>
       </span>
       <slot name="actions"></slot>
-      <template v-if="hasEndSpace && !isIconOnly" #end>
-        <span
-          v-if="hasPill"
-          class="nav-item-link-badge gl-mr-3 gl-text-sm"
-          :class="{
-            'hide-on-focus-or-hover--target transition-opacity-on-hover--target': isPinnable,
-          }"
-          data-testid="pill-badge"
-        >
-          {{ pillData }}
-        </span>
-      </template>
-    </gl-nav-item>
+      <span
+        v-if="hasPill && !isIconOnly"
+        class="nav-item-link-badge m3-shell-nav-item-badge gl-text-sm"
+        :class="{
+          'hide-on-focus-or-hover--target transition-opacity-on-hover--target': isPinnable,
+        }"
+        data-testid="pill-badge"
+      >
+        {{ pillData }}
+      </span>
+    </component>
     <gl-button
       v-if="showPinButton"
       v-gl-tooltip.noninteractive.right.viewport="

@@ -1,11 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { GitlabInstantApi, InstanceConfig, ReadinessResult } from './shared/model';
 
-const api: GitlabInstantApi = {
-  getConfiguration: () => ipcRenderer.invoke('gitlab-instant:config:get') as Promise<InstanceConfig>,
-  saveConfiguration: (config) => ipcRenderer.invoke('gitlab-instant:config:save', config) as Promise<InstanceConfig>,
-  checkReadiness: (config) => ipcRenderer.invoke('gitlab-instant:readiness:check', config) as Promise<ReadinessResult>,
-  openInstance: () => ipcRenderer.invoke('gitlab-instant:instance:open') as Promise<{ opened: boolean; url?: string; reason?: string }>,
-};
+const BRIDGE_VERSION = 1 as const;
+const CHANNELS = Object.freeze({
+  config: 'gitlab-instant/config',
+  setConfig: 'gitlab-instant/set-config',
+  readiness: 'gitlab-instant/readiness',
+  open: 'gitlab-instant/open',
+});
 
-contextBridge.exposeInMainWorld('gitlabInstant', api);
+contextBridge.exposeInMainWorld('gitlabInstant', Object.freeze({
+  version: BRIDGE_VERSION,
+  getConfig: () => ipcRenderer.invoke(CHANNELS.config),
+  setConfig: (value: unknown) => ipcRenderer.invoke(CHANNELS.setConfig, value),
+  checkReadiness: () => ipcRenderer.invoke(CHANNELS.readiness),
+  openVerifiedInstance: () => ipcRenderer.invoke(CHANNELS.open),
+}));

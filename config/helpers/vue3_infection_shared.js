@@ -128,6 +128,9 @@ function runInfectionScanner() {
  *
  * @param {Map|null} scannerGraph - The loaded scanner graph (or null to skip graph checks).
  * @param {Object} [options]
+ * Both callbacks receive the clean path with forward slashes on every platform, so they can
+ * be written as plain posix substring patterns without a separator dance of their own.
+ *
  * @param {function(string): boolean} [options.shouldExclude] - Optional callback that returns
  *   true for clean paths that should always be considered NOT infectable, regardless of the
  *   scanner graph (e.g. Vite pre-bundled deps in `/tmp/cache/vite/`).
@@ -140,10 +143,22 @@ const createIsInfectable = (scannerGraph, { shouldExclude, shouldBypass } = {}) 
   return (id) => {
     const clean = stripQuery(id);
     if (!INFECTABLE_RE.test(clean)) return false;
-    if (INFECTION_BLOCKLIST.some((blocked) => clean.includes(blocked))) return false;
+
+    // Every path *pattern* in this system is written in posix form
+    // (`app/assets/javascripts/...`, `/node_modules/core-js/`, `/tmp/cache/vite/`),
+    // while `clean` arrives in the platform's own form. On Windows that is
+    // backslash-separated, so each of those patterns silently fails to match:
+    // the blocklist stops blocking and duplicates global-state modules into the
+    // bundle, and the loader-injected bypass stops firing, which fails the
+    // build outright on core-js. Match patterns against a forward-slash copy
+    // and keep `clean` itself native for the scanner-graph lookup, whose keys
+    // are platform paths.
+    const posixClean = path.sep === '/' ? clean : clean.split(path.sep).join('/');
+
+    if (INFECTION_BLOCKLIST.some((blocked) => posixClean.includes(blocked))) return false;
     if (!scannerGraph) return true;
-    if (shouldExclude && shouldExclude(clean)) return false;
-    if (shouldBypass && shouldBypass(clean)) return true;
+    if (shouldExclude && shouldExclude(posixClean)) return false;
+    if (shouldBypass && shouldBypass(posixClean)) return true;
     const entry = scannerGraph.get(clean);
     if (!entry) {
       throw new Error(

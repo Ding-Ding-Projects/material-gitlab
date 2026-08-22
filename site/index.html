@@ -7,6 +7,12 @@
     <meta name="theme-color" content="#6750a4" />
     <title>Material GitLab · Documentation</title>
     <link rel="stylesheet" href="./src/styles.css" />
+    <link rel="stylesheet" href="./src/navigation.css" />
+    <link rel="stylesheet" href="./src/appearance.css" />
+    <link rel="stylesheet" href="./src/tabs.css" />
+    <link rel="stylesheet" href="./src/regex-builder.css" />
+    <link rel="stylesheet" href="./src/command-notifications.css" />
+    <link rel="stylesheet" href="./src/content.css" />
   </head>
   <body>
     <header class="site-header">
@@ -21,6 +27,27 @@
       </nav>
       <label class="site-search" for="site-search"><span aria-hidden="true">⌕</span><input id="site-search" data-site-search type="search" placeholder="Search guides and features" /></label>
     </header>
+
+    <section class="navigation-shell section-shell" aria-label="Site navigation tools">
+      <div class="tab-strip" role="tablist" aria-label="Primary pages" data-navigation-tabs>
+        <button type="button" role="tab" aria-selected="true" aria-controls="overview" data-nav-tab="overview">Overview</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="guides" data-nav-tab="guides">Guides</button>
+        <button type="button" role="tab" aria-selected="false" aria-controls="reference" data-nav-tab="reference">Reference</button>
+      </div>
+      <div class="navigation-tools">
+        <label for="tab-search">Search tabs</label>
+        <input id="tab-search" type="search" data-tab-search placeholder="Search tabs" />
+        <button type="button" data-regex-toggle aria-expanded="false">Regex builder</button>
+        <button type="button" data-command-palette aria-haspopup="dialog">Command palette <kbd>Ctrl+Shift+F</kbd></button>
+      </div>
+      <div class="regex-builder" data-regex-builder hidden>
+        <label for="tab-regex">Pattern</label>
+        <input id="tab-regex" type="text" data-tab-regex placeholder="Optional pattern" />
+        <label for="tab-regex-flags">Flags</label>
+        <input id="tab-regex-flags" type="text" data-tab-regex-flags value="i" maxlength="8" />
+        <output data-regex-feedback aria-live="polite"></output>
+      </div>
+    </section>
 
     <main>
       <section id="overview" class="hero section-shell">
@@ -56,6 +83,22 @@
         <div class="reference-grid"><div><h3>Material by default</h3><p>Expressive colour, readable type, and clear states create a dependable base for every page.</p></div><div><h3>Local and fast</h3><p>Assets resolve from the current base path, so the site works from a subdirectory as well as a domain root.</p></div><div><h3>Ready for your docs</h3><p>Drop new articles into the shell without losing navigation, spacing, or responsive behaviour.</p></div></div>
       </section>
 
+      <section id="settings" class="section-shell content-section settings-section" aria-labelledby="settings-title">
+        <div class="section-heading"><div><p class="eyebrow">Preferences</p><h2 id="settings-title">Make the reading experience yours</h2></div></div>
+        <div class="settings-grid" data-settings-surface>
+          <label>Language mode<select data-preference="language"><option value="en">English</option><option value="zh-Hant">繁體中文</option><option value="bilingual">English + 繁體中文</option></select></label>
+          <label>English tone <input type="range" min="1" max="5" value="1" data-preference="funnyLevelEnglish" /><output data-level-output="funnyLevelEnglish">1</output></label>
+          <label>Cantonese tone <input type="range" min="1" max="5" value="1" data-preference="funnyLevelCantonese" /><output data-level-output="funnyLevelCantonese">1</output></label>
+          <label class="checkbox-row"><input type="checkbox" data-preference="showEmojis" checked /> Show emojis in messages</label>
+          <label>Personal vocabulary JSON <input type="file" accept="application/json,.json" data-vocabulary-upload /></label>
+          <p class="settings-status" data-preferences-status role="status">No personal vocabulary file loaded.</p>
+        </div>
+        <div class="status-hub-card" data-status-hub>
+          <h3>Project status</h3><p data-status-hub-state>Not registered.</p>
+          <button type="button" data-register-status>Register this project locally</button>
+        </div>
+      </section>
+
       <section id="library" class="section-shell content-section library-section" aria-labelledby="library-title">
         <div class="section-heading"><div><p class="eyebrow">Live library</p><h2 id="library-title">Canonical docs, one calm surface</h2></div></div>
         <div class="tab-strip" role="tablist" aria-label="Documentation library">
@@ -71,9 +114,25 @@
           <div id="document-viewer" class="document-viewer" data-document-viewer aria-live="polite"><p>Choose an article to read it here.</p></div>
         </div>
       </section>
+
+      <section id="tools" class="section-shell content-section tools-section" aria-labelledby="tools-title">
+        <div class="section-heading"><div><p class="eyebrow">Local tools</p><h2 id="tools-title">Work with the site, offline</h2></div></div>
+        <div class="tool-grid">
+          <article class="surface-card" data-appearance-target="site-tools-card"><h3>Appearance</h3><p>Adjust this card locally and keep the override in browser storage.</p><button type="button" data-edit-appearance="site-tools-card">Edit appearance…</button><button type="button" data-appearance-reset-all>Reset appearance</button></article>
+          <article class="surface-card"><h3>Browser tabs</h3><div data-tabs-shell aria-label="Saved browser tabs"></div><button type="button" data-tab-add>Add tab</button></article>
+          <article class="surface-card"><h3>Anchored regex</h3><label for="tools-search">Search this tool surface</label><input id="tools-search" type="search" data-tools-search /><button type="button" data-tools-regex-toggle aria-expanded="false">Open regex builder</button><div data-tools-regex-builder hidden></div></article>
+          <article class="surface-card"><h3>Notifications</h3><button type="button" data-notification-demo>Record local notification</button><button type="button" data-notification-centre-toggle>Open notification centre</button><div data-notification-stack aria-live="polite"></div><div data-notification-centre hidden></div></article>
+          <article class="surface-card"><h3>History and exports</h3><p data-history-summary>No local history events yet.</p><button type="button" data-history-record>Record settings change</button><button type="button" data-history-export>Export redacted history</button><ul data-history-list></ul></article>
+          <article class="surface-card" data-lock-target="site-tools-lock-card"><h3>Toy locks and authenticator</h3><p data-lock-disclosure></p><button type="button" data-lock-target="site-tools-lock-card">Lock this card…</button><form data-authenticator-form><label>Issuer <input name="issuer" required /></label><label>Account <input name="account" required /></label><label>Secret <input name="secret" required autocomplete="off" /></label><button type="submit">Register authenticator</button></form><ul data-authenticator-list></ul></article>
+          <article class="surface-card"><h3>Scheduled settings and file conversion</h3><p data-schedule-summary>No local schedule rules.</p><button type="button" data-schedule-add>Add local schedule</button><label>Choose a file <input type="file" data-converter-file /></label><p data-converter-status>Nothing queued.</p></article>
+          <article class="surface-card"><h3>Logo customization</h3><label>Local logo image <input type="file" accept="image/png,image/jpeg,image/webp" data-logo-upload /></label><button type="button" data-logo-reset>Reset logo</button><p data-logo-status>Using the shipped mark.</p></article>
+          <article class="surface-card"><h3>Ollama and offline docs</h3><p data-ollama-status>Local Ollama transport is not configured; offline state remains available.</p><button type="button" data-ollama-check>Check local health</button><div data-offline-docs><label for="offline-doc-search">Search offline docs</label><input id="offline-doc-search" type="search" data-offline-doc-search /><div data-offline-doc-list></div></div></article>
+        </div>
+      </section>
     </main>
 
     <footer class="site-footer section-shell"><span>Material GitLab</span><span>Made for focused work.</span><a class="text-link" href="#library">Open library</a></footer>
+    <dialog data-command-dialog aria-labelledby="command-title"><form method="dialog"><h2 id="command-title">Command palette</h2><label for="command-search">Search commands</label><input id="command-search" type="search" data-command-search /><button value="cancel">Close</button></form><ul data-command-results></ul></dialog>
     <script type="module" src="./src/main.js"></script>
   </body>
 </html>

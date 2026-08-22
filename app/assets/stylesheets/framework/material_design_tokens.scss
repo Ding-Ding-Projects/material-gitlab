@@ -61,3 +61,58 @@ body {
     transition: none !important;
   }
 }
+
+// Framework-neutral runtime hooks. Page-specific layout belongs to the
+// consuming surface; these selectors only expose shared semantic behavior.
+[data-material-system-theme='dark'] {
+  color-scheme: dark;
+  --m3-color-surface: #1c1b1f;
+  --m3-color-surface-container: #211f26;
+  --m3-color-on-surface: #e6e1e5;
+  --m3-color-on-surface-variant: #cac4d0;
+  --m3-color-outline: #938f99;
+}
+
+[data-material-system-density='compact'] {
+  --m3-density-scale: -1;
+  --m3-control-block-size: 2rem;
+}
+
+[data-material-system-density='comfortable'] {
+  --m3-density-scale: 0;
+  --m3-control-block-size: 2.5rem;
+}
+
+[data-material-system-density='spacious'] {
+  --m3-density-scale: 1;
+  --m3-control-block-size: 3rem;
+}
+
+[data-material-system-overlay] {
+  max-block-size: min(80vh, var(--material-system-available-block-size, 80vh));
+  overflow: auto;
+  color: var(--m3-color-on-surface);
+  background: var(--m3-color-surface);
+  border: 1px solid var(--m3-color-outline);
+  border-radius: var(--m3-shape-corner-medium);
+  box-shadow: var(--m3-shell-elevation);
+}
+
+[data-material-system-focus-target]:focus-visible,
+[data-material-system-focus-target][data-teleport-highlight='true'] {
+  outline: 3px solid var(--m3-color-primary);
+  outline-offset: 2px;
+}
+
+[data-material-system-tablist][aria-orientation='vertical'] {
+  min-inline-size: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-material-system-motion] {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

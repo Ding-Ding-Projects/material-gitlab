@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div onClick="{{ close }}" style="position:fixed;inset:0;background:var(--scrim,rgba(29,27,32,.35));z-index:50;display:flex;align-items:center;justify-content:center">
+  <div onClick="{{ stop }}" data-screen-label="Regex builder" style="width:780px;max-height:88vh;overflow-y:auto;background:var(--surf,#f4effa);border-radius:var(--dlg-r,28px);padding:26px;display:flex;flex-direction:column;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,.3);font-family:'Google Sans Text',sans-serif;color:var(--onsurf,#1d1b20)">
+    <div style="display:flex;align-items:center;gap:12px">
+      <h2 style="margin:0;font-family:'Google Sans';font-size:20px;font-weight:500">Regex builder</h2>
+      <span style="font-size:12px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ validBg }};color:{{ validFg }}">{{ validLabel }}</span>
+      <div style="margin-left:auto;display:flex;gap:4px">
+        <sc-for list="{{ flagChips }}" as="fl" hint-placeholder-count="4">
+          <div onClick="{{ fl.toggle }}" title="{{ fl.tip }}" style="font-family:monospace;font-size:13px;font-weight:700;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;background:{{ fl.bg }};color:{{ fl.fg }}">{{ fl.name }}</div>
+        </sc-for>
+      </div>
+    </div>
+    <input onInput="{{ setDraft }}" value="{{ draft }}" placeholder="pattern, e.g. (auth|login).*fail" style="border:1px solid var(--outl);border-radius:12px;padding:12px 14px;font-family:monospace;font-size:15px;background:transparent;color:var(--onsurf);outline:none">
+    <sc-if value="{{ errorMsg }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;color:var(--err);font-family:monospace">{{ errorMsg }}</div></sc-if>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <sc-for list="{{ snippetGroups }}" as="grp" hint-placeholder-count="3">
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px;width:86px;flex-shrink:0">{{ grp.name }}</span>
+          <sc-for list="{{ grp.items }}" as="sn" hint-placeholder-count="5">
+            <div onClick="{{ sn.insert }}" title="{{ sn.tip }}" style="font-family:monospace;font-size:12.5px;padding:5px 11px;border-radius:8px;cursor:pointer;background:var(--surfc);color:var(--onsurf)" style-hover="background:var(--surfch)">{{ sn.text }}</div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Test string</div>
+        <textarea onInput="{{ setTestText }}" value="{{ testText }}" rows="4" style="border:1px solid var(--outl);border-radius:12px;padding:10px 12px;font-family:monospace;font-size:12.5px;background:transparent;color:var(--onsurf);outline:none;resize:vertical"></textarea>
+        <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;font-family:monospace;font-size:12.5px;line-height:1.7;min-height:40px;word-break:break-word;white-space:pre-wrap">{{ highlighted }}</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Capture groups</div>
+        <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;min-height:40px;display:flex;flex-direction:column;gap:4px">
+          <sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+            <div style="display:flex;gap:10px;font-size:12.5px"><span style="font-family:monospace;color:var(--onprimc);font-weight:700;width:36px">{{ g.n }}</span><span style="font-family:monospace;color:var(--onsurf)">{{ g.val }}</span></div>
+          </sc-for>
+          <sc-if value="{{ noGroups }}" hint-placeholder-val="{{ true }}"><div style="font-size:12px;color:var(--onsurfv)">No captures on first match.</div></sc-if>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px">Explanation</div>
+        <div style="background:var(--surfcl);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;max-height:120px;overflow-y:auto">
+          <sc-for list="{{ explain }}" as="ex" hint-placeholder-count="3">
+            <div style="display:flex;gap:10px;font-size:12px"><span style="font-family:monospace;color:var(--onprimc);flex-shrink:0;min-width:52px">{{ ex.tok }}</span><span style="color:var(--onsurfv)">{{ ex.desc }}</span></div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--surfcl);border-radius:14px;padding:12px 14px;min-height:50px">
+      <div style="font-size:11.5px;font-weight:700;color:var(--onsurfv);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">{{ corpusTitle }} · {{ matchCount }}</div>
+      <sc-for list="{{ preview }}" as="pv" hint-placeholder-count="3">
+        <div style="font-size:12.5px;padding:3px 0;color:var(--onsurfv)">{{ pv }}</div>
+      </sc-for>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <div onClick="{{ close }}" style="padding:10px 20px;border-radius:999px;font-size:13.5px;cursor:pointer;color:var(--onprimc)">Cancel</div>
+      <div onClick="{{ apply }}" style="padding:10px 22px;border-radius:999px;font-size:13.5px;font-weight:500;cursor:pointer;background:var(--prim);color:var(--onprim)">Apply to search</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 900, &quot;height&quot;: 760}, &quot;initial&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;corpusTitle&quot;: {&quot;editor&quot;: &quot;text&quot;, &quot;default&quot;: &quot;Matches&quot;, &quot;tsType&quot;: &quot;string&quot;}, &quot;corpus&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;string[]&quot;}, &quot;onApply&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;(pattern: string) =&gt; void&quot;}, &quot;onClose&quot;: {&quot;editor&quot;: null, &quot;tsType&quot;: &quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  state = { draft: '', flags: {i:true, g:true, m:false, s:false},
+    testText: 'auth: login failed for user 42\npipeline #8812 passed in 04:31\nERROR TokenRefresh retry_count=3' };
+  componentDidMount() { if (this.props.initial) this.setState({draft: this.props.initial}); }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const corpus = this.props.corpus ?? [];
+    const flagStr = Object.keys(s.flags).filter(f => s.flags[f]).join('');
+    let re = null, valid = true, errorMsg = '';
+    try { re = new RegExp(s.draft || '(?!)', flagStr); }
+    catch (err) { valid = false; errorMsg = String(err.message || err); }
+    let preview = [], matchCount = '0', highlighted = s.testText, groups = [], explain = [];
+    if (re && s.draft) {
+      preview = corpus.filter(t => { re.lastIndex = 0; return re.test(t); }).slice(0,5);
+      matchCount = preview.length + ' of ' + corpus.length;
+      const parts = []; let last = 0, mi = 0;
+      const gre = new RegExp(s.draft, flagStr.includes('g') ? flagStr : flagStr + 'g');
+      let m; while ((m = gre.exec(s.testText)) && mi < 200) {
+        if (m.index > last) parts.push(s.testText.slice(last, m.index));
+        parts.push(React.createElement('mark', {key: mi, style: {background:'var(--primc)', color:'var(--onprimc)', borderRadius:'3px', padding:'0 1px'}}, m[0] || '∅'));
+        last = m.index + (m[0] ? m[0].length : 1); mi++;
+        if (!m[0]) gre.lastIndex++;
+        if (mi === 1 && m.length > 1) groups = m.slice(1).map((v, idx) => ({n: '$' + (idx + 1), val: v === undefined ? '—' : v}));
+      }
+      parts.push(s.testText.slice(last));
+      highlighted = React.createElement(React.Fragment, null, ...parts);
+      const dict = [['(?:','non-capturing group'],['(?=','lookahead'],['(?!','negative lookahead'],['(?<=','lookbehind'],['(?<!','negative lookbehind'],['(','capturing group'],[')','end group'],['[^','negated class'],['[','character class'],[']','end class'],['\\d','digit'],['\\D','non-digit'],['\\w','word char'],['\\W','non-word char'],['\\s','whitespace'],['\\S','non-whitespace'],['\\b','word boundary'],['\\B','non-boundary'],['.*','any chars (greedy)'],['.+','one or more chars'],['.','any char'],['*?','zero+ (lazy)'],['+?','one+ (lazy)'],['*','zero or more'],['+','one or more'],['??','optional (lazy)'],['?','optional'],['^','start anchor'],['$','end anchor'],['|','alternation'],['{','repetition {n,m}']];
+      let rest = s.draft;
+      while (rest.length && explain.length < 24) {
+        const hit = dict.find(([t]) => rest.startsWith(t));
+        if (hit) { explain.push({tok: hit[0], desc: hit[1]}); rest = rest.slice(hit[0].length); }
+        else { let lit = ''; while (rest.length && !dict.some(([t]) => rest.startsWith(t))) { lit += rest[0]; rest = rest.slice(1); }
+          if (lit) explain.push({tok: lit.slice(0, 8), desc: 'literal "' + lit + '"'}); }
+      }
+    }
+    return {
+      draft: s.draft, setDraft: (e) => set({draft: e.target.value}),
+      validBg: valid ? 'var(--goodc)' : 'var(--errc)', validFg: valid ? 'var(--good)' : 'var(--err)',
+      validLabel: valid ? (s.draft ? 'valid' : 'empty') : 'invalid', errorMsg,
+      flagChips: ['i','g','m','s'].map(f => ({name: f, tip: {i:'case-insensitive', g:'global', m:'multiline', s:'dotall'}[f],
+        toggle: () => set({flags: {...s.flags, [f]: !s.flags[f]}}),
+        bg: s.flags[f] ? 'var(--prim)' : 'var(--surfc)', fg: s.flags[f] ? 'var(--onprim)' : 'var(--onsurfv)'})),
+      snippetGroups: [
+        ['Classes', [['\\d','digit 0-9'],['\\w','word char'],['\\s','whitespace'],['[a-z]','range'],['[^ ]','not space'],['.','any char']]],
+        ['Quantifiers', [['*','zero+'],['+','one+'],['?','optional'],['{2,5}','2 to 5'],['*?','lazy zero+'],['+?','lazy one+']]],
+        ['Anchors', [['^','line start'],['$','line end'],['\\b','word boundary'],['\\B','non-boundary']]],
+        ['Groups', [['( )','capture'],['(?: )','non-capture'],['(a|b)','alternation'],['(?= )','lookahead'],['(?! )','neg lookahead'],['(?<= )','lookbehind']]],
+        ['Recipes', [['#\\d+','ref number'],['\\d{2}:\\d{2}','duration'],['(fail|error)','failures'],['^ERROR','error lines'],['\\bretry\\w*','retry words']]]
+      ].map(([name, items]) => ({name, items: items.map(([text, tip]) => ({text, tip, insert: () => set({draft: s.draft + text.replace(/ /g, '')})}))})),
+      testText: s.testText, setTestText: (e) => set({testText: e.target.value}),
+      highlighted, groups, noGroups: groups.length === 0, explain,
+      corpusTitle: this.props.corpusTitle ?? 'Matches', matchCount, preview,
+      close: () => this.props.onClose && this.props.onClose(),
+      apply: () => this.props.onApply && this.props.onApply(s.draft),
+      stop: (e) => e.stopPropagation()
+    };
+  }
+}
+</script>
+</body>
+</html>

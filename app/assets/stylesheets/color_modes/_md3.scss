@@ -1,0 +1,7 @@
+// MD3 color-mode entry, matching the shape of ./_dark.scss so the MD3
+// prototype layer slots into GitLab's existing color-mode import chain.
+// The layer itself declares both its light values and its `.gl-dark` /
+// `prefers-color-scheme: dark` overrides, so importing it once here is
+// enough for any stylesheet entry point that pulls this file in.
+
+@import '../md3/index';

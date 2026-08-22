@@ -1,0 +1,8 @@
+- page_title _('Manage')
+
+#js-material-manage{ data: {
+  initial_events: Gitlab::Json.dump(@material_manage_events),
+  initial_labels: Gitlab::Json.dump(@material_manage_labels),
+  routes: Gitlab::Json.dump(@material_manage_routes),
+  delete_label_url: project_labels_path(@project)
+} }

@@ -84,9 +84,29 @@ export const MATERIAL_TYPOGRAPHY = Object.freeze({
   labelSmall: Object.freeze({ size: 11, lineHeight: 16, weight: 500, tracking: 0.5 }),
 });
 
-export const MATERIAL_SHAPE = Object.freeze({ extraSmall: 4, small: 8, medium: 12, large: 16, extraLarge: 28, full: 9999 });
-export const MATERIAL_ELEVATION = Object.freeze({ level0: 0, level1: 1, level2: 3, level3: 6, level4: 8, level5: 12 });
-export const MATERIAL_MOTION = Object.freeze({ durationShort: 150, durationMedium: 300, durationLong: 500, easingStandard: 'cubic-bezier(0.2, 0, 0, 1)', easingEmphasized: 'cubic-bezier(0.2, 0, 0, 1)' });
+export const MATERIAL_SHAPE = Object.freeze({
+  extraSmall: 4,
+  small: 8,
+  medium: 12,
+  large: 16,
+  extraLarge: 28,
+  full: 9999,
+});
+export const MATERIAL_ELEVATION = Object.freeze({
+  level0: 0,
+  level1: 1,
+  level2: 3,
+  level3: 6,
+  level4: 8,
+  level5: 12,
+});
+export const MATERIAL_MOTION = Object.freeze({
+  durationShort: 150,
+  durationMedium: 300,
+  durationLong: 500,
+  easingStandard: 'cubic-bezier(0.2, 0, 0, 1)',
+  easingEmphasized: 'cubic-bezier(0.2, 0, 0, 1)',
+});
 export const MATERIAL_DENSITY = Object.freeze({ comfortable: 0, compact: -1, spacious: 1 });
 
 export function createMaterialTokens({ scheme = 'light', density = 'comfortable' } = {}) {
@@ -98,6 +118,9 @@ export function createMaterialTokens({ scheme = 'light', density = 'comfortable'
     shape: MATERIAL_SHAPE,
     elevation: MATERIAL_ELEVATION,
     motion: MATERIAL_MOTION,
-    density: Object.freeze({ name: density in MATERIAL_DENSITY ? density : 'comfortable', scale: densityScale }),
+    density: Object.freeze({
+      name: density in MATERIAL_DENSITY ? density : 'comfortable',
+      scale: densityScale,
+    }),
   });
 }

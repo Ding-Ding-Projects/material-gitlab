@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Material GitLab appearance state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "elements"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "elements": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[A-Za-z0-9_.:-]{1,120}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6,8}$" },
+          "backgroundColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6,8}$" },
+          "fontFamily": { "type": "string", "maxLength": 160 },
+          "fontSize": { "type": "number", "minimum": 8, "maximum": 96 },
+          "fontWeight": { "type": "number", "minimum": 100, "maximum": 900 },
+          "lineHeight": { "type": "number", "minimum": 0.8, "maximum": 3 },
+          "borderRadius": { "type": "number", "minimum": 0, "maximum": 96 },
+          "padding": { "type": "number", "minimum": 0, "maximum": 160 },
+          "margin": { "type": "number", "minimum": 0, "maximum": 160 },
+          "letterSpacing": { "type": "number", "minimum": -8, "maximum": 24 },
+          "opacity": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    }
+  }
+}

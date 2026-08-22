@@ -179,6 +179,26 @@ const vueLoaderOptions = {
   },
 };
 
+// Compare real paths instead of compiling a path into a regular expression.
+// `new RegExp(path.join(ROOT_PATH, 'node_modules'))` looks equivalent, but on
+// Windows path.join emits backslashes and every one of them becomes a regex
+// escape in the resulting source: `\node_modules` carries a newline class,
+// `\src` a whitespace class, `\Documents` a literal D. The pattern then never
+// matches its own directory, so nothing was excluded and the entire
+// node_modules tree was handed to Babel on that platform.
+const NODE_MODULES_PATH = path.join(ROOT_PATH, 'node_modules');
+const GITLAB_UI_SRC_PATH = path.join(ROOT_PATH, 'node_modules', '@gitlab', 'ui', 'src');
+const VENDOR_ASSETS_PATH = path.join(ROOT_PATH, 'vendor', 'assets');
+
+// Webpack hands these predicates a resource path that is usually
+// platform-separated but is forward-slash in places, so compare a normalised
+// copy of both sides rather than trusting either form. This is a no-op where
+// the separator already is `/`.
+const toPosixPath = (value) => (typeof value === 'string' ? value.split('\\').join('/') : value);
+
+const isInsideDirectory = (directory, candidate) =>
+  typeof candidate === 'string' && toPosixPath(candidate).startsWith(`${toPosixPath(directory)}/`);
+
 const shouldExcludeFromCompiling = (modulePath) => {
   // file with .vue.js extension
   if (/\.vue\.js$/.test(modulePath)) {
@@ -191,14 +211,14 @@ const shouldExcludeFromCompiling = (modulePath) => {
   }
 
   // GitLab UI source files (in node_modules)
-  if (new RegExp(path.join(ROOT_PATH, 'node_modules/@gitlab/ui/src')).test(modulePath)) {
+  if (isInsideDirectory(GITLAB_UI_SRC_PATH, modulePath)) {
     return false;
   }
 
   // Exclude other ./node_modules and ./vendor/assets modules
   return (
-    new RegExp(path.join(ROOT_PATH, 'node_modules')).test(modulePath) ||
-    new RegExp(path.join(ROOT_PATH, 'vendor/assets')).test(modulePath)
+    isInsideDirectory(NODE_MODULES_PATH, modulePath) ||
+    isInsideDirectory(VENDOR_ASSETS_PATH, modulePath)
   );
 };
 
@@ -298,22 +318,22 @@ module.exports = {
         ],
       },
       {
-        test: /(@gitlab\/web-ide).*\.js?$/,
+        test: /(@gitlab[\\/]web-ide).*\.js?$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /(@cubejs-client\/(vue|core)).*\.(js)?$/,
+        test: /(@cubejs-client[\\/](vue|core)).*\.(js)?$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /gridstack\/.*\.js$/,
+        test: /gridstack[\\/].*\.js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /jsonc-parser\/.*\.js$/,
+        test: /jsonc-parser[\\/].*\.js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
@@ -335,12 +355,12 @@ module.exports = {
         // mermaid v11 and its transitive deps (@mermaid-js/parser, @iconify/utils,
         // langium, etc.) use modern syntax (optional chaining, static blocks) that
         // webpack 4 can't parse. Transpile them along with both mermaid versions.
-        test: /(mermaid(-v11)?|@mermaid-js|@iconify\/utils|langium|vscode-\w+|chevrotain(-allstar)?|@chevrotain)\/.*\.m?js$/,
+        test: /(mermaid(-v11)?|@mermaid-js|@iconify[\\/]utils|langium|vscode-\w+|chevrotain(-allstar)?|@chevrotain)[\\/].*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /marked\/.*\.js?$/,
+        test: /marked[\\/].*\.js?$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
@@ -348,22 +368,22 @@ module.exports = {
         // @json-render/core and @json-render/vue (peer dependencies of
         // @gitlab/duo-ui's gen-UI adapter) ship untranspiled ES2020 (optional
         // chaining, nullish coalescing) that webpack 4 can't parse.
-        test: /@json-render\/.*\.m?js$/,
+        test: /@json-render[\\/].*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /@graphiql\/.*\.m?js$/,
+        test: /@graphiql[\\/].*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /@radix-ui\/.*\.m?js$/,
+        test: /@radix-ui[\\/].*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
       },
       {
-        test: /(@sentry|@sentry-internal)\/.*\.m?js$/,
+        test: /(@sentry|@sentry-internal)[\\/].*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
         options: {
@@ -371,13 +391,13 @@ module.exports = {
         },
       },
       {
-        test: /swagger-ui-dist\/.*\.js?$/,
+        test: /swagger-ui-dist[\\/].*\.js?$/,
         include: /node_modules/,
         loader: 'babel-loader',
         options: defaultJsOptions,
       },
       {
-        test: /@swagger-api\/apidom-.*\.[mc]?js$/,
+        test: /@swagger-api[\\/]apidom-.*\.[mc]?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
         options: {
@@ -386,7 +406,7 @@ module.exports = {
         },
       },
       {
-        test: /swagger-client\/.*\.m?js$/,
+        test: /swagger-client[\\/].*\.m?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
         options: {
@@ -395,7 +415,7 @@ module.exports = {
         },
       },
       {
-        test: /@swaggerexpert\/json-pointer\/.*\.[mc]?js$/,
+        test: /@swaggerexpert[\\/]json-pointer[\\/].*\.[mc]?js$/,
         include: /node_modules/,
         loader: 'babel-loader',
         options: {
@@ -407,7 +427,7 @@ module.exports = {
         // zod (a @gitlab/duo-ui dependency) ships ES2020 syntax (`export * as`, `??`)
         // in both its ESM and CJS builds, which webpack 4's parser can't read.
         test: /\.[mc]?js$/,
-        include: /node_modules\/zod\//,
+        include: /node_modules[\\/]zod[\\/]/,
         loader: 'babel-loader',
         options: defaultJsOptions,
       },
@@ -433,9 +453,9 @@ module.exports = {
       {
         test: /\.(js|cjs)$/,
         include: (modulePath) =>
-          /node_modules\/(monaco-worker-manager|monaco-marker-data-provider)\/index\.js/.test(
+          /node_modules[\\/](monaco-worker-manager|monaco-marker-data-provider)[\\/]index\.js/.test(
             modulePath,
-          ) || /node_modules\/yaml/.test(modulePath),
+          ) || /node_modules[\\/]yaml/.test(modulePath),
         loader: 'babel-loader',
         options: {
           plugins: ['@babel/plugin-transform-numeric-separator'],
@@ -460,7 +480,7 @@ module.exports = {
             loader: 'raw-loader',
           },
           {
-            exclude: /@gitlab\/svgs\/.+\.svg$/,
+            exclude: /@gitlab[\\/]svgs[\\/].+\.svg$/,
             resourceQuery: /url/,
             loader: 'file-loader',
             options: {
@@ -469,7 +489,7 @@ module.exports = {
             },
           },
           {
-            test: /@gitlab\/svgs\/.+\.svg$/,
+            test: /@gitlab[\\/]svgs[\\/].+\.svg$/,
             loader: 'file-loader',
             options: {
               name: '[name].[contenthash:8].[ext]',
@@ -491,7 +511,23 @@ module.exports = {
         },
       },
       {
-        test: /.css$/,
+        test: /\.scss$/,
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: 'global',
+              localIdentName: '[name].[contenthash:8].[ext]',
+            },
+          },
+          {
+            loader: path.join(ROOT_PATH, 'config/webpack/loaders/material_scss_loader.js'),
+          },
+        ],
+      },
+      {
+        test: /\.css$/,
         use: [
           'style-loader',
           {
@@ -505,7 +541,10 @@ module.exports = {
       },
       {
         test: /\.(eot|ttf|woff|woff2)$/,
-        include: /node_modules\/(katex\/dist\/fonts|monaco-editor)/,
+        // Loader rules are matched against the resource path, which uses the
+        // platform separator. A `\/` here silently matches nothing on Windows,
+        // leaving these fonts with no loader at all ("Module parse failed").
+        include: /node_modules[\\/](katex[\\/]dist[\\/]fonts|monaco-editor)/,
         loader: 'file-loader',
         options: {
           name: '[name].[contenthash:8].[ext]',
@@ -513,7 +552,7 @@ module.exports = {
         },
       },
       {
-        test: /editor\/schema\/.+\.json$/,
+        test: /editor[\\/]schema[\\/].+\.json$/,
         type: 'javascript/auto',
         loader: 'file-loader',
         options: {
@@ -754,9 +793,16 @@ module.exports = {
       return new webpack.NormalModuleReplacementPlugin(regex, (resource) => {
         const { request } = resource;
         if (!request.endsWith('.js') && !request.endsWith('.mjs') && !request.endsWith('.cjs')) {
-          const relative = `./${path.relative(packageName, request)}`;
+          // Module requests and `exports` keys are always forward-slash, on every
+          // platform. `path.relative`/`path.join` are platform-separated, so on
+          // Windows this built the key `./dereference\strategies\openapi-3-1`,
+          // which no exports map can ever contain: the replacement silently did
+          // not happen, webpack fell through to raw file resolution, and the
+          // production build failed with "Can't resolve". Use the posix helpers,
+          // which are exactly what `path` already is on Linux and macOS.
+          const relative = `./${path.posix.relative(packageName, request)}`;
           if (exports[relative]?.browser?.import || exports[relative]?.import) {
-            const newRequest = path.join(
+            const newRequest = path.posix.join(
               packageName,
               exports[relative]?.browser?.import || exports[relative]?.import,
             );
@@ -767,7 +813,7 @@ module.exports = {
             packageName === '@swaggerexpert/json-pointer' &&
             relative === './evaluate/realms/apidom'
           ) {
-            const newRequest = path.join(packageName, 'es/evaluate/realms/apidom/index.mjs');
+            const newRequest = path.posix.join(packageName, 'es/evaluate/realms/apidom/index.mjs');
             console.log(`[exports-replacer]: ${request} => ${newRequest}`);
             // eslint-disable-next-line no-param-reassign
             resource.request = newRequest;
@@ -781,7 +827,7 @@ module.exports = {
     }),
 
     new webpack.ContextReplacementPlugin(/^\.$/, (context) => {
-      if (/\/node_modules\/pdfjs-dist/.test(context.context)) {
+      if (/[\\/]node_modules[\\/]pdfjs-dist/.test(context.context)) {
         for (const d of context.dependencies) {
           if (d.critical) d.critical = false;
         }

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Text:wght@400;500;700&family=Google+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,300..500,0..1,0" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Google Sans Text',sans-serif;
+--surf:#f4effa;--surfc:#ece4f6;--surfch:#e0d5f2;--surfcl:#faf6ff;--onsurf:#1d1b20;--onsurfv:#49454f;
+--prim:#6750c4;--onprim:#ffffff;--primc:#e8def8;--onprimc:#4f378b;--sec:#d6c9f0;--outl:#cac4d0;--outlv:#e7e0ec;
+--err:#b3261e;--errc:#f9dedc;--good:#1a7f37;--goodc:#dcf2e3;--warn:#9a6700;--warnc:#fff3d0;--card:#ffffff;--scrim:rgba(29,27,32,.35)}
+body.dark{--surf:#141218;--surfc:#211f26;--surfch:#2b2831;--surfcl:#1b1922;--onsurf:#e6e0e9;--onsurfv:#cac4d0;
+--prim:#cfbdfe;--onprim:#381e72;--primc:#4f378b;--onprimc:#e8def8;--sec:#4a4458;--outl:#49454f;--outlv:#332f3a;
+--err:#f2b8b5;--errc:#5c1a17;--good:#7fd79a;--goodc:#1c3a27;--warn:#e2c46d;--warnc:#3d3012;--card:#211f26;--scrim:rgba(0,0,0,.5)}
+a{color:var(--prim);text-decoration:none}a:hover{color:var(--onprimc)}
+input::placeholder{color:var(--onsurfv);opacity:.7}
+.material-symbols-outlined{font-variation-settings:'opsz' 20,'wght' 400;font-size:20px;user-select:none}
+</style>
+</helmet>
+<div style="display:flex;height:100vh;background:var(--surf);color:var(--onsurf);overflow:hidden">
+  <dc-import name="Sidebar" active="Branches" hint-size="248px,100%" style="height:100%"></dc-import>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <header data-screen-label="Top bar" style="display:flex;align-items:center;gap:12px;padding:12px 24px 8px">
+      <div style="flex:1;max-width:600px;display:flex;align-items:center;gap:10px;background:var(--surfc);border-radius:999px;padding:8px 8px 8px 18px;color:var(--onsurfv)">
+        <span class="material-symbols-outlined">search</span>
+        <input onInput="{{ setSearch }}" value="{{ search }}" placeholder="{{ searchPlaceholder }}" style="border:none;outline:none;background:transparent;font:inherit;color:var(--onsurf);flex:1">
+        <div onClick="{{ toggleRegexMode }}" title="Regex mode" style="padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700;cursor:pointer;font-family:monospace;background:{{ regexBg }};color:{{ regexFg }}">.*</div>
+        <div onClick="{{ openRegexBuilder }}" title="Regex builder" style="width:32px;height:32px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer" style-hover="background:var(--surfch)"><span class="material-symbols-outlined" style="font-size:18px">construction</span></div>
+      </div>
+      <div onClick="{{ openPalette }}" title="Command palette (Ctrl+Shift+F)" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">keyboard_command_key</span></div>
+      <div onClick="{{ toggleDark }}" title="Toggle theme" style="width:40px;height:40px;border-radius:999px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--onsurfv)" style-hover="background:var(--surfch)"><span class="material-symbols-outlined">{{ themeIcon }}</span></div>
+      <div style="width:36px;height:36px;border-radius:999px;background:var(--primc);color:var(--onprimc);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px">JD</div>
+    </header>
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 24px">
+      <h1 style="margin:0;font-family:'Google Sans';font-size:24px;font-weight:500">Code</h1>
+      <div style="display:flex;background:var(--surfc);border-radius:999px;padding:3px;gap:2px;flex-wrap:wrap">
+        <sc-for list="{{ tabs }}" as="tb" hint-placeholder-count="5">
+          <div onClick="{{ tb.pick }}" style="padding:7px 16px;border-radius:999px;font-size:13px;font-weight:500;cursor:pointer;background:{{ tb.bg }};color:{{ tb.fg }}">{{ tb.label }}</div>
+        </sc-for>
+      </div>
+      <span style="font-size:12.5px;color:var(--onsurfv)">{{ countLabel }}</span>
+    </div>
+    <main style="flex:1;overflow-y:auto;padding:8px 24px 24px">
+      <sc-if value="{{ isCompare }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Compare" style="background:var(--card);border-radius:var(--card-r,20px);padding:18px 20px;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:720px;display:flex;flex-direction:column;gap:12px;margin-bottom:14px">
+          <div style="display:flex;gap:10px;align-items:center">
+            <select onChange="{{ setCompFrom }}" value="{{ compFrom }}" style="border:1px solid var(--outl);border-radius:12px;padding:10px 12px;font:inherit;font-size:13px;background:var(--card);color:var(--onsurf)">
+              <option>main</option><option>perf/board-virtual</option><option>fix/badge-contrast</option><option>feat/mr-regex-search</option>
+            </select>
+            <span class="material-symbols-outlined" style="color:var(--onsurfv)">arrow_forward</span>
+            <select onChange="{{ setCompTo }}" value="{{ compTo }}" style="border:1px solid var(--outl);border-radius:12px;padding:10px 12px;font:inherit;font-size:13px;background:var(--card);color:var(--onsurf)">
+              <option>perf/board-virtual</option><option>main</option><option>fix/badge-contrast</option><option>feat/mr-regex-search</option>
+            </select>
+            <div onClick="{{ runCompare }}" style="background:var(--prim);color:var(--onprim);border-radius:999px;padding:9px 20px;font-weight:500;font-size:13px;cursor:pointer">Compare</div>
+          </div>
+          <sc-if value="{{ compResult }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:13px;color:var(--onsurfv)">{{ compResult }}</div>
+          </sc-if>
+        </div>
+      </sc-if>
+      <div style="background:var(--card);border-radius:var(--card-r,20px);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08);max-width:980px">
+        <sc-for list="{{ rows }}" as="r" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 20px;border-bottom:1px solid var(--outlv)">
+            <span class="material-symbols-outlined" style="color:{{ r.iconColor }};font-size:19px">{{ r.icon }}</span>
+            <div style="flex:1;min-width:0">
+              <div style="font-weight:500;font-size:13.5px;font-family:{{ r.titleFont }}">{{ r.title }}</div>
+              <div style="font-size:12px;color:var(--onsurfv);margin-top:1px">{{ r.sub }}</div>
+            </div>
+            <sc-if value="{{ r.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11.5px;font-weight:500;padding:3px 12px;border-radius:999px;background:{{ r.badgeBg }};color:{{ r.badgeFg }}">{{ r.badge }}</span>
+            </sc-if>
+            <span style="font-size:12px;color:var(--onsurfv)">{{ r.meta }}</span>
+            <sc-if value="{{ r.action }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ r.act }}" style="font-size:12.5px;font-weight:500;color:{{ r.actionColor }};cursor:pointer;border:1px solid var(--outl);border-radius:999px;padding:6px 14px">{{ r.action }}</div>
+            </sc-if>
+          </div>
+        </sc-for>
+        <sc-if value="{{ emptyList }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:36px;text-align:center;color:var(--onsurfv);font-size:13.5px">Nothing matches.</div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+  <sc-if value="{{ regexOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Regex Builder" initial="{{ regexInitial }}" corpus="{{ regexCorpus }}" corpus-title="Matches" on-apply="{{ applyRegex }}" on-close="{{ closeRegexBuilder }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+  <sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Command Palette" actions="{{ paletteActions }}" on-close="{{ closePalette }}" hint-size="0px,0px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // Tabs mirror code_menu.rb: branches, commits, tags, compare, snippets (files → Repository.dc.html)
+  state = {
+    dark: false, search: '', regexMode: false, regexOpen: false, paletteOpen: false, tab: 'Branches',
+    compFrom: 'main', compTo: 'perf/board-virtual', compResult: null,
+    branches: [
+      {name:'main', sub:'default · protected', badge:'protected', when:'2h ago', mono:true},
+      {name:'perf/board-virtual', sub:'a41f9c2e · Virtualize board column lists', badge:'merged MR !1287', when:'2h ago', mono:true, del:true},
+      {name:'fix/badge-contrast', sub:'7be20d11 · Tonal container colors', badge:'open MR !1285', when:'6h ago', mono:true, del:true},
+      {name:'feat/mr-regex-search', sub:'c9d1e770 · Regex mode for MR search', badge:'open MR !1278', when:'2d ago', mono:true, del:true},
+      {name:'release/17-2', sub:'protected · release branch', badge:'protected', when:'1w ago', mono:true}
+    ],
+    commits: [
+      {sha:'a41f9c2e', msg:'Virtualize board column lists', who:'Jun Park', when:'2h ago', pipe:'success'},
+      {sha:'c2d84b60', msg:'Update empty-state snapshots', who:'Dana Weiss', when:'2h ago', pipe:'success'},
+      {sha:'7be20d11', msg:'Move pipeline badges to tonal containers', who:'Dana Weiss', when:'6h ago', pipe:'running'},
+      {sha:'90c3aa17', msg:'Backoff for state query polling', who:'Omar Haddad', when:'1d ago', pipe:'success'},
+      {sha:'5f01bd93', msg:'Add regex search feature flag', who:'Jun Park', when:'1d ago', pipe:'failed'}
+    ],
+    tags: [
+      {name:'v17.2.0', sub:'Release 17.2 · signed', when:'1w ago'},
+      {name:'v17.1.2', sub:'Patch: poll backoff', when:'3w ago'},
+      {name:'v17.1.1', sub:'Patch: favicon contrast', when:'1mo ago'}
+    ],
+    snippets: [
+      {name:'Board perf test script', sub:'$ ruby bench/boards.rb --cards 700', vis:'private', when:'3d ago'},
+      {name:'Regex corpus for search QA', sub:'40 patterns with expected match counts', vis:'project', when:'5d ago'},
+      {name:'MD3 token bootstrap', sub:'CSS custom-property block for new surfaces', vis:'public', when:'1w ago'}
+    ]
+  };
+  componentDidMount() {
+    this._key = (e) => {
+      if (e.ctrlKey && e.shiftKey && (e.key === 'F' || e.key === 'f')) { e.preventDefault(); this.setState({paletteOpen: true}); }
+      if (e.key === 'Escape') this.setState({paletteOpen: false, regexOpen: false});
+    };
+    window.addEventListener('keydown', this._key);
+  }
+  componentWillUnmount() { window.removeEventListener('keydown', this._key); }
+  matcher() {
+    const q = this.state.search;
+    if (!q) return () => true;
+    if (this.state.regexMode) { try { const re = new RegExp(q, 'i'); return (t) => re.test(t); } catch { return () => true; } }
+    const lq = q.toLowerCase(); return (t) => t.toLowerCase().includes(lq);
+  }
+  renderVals() {
+    const s = this.state, set = (o) => this.setState(o);
+    const m = this.matcher();
+    const pipeMeta = {success:['check_circle','var(--good)','var(--goodc)'], running:['sync','var(--warn)','var(--warnc)'], failed:['cancel','var(--err)','var(--errc)']};
+    let rows = [];
+    if (s.tab === 'Branches') rows = s.branches.filter(b => m(b.name + ' ' + b.sub)).map(b => ({
+      icon:'account_tree', iconColor:'var(--prim)', title:b.name, titleFont:'monospace', sub:b.sub,
+      badge:b.badge, badgeBg:b.badge === 'protected' ? 'var(--warnc)' : 'var(--primc)', badgeFg:b.badge === 'protected' ? 'var(--warn)' : 'var(--onprimc)',
+      meta:b.when, action:b.del ? 'Delete' : null, actionColor:'var(--err)',
+      act:() => set({branches: s.branches.filter(x => x.name !== b.name)})}));
+    if (s.tab === 'Commits') rows = s.commits.filter(c => m(c.sha + ' ' + c.msg + ' ' + c.who)).map(c => { const pm = pipeMeta[c.pipe];
+      return {icon:'commit', iconColor:'var(--onsurfv)', title:c.msg, titleFont:'inherit', sub:c.sha + ' · ' + c.who,
+        badge:c.pipe, badgeBg:pm[2], badgeFg:pm[1], meta:c.when, action:null}; });
+    if (s.tab === 'Tags') rows = s.tags.filter(t => m(t.name + ' ' + t.sub)).map(t => ({
+      icon:'sell', iconColor:'var(--prim)', title:t.name, titleFont:'monospace', sub:t.sub, badge:null, meta:t.when,
+      action:'Delete', actionColor:'var(--err)', act:() => set({tags: s.tags.filter(x => x.name !== t.name)})}));
+    if (s.tab === 'Snippets') rows = s.snippets.filter(x => m(x.name + ' ' + x.sub)).map(x => ({
+      icon:'sticky_note_2', iconColor:'var(--prim)', title:x.name, titleFont:'inherit', sub:x.sub,
+      badge:x.vis, badgeBg:'var(--surfch)', badgeFg:'var(--onsurfv)', meta:x.when, action:null}));
+    if (s.tab === 'Compare') rows = [];
+    return {
+      search: s.search, setSearch: (e) => set({search: e.target.value}),
+      searchPlaceholder: s.regexMode ? 'Regex search — ' + s.tab.toLowerCase() : 'Search ' + s.tab.toLowerCase(),
+      regexBg: s.regexMode ? 'var(--prim)' : 'var(--surfch)', regexFg: s.regexMode ? 'var(--onprim)' : 'var(--onsurfv)',
+      toggleRegexMode: () => set({regexMode: !s.regexMode}),
+      regexOpen: s.regexOpen, regexInitial: s.regexMode ? s.search : '',
+      regexCorpus: [...s.branches.map(b => b.name), ...s.commits.map(c => c.sha + ' ' + c.msg), ...s.tags.map(t => t.name), ...s.snippets.map(x => x.name)],
+      openRegexBuilder: () => set({regexOpen: true}), closeRegexBuilder: () => set({regexOpen: false}),
+      applyRegex: (p) => set({search: p, regexMode: true, regexOpen: false}),
+      paletteOpen: s.paletteOpen, openPalette: () => set({paletteOpen: true}), closePalette: () => set({paletteOpen: false}),
+      paletteActions: [{label:'Toggle dark theme', icon:'dark_mode', run: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); }},
+        ...['Branches','Commits','Tags','Compare','Snippets'].map(t => ({label:'Code: ' + t, icon:'code', run: () => set({tab: t})}))],
+      toggleDark: () => { document.body.classList.toggle('dark', !s.dark); set({dark: !s.dark}); },
+      themeIcon: s.dark ? 'light_mode' : 'dark_mode',
+      tabs: ['Branches','Commits','Tags','Compare','Snippets'].map(t => ({label:t, pick:() => set({tab:t}),
+        bg: s.tab === t ? 'var(--primc)' : 'transparent', fg: s.tab === t ? 'var(--onprimc)' : 'var(--onsurfv)'})),
+      countLabel: s.tab === 'Compare' ? '' : rows.length + ' ' + s.tab.toLowerCase(),
+      isCompare: s.tab === 'Compare',
+      compFrom: s.compFrom, compTo: s.compTo,
+      setCompFrom: (e) => set({compFrom: e.target.value, compResult: null}),
+      setCompTo: (e) => set({compTo: e.target.value, compResult: null}),
+      runCompare: () => set({compResult: s.compFrom === s.compTo ? 'Source and target are identical.' : s.compTo + ' is ahead of ' + s.compFrom + ' by 3 commits (+191 −37 across 4 files). Create a merge request to review the diff.'}),
+      compResult: s.compResult,
+      rows, emptyList: rows.length === 0 && s.tab !== 'Compare'
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -154,3 +154,14 @@ CLAUDE.local.md
 
 # Optional local RuboCop override (see .rubocop.yml inherit_from)
 /.rubocop.local.yml
+
+# Local one-click packaging output (build-installer.bat)
+/build/
+
+# Generated bundles. The Pages workflow builds site/dist on the runner and
+# uploads it as the Pages artifact, so a committed copy would only ever be
+# a stale duplicate of what CI produces.
+/site/dist/
+/tools/material-gitlab-deployer/dist/
+/tools/material-gitlab-instant/app-dist/
+/tools/material-gitlab-instant/installer/
