@@ -1,0 +1,74 @@
+// Material 3 motion tokens for the MD3 prototype layer.
+// Duration is anchored to the one real transition the design specifies -
+// the settings toggle knob's `transition:left .15s` / `transition:background
+// .15s` - which lines up exactly with MD3's short3 (150ms) step, so the
+// rest of the duration ladder is built around that anchor. The design has
+// no custom easing curves of its own, so the four curves below are the
+// published MD3 system easing tokens.
+
+$gl-md3-motion-easing-scale: (
+  'standard': cubic-bezier(0.2, 0, 0, 1),
+  'emphasized': cubic-bezier(0.3, 0, 0.1, 1),
+  'decelerate': cubic-bezier(0, 0, 0, 1),
+  'accelerate': cubic-bezier(0.3, 0, 1, 1),
+);
+
+$gl-md3-motion-duration-scale: (
+  'short1': 50ms,
+  'short2': 100ms,
+  'short3': 150ms,
+  'short4': 200ms,
+  'medium1': 250ms,
+  'medium2': 300ms,
+  'medium3': 350ms,
+  'medium4': 400ms,
+  'long1': 450ms,
+  'long2': 500ms,
+  'extra-long1': 700ms,
+);
+
+:root {
+  @each $name, $curve in $gl-md3-motion-easing-scale {
+    --gl-md3-motion-easing-#{$name}: #{$curve};
+  }
+
+  @each $name, $duration in $gl-md3-motion-duration-scale {
+    --gl-md3-motion-duration-#{$name}: #{$duration};
+  }
+}
+
+// Users who ask the OS for reduced motion get every MD3 transition and
+// animation collapsed to instant, regardless of which duration token a
+// component reached for - the curve tokens are left alone since an
+// instant transition has no perceptible easing to apply.
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    @each $name, $duration in $gl-md3-motion-duration-scale {
+      --gl-md3-motion-duration-#{$name}: 0ms;
+    }
+  }
+}
+
+@mixin gl-md3-motion($properties, $duration: var(--gl-md3-motion-duration-short4), $easing: var(--gl-md3-motion-easing-standard)) {
+  transition-property: $properties;
+  transition-duration: $duration;
+  transition-timing-function: $easing;
+}
+
+// Convenience presets for the two most common motion intents: a plain
+// state change, and an element entering/leaving the layout.
+@mixin gl-md3-motion-standard($properties) {
+  @include gl-md3-motion($properties, var(--gl-md3-motion-duration-short4), var(--gl-md3-motion-easing-standard));
+}
+
+@mixin gl-md3-motion-emphasized($properties) {
+  @include gl-md3-motion($properties, var(--gl-md3-motion-duration-medium2), var(--gl-md3-motion-easing-emphasized));
+}
+
+@mixin gl-md3-motion-enter($properties) {
+  @include gl-md3-motion($properties, var(--gl-md3-motion-duration-medium1), var(--gl-md3-motion-easing-decelerate));
+}
+
+@mixin gl-md3-motion-exit($properties) {
+  @include gl-md3-motion($properties, var(--gl-md3-motion-duration-short4), var(--gl-md3-motion-easing-accelerate));
+}

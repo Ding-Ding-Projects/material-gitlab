@@ -1,0 +1,285 @@
+// Material 3 navigation drawer for the MD3 prototype layer: the 248px
+// primary sidebar (brand, project context card, search, grouped nav
+// items), a collapsed icon-only rail variant, and the narrow-viewport
+// overlay drawer with its scrim.
+// Requires md3/_tokens.scss, md3/_shape.scss, md3/_elevation.scss,
+// md3/_motion.scss and md3/_typography.scss to already be loaded.
+
+// Below this width the drawer leaves the flex flow and becomes a
+// fixed overlay panel toggled by .md3-sidebar--open.
+$md3-sidebar-breakpoint: 768px;
+
+// Matches the side-sheet stacking tier in _dialogs.scss so the overlay
+// drawer and any dialog opened from within it order predictably.
+$md3-sidebar-overlay-z: 900;
+
+.md3-sidebar {
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  gap: 2px;
+  width: 248px;
+  height: 100%;
+  padding: 12px 10px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  background-color: var(--gl-md3-surfc);
+  color: var(--gl-md3-onsurf);
+  // Right corners only; the drawer sits flush against the viewport edge.
+  border-radius: 0 var(--gl-md3-shape-l) var(--gl-md3-shape-l) 0;
+  @include gl-md3-motion-standard(transform);
+}
+
+.md3-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px 14px;
+  font-family: var(--gl-md3-font-family-brand);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.md3-sidebar__brand-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  background-color: var(--gl-md3-prim);
+  color: var(--gl-md3-onprim);
+  font-size: 15px;
+  @include gl-md3-shape('s');
+}
+
+.md3-sidebar__brand-text {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.md3-sidebar__context {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding: 8px 12px;
+  background-color: var(--gl-md3-surfcl);
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  @include gl-md3-shape('m');
+  @include gl-md3-motion-standard(background-color);
+
+  &:hover {
+    background-color: var(--gl-md3-surfch);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+}
+
+// The warning-container tint is the design's placeholder avatar color;
+// a real project avatar overrides background-color/color per project.
+.md3-sidebar__context-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  background-color: var(--gl-md3-warnc);
+  color: var(--gl-md3-warn);
+  font-size: 12px;
+  font-weight: 700;
+  @include gl-md3-shape('xs');
+}
+
+.md3-sidebar__context-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.md3-sidebar__context-title {
+  overflow: hidden;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.md3-sidebar__context-subtitle {
+  overflow: hidden;
+  color: var(--gl-md3-onsurfv);
+  font-size: 11.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// A distinct compact search treatment from the top bar's .md3-search-field
+// (md3/components/_forms.scss): tighter padding, smaller type, bordered.
+.md3-sidebar__search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 2px 8px;
+  padding: 6px 8px 6px 12px;
+  background-color: var(--gl-md3-surfcl);
+  color: var(--gl-md3-onsurfv);
+  border: 1px solid var(--gl-md3-outlv);
+  @include gl-md3-shape('full');
+  @include gl-md3-motion-standard(box-shadow);
+
+  &:focus-within {
+    box-shadow: inset 0 0 0 2px var(--gl-md3-prim);
+  }
+
+  .material-symbols-outlined {
+    flex-shrink: 0;
+    font-size: 17px;
+  }
+}
+
+.md3-sidebar__search-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background-color: transparent;
+  color: var(--gl-md3-onsurf);
+  font: inherit;
+  font-size: 12.5px;
+
+  &::placeholder {
+    color: var(--gl-md3-onsurfv);
+    opacity: 0.7;
+  }
+}
+
+.md3-sidebar__search-kbd {
+  flex-shrink: 0;
+  padding: 1px 5px;
+  color: var(--gl-md3-onsurfv);
+  font-size: 10.5px;
+  font-weight: 700;
+  border: 1px solid var(--gl-md3-outl);
+  border-radius: 6px;
+}
+
+.md3-sidebar__section {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.md3-sidebar__section-label {
+  padding: 10px 14px 4px;
+  color: var(--gl-md3-onsurfv);
+  @include gl-md3-label-small;
+}
+
+.md3-sidebar__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  color: var(--gl-md3-onsurf);
+  background-color: transparent;
+  text-decoration: none;
+  font-size: 13.5px;
+  @include gl-md3-shape('full');
+  @include gl-md3-motion-standard(background-color);
+
+  &:hover {
+    background-color: var(--gl-md3-surfch);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: -2px;
+  }
+}
+
+.md3-sidebar__item--active {
+  background-color: var(--gl-md3-sec);
+}
+
+// Icon color stays constant on active per the design; only the pill
+// background communicates the active state.
+.md3-sidebar__item-icon {
+  flex-shrink: 0;
+  color: var(--gl-md3-onsurfv);
+}
+
+.md3-sidebar__item-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+// Collapsed rail: icon-only, any viewport width. Distinct from the
+// standalone .md3-nav-rail in _navigation.scss, which is a full MD3
+// icon+label rail component rather than a collapsed drawer state.
+.md3-sidebar--rail {
+  width: 80px;
+}
+
+.md3-sidebar--rail .md3-sidebar__brand {
+  justify-content: center;
+  padding: 8px 0 14px;
+}
+
+.md3-sidebar--rail .md3-sidebar__brand-text,
+.md3-sidebar--rail .md3-sidebar__context-body,
+.md3-sidebar--rail .md3-sidebar__search,
+.md3-sidebar--rail .md3-sidebar__section-label,
+.md3-sidebar--rail .md3-sidebar__item-label {
+  display: none;
+}
+
+.md3-sidebar--rail .md3-sidebar__context {
+  justify-content: center;
+  padding: 8px;
+}
+
+.md3-sidebar--rail .md3-sidebar__item {
+  justify-content: center;
+  padding: 10px;
+}
+
+// Narrow viewports: the drawer leaves the flex layout and becomes a
+// fixed overlay, hidden off-canvas until .md3-sidebar--open is applied.
+@media (max-width: $md3-sidebar-breakpoint) {
+  .md3-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: $md3-sidebar-overlay-z;
+    transform: translateX(-100%);
+    box-shadow: var(--gl-md3-elevation-5);
+  }
+
+  .md3-sidebar--open {
+    transform: translateX(0);
+  }
+}
+
+.md3-sidebar-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: $md3-sidebar-overlay-z - 1;
+  background-color: var(--gl-md3-scrim);
+}
+
+@media (max-width: $md3-sidebar-breakpoint) {
+  .md3-sidebar-scrim--visible {
+    display: block;
+  }
+}

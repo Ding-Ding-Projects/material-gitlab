@@ -1,3 +1,7 @@
 @import './color_modes/dark';
 @import './application_base';
 @import 'application_dark_overrides';
+
+// Dark mode loads this entry *instead of* application.scss, so the MD3 layer
+// has to be imported here too or it is absent entirely for dark-mode users.
+@import './color_modes/md3';

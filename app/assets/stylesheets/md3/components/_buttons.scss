@@ -1,0 +1,277 @@
+// Material 3 button family: the five container buttons (elevated, filled,
+// filled-tonal, outlined, text), icon buttons in their standard/filled/
+// tonal/outlined styles, and the FAB, built on the shared md3 partials.
+
+@mixin md3-btn-state-layer {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  @include gl-md3-motion-standard(opacity);
+}
+
+@mixin md3-btn-focus-ring($offset: 2px) {
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: $offset;
+  }
+}
+
+// Approximates the M3 disabled container: a 12%-opacity tint of on-surface
+// for the container/border and a 38%-opacity tint for the label, mixed
+// against transparent so the element still reads correctly on any backdrop.
+@mixin md3-btn-disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    pointer-events: none;
+    box-shadow: none;
+    background-color: color-mix(in srgb, var(--gl-md3-onsurf) 12%, transparent);
+    color: color-mix(in srgb, var(--gl-md3-onsurf) 38%, transparent);
+    border-color: color-mix(in srgb, var(--gl-md3-onsurf) 12%, transparent);
+
+    &::before {
+      display: none;
+    }
+  }
+}
+
+.md3-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  min-width: 40px;
+  padding: 0 24px;
+  border: 0;
+  background-color: transparent;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  text-decoration: none;
+  @include gl-md3-shape('full');
+  @include gl-md3-label-large;
+  @include gl-md3-motion-standard(unquote('box-shadow, background-color, border-color'));
+  @include md3-btn-focus-ring;
+  @include md3-btn-disabled;
+
+  &::before {
+    @include md3-btn-state-layer;
+  }
+
+  &:hover:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.08;
+  }
+
+  &:focus-visible:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  .material-symbols-outlined {
+    font-size: 18px;
+  }
+
+  // Apply alongside the base class when a leading/trailing icon is present
+  // so the icon-side padding matches the M3 spec's 16px icon inset.
+  &.md3-btn--icon-start {
+    padding-left: 16px;
+  }
+
+  &.md3-btn--icon-end {
+    padding-right: 16px;
+  }
+}
+
+// Elevated: low-emphasis container on a colored surface, resting on a
+// surface-container-low fill with a level-1 shadow that rises on hover.
+.md3-btn--elevated {
+  background-color: var(--gl-md3-surfcl);
+  color: var(--gl-md3-prim);
+  box-shadow: var(--gl-md3-elevation-1);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--gl-md3-elevation-2);
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--gl-md3-elevation-1);
+  }
+}
+
+// Filled: highest emphasis, used for the single most important action.
+.md3-btn--filled {
+  background-color: var(--gl-md3-prim);
+  color: var(--gl-md3-onprim);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--gl-md3-elevation-1);
+  }
+}
+
+// Filled-tonal: the design's primary call-to-action treatment (New issue,
+// New merge request) — a softer container/on-container pair than filled.
+.md3-btn--filled-tonal {
+  background-color: var(--gl-md3-primc);
+  color: var(--gl-md3-onprimc);
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--gl-md3-elevation-1);
+  }
+}
+
+// Outlined: medium emphasis, matches the drawer's "Reopen issue" treatment.
+.md3-btn--outlined {
+  background-color: transparent;
+  color: var(--gl-md3-onprimc);
+  border: 1px solid var(--gl-md3-outl);
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    border-color: color-mix(in srgb, var(--gl-md3-onsurf) 12%, transparent);
+    background-color: transparent;
+  }
+}
+
+// Text: lowest emphasis, matches the design's Cancel / Resolve thread links.
+.md3-btn--text {
+  background-color: transparent;
+  color: var(--gl-md3-onprimc);
+  padding: 0 12px;
+
+  &:disabled,
+  &[aria-disabled='true'] {
+    background-color: transparent;
+  }
+}
+
+// Icon buttons: circular, 40px minimum touch target, four container styles.
+.md3-icon-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  background-color: transparent;
+  color: var(--gl-md3-onsurfv);
+  cursor: pointer;
+  @include gl-md3-shape('full');
+  @include gl-md3-motion-standard(unquote('background-color, color, border-color'));
+  @include md3-btn-focus-ring;
+  @include md3-btn-disabled;
+
+  &::before {
+    @include md3-btn-state-layer;
+  }
+
+  &:hover:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.08;
+  }
+
+  &:focus-visible:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+}
+
+.md3-icon-button--filled {
+  background-color: var(--gl-md3-prim);
+  color: var(--gl-md3-onprim);
+}
+
+.md3-icon-button--tonal {
+  background-color: var(--gl-md3-primc);
+  color: var(--gl-md3-onprimc);
+}
+
+.md3-icon-button--outlined {
+  border: 1px solid var(--gl-md3-outl);
+  color: var(--gl-md3-onsurfv);
+
+  &[aria-pressed='true'] {
+    background-color: var(--gl-md3-onsurf);
+    color: var(--gl-md3-surf);
+    border-color: transparent;
+  }
+}
+
+// FAB: the app's most emphasized single action, floating above content.
+.md3-fab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 56px;
+  height: 56px;
+  padding: 0 16px;
+  border: 0;
+  background-color: var(--gl-md3-primc);
+  color: var(--gl-md3-onprimc);
+  cursor: pointer;
+  box-shadow: var(--gl-md3-elevation-3);
+  @include gl-md3-shape('l');
+  @include gl-md3-motion-standard(box-shadow);
+  @include md3-btn-focus-ring;
+  @include md3-btn-disabled;
+
+  &::before {
+    @include md3-btn-state-layer;
+  }
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--gl-md3-elevation-4);
+  }
+
+  &:hover:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.08;
+  }
+
+  &:focus-visible:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    box-shadow: var(--gl-md3-elevation-3);
+  }
+
+  &:active:not(:disabled):not([aria-disabled='true'])::before {
+    opacity: 0.12;
+  }
+
+  .material-symbols-outlined {
+    font-size: 24px;
+  }
+}
+
+// Small FAB: a lower-emphasis size for dense toolbars.
+.md3-fab--small {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  @include gl-md3-shape('m');
+}
+
+// Extended FAB: adds a visible label alongside the icon.
+.md3-fab--extended {
+  width: auto;
+  padding: 0 20px;
+  @include gl-md3-label-large;
+}

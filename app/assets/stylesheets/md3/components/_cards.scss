@@ -1,0 +1,129 @@
+// Material 3 card family: elevated, filled and outlined containers at the
+// design's 20px radius, with shared header/media/body/footer slots, built
+// on the shared md3 tokens/shape/elevation/motion/typography partials.
+
+.md3-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: var(--gl-md3-card);
+  color: var(--gl-md3-onsurf);
+  @include gl-md3-shape('xl');
+  box-shadow: var(--gl-md3-elevation-1);
+  @include gl-md3-motion-standard(box-shadow);
+}
+
+// Filled: a flatter, no-shadow treatment for cards nested inside other
+// surfaces (e.g. a card inside a drawer or another card).
+.md3-card--filled {
+  background-color: var(--gl-md3-surfc);
+  box-shadow: none;
+}
+
+// Outlined: no shadow, bounded by a hairline instead.
+.md3-card--outlined {
+  background-color: var(--gl-md3-surface);
+  box-shadow: none;
+  border: 1px solid var(--gl-md3-outlv);
+}
+
+// Interactive: for a whole card that acts as a click target (an issue row
+// rendered as a card, a board card). Never remove the focus outline it
+// gains from being a real button/link — only replace its shadow.
+.md3-card--interactive {
+  cursor: pointer;
+
+  &:hover {
+    box-shadow: var(--gl-md3-elevation-2);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--gl-md3-prim);
+    outline-offset: 2px;
+  }
+}
+
+.md3-card--outlined.md3-card--interactive:hover {
+  box-shadow: none;
+  background-color: var(--gl-md3-surfcl);
+}
+
+.md3-card__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background-color: var(--gl-md3-surfch);
+}
+
+.md3-card__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px 0;
+}
+
+.md3-card__header-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.md3-card__title {
+  margin: 0;
+  @include gl-md3-title-medium;
+}
+
+.md3-card__subtitle {
+  margin: 2px 0 0;
+  color: var(--gl-md3-onsurfv);
+  @include gl-md3-body-medium;
+}
+
+.md3-card__avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--gl-md3-shape-full);
+  background-color: var(--gl-md3-sec);
+  color: var(--gl-md3-onprimc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.md3-card__body {
+  flex: 1;
+  padding: 18px 20px;
+  color: var(--gl-md3-onsurfv);
+  @include gl-md3-body-large;
+
+  > p {
+    margin: 0;
+    line-height: inherit;
+  }
+}
+
+.md3-card__header + .md3-card__body {
+  padding-top: 8px;
+}
+
+.md3-card__footer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--gl-md3-outlv);
+}
+
+.md3-card__footer--plain {
+  border-top: none;
+  padding-top: 0;
+}
+
+.md3-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}

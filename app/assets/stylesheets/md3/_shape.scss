@@ -1,0 +1,31 @@
+// Material 3 shape scale for the MD3 prototype layer.
+// The six non-zero radii below are exactly the values used throughout the
+// design prototypes (avatar/icon squares at 8px, chip-style buttons at 9px,
+// cards and menus at 12px, dialogs and panels at 16px, larger sheets at
+// 20px, pill shapes at 999px) - nothing here is invented or rounded.
+
+$gl-md3-shape-scale: (
+  'none': 0,
+  'xs': 8px,
+  's': 9px,
+  'm': 12px,
+  'l': 16px,
+  'xl': 20px,
+  'full': 999px,
+);
+
+:root {
+  @each $name, $radius in $gl-md3-shape-scale {
+    --gl-md3-shape-#{$name}: #{$radius};
+  }
+}
+
+@mixin gl-md3-shape($name) {
+  border-radius: var(--gl-md3-shape-#{$name});
+}
+
+@each $name, $radius in $gl-md3-shape-scale {
+  .md3-shape-#{$name} {
+    border-radius: var(--gl-md3-shape-#{$name});
+  }
+}

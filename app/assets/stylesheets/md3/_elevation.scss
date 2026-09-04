@@ -1,0 +1,58 @@
+/* stylelint-disable gitlab/no-gl-class */
+// Material 3 elevation scale for the MD3 prototype layer.
+// Level 1 is the design's own resting-card shadow, copied verbatim:
+// box-shadow: 0 1px 3px rgba(0,0,0,.08). The remaining levels are the
+// design's other real shadows (raised buttons, popovers, the login split
+// panel, modal dialogs), ordered by increasing offset/blur so the ladder
+// stays visually monotonic even though the design varies opacity per case.
+
+$gl-md3-elevation-scale: (
+  0: none,
+  1: (0 1px 3px rgba(0, 0, 0, 0.08)),
+  2: (0 1px 3px rgba(0, 0, 0, 0.2)),
+  3: (0 4px 20px rgba(0, 0, 0, 0.2)),
+  4: (0 4px 24px rgba(0, 0, 0, 0.12)),
+  5: (0 8px 32px rgba(0, 0, 0, 0.3)),
+);
+
+// Black shadows read weaker against dark surfaces than against light ones,
+// so the dark variants keep the same offsets/blur and raise the alpha to
+// stay legible rather than disappearing into the background.
+$gl-md3-elevation-scale-dark: (
+  0: none,
+  1: (0 1px 3px rgba(0, 0, 0, 0.16)),
+  2: (0 1px 3px rgba(0, 0, 0, 0.32)),
+  3: (0 4px 20px rgba(0, 0, 0, 0.36)),
+  4: (0 4px 24px rgba(0, 0, 0, 0.28)),
+  5: (0 8px 32px rgba(0, 0, 0, 0.48)),
+);
+
+:root {
+  @each $level, $shadow in $gl-md3-elevation-scale {
+    --gl-md3-elevation-#{$level}: #{$shadow};
+  }
+}
+
+:root.gl-dark {
+  @each $level, $shadow in $gl-md3-elevation-scale-dark {
+    --gl-md3-elevation-#{$level}: #{$shadow};
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.gl-light) {
+    @each $level, $shadow in $gl-md3-elevation-scale-dark {
+      --gl-md3-elevation-#{$level}: #{$shadow};
+    }
+  }
+}
+
+@mixin gl-md3-elevation($level) {
+  box-shadow: var(--gl-md3-elevation-#{$level});
+}
+
+@each $level, $shadow in $gl-md3-elevation-scale {
+  .md3-elevation-#{$level} {
+    box-shadow: var(--gl-md3-elevation-#{$level});
+  }
+}
