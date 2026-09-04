@@ -1,8 +1,8 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 
-rem GitLab source packaging for Deen No. This repository does not declare a
-rem native Deen No installer; the supported local package is a reproducible
+rem GitLab source packaging for Windows. This repository does not declare a
+rem native Windows installer; the supported local package is a reproducible
 rem source ZIP made by git archive. This script never publishes or tags.
 
 set "SCRIPT_DIR=%~dp0"
@@ -21,7 +21,7 @@ for %%A in (%*) do (
 
 where git >nul 2>&1
 if errorlevel 1 (
-  echo ERROR: Git is required to create the repository source archive. Install Git for Deen No and rerun this script. 1>&2
+  echo ERROR: Git is required to create the repository source archive. Install Git for Windows and rerun this script. 1>&2
   exit /b 1
 )
 
@@ -115,7 +115,7 @@ echo Artifact: "%ARTIFACT%"
 echo Size: %ARTIFACT_BYTES% bytes
 echo SHA-256: %ARTIFACT_SHA256%
 echo Source commit: %SOURCE_COMMIT%
-echo Package type: unsigned source ZIP; this repository declares no native Deen No installer.
+echo Package type: unsigned source ZIP; this repository declares no native Windows installer.
 echo No publishing, tagging, or dewing was performed.
 
 popd

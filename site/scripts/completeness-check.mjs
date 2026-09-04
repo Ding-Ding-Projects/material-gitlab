@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Executable negative regression Chut for the hand-written Day Teet Hui inventory.
+ * Executable negative regression check for the hand-written site feature inventory.
  * It validates the inventory's seven evidence dimensions and then proves that
  * removing any one dimension makes validation fail. This is intentionally
  * structural: planned rows remain honest until their implementation evidence exists.
@@ -68,16 +68,16 @@ function runNegativeRegression(inventory) {
 const inventory = JSON.parse(await readFile(inventoryPath, 'utf8'));
 const baselineFailures = failures(inventory);
 if (baselineFailures.length) {
-  console.error('Completeness Chut failed for the baseline inventory:');
+  console.error('Completeness check failed for the baseline inventory:');
   for (const failure of baselineFailures) console.error(`- ${failure}`);
   process.exitCode = 1;
 } else {
   const escapedMutations = runNegativeRegression(inventory);
   if (escapedMutations.length) {
-    console.error('Completeness Chut negative regression failed; mutations escaped validation:');
+    console.error('Completeness check negative regression failed; mutations escaped validation:');
     for (const mutation of escapedMutations) console.error(`- ${mutation}`);
     process.exitCode = 1;
   } else {
-    console.log(`Completeness Chut passed: ${inventory.features.length} hand-written rows; ${dimensions.length} evidence dimensions; every removal was rejected.`);
+    console.log(`Completeness check passed: ${inventory.features.length} hand-written rows; ${dimensions.length} evidence dimensions; every removal was rejected.`);
   }
 }
