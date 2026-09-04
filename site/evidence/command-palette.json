@@ -1,0 +1,24 @@
+{
+  "feature": "command-palette",
+  "sourceCommit": "c74f63310cf78a9d56717c7524f57b072101f83c",
+  "capturedAt": "2026-09-04T03:37:04.663Z",
+  "route": "http://localhost:4317/",
+  "servedFrom": "site/dist (the built artifact, not the source tree)",
+  "viewport": "1280x900 window, 1264x892 client",
+  "theme": "light",
+  "displayScale": "100%",
+  "method": "hidden Windows desktop, isolated guest browser profile, background window capture by handle",
+  "verificationState": "verified",
+  "captures": [
+    {
+      "path": "site/evidence/command-palette-open.png",
+      "bytes": 124667,
+      "sha256": "3b82db89d8e5fec122d2c21d9cf0ebc599d6436a332b8ea790ead3ca957eb939"
+    }
+  ],
+  "notes": [
+    "The palette opener was clicked in the built artifact and the dialog opened, collecting 15 real destinations from the live DOM.",
+    "Before this commit the dialog markup and the palette module both shipped and nothing connected them, so the control did nothing.",
+    "Ctrl+Shift+F is bound in the same module; the shortcut itself was not exercised through this route because the background keyboard path does not deliver that chord."
+  ]
+}

@@ -16,6 +16,11 @@ import { mountOfflineDocs } from './offline-docs.js';
 import { createOllamaManager } from './ollama-manager.js';
 import { applyMobileAccessibility, installFocusRing } from './mobile-accessibility.js';
 import { initProductContent } from './content.js';
+import { initCommandPalette } from './command-palette.js';
+import { loadChangelog, filterChangelog, renderChangelog } from './changelog.js';
+import { selectionFromCheckboxes } from './bulk-actions.js';
+import { detectFileType, buildAdapterCatalog, findAdapters } from './file-converter.js';
+import { bindSupportTickets, supportDisclosure, openRecoveryFolder } from './support-tickets.js';
 (function () {
   'use strict';
 
@@ -207,6 +212,92 @@ import { initProductContent } from './content.js';
     const ollama = createOllamaManager();
     $('[data-ollama-check]')?.addEventListener('click', async () => { const status = await ollama.checkHealth(); $('[data-ollama-status]').textContent = `${status.state}: ${status.detail}`; });
     mountOfflineDocs($('[data-offline-doc-list]'), { onSelect: (doc) => { $('[data-ollama-status]').textContent = `Offline article selected: ${doc.title}`; } });
+    // The palette dialog markup and the palette module both existed for weeks
+    // while nothing connected them, so Ctrl+Shift+F did nothing at all. This
+    // is the line that makes the shipped dialog real.
+    initCommandPalette({ document, window });
+
+    const converterFile = $('[data-converter-file]');
+    const converterStatus = $('[data-converter-status]');
+    if (converterFile && converterStatus) {
+      // No adapter is bundled with a static site, so the catalog is
+      // deliberately empty and every conversion reports the exact reason it
+      // cannot run rather than pretending to queue work.
+      const catalog = buildAdapterCatalog([]);
+      converterFile.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) { converterStatus.textContent = 'Nothing queued.'; return; }
+        try {
+          const detected = await detectFileType(file, []);
+          const adapters = findAdapters(catalog, detected.mime);
+          converterStatus.textContent = adapters.length
+            ? `${file.name}: ${adapters.length} bundled adapter(s) available.`
+            : `${file.name} reads as ${detected.mime}. No converter is bundled with this site, so nothing was converted and the file never left this device.`;
+        } catch (error) {
+          converterStatus.textContent = error.message;
+        }
+        event.target.value = '';
+      });
+    }
+
+    const changelogList = $('[data-changelog-list]');
+    const changelogStatus = $('[data-changelog-status]');
+    if (changelogList && changelogStatus) {
+      let entries = [];
+      const renderFiltered = () => {
+        const visible = filterChangelog(entries, {
+          query: $('[data-changelog-search]')?.value || '',
+          from: $('[data-changelog-from]')?.value || '',
+          to: $('[data-changelog-to]')?.value || '',
+        });
+        changelogStatus.textContent = `${visible.length} of ${entries.length} release${entries.length === 1 ? '' : 's'}.`;
+        renderChangelog(visible, changelogList, { repository: 'Ding-Ding-Projects/material-gitlab' });
+      };
+      loadChangelog()
+        .then((loaded) => { entries = loaded; renderFiltered(); })
+        .catch((error) => { changelogStatus.textContent = `Changelog unavailable: ${error.message}`; });
+      ['[data-changelog-search]', '[data-changelog-from]', '[data-changelog-to]'].forEach((selector) => {
+        $(selector)?.addEventListener('input', renderFiltered);
+      });
+    }
+
+    const bulkRoot = $('[data-bulk-list]');
+    const bulkSummary = $('[data-bulk-summary]');
+    if (bulkRoot && bulkSummary) {
+      const selection = selectionFromCheckboxes(bulkRoot);
+      const describe = () => {
+        const count = selection.selected().length;
+        bulkSummary.textContent = count ? `${count} selected.` : 'Nothing selected.';
+      };
+      bulkRoot.addEventListener('change', describe);
+      $('[data-bulk-select-all]')?.addEventListener('click', () => { selection.selectAll(true); describe(); });
+      $('[data-bulk-invert]')?.addEventListener('click', () => {
+        bulkRoot.querySelectorAll('input[type="checkbox"][data-item-id]').forEach((box) => { box.checked = !box.checked; });
+        describe();
+      });
+      $('[data-bulk-preview]')?.addEventListener('click', () => {
+        // A preview states the count before anything happens; it never deletes.
+        const preview = selection.preview('delete');
+        bulkSummary.textContent = preview.selected
+          ? `Delete would affect ${preview.selected} row(s): ${preview.ids.join(', ')}. Nothing has been deleted.`
+          : 'Select at least one row before previewing a bulk action.';
+      });
+      describe();
+    }
+
+    const supportDisclosureNode = $('[data-support-disclosure]');
+    if (supportDisclosureNode) supportDisclosureNode.textContent = supportDisclosure();
+    bindSupportTickets(document, {
+      onOpenFolder: () => {
+        const detail = openRecoveryFolder();
+        const target = $('[data-support-recovery]');
+        // A browser cannot open a folder, so say the path instead of shipping
+        // a button that appears to do something and silently does not.
+        if (target) target.textContent = 'A web page cannot open a folder. Clear this site’s storage in your browser settings to reset every local record here.';
+        return detail;
+      },
+    });
+
     applyMobileAccessibility(document); installFocusRing(document);
   }
 

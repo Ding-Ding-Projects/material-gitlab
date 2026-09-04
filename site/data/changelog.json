@@ -1,1 +1,95 @@
-[]
+[
+  {
+    "version": "site-013",
+    "date": "2026-09-03",
+    "commit": "c74f63310cf78a9d56717c7524f57b072101f83c",
+    "summary": "Add a fail-closed scan for internal shorthand in published files",
+    "changes": []
+  },
+  {
+    "version": "site-012",
+    "date": "2026-09-03",
+    "commit": "33df8274bc8b284e711591ffad10ebaad98d9951",
+    "summary": "Say Windows in the installer script and rename the site check",
+    "changes": []
+  },
+  {
+    "version": "site-011",
+    "date": "2026-08-14",
+    "commit": "9628a9e206d9d58c452a6d9333c8a1ae78899552",
+    "summary": "Apply scheduled site preferences",
+    "changes": []
+  },
+  {
+    "version": "site-010",
+    "date": "2026-08-14",
+    "commit": "eb1548d4375b6da72c9f9ce4a22af70dc9f38eb0",
+    "summary": "Improve site keyboard focus feedback",
+    "changes": []
+  },
+  {
+    "version": "site-009",
+    "date": "2026-08-14",
+    "commit": "eca55a1d4d942105cff52e338dad0bb9fd347792",
+    "summary": "Expand interactive Material 3 site",
+    "changes": []
+  },
+  {
+    "version": "site-008",
+    "date": "2026-08-14",
+    "commit": "9ad49f83bb3a08003ae77ff298cb7b8c5d5c5e27",
+    "summary": "Build the site interaction foundation",
+    "changes": [
+      "The original commit subject used internal shorthand and is not reproduced here. Follow the commit link for the recorded history."
+    ]
+  },
+  {
+    "version": "site-007",
+    "date": "2026-08-14",
+    "commit": "089a58022ade16d3bf060c2b3b7892cdc83d97c5",
+    "summary": "Track the Pages site dependency lockfile",
+    "changes": []
+  },
+  {
+    "version": "site-006",
+    "date": "2026-08-14",
+    "commit": "8a432b5605e60b29ae2027c12648798e3d94801d",
+    "summary": "Publish the site through GitHub Pages",
+    "changes": []
+  },
+  {
+    "version": "site-005",
+    "date": "2026-08-14",
+    "commit": "1fe1bcf14ceb62fea0b0ab411c5772a99228193f",
+    "summary": "Add static site worker adapter",
+    "changes": []
+  },
+  {
+    "version": "site-004",
+    "date": "2026-08-14",
+    "commit": "c8ecd7dfac2c9c0a9726765313144735a804bbf0",
+    "summary": "Wire live docs library into site shell",
+    "changes": []
+  },
+  {
+    "version": "site-003",
+    "date": "2026-08-14",
+    "commit": "6ab2f59d594ec43a155ed30fe8d8f344270bb98c",
+    "summary": "Add base-safe documentation runtime",
+    "changes": []
+  },
+  {
+    "version": "site-002",
+    "date": "2026-08-14",
+    "commit": "22466e134a6177cc9cd81ad3fd4eefd6702590dc",
+    "summary": "Add Material GitLab site shell",
+    "changes": []
+  },
+  {
+    "version": "site-001",
+    "date": "2026-08-14",
+    "commit": "524718e6d2d54fb81d76f47103a023f01e15a220",
+    "summary": "Add universal feature inventory",
+    "changes": []
+  }
+]

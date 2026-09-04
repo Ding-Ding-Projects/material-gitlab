@@ -6,12 +6,36 @@
  * structural: planned rows remain honest until their implementation evidence exists.
  */
 import { readFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const repoRoot = path.resolve(root, '..');
 const inventoryPath = path.join(root, 'data', 'completeness-inventory.json');
 const dimensions = ['implementation', 'documentation', 'localization', 'persistence', 'tests', 'capture', 'evidence'];
+
+/**
+ * A row may name a path that does not exist yet ONLY while it is planned.
+ * The moment a row claims "implemented" or "verified", every path it names is
+ * a claim about something on disk, and the check reads the disk rather than
+ * believing the row. Without this, a row could point its documentation and
+ * evidence at files nobody ever wrote and still pass.
+ */
+function missingClaimedPaths(inventory) {
+  const missing = [];
+  for (const row of inventory?.features ?? []) {
+    if (row?.status !== 'implemented' && row?.status !== 'verified') continue;
+    for (const dimension of dimensions) {
+      for (const relative of row?.[dimension]?.paths ?? []) {
+        if (typeof relative !== 'string') continue;
+        const absolute = path.resolve(repoRoot, relative);
+        if (!existsSync(absolute)) missing.push(`${row.id}.${dimension} claims ${relative}, which does not exist`);
+      }
+    }
+  }
+  return missing;
+}
 
 function failures(inventory) {
   const result = [];
@@ -66,7 +90,7 @@ function runNegativeRegression(inventory) {
 }
 
 const inventory = JSON.parse(await readFile(inventoryPath, 'utf8'));
-const baselineFailures = failures(inventory);
+const baselineFailures = [...failures(inventory), ...missingClaimedPaths(inventory)];
 if (baselineFailures.length) {
   console.error('Completeness check failed for the baseline inventory:');
   for (const failure of baselineFailures) console.error(`- ${failure}`);

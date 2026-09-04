@@ -64,8 +64,8 @@ const SKIPPED_PREFIXES = [
  * than a preference.
  *
  * Some private terms are ordinary English words. Scanning the whole imported
- * tree for those produced 114 false positives in one run -- heap dumps, memory
- * samplers, a database vacuum section, an emoji sprite sheet -- against a
+ * tree for those produced 114 false positives in one run -- memory diagnostics,
+ * a database vacuum section, an emoji sprite sheet -- against a
  * single genuine hit. A check with that ratio is a check everybody learns to
  * ignore, which is worse than no check at all.
  *

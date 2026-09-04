@@ -1,0 +1,23 @@
+{
+  "feature": "landing-and-offline-docs",
+  "sourceCommit": "c74f63310cf78a9d56717c7524f57b072101f83c",
+  "capturedAt": "2026-09-04T03:37:04.663Z",
+  "route": "http://localhost:4317/",
+  "servedFrom": "site/dist (the built artifact, not the source tree)",
+  "viewport": "1280x900 window, 1264x892 client",
+  "theme": "light",
+  "displayScale": "100%",
+  "method": "hidden Windows desktop, isolated guest browser profile, background window capture by handle",
+  "verificationState": "verified",
+  "captures": [
+    {
+      "path": "site/evidence/landing-1280x900.png",
+      "bytes": 106217,
+      "sha256": "0d5890a1ca42bed9e50fb872f31c8d2cc8c760b47adfbc6dbcdea8c36829ef43"
+    }
+  ],
+  "notes": [
+    "The landing surface, its navigation and the offline documentation list render from the built bundle.",
+    "A layout defect is visible in the header region of this capture and is recorded as open in ROADMAP.md; the capture is kept unedited rather than retaken to look better."
+  ]
+}
