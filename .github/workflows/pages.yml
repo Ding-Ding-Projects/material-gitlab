@@ -25,6 +25,17 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
+      # Scans published files for internal shorthand that must not appear in a
+      # public repository. The term list is private and is not available to a
+      # hosted runner, so this step reports that it skipped rather than
+      # pretending to have checked. Its real bite is local, before a push.
+      - name: Check published files for internal shorthand
+        run: node scripts/verify-public-vocabulary.mjs
+
+      - name: Run the site completeness check
+        working-directory: site
+        run: node scripts/completeness-check.mjs
+
       - name: Install site dependencies
         working-directory: site
         run: npm ci

@@ -116,7 +116,7 @@ echo Size: %ARTIFACT_BYTES% bytes
 echo SHA-256: %ARTIFACT_SHA256%
 echo Source commit: %SOURCE_COMMIT%
 echo Package type: unsigned source ZIP; this repository declares no native Windows installer.
-echo No publishing, tagging, or dewing was performed.
+echo No publishing, tagging, or pushing was performed.
 
 popd
 exit /b 0

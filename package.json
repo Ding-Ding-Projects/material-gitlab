@@ -3,6 +3,7 @@
   "scripts": {
     "check-dependencies": "scripts/frontend/check_dependencies.sh",
     "overlay:check": "node scripts/verify-upstream-overlay.mjs",
+    "vocab:check": "node scripts/verify-public-vocabulary.mjs",
     "deps:check": "depcruise --config config/dependency_cruiser.mjs --no-ignore-known",
     "deps:check:all": "yarn run deps:check .",
     "clean": "rm -rf public/assets tmp/cache/webpack tmp/cache/rspack tmp/cache/vite",
