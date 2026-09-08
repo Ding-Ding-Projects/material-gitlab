@@ -1,0 +1,224 @@
+name: Omnibus package
+
+# Builds a Debian package of THIS fork, so that installing it gets you the Material
+# work rather than stock upstream GitLab.
+#
+# Deliberately manual. A full Omnibus build compiles Ruby, PostgreSQL, Redis, nginx and
+# the Go components from source. It is enormous, and running it on every push would be
+# both useless and rude to the runner pool.
+#
+# Honesty about the state of this workflow: it has not yet produced a package. It is
+# committed so the work is real and reviewable rather than described in a roadmap, and
+# so its failures are visible. The two things most likely to stop it on a hosted runner
+# are disk and wall clock; both are checked and reported explicitly rather than being
+# left to fail as something obscure two hours in.
+
+on:
+  workflow_dispatch:
+    inputs:
+      omnibus_ref:
+        description: 'omnibus-gitlab ref to build with (must match this tree)'
+        required: true
+        default: '19.3.0+ce.0'
+      gitlab_ref:
+        description: 'Ref of this fork to package. Defaults to the triggering commit.'
+        required: false
+        default: ''
+      attach_to_release:
+        description: 'Attach the resulting .deb to a GitHub release'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  # Never cancel in progress: this workflow publishes, so a half-finished run that is
+  # killed can leave a tag or an asset behind.
+  group: omnibus-package-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
+
+jobs:
+  build-package:
+    runs-on: ubuntu-24.04
+    # 360 minutes is the GitHub hosted runner ceiling for one job. An Omnibus build can
+    # legitimately need more than this on 4 cores, which is a real risk, not a defect.
+    timeout-minutes: 360
+
+    steps:
+      - name: Check out this fork at the exact ref to package
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.gitlab_ref || github.sha }}
+          fetch-depth: 0
+
+      - name: Record what is being packaged
+        id: target
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="$(git rev-parse HEAD)"
+          version="$(tr -d '[:space:]' < VERSION)"
+          echo "sha=$sha"          >> "$GITHUB_OUTPUT"
+          echo "version=$version"  >> "$GITHUB_OUTPUT"
+          echo "Packaging $sha at declared version $version"
+          echo "Building with omnibus-gitlab ${{ inputs.omnibus_ref }}"
+
+      - name: Reclaim runner disk before starting
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Before:"; df -h / | tail -1
+          # A hosted runner ships several toolchains this build never touches. Removing
+          # them is the difference between roughly 20 GB free and roughly 50 GB free.
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+                      /usr/local/share/boost /usr/local/lib/node_modules \
+                      /opt/hostedtoolcache/CodeQL || true
+          sudo docker image prune --all --force || true
+          echo "After:"; df -h / | tail -1
+          avail_gb="$(df -BG --output=avail / | tail -1 | tr -dc '0-9')"
+          echo "Available: ${avail_gb} GB"
+          if [ "$avail_gb" -lt 25 ]; then
+            echo "::error::Only ${avail_gb} GB free. An Omnibus build needs far more than this and would fail late and confusingly. Stopping now."
+            exit 1
+          fi
+
+      - name: Check out omnibus-gitlab at the matching ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 --branch "${{ inputs.omnibus_ref }}" \
+            https://gitlab.com/gitlab-org/omnibus-gitlab.git omnibus-gitlab
+          cd omnibus-gitlab
+          git log -1 --format='omnibus-gitlab at %H %s'
+
+      - name: Point the gitlab-rails component at this fork
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd omnibus-gitlab
+          # Omnibus resolves each component's git remote through .custom_sources.yml.
+          # Repointing gitlab-rails at this repository is what makes the resulting
+          # package carry the Material work instead of upstream's application code.
+          test -f .custom_sources.yml || { echo "::error::.custom_sources.yml is missing; the omnibus layout has changed and this step needs revisiting."; exit 1; }
+          cp .custom_sources.yml .custom_sources.yml.orig
+          python3 - <<'PY'
+          import re, sys, pathlib
+          p = pathlib.Path('.custom_sources.yml')
+          text = p.read_text(encoding='utf-8')
+          fork = 'https://github.com/Ding-Ding-Projects/material-gitlab.git'
+          # Operate on the gitlab-rails block only. The (?=^\S|\Z) lookahead ends the block
+          # at the next top level key, which is what keeps gitlab-rails-ee out of range;
+          # a plain prefix match would rewrite it too, and the build would then be EE.
+          block_re = re.compile(r'(^gitlab-rails:\n)((?:[ \t]+.*\n|\n)*?)(?=^\S|\Z)', re.M)
+          m = block_re.search(text)
+          if not m:
+              sys.exit('gitlab-rails block not found in .custom_sources.yml')
+          body = m.group(2)
+          changed = 0
+          def swap(mm):
+              global changed
+              changed += 1
+              return mm.group(1) + '"' + fork + '"'
+          # Both keys must point at the fork. Omnibus reads "alternative" when
+          # ALTERNATIVE_SOURCES is set, so rewriting only "remote" can silently build
+          # upstream while looking correct.
+          for key in ('remote', 'alternative'):
+              body, _ = re.subn(r'(^[ \t]+%s:[ \t]*)("[^"]*"|\S+)' % key, swap, body, count=1, flags=re.M)
+          if changed != 2:
+              sys.exit('Expected to rewrite remote and alternative; rewrote %d' % changed)
+          p.write_text(text[:m.start(2)] + body + text[m.end(2):], encoding='utf-8')
+          print('gitlab-rails remote and alternative repointed to', fork)
+          PY
+          echo "--- diff ---"
+          diff -u .custom_sources.yml.orig .custom_sources.yml || true
+
+      - name: Build the package in the official omnibus builder image
+        shell: bash
+        env:
+          GITLAB_VERSION: ${{ steps.target.outputs.sha }}
+        run: |
+          set -euo pipefail
+          # The official builder image carries the exact toolchain omnibus expects.
+          # Installing those dependencies by hand on a bare runner is a reliable way to
+          # fail slowly for reasons that have nothing to do with this fork.
+          builder="registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ubuntu_24.04:latest"
+          docker pull "$builder"
+          docker run --rm \
+            -e GITLAB_VERSION \
+            -e BUILD_VERSION="${{ steps.target.outputs.version }}" \
+            -v "$PWD/omnibus-gitlab:/omnibus" \
+            -w /omnibus \
+            "$builder" \
+            bash -lc '
+              set -euo pipefail
+              bundle config set --local path /omnibus/.bundle-vendor
+              bundle install --jobs 4
+              bundle exec omnibus build gitlab --log-level=info
+            '
+
+      - name: Verify a real package was produced
+        id: verify
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          debs=(omnibus-gitlab/pkg/*.deb)
+          if [ ${#debs[@]} -eq 0 ]; then
+            echo "::error::The build finished without producing a .deb. Nothing will be published."
+            exit 1
+          fi
+          for d in "${debs[@]}"; do
+            echo "=== $d ==="
+            ls -l "$d"
+            dpkg-deb --info "$d" | head -20
+            sha256sum "$d"
+          done
+          echo "deb_count=${#debs[@]}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload the package as a build artifact
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: omnibus-deb-${{ steps.target.outputs.sha }}
+          path: omnibus-gitlab/pkg/*.deb
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Attach the package to a release
+        if: ${{ inputs.attach_to_release && steps.verify.outcome == 'success' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha="${{ steps.target.outputs.sha }}"
+          tag="omnibus-${{ steps.target.outputs.version }}-${sha:0:12}"
+          {
+            echo "## Omnibus package"
+            echo
+            echo "Debian package built from this fork, so installing it gets you the Material"
+            echo "work rather than stock upstream GitLab."
+            echo
+            echo "- Target commit: $sha"
+            echo "- Declared version: ${{ steps.target.outputs.version }}"
+            echo "- Built with omnibus-gitlab: ${{ inputs.omnibus_ref }}"
+            echo
+            echo "### Install"
+            echo
+            echo '```bash'
+            echo "sudo apt-get install -y curl openssh-server ca-certificates tzdata perl"
+            echo "sudo EXTERNAL_URL=\"http://gitlab.example.com\" dpkg -i <package>.deb"
+            echo '```'
+            echo
+            echo "The package is unsigned. Code signing is deliberately disabled in this project."
+          } > release-notes.md
+          gh release create "$tag" \
+            --repo '${{ github.repository }}' \
+            --target "$sha" \
+            --title "Omnibus ${{ steps.target.outputs.version }}" \
+            --notes-file release-notes.md \
+            omnibus-gitlab/pkg/*.deb
+          gh release view "$tag" --repo '${{ github.repository }}' --json tagName,isDraft,assets
