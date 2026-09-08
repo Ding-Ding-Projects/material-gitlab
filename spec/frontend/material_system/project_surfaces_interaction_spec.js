@@ -5,6 +5,9 @@ import CicdTab from '~/material_system/surfaces/Settings/components/CicdTab.vue'
 import Settings from '~/material_system/surfaces/Settings/Settings.vue';
 import { SETTINGS_ADAPTER_METHODS } from '~/material_system/surfaces/Settings/adapter';
 
+jest.mock('~/material_system/surfaces/Settings/advanced_destinations', () => ({ loadTransferDestinations: jest.fn() }));
+jest.mock('~/material_system/surfaces/Settings/duo_remediation_adapter', () => ({ ensureDependencyBumpProfile: jest.fn() }));
+
 jest.mock('@gitlab/ui', () => ({ GlButton: { name: 'GlButton', template: '<button><slot /></button>' }, GlLink: { name: 'GlLink', template: '<a><slot /></a>' }, GlForm: { name: 'GlForm', template: '<form><slot /></form>' }, GlFormGroup: { name: 'GlFormGroup', template: '<div><slot /></div>' }, GlFormInput: { name: 'GlFormInput', template: '<input />' }, GlFormCheckbox: { name: 'GlFormCheckbox', template: '<input type="checkbox" />' } }));
 jest.mock('~/material_system/notifications', () => ({ __esModule: true, default: { notify: jest.fn(), subscribe: () => () => {} } }));
 

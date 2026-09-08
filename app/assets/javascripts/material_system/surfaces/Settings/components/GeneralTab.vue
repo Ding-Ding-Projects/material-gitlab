@@ -19,7 +19,10 @@
     <ProjectDetailsCard
       v-if="visible.project"
       :project-name="projectName"
+      :project-id="projectId"
       :visibility="visibility"
+      :can-change-visibility="canChangeVisibility"
+      :allowed-visibility-levels="allowedVisibilityLevels"
       @update:project-name="$emit('update:project-name', $event)"
       @update:visibility="$emit('update:visibility', $event)"
     />
@@ -30,9 +33,12 @@
       :logo-file-name="logoFileName"
       :logo-url="logoUrl"
       :production="production"
+      :avatar-removal="avatarRemoval"
       @update:logo-color="$emit('update:logo-color', $event)"
       @upload-logo="$emit('upload-logo', $event)"
     />
+    <DescriptionTopicsCard v-if="visible.description" :description="description" :topics="topics" :busy="busy" @save="$emit('save-description-topics', $event)" />
+    <BadgesCard v-if="visible.badges && adapter && adapter.loadBadges" :adapter="adapter" />
     <VocabularyCard
       v-if="visible.vocabulary"
       :status="vocabularyStatus"
@@ -45,7 +51,7 @@
       @file-chosen="$emit('file-chosen', $event)"
     />
 
-    <p v-if="!visible.project && !visible.logo && !visible.vocabulary && !visible.converter" class="st-empty">
+    <p v-if="!Object.values(visible).some(Boolean)" class="st-empty">
       No general settings match "{{ search }}".
     </p>
   </div>
@@ -57,6 +63,8 @@ import ProjectDetailsCard from './ProjectDetailsCard.vue';
 import ProjectLogoCard from './ProjectLogoCard.vue';
 import VocabularyCard from './VocabularyCard.vue';
 import FileConverterCard from './FileConverterCard.vue';
+import DescriptionTopicsCard from './DescriptionTopicsCard.vue';
+import BadgesCard from './BadgesCard.vue';
 import { createMatcher } from '../data';
 
 const CARD_KEYWORDS = {
@@ -64,19 +72,29 @@ const CARD_KEYWORDS = {
   logo: ['Project avatar & logo', 'Logo', 'Avatar'],
   vocabulary: ['Personal vocabulary', 'Vocabulary'],
   converter: ['Local file converter', 'File converter', 'Convert'],
+  description: ['Description and topics', 'Project description', 'Topics'],
+  badges: ['Project badges', 'Badge', 'Image URL', 'Link URL'],
 };
 
 export default {
   name: 'GeneralTab',
-  components: { SearchField, ProjectDetailsCard, ProjectLogoCard, VocabularyCard, FileConverterCard },
+  components: { SearchField, ProjectDetailsCard, ProjectLogoCard, VocabularyCard, FileConverterCard, DescriptionTopicsCard, BadgesCard },
   props: {
     projectName: { type: String, required: true },
+    projectId: { type: [String, Number], default: null },
     visibility: { type: String, required: true },
     logoColor: { type: String, required: true },
     logoLetter: { type: String, required: true },
     logoFileName: { type: String, default: '' },
     logoUrl: { type: String, default: '' },
     production: { type: Boolean, default: false },
+    description: { type: String, default: '' },
+    topics: { type: Array, default: () => [] },
+    busy: { type: Boolean, default: false },
+    adapter: { type: Object, default: null },
+    avatarRemoval: { type: Object, default: () => ({}) },
+    canChangeVisibility: { type: Boolean, default: true },
+    allowedVisibilityLevels: { type: Array, default: () => [0, 10, 20] },
     vocabularyStatus: { type: String, required: true },
     vocabularyOk: { type: Boolean, default: null },
     converterStatus: { type: String, required: true },

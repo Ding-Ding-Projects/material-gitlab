@@ -11,12 +11,17 @@
     >
       <h2 :id="titleId" class="st-confirm__title">{{ title }}</h2>
       <p :id="descId" class="st-confirm__desc">{{ description }}</p>
+      <slot />
       <ul v-if="items.length > 1" class="st-confirm__items">
         <li v-for="item in items" :key="item">{{ item }}</li>
       </ul>
+      <label v-if="confirmationPhrase" :for="`${titleId}-phrase`">
+        Type {{ confirmationPhrase }} to confirm
+        <input :id="`${titleId}-phrase`" v-model="typedPhrase" type="text" autocomplete="off" />
+      </label>
       <div class="st-confirm__actions">
-        <button ref="cancelBtn" type="button" class="st-btn st-btn--text" @click="cancel">Cancel</button>
-        <button type="button" class="st-btn st-btn--danger" @click="confirm">{{ confirmLabel }}</button>
+        <button ref="cancelBtn" type="button" class="st-btn st-btn--text" :disabled="busy" @click="cancel">Cancel</button>
+        <button type="button" class="st-btn st-btn--danger" :disabled="busy || (confirmationPhrase && typedPhrase !== confirmationPhrase)" @click="confirm">{{ confirmLabel }}</button>
       </div>
     </div>
   </div>
@@ -32,10 +37,12 @@ export default {
     description: { type: String, default: '' },
     items: { type: Array, default: () => [] },
     confirmLabel: { type: String, default: 'Delete' },
+    confirmationPhrase: { type: String, default: '' },
+    busy: { type: Boolean, default: false },
   },
   data() {
     uid += 1;
-    return { titleId: `st-confirm-title-${uid}`, descId: `st-confirm-desc-${uid}` };
+    return { titleId: `st-confirm-title-${uid}`, descId: `st-confirm-desc-${uid}`, typedPhrase: '' };
   },
   mounted() {
     this._previouslyFocused = document.activeElement;
@@ -48,9 +55,12 @@ export default {
   },
   methods: {
     confirm() {
+      if (this.busy) return;
+      if (this.confirmationPhrase && this.typedPhrase !== this.confirmationPhrase) return;
       this.$emit('confirm');
     },
     cancel() {
+      if (this.busy) return;
       this.$emit('cancel');
     },
     trapTab(event) {

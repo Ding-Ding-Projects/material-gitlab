@@ -10,6 +10,7 @@ export const TABS = Object.freeze([
   { id: 'members', label: 'Members' },
   { id: 'cicd', label: 'CI/CD' },
   { id: 'integrations', label: 'Integrations' },
+  { id: 'advanced', label: 'Advanced' },
 ]);
 
 export const ROLE_OPTIONS = Object.freeze(['Maintainer', 'Developer', 'Reporter', 'Planner', 'Guest']);
@@ -39,6 +40,8 @@ export function createInitialState(overrides = {}) {
   return {
     tab: 'general',
     projectName: '',
+    description: '',
+    topics: [],
     visibility: '',
     logoColor: LOGO_PRESET_COLORS[0],
     logoFileName: '',

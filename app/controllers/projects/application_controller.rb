@@ -121,7 +121,8 @@ class Projects::ApplicationController < ApplicationController
 
     if result[:status] == :success
       flash[:notice] = format(_("Project '%{project_name}' was successfully updated."), project_name: @project.name)
-      redirect_to(edit_project_path(@project, anchor: 'js-general-project-settings'))
+      anchor = params[:material_settings_section] == 'advanced' ? 'material-settings-advanced' : 'js-general-project-settings'
+      redirect_to(edit_project_path(@project, anchor: anchor))
     else
       flash[:alert] = result[:message]
       @project.reset
