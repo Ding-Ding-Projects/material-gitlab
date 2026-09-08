@@ -29,6 +29,7 @@ function mime(file) {
     '.json': 'application/json; charset=utf-8',
     '.svg': 'image/svg+xml',
     '.css': 'text/css; charset=utf-8',
+    '.ttf': 'font/ttf',
     '.png': 'image/png',
   })[path.extname(file).toLowerCase()] || 'application/octet-stream';
 }
@@ -49,6 +50,7 @@ function freezeScript(tuple) {
     `window.Date=FrozenDate; let seed=tuple.deterministic.randomSeed>>>0; Math.random=()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);\n` +
     `const nativeFetch=window.fetch.bind(window); window.fetch=(input,init)=>{ const u=new URL(typeof input==='string'?input:input.url,location.href); if(u.origin!==location.origin) return Promise.reject(new Error('External network blocked by design-reference policy')); return nativeFetch(input,init); };\n` +
     `const style=document.createElement('style'); style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}'; document.documentElement.appendChild(style);\n` +
+    `const families=['Google Sans','Google Sans Text','Material Symbols Outlined']; window.__DESIGN_REFERENCE_CAPTURE_READY__=document.fonts.ready.then(()=>{const faces=Array.from(document.fonts); const availability=Object.fromEntries(families.map((family)=>[family,document.fonts.check('16px "'+family+'"')&&faces.some((face)=>face.family.replaceAll('\\"','').replaceAll("'",'')===family&&face.status==='loaded')])); const proof={transport:'cheap Lowlevel headless route',availability,loadedAt:new Date(0).toISOString()}; window.__DESIGN_REFERENCE_FONT_PROOF__=proof; document.documentElement.dataset.designReferenceFonts=Object.values(availability).every(Boolean)?'ready':'unavailable'; return proof;});\n` +
     `document.addEventListener('DOMContentLoaded',()=>{ if(tuple.theme==='dark') document.body.classList.add('dark'); document.documentElement.dataset.designReferenceTheme=tuple.theme; document.documentElement.dataset.designReferenceState=tuple.state; });\n` +
     `})();</script>`;
 }
@@ -56,7 +58,7 @@ function freezeScript(tuple) {
 function transformDesign(source, row, tuple) {
   const reactPath = '/vendor/react.production.min.js';
   const reactDomPath = '/vendor/react-dom.production.min.js';
-  const localFonts = `<style data-design-reference-fonts>@font-face{font-family:'Material Symbols Outlined';font-style:normal;font-weight:100 700;src:url('/vendor/material-symbols-outlined.woff2') format('woff2')}.material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased}</style>`;
+  const localFonts = `<style data-design-reference-fonts>@font-face{font-family:'Google Sans';font-style:normal;font-weight:400 700;font-display:block;font-variation-settings:'opsz' 18,'GRAD' 0;src:url('/vendor/google-sans-v14.000-opsz17-18.ttf') format('truetype')}@font-face{font-family:'Google Sans Text';font-style:normal;font-weight:400 700;font-display:block;font-variation-settings:'opsz' 17,'GRAD' 0;src:url('/vendor/google-sans-v14.000-opsz17-18.ttf') format('truetype')}@font-face{font-family:'Material Symbols Outlined';font-style:normal;font-weight:100 700;src:url('/vendor/material-symbols-outlined.woff2') format('woff2')}.material-symbols-outlined{font-family:'Material Symbols Outlined';font-weight:normal;font-style:normal;line-height:1;letter-spacing:normal;text-transform:none;display:inline-block;white-space:nowrap;word-wrap:normal;direction:ltr;font-feature-settings:'liga';-webkit-font-feature-settings:'liga';-webkit-font-smoothing:antialiased}</style>`;
   const injection = `<base href="/design/"><script src="${reactPath}"></script><script src="${reactDomPath}"></script>${localFonts}${freezeScript({ ...row, tuple, deterministic: row.deterministic })}`;
   return source.replace(/<head>/i, `<head>${injection}`);
 }
@@ -117,6 +119,12 @@ function startServer() {
           const file = path.join(packageRoot, 'material-symbols-outlined.woff2');
           if (!fs.existsSync(file)) return json(res, 404, { error: 'missing bundled Material Symbols font' });
           res.writeHead(200, { 'content-type': 'font/woff2', 'cache-control': 'no-store' });
+          return fs.createReadStream(file).pipe(res);
+        }
+        if (url.pathname === '/vendor/google-sans-v14.000-opsz17-18.ttf') {
+          const file = path.join(__dirname, '..', 'fonts', 'GoogleSans-v14.000-opsz17-18.ttf');
+          if (!fs.existsSync(file)) return json(res, 404, { error: 'missing bundled Google Sans v14.000 font' });
+          res.writeHead(200, { 'content-type': 'font/ttf', 'cache-control': 'no-store' });
           return fs.createReadStream(file).pipe(res);
         }
         return json(res, 404, { error: 'not found' });

@@ -26,6 +26,12 @@ function sameJson(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
+function rootFile(root, relative) {
+  if (typeof relative !== 'string' || path.isAbsolute(relative)) return null;
+  const file = path.resolve(root, relative);
+  return file.startsWith(`${root}${path.sep}`) ? file : null;
+}
+
 function requiredReferenceFonts(row, root) {
   const source = fs.readFileSync(path.join(root, row.referenceFile), 'utf8');
   const fonts = new Set();
@@ -76,6 +82,16 @@ function checkReceipt(errors, row, key, root, sourceCommit) {
     const expectedWidth = Math.round(row.tuple.viewport.width * row.tuple.scale);
     const expectedHeight = Math.round(row.tuple.viewport.height * row.tuple.scale);
     if (receipt?.raw?.width !== expectedWidth || receipt?.raw?.height !== expectedHeight) issue(errors, `${row.id}.evidence.${key} receipt dimensions do not match tuple`);
+    const manifestPath = rootFile(root, receipt?.artifact?.manifest?.path);
+    if (!manifestPath || !fs.existsSync(manifestPath) || sha256(manifestPath) !== receipt.artifact.manifest.sha256) issue(errors, `${row.id}.evidence.${key} receipt artifact manifest is missing or stale`);
+    else {
+      let manifest;
+      try { manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8')); }
+      catch { issue(errors, `${row.id}.evidence.${key} receipt artifact manifest is not valid JSON`); }
+      if (manifest && (manifest.schemaVersion !== 1 || manifest.sourceCommit !== sourceCommit || !manifest.artifacts?.some((artifact) => artifact.path === receipt.artifact.path && artifact.sha256 === receipt.artifact.sha256))) issue(errors, `${row.id}.evidence.${key} receipt artifact manifest does not bind the rendered artifact`);
+      const artifactPath = rootFile(root, receipt?.artifact?.path);
+      if (!artifactPath || !fs.existsSync(artifactPath) || sha256(artifactPath) !== receipt?.artifact?.sha256) issue(errors, `${row.id}.evidence.${key} rendered artifact is missing or stale`);
+    }
     if (key === 'referenceRaw') {
       const proof = receipt.fontProof;
       if (proof?.transport !== 'cheap Lowlevel headless route' || !proof?.availability || typeof proof.availability !== 'object') issue(errors, `${row.id}.evidence.referenceRaw receipt needs a cheap Lowlevel document.fonts proof`);
@@ -85,13 +101,27 @@ function checkReceipt(errors, row, key, root, sourceCommit) {
     const reference = row.evidence.referenceRaw;
     const built = row.evidence.builtRaw;
     if (receipt?.inputs?.reference?.path !== reference.path || receipt?.inputs?.reference?.sha256 !== reference.sha256 || receipt?.inputs?.built?.path !== built.path || receipt?.inputs?.built?.sha256 !== built.sha256) issue(errors, `${row.id}.evidence.${key} receipt inputs do not link to the verified raw captures`);
+    for (const [kind, evidenceInput] of [['reference', reference], ['built', built]]) {
+      const inputReceipt = receipt?.inputReceipts?.[kind];
+      const inputReceiptPath = rootFile(root, inputReceipt?.path);
+      if (!inputReceiptPath || !fs.existsSync(inputReceiptPath) || sha256(inputReceiptPath) !== inputReceipt.sha256) issue(errors, `${row.id}.evidence.${key} ${kind} raw receipt is missing or stale`);
+      else {
+        const raw = JSON.parse(fs.readFileSync(inputReceiptPath, 'utf8'));
+        if (raw.id !== row.id || raw.kind !== kind || raw.sourceCommit !== sourceCommit || raw.raw?.path !== evidenceInput.path || raw.raw?.sha256 !== evidenceInput.sha256 || !sameJson(raw.tuple, row.tuple)) issue(errors, `${row.id}.evidence.${key} ${kind} raw receipt does not match its input`);
+      }
+    }
     if (key === 'diff') {
       let diff;
       try { diff = JSON.parse(fs.readFileSync(evidencePath, 'utf8')); }
       catch { return issue(errors, `${row.id}.evidence.diff is not valid JSON`); }
       if (diff.schemaVersion !== 2 || diff.id !== row.id || diff.sourceCommit !== sourceCommit || !sameJson(diff.tuple, row.tuple) || diff.tupleHash !== hashJson(row.tuple)) issue(errors, `${row.id}.evidence.diff record provenance is stale`);
-      if (diff.review?.verdict !== 'approved' || typeof diff.review?.reviewer !== 'string' || !diff.review.reviewer.trim()) issue(errors, `${row.id}.evidence.diff requires an approved human review`);
       if (!sameJson(diff.inputs, receipt.inputs)) issue(errors, `${row.id}.evidence.diff record inputs do not match receipt`);
+      const reviewPath = `${evidencePath}.review.json`;
+      if (!fs.existsSync(reviewPath)) issue(errors, `${row.id}.evidence.diff requires an immutable approval record`);
+      else {
+        const review = JSON.parse(fs.readFileSync(reviewPath, 'utf8'));
+        if (review.schemaVersion !== 1 || review.status !== 'approved' || review.id !== row.id || review.sourceCommit !== sourceCommit || review.tupleHash !== hashJson(row.tuple) || review.diff?.path !== evidence.path || review.diff?.sha256 !== evidence.sha256 || typeof review.reviewer !== 'string' || !review.reviewer.trim() || typeof review.approval !== 'string' || !review.approval.trim()) issue(errors, `${row.id}.evidence.diff approval record is incomplete or stale`);
+      }
     }
   }
 }

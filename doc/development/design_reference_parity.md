@@ -52,6 +52,21 @@ font blocks strict completion, preventing a fallback-font capture from becoming 
 evidence. The guard records the absence only. It neither downloads nor substitutes a
 font asset.
 
+An artifact SHA-256 is never accepted from a capture command by itself. The capture
+tool reads it from a repository-relative manifest whose source commit and listed
+artifact are both validated on disk. Side-by-side and diff generation each require
+the two raw receipts and reject a tuple, PNG, or commit mismatch. Diff measurements
+remain immutable; a separate approval record binds reviewer and approval evidence to
+the retained diff hash.
+
+The reference runtime serves a pinned local Google Sans v14.000 variable font and
+records its release hash, source path, axes, and OFL provenance in
+`tools/design-reference/fonts/GoogleSans-v14.000.provenance.json`. The two CSS faces
+pin `Google Sans` to optical size 18 and `Google Sans Text` to optical size 17. Before
+a capture, wait for `window.__DESIGN_REFERENCE_CAPTURE_READY__` and inspect the
+resulting font proof. This prevents a fallback rendering from being treated as real
+reference evidence.
+
 The negative regression removes each required reference, route, tuple, deterministic
 input, audit, and evidence boundary from every row in memory. It must turn red for the
 removed boundary and green after restoring the original inventory. This prevents a

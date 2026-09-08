@@ -13,6 +13,24 @@ function hash(file) { return crypto.createHash('sha256').update(fs.readFileSync(
 function hashJson(value) { return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
 function rowFor(id) { const row = inventory.contracts.find((candidate) => candidate.id === id); if (!row) throw new Error(`unknown inventory row ${id}`); return row; }
 function currentCommit() { return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); }
+function localFile(value, label) {
+  if (path.isAbsolute(value)) throw new Error(`${label} must be relative to the repository root`);
+  const file = path.resolve(ROOT, value);
+  if (!file.startsWith(`${ROOT}${path.sep}`)) throw new Error(`${label} escapes the repository root`);
+  return file;
+}
+function artifactFromManifest(manifestValue, artifactValue, sourceCommit) {
+  const manifestPath = localFile(manifestValue, 'artifact manifest path');
+  if (!fs.existsSync(manifestPath)) throw new Error(`artifact manifest is missing: ${manifestValue}`);
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  if (manifest?.schemaVersion !== 1 || manifest.sourceCommit !== sourceCommit || !Array.isArray(manifest.artifacts)) throw new Error('artifact manifest must have schemaVersion 1, matching sourceCommit, and artifacts');
+  const artifactPath = String(artifactValue || '');
+  const entry = manifest.artifacts.find((candidate) => candidate?.path === artifactPath);
+  if (!entry || !/^[a-f0-9]{64}$/.test(entry.sha256 || '')) throw new Error('artifact manifest must contain the requested artifact path and SHA-256');
+  const file = localFile(artifactPath, 'artifact path');
+  if (!fs.existsSync(file) || sha256(file) !== entry.sha256) throw new Error(`artifact hash does not match manifest: ${artifactPath}`);
+  return { path: artifactPath, sha256: entry.sha256, manifest: { path: manifestValue, sha256: sha256(manifestPath) } };
+}
 function pngInfo(file) {
   const bytes = fs.readFileSync(file);
   const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
@@ -26,7 +44,7 @@ if (!id || !['reference', 'built'].includes(kind)) { fail('usage requires --id=s
 else {
   try {
     const row = rowFor(id);
-    const output = args.png ? path.resolve(ROOT, String(args.png)) : null;
+      const output = args.png ? localFile(String(args.png), 'raw PNG path') : null;
     if (!output) {
       console.log(JSON.stringify({ status: 'capture-required', id, kind, route: row[`${kind}Route`] || row.referenceRoute, tuple: row.tuple, transport: 'cheap Lowlevel headless route', next: 'Capture the real app with the approved hidden-desktop route, then rerun with --png=<raw PNG path>.' }, null, 2));
       process.exitCode = 2;
@@ -35,8 +53,8 @@ else {
       const sourceCommit = String(args.commit || '');
       if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error('capture receipt requires a full 40-character source commit');
       if (sourceCommit !== currentCommit()) throw new Error(`capture source commit ${sourceCommit} does not match current HEAD`);
-      const artifactHash = String(args['artifact-sha256'] || '');
-      if (!/^[0-9a-f]{64}$/.test(artifactHash)) throw new Error('capture receipt requires --artifact-sha256=<64-character SHA-256> for the exact rendered application artifact');
+      if (!args['artifact-manifest'] || !args.artifact) throw new Error('capture receipt requires --artifact-manifest=<relative manifest> and --artifact=<relative rendered artifact>');
+      const artifact = artifactFromManifest(String(args['artifact-manifest']), String(args.artifact), sourceCommit);
       let fontProof = null;
       if (kind === 'reference') {
         if (!args['font-proof']) throw new Error('reference capture receipt requires --font-proof=<JSON from document.fonts checks>; fallback fonts cannot complete parity');
@@ -46,7 +64,7 @@ else {
       const info = pngInfo(output);
       const expectedWidth = Math.round(row.tuple.viewport.width * row.tuple.scale);
       const expectedHeight = Math.round(row.tuple.viewport.height * row.tuple.scale);
-      if (info.width !== expectedWidth || info.height !== expectedHeight) fail(`capture dimensions ${info.width}x${info.height} do not match tuple ${expectedWidth}x${expectedHeight}`);
+      if (info.width !== expectedWidth || info.height !== expectedHeight) throw new Error(`capture dimensions ${info.width}x${info.height} do not match tuple ${expectedWidth}x${expectedHeight}`);
       const receipt = {
         schemaVersion: 2,
         id,
@@ -58,7 +76,7 @@ else {
         tuple: row.tuple,
         tupleHash: hashJson(row.tuple),
         deterministic: row.deterministic,
-        artifact: { sha256: artifactHash },
+        artifact,
         ...(fontProof ? { fontProof } : {}),
         raw: { path: path.relative(ROOT, output).replaceAll('\\', '/'), sha256: hash(output), ...info },
         sourceCommit,

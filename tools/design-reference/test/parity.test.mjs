@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { runNegativeRegression, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
 
@@ -22,7 +23,8 @@ test('binds capture receipts to the exact current commit', () => {
   const captureSource = fs.readFileSync(new URL('../scripts/capture.mjs', import.meta.url), 'utf8');
   assert.match(captureSource, /sourceCommit !== currentCommit\(\)/);
   assert.match(captureSource, /full 40-character source commit/);
-  assert.match(captureSource, /artifact-sha256/);
+  assert.match(captureSource, /artifact-manifest/);
+  assert.match(captureSource, /artifactFromManifest/);
   assert.match(captureSource, /font-proof/);
   assert.match(captureSource, /fallback fonts cannot complete parity/);
   assert.match(captureSource, /kind === 'reference' \? row\.referenceRoute : row\.productionRoute/);
@@ -54,6 +56,34 @@ test('pending evidence is explicit and cannot claim a fabricated hash', () => {
   const verdict = validateInventory(broken, { root });
   assert.equal(verdict.valid, false);
   assert.ok(verdict.errors.some((error) => error.includes('pending evidence must not claim a hash')));
+});
+
+test('a rejected capture never writes a receipt fixture', () => {
+  const fixture = path.join(root, 'tools', 'design-reference', 'test', `.tmp-rejected-capture-${process.pid}`);
+  const raw = path.join(fixture, 'raw.png');
+  fs.mkdirSync(fixture, { recursive: true });
+  fs.writeFileSync(raw, Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+9y5nNwAAAABJRU5ErkJggg==', 'base64'));
+  const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  try {
+    assert.throws(() => execFileSync(process.execPath, ['scripts/capture.mjs', '--id=surface.admin', '--kind=built', '--png=tools/design-reference/test/' + path.basename(fixture) + '/raw.png', '--commit=' + commit, '--artifact-manifest=tools/design-reference/test/' + path.basename(fixture) + '/missing.json', '--artifact=tools/design-reference/test/' + path.basename(fixture) + '/artifact.exe'], { cwd: path.join(root, 'tools', 'design-reference'), stdio: 'pipe' }));
+    assert.equal(fs.existsSync(`${raw}.receipt.json`), false);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test('serves pinned local Google Sans faces and exposes a capture-readiness proof', () => {
+  const mainSource = fs.readFileSync(new URL('../src/main.cjs', import.meta.url), 'utf8');
+  const provenance = JSON.parse(fs.readFileSync(new URL('../fonts/GoogleSans-v14.000.provenance.json', import.meta.url), 'utf8'));
+  assert.match(mainSource, /google-sans-v14\.000-opsz17-18\.ttf/);
+  assert.match(mainSource, /font-variation-settings:'opsz' 18/);
+  assert.match(mainSource, /font-variation-settings:'opsz' 17/);
+  assert.match(mainSource, /__DESIGN_REFERENCE_CAPTURE_READY__/);
+  assert.match(mainSource, /__DESIGN_REFERENCE_FONT_PROOF__/);
+  assert.equal(provenance.release, 'v14.000');
+  assert.equal(provenance.axes.opsz['Google Sans'], 18);
+  assert.equal(provenance.axes.opsz['Google Sans Text'], 17);
+  assert.match(provenance.fontSha256, /^[a-f0-9]{64}$/);
 });
 
 test('strict completion stays red while the 25 rows intentionally hold pending evidence', () => {
@@ -88,6 +118,7 @@ test('strict completion makes local font availability a reference-evidence bound
   assert.match(source, /requiredReferenceFonts/);
   assert.match(source, /document\.fonts proof/);
   assert.match(source, /required font is unavailable/);
-  assert.match(source, /diff requires an approved human review/);
+  assert.match(source, /diff requires an immutable approval record/);
   assert.match(source, /artifact hash does not match evidence/);
+  assert.match(source, /function rootFile/);
 });

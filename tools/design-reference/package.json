@@ -10,6 +10,7 @@
     "test": "node --test test/*.test.mjs",
     "capture": "node scripts/capture.mjs",
     "diff": "node scripts/diff.mjs",
+    "review-diff": "node scripts/review-diff.mjs",
     "side-by-side": "node scripts/side-by-side.mjs",
     "start": "electron ."
   },
