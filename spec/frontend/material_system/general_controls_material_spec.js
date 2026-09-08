@@ -7,6 +7,8 @@ import { MATERIAL_WEB_CONSTRUCTORS } from '~/material_system/components/register
 import ListRow from '~/material_system/surfaces/Admin/components/ListRow.vue';
 import LabelsList from '~/material_system/surfaces/Manage/components/LabelsList.vue';
 import TodoListItem from '~/material_system/surfaces/Todos/components/TodoListItem.vue';
+import AccountMenu from '~/material_system/surfaces/Admin/components/AccountMenu.vue';
+import NotificationBell from '~/material_system/surfaces/Admin/components/NotificationBell.vue';
 
 const root = path.resolve(__dirname, '../../../app/assets/javascripts/material_system/surfaces');
 const inventory = [
@@ -37,6 +39,12 @@ const settle = async (element) => {
 };
 
 describe('general control Material Web migration', () => {
+  beforeEach(() => {
+    const matches = Element.prototype.matches;
+    jest.spyOn(Element.prototype, 'matches').mockImplementation(function match(selector) {
+      return matches.call(this, selector === ':focus-visible' ? ':focus' : selector);
+    });
+  });
   afterEach(() => { document.body.innerHTML = ''; });
 
   it('keeps an exact hand-written adapter inventory and rejects native replacements', () => {
@@ -84,5 +92,35 @@ describe('general control Material Web migration', () => {
     expect(wrapper.emitted('toggle-select')).toEqual([['todo-1']]);
     wrapper.element.querySelector('md-filled-button').shadowRoot.querySelector('button').click();
     expect(wrapper.emitted('mark-done')).toEqual([['todo-1']]);
+  });
+
+  it('opens and closes the Account menu through its official trigger without a native-ref error', async () => {
+    const wrapper = mount(AccountMenu, { attachTo: document.body });
+    const trigger = wrapper.element.querySelector('md-filled-button');
+    await settle(trigger);
+    trigger.shadowRoot.querySelector('button').click();
+    await Vue.nextTick();
+    expect(wrapper.find('[role="menu"]').exists()).toBe(true);
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    await Vue.nextTick();
+    expect(wrapper.find('[role="menu"]').exists()).toBe(false);
+    wrapper.destroy();
+  });
+
+  it('opens and closes notification popover through its official trigger without a native-ref error', async () => {
+    const center = {
+      subscribe: (listener) => { listener([]); return jest.fn(); },
+      markRead: jest.fn(), dismiss: jest.fn(), clear: jest.fn(),
+    };
+    const wrapper = mount(NotificationBell, { attachTo: document.body, propsData: { center } });
+    const trigger = wrapper.element.querySelector('md-filled-button');
+    await settle(trigger);
+    trigger.shadowRoot.querySelector('button').click();
+    await Vue.nextTick();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(true);
+    document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+    await Vue.nextTick();
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false);
+    wrapper.destroy();
   });
 });

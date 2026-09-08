@@ -112,7 +112,7 @@ export default {
     },
     handleOutsideClick(event) {
       if (this.$refs.panel && this.$refs.panel.contains(event.target)) return;
-      if (this.$refs.trigger && this.$refs.trigger.contains(event.target)) return;
+      if (this.$refs.trigger?.$el?.contains(event.target)) return;
       this.close();
     },
     relativeTime(iso) {

@@ -74,7 +74,7 @@ export default {
     },
     handleOutsideClick(event) {
       if (this.$refs.menu && this.$refs.menu.contains(event.target)) return;
-      if (this.$refs.trigger && this.$refs.trigger.contains(event.target)) return;
+      if (this.$refs.trigger?.$el?.contains(event.target)) return;
       this.close();
     },
   },
