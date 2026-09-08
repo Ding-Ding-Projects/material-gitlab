@@ -49,7 +49,7 @@ else {
     const row = rowFor(id);
       const output = args.png ? existingFile(ROOT, String(args.png), 'raw PNG path') : null;
     if (!output) {
-      console.log(JSON.stringify({ status: 'capture-required', id, kind, route: row[`${kind}Route`] || row.referenceRoute, tuple: row.tuple, transport: 'cheap Lowlevel headless route', next: 'Capture the real app with the approved hidden-desktop route, then rerun with --png=<raw PNG path>.' }, null, 2));
+      console.log(JSON.stringify({ status: 'capture-required', id, kind, route: kind === 'built' ? row.productionRoute : row.referenceRoute, tuple: row.tuple, transport: 'cheap Lowlevel headless route', next: 'Capture the real app with the approved hidden-desktop route, then rerun with --png=<raw PNG path>.' }, null, 2));
       process.exitCode = 2;
     } else if (!fs.existsSync(output)) fail(`raw capture does not exist: ${output}`);
     else {

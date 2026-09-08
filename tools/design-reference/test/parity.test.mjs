@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { runNegativeRegression, sha256, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
@@ -60,6 +60,16 @@ test('pending evidence is explicit and cannot claim a fabricated hash', () => {
   const verdict = validateInventory(broken, { root });
   assert.equal(verdict.valid, false);
   assert.ok(verdict.errors.some((error) => error.includes('pending evidence must not claim a hash')));
+});
+
+test('built capture plans use the reviewed production route, never the reference route', () => {
+  const source = fs.readFileSync(new URL('../scripts/capture.mjs', import.meta.url), 'utf8');
+  assert.match(source, /kind === 'built' \? row\.productionRoute : row\.referenceRoute/);
+  const plan = spawnSync(process.execPath, ['scripts/capture.mjs', '--id=surface.issues', '--kind=built'], { cwd: path.join(root, 'tools', 'design-reference'), encoding: 'utf8' });
+  assert.equal(plan.status, 2);
+  const payload = JSON.parse(plan.stdout);
+  assert.equal(payload.route, inventory.contracts.find((row) => row.id === 'surface.issues').productionRoute);
+  assert.notEqual(payload.route, inventory.contracts.find((row) => row.id === 'surface.issues').referenceRoute);
 });
 
 test('a valid manifest fixture turns a wrong-size capture red without writing a receipt', () => {
