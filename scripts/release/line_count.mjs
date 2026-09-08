@@ -50,6 +50,17 @@ async function main() {
   const jsonOutput = args.has('--json');
   const requestedRevision = process.argv.find((arg) => arg.startsWith('--revision='))?.slice('--revision='.length) ?? 'HEAD';
 
+  // Surviving-line authorship needs one `git blame` subprocess per tracked text file.
+  // That is affordable on an ordinary repository and is not affordable here: this tree
+  // carries a squashed upstream GitLab import of more than 100,000 files, and the blame
+  // pass alone ran over 80 minutes in CI while the rest of the release took roughly half
+  // an hour. `--no-blame` skips the pass outright.
+  //
+  // It never invents a number to fill the gap. The report records attribution as skipped
+  // together with the reason, so a reader can tell the difference between "no agent
+  // lines were found" and "nobody counted".
+  const skipBlame = args.has('--no-blame') || process.env.LINE_COUNT_SKIP_BLAME === '1';
+
 function git(...gitArgs) {
   const result = spawnSync('git', ['-C', root, ...gitArgs], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
   if (result.error || result.status !== 0) {
@@ -200,11 +211,13 @@ function parseIncrementalBlame(output, file) {
   return ranges;
 }
 
-const blameResults = await mapWithWorkerPool(
-  blameEntries,
-  async (entry) => parseIncrementalBlame(await gitAsync('blame', '--incremental', revision, '--', entry.file), entry.file),
-  blameConcurrency,
-);
+const blameResults = skipBlame
+  ? []
+  : await mapWithWorkerPool(
+      blameEntries,
+      async (entry) => parseIncrementalBlame(await gitAsync('blame', '--incremental', revision, '--', entry.file), entry.file),
+      blameConcurrency,
+    );
 
 const commitIds = [...new Set(blameResults.flat().map((range) => range.commit))];
 const commitCache = new Map();
@@ -262,7 +275,15 @@ const report = {
   counted: { files: included.length, ...totals, buckets, generated },
   grandTotal: { files: trackedFiles.length, total: totals.total + excludedTotals.total, nonBlank: totals.nonBlank + excludedTotals.nonBlank },
   exclusions: { files: exclusions.length, byReason: exclusions.reduce((result, item) => { result[item.reason] = (result[item.reason] || 0) + 1; return result; }, {}), entries: exclusions },
-  attribution: { rule: 'git blame surviving lines; automation if blamed author/email or Co-Authored-By trailer matches bot, automation, agent, Claude, or Codex', authors: [...authors.values()].sort((a, b) => b.lines - a.lines), agentLines: [...authors.values()].filter((entry) => entry.automation).reduce((sum, entry) => sum + entry.lines, 0) },
+  attribution: skipBlame
+    ? {
+        skipped: true,
+        reason: `Surviving-line authorship was not computed. It needs one git blame per tracked text file, and this tree carries ${blameEntries.length} of them because of the squashed upstream import, which took over 80 minutes in CI. Re-run without --no-blame to compute it.`,
+        rule: null,
+        authors: [],
+        agentLines: null,
+      }
+    : { rule: 'git blame surviving lines; automation if blamed author/email or Co-Authored-By trailer matches bot, automation, agent, Claude, or Codex', authors: [...authors.values()].sort((a, b) => b.lines - a.lines), agentLines: [...authors.values()].filter((entry) => entry.automation).reduce((sum, entry) => sum + entry.lines, 0) },
 };
 
 if (jsonOutput) {
@@ -274,8 +295,13 @@ if (jsonOutput) {
   console.log(`Generated: ${report.counted.generated.files} files, ${report.counted.generated.total} total, ${report.counted.generated.nonBlank} nonblank`);
   console.log(`Grand total (tracked text plus excluded files): ${report.grandTotal.files} files, ${report.grandTotal.total} counted lines, ${report.grandTotal.nonBlank} nonblank`);
   console.log(`Excluded: ${report.exclusions.files} files`);
-  console.log(`Agent-attributed surviving lines: ${report.attribution.agentLines}`);
-  for (const author of report.attribution.authors) console.log(`  ${author.lines}: ${author.author} <${author.email}>${author.automation ? ' [automation]' : ''}`);
+  if (report.attribution.skipped) {
+    console.log('Agent-attributed surviving lines: not computed (--no-blame)');
+    console.log(`  ${report.attribution.reason}`);
+  } else {
+    console.log(`Agent-attributed surviving lines: ${report.attribution.agentLines}`);
+    for (const author of report.attribution.authors) console.log(`  ${author.lines}: ${author.author} <${author.email}>${author.automation ? ' [automation]' : ''}`);
+  }
 }
 
 }

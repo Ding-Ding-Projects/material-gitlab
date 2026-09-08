@@ -223,7 +223,13 @@ jobs:
           $duration = $completed - $started
           $durationText = '{0:00}:{1:00}:{2:00}' -f [int]$duration.TotalHours, $duration.Minutes, $duration.Seconds
           $lineCountPath = Join-Path $env:RUNNER_TEMP 'line-count.json'
-          $lineCountOutput = & node scripts/release/line_count.mjs --json "--revision=$sha" 2>&1
+          # --no-blame is deliberate for this repository. Surviving-line authorship needs
+          # one git blame per tracked text file, and the squashed upstream import means
+          # there are over 100,000 of them; that pass alone ran more than 80 minutes here
+          # while the whole rest of the release took about half an hour. The counter
+          # records attribution as skipped rather than inventing a number, and the summary
+          # below reports it as not computed.
+          $lineCountOutput = & node scripts/release/line_count.mjs --json --no-blame "--revision=$sha" 2>&1
           if ($LASTEXITCODE -ne 0) { throw "Committed line counter failed: $($lineCountOutput -join ' ')" }
           $lineCountOutput -join "`n" | Set-Content -LiteralPath $lineCountPath -Encoding utf8
           $lineCount = Get-Content -Raw -LiteralPath $lineCountPath | ConvertFrom-Json
@@ -246,8 +252,26 @@ jobs:
           $reasonRows = @(foreach ($name in @($lineCount.exclusions.byReason.PSObject.Properties.Name | Sort-Object)) {
             "| $name | $($lineCount.exclusions.byReason.$name) |"
           })
-          $agentLines = [int]$lineCount.attribution.agentLines
-          $humanLines = [int]$counted.total - $agentLines
+          # A skipped attribution must never render as "all human". Distinguish the two.
+          $attributionSkipped = [bool]$lineCount.attribution.skipped
+          if ($attributionSkipped) {
+            $authorshipRows = @(
+              "Surviving-line authorship was not computed for this release.",
+              "",
+              "> $($lineCount.attribution.reason)"
+            )
+          } else {
+            $agentLines = [int]$lineCount.attribution.agentLines
+            $humanLines = [int]$counted.total - $agentLines
+            $authorshipRows = @(
+              "| Origin | Lines |",
+              "| --- | --- |",
+              "| Agent-written | $agentLines |",
+              "| Human-written | $humanLines |",
+              "",
+              "Attribution rule: $($lineCount.attribution.rule)"
+            )
+          }
           $notes = @(
             "## Windows release",
             "",
@@ -274,13 +298,8 @@ jobs:
             "Generated files: $($counted.generated.files) files, $($counted.generated.total) total lines.",
             "",
             "#### Authorship of surviving lines",
-            "",
-            "| Origin | Lines |",
-            "| --- | --- |",
-            "| Agent-written | $agentLines |",
-            "| Human-written | $humanLines |",
-            "",
-            "Attribution rule: $($lineCount.attribution.rule)",
+            ""
+          ) + $authorshipRows + @(
             "",
             "#### Exclusions",
             "",
