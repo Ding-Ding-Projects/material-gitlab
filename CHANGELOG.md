@@ -2,6 +2,53 @@
 
 ## Unreleased
 
+### The application does not render the design, measured rather than assumed
+
+- Stood up a real instance (Omnibus 19.3.1 on WSL2) serving this fork's own compiled frontend,
+  11,317 webpack files replacing the stock 7,237, and measured the live DOM while signed in as an
+  administrator. The content area carries **35 `gl-mds` classes**, which is GitLab's own design
+  system, and **zero** Material classes, **zero** Material Symbols icons, **zero** `md3` token
+  classes and **zero** Vue application roots.
+- The only Material presence on the page is `m3-shell-*` applied to GitLab's stock `super-sidebar`.
+  That is the token-and-override layer over Pajamas that `HANDOFF.md` records as explicitly
+  rejected. The distance to the 25 contracts in `design/` is therefore a replacement gap rather
+  than a styling one, and cannot be closed with CSS.
+
+### Repairs that were needed before any of that could be measured
+
+- **Restored the execute bit on 306 tracked scripts.** Every one of the 108,026 tracked files was
+  mode `100644`; not a single executable existed anywhere in the tree, because the squashed import
+  was made on a platform that carries no execute bit. `yarn webpack-prod` therefore died on its
+  first command with exit 126, so the frontend could never be compiled, so no package could be
+  built from it. One permission bit sat underneath the whole problem.
+- **Fixed `app/views/admin/dashboard/index.html.haml`, which had never rendered in any
+  environment.** Hamlit ends a `-` statement at the line break, so an array opener alone on its line
+  compiles to `stats = [;`. Verified against Hamlit 3.0.3, the engine the instance actually runs.
+  A sweep found the pattern in exactly one file and two places.
+- Recorded that the view also needs the fork's own admin controller and route; views and compiled
+  assets alone raise `undefined method 'admin_dashboard_actions_path'`.
+
+### Traps recorded so they are not paid for twice
+
+- **Vue replaces its mount node**, so `querySelector('#js-material-<surface>')` returning null is not
+  evidence that a surface failed to mount. Reading it that way produced a wrong conclusion here.
+- **A backup written beside a template is itself a resolvable template.** Rails globbed
+  `index.html.haml.stock-<stamp>` as a candidate for the same action. Keep backups outside the view
+  tree.
+- **WSL2 terminates the distro seconds after the last command exits**, stopping the instance, so a
+  browser capture fails with connection refused against something that answered `curl` moments
+  earlier. A keepalive is required for the length of a capture run; the `vmIdleTimeout` setting did
+  not hold.
+- **7z is a native platform binary and cannot resolve shell-style paths.** Handed one it reports
+  "The system cannot find the file specified" and writes nothing. Convert every path it receives.
+
+### Evidence
+
+- Added the first capture of a Material surface in a running instance, plus a before and after pair
+  for the unstyled navigation controls, each with a committed receipt carrying its SHA-256, source
+  commit and capture method. Captures come from the built artifact through an isolated guest browser
+  on a hidden desktop, with exactly one debugger page target verified before each shot.
+
 ### Release pipeline repairs
 
 - Stop the Windows release body exceeding GitHub's 125,000 character limit. The notes step inlined
