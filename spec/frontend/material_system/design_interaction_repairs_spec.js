@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { mount, shallowMount } from '@vue/test-utils';
 import { authenticate } from '~/material_system/surfaces/Login/data';
 import LiveCollectionSurface from '~/material_system/surfaces/LiveCollectionSurface.vue';
 import CommandPalette from '~/material_system/surfaces/CommandPalette/CommandPalette.vue';
@@ -16,6 +16,14 @@ jest.mock('~/material_system/surfaces/Pipelines/data', () => ({
 }));
 
 jest.mock('~/material_system/surfaces/gitlabApi', () => ({ createGitLabClient: jest.fn() }));
+jest.mock('~/material_system/settings', () => ({
+  loadSettings: () => ({ theme: 'light' }),
+  updateSettings: jest.fn(() => ({ ok: true, value: { theme: 'light' } })),
+  subscribeSettings: () => jest.fn(),
+}));
+jest.mock('~/material_system/notifications', () => ({ notificationCenter: { notify: jest.fn() } }));
+
+const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('design interaction repairs', () => {
   it('does not authenticate nonempty credentials without host authentication', async () => {
@@ -105,6 +113,31 @@ describe('design interaction repairs', () => {
     expect(updated.stages[1].jobs[0].trace).toBe('test trace');
   });
 
+  it('shows a rejected pipeline load, then retries into the successful list', async () => {
+    const { fetchPipelines } = require('~/material_system/surfaces/Pipelines/data');
+    const { createGitLabClient } = require('~/material_system/surfaces/gitlabApi');
+    createGitLabClient.mockReturnValue({});
+    fetchPipelines.mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce([
+      { id: 10, title: 'Retry succeeded', branch: 'main', sha: 'abc', status: 'running' },
+    ]);
+
+    const wrapper = shallowMount(PipelinesSurface, { propsData: { projectPath: 'group/project' } });
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    expect(wrapper.find('[role="alert"]').text()).toContain('Offline');
+    await wrapper.find('[role="alert"] button').trigger('click');
+    await flushPromises();
+    await wrapper.vm.$nextTick();
+
+    expect(fetchPipelines).toHaveBeenCalledTimes(2);
+    expect(wrapper.find('[role="alert"]').exists()).toBe(false);
+    expect(wrapper.find('pipeline-list-stub').props('pipelines')).toEqual([
+      expect.objectContaining({ id: 10, title: 'Retry succeeded' }),
+    ]);
+    wrapper.destroy();
+  });
+
   it('retries the selected job by its raw id and updates only its stage-qualified identity', async () => {
     const pipeline = {
       id: 10,
@@ -114,19 +147,24 @@ describe('design interaction repairs', () => {
       ],
     };
     const updatePipeline = jest.fn((_id, transform) => transform(pipeline));
+    let resolveRetry;
     const vm = {
       activeJobKey: 'test:same',
       activeJob: pipeline.stages[1].jobs[0],
       detail: pipeline,
-      api: { retryJob: jest.fn().mockResolvedValue({}) },
+      api: { retryJob: jest.fn(() => new Promise((resolve) => { resolveRetry = resolve; })) },
       updatePipeline,
     };
 
-    await PipelinesSurface.methods.retryJob.call(vm);
+    const retry = PipelinesSurface.methods.retryJob.call(vm);
+    vm.activeJobKey = 'build:same';
+    resolveRetry({ id: 123, name: 'job', status: 'pending' });
+    await retry;
 
     expect(vm.api.retryJob).toHaveBeenCalledWith(2);
     const updated = updatePipeline.mock.results[0].value;
+    expect(updated.id).toBe(10);
     expect(updated.stages[0].jobs[0].status).toBe('failed');
-    expect(updated.stages[1].jobs[0]).toMatchObject({ status: 'running', duration: '—' });
+    expect(updated.stages[1].jobs[0]).toMatchObject({ id: 123, key: 'same', name: 'job', status: 'pending', duration: '—' });
   });
 });

@@ -361,23 +361,31 @@ export default {
     },
     async retryJob() {
       if (!this.detail || !this.activeJobKey) return;
-      const id = this.detail.id;
+      const pipelineId = this.detail.id;
+      const selectedJobKey = this.activeJobKey;
       const job = this.activeJob;
       const jobName = job ? job.name : 'Job';
       const jobId = job && (job.id || job.key);
       if (!jobId) return;
       try {
         const response = await this.api.retryJob(jobId);
-        this.updatePipeline(id, (pipeline) => ({
+        this.updatePipeline(pipelineId, (pipeline) => ({
           ...pipeline,
           status: 'running',
           stages: pipeline.stages.map((stage) => ({
             ...stage,
-            jobs: stage.jobs.map((item) => (`${stage.name}:${item.key}` === this.activeJobKey
-              ? { ...item, status: 'running', duration: '—' }
+            jobs: stage.jobs.map((item) => (`${stage.name}:${item.key}` === selectedJobKey
+              ? {
+                ...item,
+                ...response,
+                key: item.key,
+                stage: item.stage,
+                trace: item.trace,
+                status: response.status || 'running',
+                duration: response.duration == null ? '—' : String(response.duration),
+              }
               : item)),
           })),
-          ...response,
         }));
         notificationCenter.notify({ title: 'Retrying job', message: `${jobName} is running again.`, severity: 'info' });
       } catch (error) { notificationCenter.notify({ title: 'Job retry failed', message: error.message, severity: 'error' }); }

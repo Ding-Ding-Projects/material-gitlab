@@ -1,3 +1,5 @@
+import { __ } from '~/locale';
+
 /**
  * View model for the Login surface, ported from Login.dc.html's renderVals().
  * Kept as plain data + pure functions so a real authentication API can be
@@ -56,6 +58,6 @@ export async function authenticate({ username, password }) {
   if (!validation.ok) return validation;
   return {
     ok: false,
-    error: 'Sign-in is unavailable because no authentication service is configured.',
+    error: __('Sign-in is unavailable because no authentication service is configured.'),
   };
 }
