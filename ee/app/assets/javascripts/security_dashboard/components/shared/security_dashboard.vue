@@ -54,9 +54,7 @@ export default {
 
 <template>
   <index-layout
-    class="m3-security-dashboard"
     :heading="s__('SecurityReports|Security dashboard')"
-    data-material-surface="security-dashboard"
     data-testid="security-dashboard"
   >
     <template #actions>
@@ -65,7 +63,7 @@ export default {
 
     <no-longer-detected-vulnerabilities-alert />
 
-    <div class="security-charts m3-security-dashboard-grid gl-grid">
+    <div class="security-charts gl-grid">
       <vulnerabilities-over-time-chart
         :query="historyQuery"
         @chart-report-data-registered="vulnerabilitiesChartFn = $event"

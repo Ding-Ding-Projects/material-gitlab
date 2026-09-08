@@ -1,18 +1,14 @@
 <script>
 import { nextTick } from 'vue';
-import { GlFilteredSearch, GlFormInput } from '@gitlab/ui';
+import { GlFilteredSearch } from '@gitlab/ui';
 import { isEqual } from 'lodash-es';
 import { OPERATOR_NOT } from '~/vue_shared/components/filtered_search_bar/constants';
-import { s__ } from '~/locale';
-import AnchoredRegexBuilder from '../anchored_regex_builder.vue';
 import { ALL_ID } from './constants';
 
 export default {
   name: 'FilteredSearch',
   components: {
-    AnchoredRegexBuilder,
     GlFilteredSearch,
-    GlFormInput,
   },
   inject: {
     defaultBranchContext: {
@@ -31,33 +27,10 @@ export default {
   emits: ['filters-changed', 'url-params-changed'],
   data() {
     return {
-      tokenSearch: '',
-      tokenSearchFlags: 'i',
-      tokenSearchIsRegex: false,
       value: [],
     };
   },
   computed: {
-    tokenSearchSample() {
-      return this.tokens
-        .map(({ title, type }) => title || type)
-        .filter(Boolean)
-        .join('\n');
-    },
-    visibleTokens() {
-      if (!this.tokenSearch) return this.tokens;
-
-      const source = this.tokenSearchIsRegex
-        ? this.tokenSearch
-        : this.tokenSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-      try {
-        const expression = new RegExp(source, this.tokenSearchFlags.replace(/[gy]/g, ''));
-        return this.tokens.filter(({ title, type }) => expression.test(title || type));
-      } catch {
-        return this.tokens;
-      }
-    },
     filteredValue() {
       return this.value.filter(({ type }) => this.tokens.some((token) => token.type === type));
     },
@@ -75,16 +48,6 @@ export default {
     this.emitFilters();
   },
   methods: {
-    updateTokenSearch(value) {
-      this.tokenSearch = value;
-      this.tokenSearchFlags = 'i';
-      this.tokenSearchIsRegex = false;
-    },
-    applyTokenRegex({ pattern, flags }) {
-      this.tokenSearch = pattern;
-      this.tokenSearchFlags = flags;
-      this.tokenSearchIsRegex = true;
-    },
     buildInitialValue(token) {
       const params = new URLSearchParams(window.location.search);
       const parse = (key) => params.get(key)?.split(',').filter(Boolean);
@@ -188,30 +151,12 @@ export default {
 };
 </script>
 <template>
-  <div class="m3-security-search-stack">
-    <div class="m3-security-token-search">
-      <gl-form-input
-        class="m3-security-token-input"
-        :value="tokenSearch"
-        :placeholder="s__('SecurityReports|Find a security filter')"
-        :aria-label="s__('SecurityReports|Find a security filter')"
-        data-testid="security-token-search"
-        @input="updateTokenSearch"
-      />
-      <anchored-regex-builder
-        :value="tokenSearch"
-        :sample="tokenSearchSample"
-        :title="s__('SecurityReports|Build a security-filter search pattern')"
-        @apply="applyTokenRegex"
-      />
-    </div>
-    <gl-filtered-search
-      v-model="value"
-      :placeholder="s__('SecurityReports|Filter results...')"
-      :available-tokens="visibleTokens"
-      @token-complete="update"
-      @token-destroy="update"
-      @clear="update"
-    />
-  </div>
+  <gl-filtered-search
+    v-model="value"
+    :placeholder="s__('SecurityReports|Filter results...')"
+    :available-tokens="tokens"
+    @token-complete="update"
+    @token-destroy="update"
+    @clear="update"
+  />
 </template>

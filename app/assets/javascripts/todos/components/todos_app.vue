@@ -15,7 +15,6 @@ import { createAlert } from '~/alert';
 import { BV_HIDE_TOOLTIP } from '~/lib/utils/constants';
 import { s__ } from '~/locale';
 import Tracking from '~/tracking';
-import { RegexBuilder } from '~/material_system';
 import {
   DEFAULT_PAGE_SIZE,
   INSTRUMENT_TAB_LABELS,
@@ -90,11 +89,6 @@ export default {
       currentTimeInterval: null,
       multiselectState: {},
       selectAllChecked: false,
-      localSearch: {
-        query: '',
-        isRegex: false,
-        flags: 'i',
-      },
     };
   },
   apollo: {
@@ -116,9 +110,7 @@ export default {
         return nodes;
       },
       error(error) {
-        this.alert = createAlert({
-          message: s__('Todos|Something went wrong. Please try again.'),
-        });
+        this.alert = createAlert({ message: s__('Todos|Something went wrong. Please try again.') });
         Sentry.captureException(error);
       },
       watchLoading() {
@@ -149,9 +141,7 @@ export default {
     isFiltered() {
       // Ignore sort value. It is always present and not really a filter.
       const { sort: _, ...filters } = this.queryFilterValues;
-      return (
-        Object.values(filters).some((value) => value.length > 0) || Boolean(this.localSearch.query)
-      );
+      return Object.values(filters).some((value) => value.length > 0);
     },
     isOnSnoozedTab() {
       return this.currentTab === TABS_INDICES.snoozed;
@@ -163,7 +153,7 @@ export default {
       return !this.pageInfo.hasPreviousPage;
     },
     showEmptyState() {
-      return this.isOnFirstPage && !this.isLoading && this.visibleTodos.length === 0;
+      return this.isOnFirstPage && !this.isLoading && this.todos.length === 0;
     },
     showSelectAll() {
       if (this.isOnAllTab) return false;
@@ -173,26 +163,8 @@ export default {
     selectedIds() {
       return this.todos.filter((todo) => this.multiselectState[todo.id]).map((todo) => todo.id);
     },
-    visibleTodos() {
-      const query = this.localSearch.query.trim();
-      if (!query) return this.todos;
-
-      const builder = new RegexBuilder({
-        pattern: query,
-        flags: this.localSearch.flags.replace(/[gy]/g, ''),
-        regex: this.localSearch.isRegex,
-      });
-
-      return this.todos.filter((todo) => {
-        const snapshot = builder.update({ sample: this.todoSearchText(todo) });
-        return snapshot.syntax.valid && snapshot.matches.length > 0;
-      });
-    },
-    todosSearchCorpus() {
-      return this.todos.map((todo) => this.todoSearchText(todo));
-    },
     hasIndeterminateSelectAll() {
-      return this.selectedIds.length > 0 && this.selectedIds.length < this.visibleTodos.length;
+      return this.selectedIds.length > 0 && this.selectedIds.length < this.todos.length;
     },
   },
   watch: {
@@ -298,23 +270,6 @@ export default {
       this.resetPagination();
       this.queryFilterValues = { ...data };
     },
-    handleLocalSearchChanged(search) {
-      this.unselectAll();
-      this.localSearch = { ...search };
-    },
-    todoSearchText(todo) {
-      return [
-        todo.action,
-        todo.author?.name,
-        todo.author?.username,
-        todo.project?.name,
-        todo.project?.fullPath,
-        todo.targetEntity?.title,
-        todo.note?.body,
-      ]
-        .filter(Boolean)
-        .join(' ');
-    },
     handleVisibilityChanged() {
       if (!document.hidden) {
         this.updateAllQueries(false);
@@ -370,7 +325,7 @@ export default {
       }, TODO_WAIT_BEFORE_RELOAD);
     },
     selectAll() {
-      this.multiselectState = Object.fromEntries(this.visibleTodos.map((todo) => [todo.id, true]));
+      this.multiselectState = Object.fromEntries(this.todos.map((todo) => [todo.id, true]));
     },
     unselectAll() {
       this.multiselectState = {};
@@ -390,7 +345,7 @@ export default {
 </script>
 
 <template>
-  <index-layout :heading="__('To-Do List')" class="todos-app" data-testid="todos-list-container">
+  <index-layout :heading="__('To-Do List')" data-testid="todos-list-container">
     <div
       class="gl-flex gl-flex-wrap-reverse gl-justify-between gl-border-b-1 gl-border-default gl-border-b-solid"
     >
@@ -434,12 +389,7 @@ export default {
       </div>
     </div>
 
-    <todos-filter-bar
-      :todos-status="statusByTab"
-      :search-corpus="todosSearchCorpus"
-      @filters-changed="handleFiltersChanged"
-      @local-search-changed="handleLocalSearchChanged"
-    />
+    <todos-filter-bar :todos-status="statusByTab" @filters-changed="handleFiltersChanged" />
 
     <div>
       <div class="gl-flex gl-flex-col">
@@ -482,7 +432,7 @@ export default {
             class="gl-m-0 gl-list-none gl-p-0"
           >
             <todo-item
-              v-for="todo in visibleTodos"
+              v-for="todo in todos"
               :key="todo.id"
               :todo="todo"
               selectable
@@ -508,57 +458,6 @@ export default {
 </template>
 
 <style>
-.todos-app {
-  --todos-surface: var(--m3-color-surface, var(--gl-color-neutral-0));
-  --todos-surface-container: var(
-    --m3-color-surface-container,
-    var(--gl-color-surface-container-low, var(--gl-color-neutral-50))
-  );
-  --todos-outline: var(--m3-color-outline, var(--gl-color-border-subtle));
-  --todos-primary: var(--m3-color-primary, var(--gl-color-text-link));
-}
-
-.todos-app [role='tablist'] {
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 999px;
-  background: var(--todos-surface-container);
-}
-
-.todos-app [role='tab'] {
-  min-height: 2.5rem;
-  border: 0;
-  border-radius: 999px;
-}
-
-.todos-app [role='tab'][aria-selected='true'] {
-  background: var(--gl-color-purple-100);
-  color: var(--gl-color-purple-900);
-}
-
-.todos-app [data-testid='todo-item-list'] {
-  margin-top: 1rem !important;
-  overflow: hidden;
-  border: 1px solid var(--todos-outline);
-  border-radius: 1rem;
-  background: var(--todos-surface);
-  box-shadow: 0 1px 3px rgb(0 0 0 / 10%);
-}
-
-.todos-app .todos-bulk-bar {
-  margin-top: 1rem;
-  border: 1px solid var(--todos-outline);
-  border-radius: 1rem;
-  background: var(--todos-surface-container) !important;
-}
-
-.todos-app button:focus-visible,
-.todos-app a:focus-visible,
-.todos-app input:focus-visible {
-  outline: 3px solid var(--todos-primary);
-  outline-offset: 2px;
-}
-
 .todos-leave-active {
   transition: transform 0.15s ease-out;
   position: absolute;
