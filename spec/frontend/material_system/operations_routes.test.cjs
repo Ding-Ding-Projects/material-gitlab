@@ -57,6 +57,12 @@ test('package deletion cannot target the collection endpoint', async () => {
   await assert.rejects(async () => deploy.deleteDeployItem({ endpoints: { packages: '/api/packages' }, kind: 'packages', id: '17' }), /Missing live endpoint/);
 });
 
+test('accepted asynchronous registry deletion does not require a JSON body or pretend completion', async () => {
+  let parsed = false;
+  const result = await deploy.deleteDeployItem({ endpoints: { deleteContainer: '/api/registry/repositories/:id' }, kind: 'containers', id: '2', fetchImpl: async () => ({ ok: true, status: 202, json: async () => { parsed = true; throw new Error('empty response'); } }) });
+  assert.equal(result.status, 202); assert.equal(parsed, false);
+});
+
 test('environment Rails wrapper preserves permission-controlled stop links and both scopes', async () => {
   const data = await operate.fetchOperateData({ endpoints: { environments: '/environments.json?scope=active', stoppedEnvironments: '/environments.json?scope=stopped' }, fetchImpl: async (url) => response({ environments: [{ id: url.includes('active') ? 1 : 2, name: 'production', state: url.includes('active') ? 'available' : 'stopped', can_stop: url.includes('active'), stop_path: '/environments/1/stop', environment_path: '/environments/1' }] }) });
   assert.equal(data.environments.length, 2); assert.equal(data.environments[0].stopPath, '/environments/1/stop'); assert.equal(data.environments[1].stopPath, null);

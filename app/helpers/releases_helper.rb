@@ -17,7 +17,7 @@ module ReleasesHelper
       containers: ("#{base}/registry/repositories?per_page=100" if can?(current_user, :read_container_image, @project)),
       updateFeatureFlag: ("#{base}/feature_flags/:id" if can?(current_user, :update_feature_flag, @project)),
       deletePackage: ("#{base}/packages/:id" if can?(current_user, :destroy_package, @project)),
-      deleteContainer: ("#{base}/registry/repositories/:id" if can?(current_user, :destroy_container_image, @project)),
+      deleteContainer: ("#{base}/registry/repositories/:id" if can?(current_user, :admin_container_image, @project)),
       projectPath: project_path(@project),
       newRelease: (new_project_release_path(@project) if can?(current_user, :create_release, @project)),
       featureFlagsPath: project_feature_flags_path(@project),

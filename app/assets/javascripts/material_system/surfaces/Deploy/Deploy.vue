@@ -465,14 +465,11 @@ export default {
       };
     },
     deleteRows(kind, ids) {
-      const idSet = new Set(ids);
       const commit = Promise.all(ids.map((id) => deleteDeployItem({ endpoints: this.endpoints, kind, id, fetchImpl: this.fetchImpl })));
       commit.then(() => {
-        if (kind === 'packages') this.packages = this.packages.filter((p) => !idSet.has(p.id));
-        else this.images = this.images.filter((image) => !idSet.has(image.id));
-        this.setSelection(this.selectedIds.filter((id) => !idSet.has(id)));
+        this.clearSelection();
         const noun = kind === 'packages' ? 'package' : 'container repository';
-        this.notify({ title: 'Deleted', message: `${ids.length} ${noun}${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
+        this.notify({ title: 'Deletion requested', message: `The server accepted deletion of ${ids.length} ${noun}${ids.length === 1 ? '' : 's'}. Background removal may still be pending.`, severity: 'success' });
       }).catch((error) => this.notify({ title: 'Delete failed', message: error.message, severity: 'error' })).finally(() => this.loadLiveData());
     },
     confirmAction() {

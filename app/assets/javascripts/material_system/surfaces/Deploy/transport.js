@@ -12,7 +12,7 @@ export async function operationsRequest(endpoint, { fetchImpl = globalThis.fetch
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
   if (!response?.ok) throw new Error(`Operations request failed (${response?.status || 'unavailable'}).`);
-  return { payload: response.status === 204 ? null : await response.json(), headers: response.headers };
+  return { payload: [202, 204].includes(response.status) ? null : await response.json(), headers: response.headers, status: response.status };
 }
 
 export async function operationsCollection(endpoint, options = {}) {
