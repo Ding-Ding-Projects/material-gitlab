@@ -24,7 +24,8 @@ if (materialSidebarHost && superSidebarData) {
   initSuperSidebar(superSidebarData);
 }
 
-if (materialTopbarHost && superSidebarData) {
+const pageOwnsTopbar = Boolean(document.querySelector('#js-material-admin, #js-material-build, #js-material-pipelines'));
+if (materialTopbarHost && superSidebarData && !pageOwnsTopbar) {
   mountAuthenticatedShell(materialTopbarHost, { data: superSidebarData.sidebarData });
 } else if (superSidebarData) {
   initSuperTopbar(superSidebarData);

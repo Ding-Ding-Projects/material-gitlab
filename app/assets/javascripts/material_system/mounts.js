@@ -30,7 +30,8 @@ const toSections = (payload) => {
 
 const mount = (el, Component, props = {}) => {
   if (!el || el.__materialMount) return el?.__materialMount || null;
-  const vm = new Vue({ name: `${Component.name || 'Material'}Mount`, render: (h) => h(Component, { props }) }).$mount(el);
+  const { listeners = {}, ...componentProps } = props;
+  const vm = new Vue({ name: `${Component.name || 'Material'}Mount`, render: (h) => h(Component, { props: componentProps, on: listeners }) }).$mount(el);
   el.__materialMount = vm;
   return vm;
 };
@@ -44,7 +45,12 @@ export function mountSidebar(el = document.querySelector('.m3-shell-sidebar-host
 export function mountAuthenticatedShell(el = document.querySelector('.m3-shell-topbar-host'), options = {}) {
   if (!el) return null;
   const payload = options.data || parseJson(document.querySelector('.m3-shell-sidebar-host')?.dataset.sidebar, {});
-  return mount(el, ShellB, { chromeOnly: true, brand: options.brand || 'GitLab M3', sections: options.sections || toSections(payload), paletteActions: options.paletteActions || [] });
+  const sections = options.sections || toSections(payload);
+  const paletteActions = options.paletteActions || sections.flatMap((section) => section.items).filter(({ href }) => href && href !== '#').map((item) => ({ id: `navigate-${item.id || item.href}`, title: item.label, action: () => { window.location.assign(item.href); } }));
+  const navigateSearch = (query) => {
+    if (query && query.trim()) window.location.assign(`/search?search=${encodeURIComponent(query.trim())}`);
+  };
+  return mount(el, ShellB, { chromeOnly: true, brand: options.brand || 'GitLab M3', sections, paletteActions, listeners: { search: navigateSearch, 'regex-change': ({ pattern }) => navigateSearch(pattern) } });
 }
 
 export function mountLoginShell(el = document.querySelector('.login-m3-surface'), options = {}) {
