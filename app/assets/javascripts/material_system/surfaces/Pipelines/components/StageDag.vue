@@ -4,7 +4,7 @@
       <div class="mgl-pl-stage-name">{{ stage.name }}</div>
       <job-card
         v-for="job in stage.jobs"
-        :key="job.key"
+        :key="`${stage.name}:${job.key}`"
         :job="job"
         :active="activeJobKey === `${stage.name}:${job.key}`"
         @pick="$emit('pick-job', `${stage.name}:${job.key}`)"

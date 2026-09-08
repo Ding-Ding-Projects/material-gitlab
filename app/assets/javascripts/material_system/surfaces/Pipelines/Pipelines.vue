@@ -24,7 +24,12 @@
         @delete="bulkDelete"
         @clear="selectedIds = []"
       />
-      <main class="mgl-pl-main">
+      <p v-if="loading" class="mgl-pl-state" role="status">Loading pipelines…</p>
+      <div v-else-if="loadError" class="mgl-pl-state mgl-pl-state--error" role="alert">
+        <span>{{ loadError.message || 'Pipelines could not be loaded.' }}</span>
+        <button type="button" @click="loadPipelines">Retry</button>
+      </div>
+      <main v-else class="mgl-pl-main">
         <pipeline-list
           :pipelines="visiblePipelines"
           :selected-ids="selectedVisibleIds"
@@ -196,10 +201,7 @@ export default {
   },
   mounted() {
     this.api = createGitLabClient(this.projectPath);
-    fetchPipelines({ projectPath: this.projectPath, client: this.api })
-      .then((pipelines) => { this.pipelines = pipelines; })
-      .catch((error) => { this.loadError = error; })
-      .finally(() => { this.loading = false; });
+    this.loadPipelines();
     this.onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -235,6 +237,17 @@ export default {
     }
   },
   methods: {
+    async loadPipelines() {
+      this.loading = true;
+      this.loadError = null;
+      try {
+        this.pipelines = await fetchPipelines({ projectPath: this.projectPath, client: this.api });
+      } catch (error) {
+        this.loadError = error;
+      } finally {
+        this.loading = false;
+      }
+    },
     selectJob(jobKey) {
       this.activeJobKey = jobKey;
       this.loadJobTrace(jobKey);
@@ -315,7 +328,7 @@ export default {
           ...pipeline,
           stages: pipeline.stages.map((stage) => ({
             ...stage,
-            jobs: stage.jobs.map((item) => item.key === jobKey ? { ...item, trace } : item),
+            jobs: stage.jobs.map((item) => `${stage.name}:${item.key}` === jobKey ? { ...item, trace } : item),
           })),
         }));
       } catch (error) {
@@ -348,12 +361,32 @@ export default {
     },
     async retryJob() {
       if (!this.detail || !this.activeJobKey) return;
-      const id = this.detail.id;
-      const key = this.activeJobKey;
-      const jobName = this.activeJob ? this.activeJob.name : 'Job';
+      const pipelineId = this.detail.id;
+      const selectedJobKey = this.activeJobKey;
+      const job = this.activeJob;
+      const jobName = job ? job.name : 'Job';
+      const jobId = job && (job.id || job.key);
+      if (!jobId) return;
       try {
-        const response = await this.api.retryJob(key);
-        this.updatePipeline(id, (p) => ({ ...retriedJob(p, key), ...response }));
+        const response = await this.api.retryJob(jobId);
+        this.updatePipeline(pipelineId, (pipeline) => ({
+          ...pipeline,
+          status: 'running',
+          stages: pipeline.stages.map((stage) => ({
+            ...stage,
+            jobs: stage.jobs.map((item) => (`${stage.name}:${item.key}` === selectedJobKey
+              ? {
+                ...item,
+                ...response,
+                key: item.key,
+                stage: item.stage,
+                trace: item.trace,
+                status: response.status || 'running',
+                duration: response.duration == null ? '—' : String(response.duration),
+              }
+              : item)),
+          })),
+        }));
         notificationCenter.notify({ title: 'Retrying job', message: `${jobName} is running again.`, severity: 'info' });
       } catch (error) { notificationCenter.notify({ title: 'Job retry failed', message: error.message, severity: 'error' }); }
     },
