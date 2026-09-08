@@ -16,6 +16,10 @@ The adapter uses existing GitLab REST v4 resources:
 
 Mutating REST requests use the page's CSRF token and same-origin credentials.
 `204 No Content` is accepted as a successful delete response.
+Every write requires an exact boolean `true` for its server-supplied capability:
+`milestones` for milestone state changes and `wiki` for wiki saves and deletion.
+Missing capabilities, missing permission objects, strings, numbers, arrays, null,
+and other malformed values never enable a write or reach its transport.
 
 Requirements have no project REST v4 resource in this adapter. They report an
 explicit per-tab unavailable state rather than a locally invented collection.

@@ -42,7 +42,7 @@ describe('planning design-contract data adapters', () => {
       .mockResolvedValueOnce(response({ id: 7, title: 'Release', state: 'closed' }))
       .mockResolvedValueOnce(response({ slug: 'a/b', title: 'Home', content: 'Updated', format: 'rdoc' }))
       .mockResolvedValueOnce(response(null, 204));
-    const adapter = createProjectPlanAdapter({ projectId: 123, root, fetcher });
+    const adapter = createProjectPlanAdapter({ projectId: 123, root, fetcher, permissions: { milestones: true, wiki: true } });
 
     await expect(adapter.fetchMilestones()).resolves.toEqual([expect.objectContaining({ id: 7, name: 'Release' })]);
     await expect(adapter.fetchWikiPages()).resolves.toEqual([expect.objectContaining({ id: 'a/b', format: 'rdoc' })]);
@@ -95,7 +95,7 @@ describe('planning design-contract data adapters', () => {
 
   it('rejects a wiki save without a matching server page', async () => {
     const fetcher = jest.fn().mockResolvedValueOnce(response([{ slug: 'home', content: 'Existing', format: 'markdown' }])).mockResolvedValueOnce(response(null));
-    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher });
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher, permissions: { wiki: true } });
     await adapter.fetchWikiPages();
     await expect(adapter.saveWiki({ id: 'home', body: 'Changed' })).rejects.toThrow('did not return the saved wiki page');
   });
@@ -105,6 +105,25 @@ describe('planning design-contract data adapters', () => {
     const adapter = createProjectPlanAdapter({ projectId: 123, fetcher, permissions: { milestones: false, wiki: false } });
     await expect(adapter.mutateEntity({ resource: 'milestones', id: 1, changes: { state: 'closed' } })).rejects.toThrow('current project access');
     await expect(adapter.saveWiki({ id: 'home', body: 'Changed' })).rejects.toThrow('current project access');
+    await expect(adapter.deleteEntity({ resource: 'wiki', id: 'home' })).rejects.toThrow('current project access');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, null, false, 0, 1, 'true', 'false', {}, []])('requires exact true for every write instead of accepting permission %p', async (permission) => {
+    const fetcher = jest.fn();
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher, permissions: { milestones: permission, wiki: permission } });
+    await expect(adapter.mutateEntity({ resource: 'milestones', id: 1, changes: { state: 'closed' } })).rejects.toThrow('current project access');
+    await expect(adapter.saveWiki({ id: 'home', body: 'Changed' })).rejects.toThrow('current project access');
+    await expect(adapter.deleteEntity({ resource: 'wiki', id: 'home' })).rejects.toThrow('current project access');
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it.each([undefined, null, false, 'true'])('rejects writes when the permission object itself is absent or malformed: %p', async (permissions) => {
+    const fetcher = jest.fn();
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher, permissions });
+    await expect(adapter.mutateEntity({ resource: 'milestones', id: 1, changes: { state: 'active' } })).rejects.toThrow('current project access');
+    await expect(adapter.saveWiki({ id: 'home', body: 'Changed' })).rejects.toThrow('current project access');
+    await expect(adapter.deleteEntity({ resource: 'wiki', id: 'home' })).rejects.toThrow('current project access');
     expect(fetcher).not.toHaveBeenCalled();
   });
 

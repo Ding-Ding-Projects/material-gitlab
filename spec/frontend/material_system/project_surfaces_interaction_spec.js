@@ -72,4 +72,14 @@ describe('project design surface interactions', () => {
     expect(wrapper.vm.members.map((member) => member.id)).toEqual([2]);
     expect(wrapper.vm.adapterError).toContain('Second member');
   });
+
+  it('disables generic reveal in production and provides the dedicated editor route', async () => {
+    const adapter = Object.fromEntries(SETTINGS_ADAPTER_METHODS.map((method) => [method, jest.fn()]));
+    adapter.load.mockResolvedValue({ projectName: 'Project', variables: [{ id: 'variable-1', key: 'KEY' }] });
+    wrapper = shallowMount(Settings, { propsData: { production: true, adapter, variablesEditorPath: '/group/project/-/settings/ci_cd' } });
+    await settle();
+    expect(wrapper.findComponent(CicdTab).props('allowReveal')).toBe(false);
+    expect(wrapper.findComponent(CicdTab).props('variablesEditorPath')).toBe('/group/project/-/settings/ci_cd');
+    expect(adapter.revealVariable).not.toHaveBeenCalled();
+  });
 });

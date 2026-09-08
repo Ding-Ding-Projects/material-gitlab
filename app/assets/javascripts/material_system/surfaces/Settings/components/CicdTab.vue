@@ -24,6 +24,8 @@
           Add variable
         </button>
       </div>
+      <p v-if="!allowReveal">Variable values are managed in the dedicated CI/CD variables editor.</p>
+      <gl-button v-if="variablesEditorPath" :href="variablesEditorPath">Open CI/CD variables editor</gl-button>
       <gl-form v-if="variableFormOpen" @submit.prevent="submitVariable">
         <gl-form-group label="Key" label-for="st-variable-key">
           <gl-form-input id="st-variable-key" v-model="newVariable.key" required autocomplete="off" />
@@ -60,6 +62,7 @@
           :key="variable.id"
           :variable="variable"
           :selected="selectedVariableIds.includes(variable.id)"
+          :allow-reveal="allowReveal"
           @toggle-select="toggleVariableSelect"
           @toggle-reveal="$emit('toggle-reveal', $event)"
           @remove="confirmVariableRemoval([$event])"
@@ -129,6 +132,8 @@ export default {
     variables: { type: Array, required: true },
     protectedBranches: { type: Array, required: true },
     busy: { type: Boolean, default: false },
+    allowReveal: { type: Boolean, default: true },
+    variablesEditorPath: { type: String, default: '' },
   },
   data() {
     return {

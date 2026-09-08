@@ -151,7 +151,7 @@ export function createProjectPlanAdapter({ projectId = currentProjectId(), root 
       });
     },
     async mutateEntity({ resource, id, changes = {} }) {
-      if (permissions.milestones === false) throw new Error('Milestone changes are unavailable for your current project access.');
+      if (permissions?.milestones !== true) throw new Error('Milestone changes are unavailable for your current project access.');
       if (resource !== 'milestones') {
         throw new PlanResourceUnavailableError(resource, `${resource} state updates are unavailable on this GitLab edition.`);
       }
@@ -166,12 +166,13 @@ export function createProjectPlanAdapter({ projectId = currentProjectId(), root 
       if (resource !== 'wiki') {
         throw new PlanResourceUnavailableError(resource, `${resource} deletion is unavailable on this GitLab edition.`);
       }
+      if (permissions?.wiki !== true) throw new Error('Wiki changes are unavailable for your current project access.');
       await request('wiki', `${apiBase}/wikis/${encodeURIComponent(id)}`, { method: 'DELETE' });
       wikiFormats.delete(id);
       return true;
     },
     async saveWiki({ id, body }) {
-      if (permissions.wiki === false) throw new Error('Wiki changes are unavailable for your current project access.');
+      if (permissions?.wiki !== true) throw new Error('Wiki changes are unavailable for your current project access.');
       const format = wikiFormats.get(id);
       if (!format) throw new Error('Wiki format is unavailable. Reload the page before saving.');
       const value = await request('wiki', `${apiBase}/wikis/${encodeURIComponent(id)}`, {

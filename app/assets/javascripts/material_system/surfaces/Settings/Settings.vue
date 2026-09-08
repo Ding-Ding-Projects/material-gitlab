@@ -47,6 +47,8 @@
         :variables="variables"
         :protected-branches="protectedBranches"
         :busy="mutationPending"
+        :allow-reveal="!production"
+        :variables-editor-path="variablesEditorPath"
         @add-variable="onAddVariable"
         @toggle-reveal="onToggleReveal"
         @remove-variables="onRemoveVariables"
@@ -98,6 +100,7 @@ export default {
     userInitials: { type: String, default: '' },
     production: { type: Boolean, default: false },
     integrationSettingsPath: { type: String, default: '' },
+    variablesEditorPath: { type: String, default: '' },
     // Production state and mutations must come from a real host adapter.
     adapter: { type: Object, default: null },
     // Compatibility alias for callers that named this seam explicitly.

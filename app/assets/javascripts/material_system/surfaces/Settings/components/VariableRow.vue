@@ -13,7 +13,7 @@
       type="button"
       class="st-var-row__icon-btn"
       :aria-label="variable.revealed ? `Hide value for ${variable.key}` : `Reveal value for ${variable.key}`"
-      :disabled="variable.hidden"
+      :disabled="variable.hidden || !allowReveal"
       @click="$emit('toggle-reveal', variable.id)"
     >
       <StIcon :name="variable.revealed ? 'visibility_off' : 'visibility'" size="small" />
@@ -37,6 +37,7 @@ export default {
   props: {
     variable: { type: Object, required: true },
     selected: { type: Boolean, default: false },
+    allowReveal: { type: Boolean, default: true },
   },
   computed: {
     shownValue() {

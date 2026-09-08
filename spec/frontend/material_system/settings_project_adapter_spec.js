@@ -51,13 +51,10 @@ describe('project Settings API adapter', () => {
     await expect(adapter.updateMemberRole({ id: 2, role: 'Owner' })).rejects.toThrow('cannot be assigned');
   });
 
-  it('retrieves a variable only on explicit reveal and encodes the environment scope', async () => {
+  it('keeps generic reveal disabled without retrieving or caching a variable value', async () => {
     await adapter.load();
-    fetchImpl.mockResolvedValueOnce(response({ value: 'explicitly requested value' }));
-    await expect(adapter.revealVariable(variable.id)).resolves.toMatchObject({ variables: [{ revealed: true, value: 'explicitly requested value' }] });
-    expect(fetchImpl).toHaveBeenLastCalledWith('/gitlab/api/v4/projects/7/variables/RELEASE_KEY?filter%5Benvironment_scope%5D=production%2F*', expect.objectContaining({ method: 'GET' }));
     fetchImpl.mockClear();
-    await expect(adapter.revealVariable(variable.id)).resolves.toMatchObject({ variables: [{ revealed: false, value: '' }] });
+    await expect(adapter.revealVariable(variable.id)).rejects.toThrow('dedicated CI/CD variables editor');
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 

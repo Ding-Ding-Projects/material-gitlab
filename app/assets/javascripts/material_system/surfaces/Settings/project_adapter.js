@@ -139,13 +139,7 @@ export function createProjectSettingsAdapter({ projectId, fullPath, projectEndpo
       requirePermission('variables');
       const item = variables.find((variable) => variable.id === id);
       if (!item || item.hidden) throw new Error('Hidden variables cannot be revealed.');
-      if (item.revealed) { variables = variables.map((entry) => entry.id === id ? { ...entry, revealed: false, value: '' } : entry); }
-      else {
-        const body = await request(variablePath(id));
-        if (typeof body?.value !== 'string') throw new Error('This variable value is unavailable.');
-        variables = variables.map((entry) => entry.id === id ? { ...entry, revealed: true, value: body.value } : entry);
-      }
-      return { variables };
+      throw new Error('Use the dedicated CI/CD variables editor to inspect variable values.');
     },
     async removeVariables(ids) {
       requirePermission('variables');
