@@ -131,7 +131,7 @@ describe('design interaction repairs', () => {
 
     expect(fetchPipelines).toHaveBeenCalledTimes(2);
     expect(wrapper.find('[role="alert"]').exists()).toBe(false);
-    expect(wrapper.find('pipeline-list-stub').props('pipelines')).toEqual([
+    expect(wrapper.findComponent({ name: 'PipelinesList' }).props('pipelines')).toEqual([
       expect.objectContaining({ id: 10, title: 'Retry succeeded' }),
     ]);
     wrapper.destroy();
