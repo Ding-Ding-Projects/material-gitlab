@@ -2,51 +2,45 @@
 title: Material design route integration
 ---
 
-The design surface inventory lives in
-`app/assets/javascripts/material_system/surfaces/contracts.js`.
-It contains one explicit row for every checked-in design reference.
-The inventory records the route, page entrypoint, initializer, and host for each route that is
-connected to a production surface.
+`app/assets/javascripts/material_system/surfaces/contracts.js` is a hand-written
+inventory of the 25 checked-in design references. It records actual server views,
+page entries, import edges, initializers, and hosts. It does not infer a route from
+a component export.
 
-## Connected routes
+## Source-wired routes
 
-The following routes mount a design surface through an existing page-specific entrypoint:
+Admin, Agent Memory, Build, Code, Deploy, Epics, Issues, Manage, Merge Requests, Monitor,
+Operate, Pipelines, Plan, Repository, Secure, Security, and To-Dos each have a Rails host and a
+page entry that imports and calls the named surface initializer. Shell B and Sidebar
+are mounted by `entrypoints/super_sidebar.js` from the authenticated application
+and page layouts. The inventory records one representative Code route; tags and
+commits use the same `mountCodeSurface` import and host contract.
 
-| Surface | Route | Entrypoint | Host |
-| --- | --- | --- | --- |
-| Admin | `/admin` | `pages/admin/dashboard/index.js` | `#js-material-admin` |
-| Agent Memory | `/-/agent_memory` | `pages/agent_memory/index.js` | `#js-material-agent-memory` |
-| Build | `/:namespace/:project/-/jobs` | `pages/projects/jobs/index/index.js` | `#js-material-build` |
-| Manage | `/:namespace/:project/-/manage` | `pages/projects/manage.js` | `#js-material-manage` |
-| Pipelines | `/:namespace/:project/-/pipelines` | `pages/projects/pipelines/index/index.js` | `#js-material-pipelines` |
-| To-Dos | `/dashboard/todos` | `pages/dashboard/todos/index/index.js` | `#js-todos-app-root` |
+Command Palette and Regex Builder are embedded overlays in `ShellB.vue`. They have
+component imports and template hosts, but no standalone Rails route. The source
+guard verifies those exact imports and template hosts.
 
-The admin dashboard entrypoint initializes both the Jihu transition banner and the Material Admin
-surface. The two initializers operate on separate hosts.
+## Honest unresolved boundaries
 
-## Existing-host boundary
+Analyze preserves the existing authenticated Apollo host because no production page
+entry imports the Material adapter. Settings and Shell A have checked-in initializer
+or component source only, without a production page-entry edge. Login is a Rails-rendered Devise
+authentication view, including `devise/sessions/new_base`; it is not recorded as a
+Vue replacement.
 
-Analytics Dashboards already owns `#js-explore-analytics-dashboards` through an authenticated
-Apollo router. The inventory labels Analyze as `preserved-host` until an adapter can supply the
-same authorized data and lifecycle to the design component. Replacing that host from a generic
-mount would discard the route's router and live data contract.
-
-The remaining design surfaces have an explicit `route-contract-pending` row. They are not mounted
-on invented routes or generic eager bundles. Each row names the missing compatibility condition,
-such as a Rails host, live endpoint metadata, or a page-specific replacement boundary.
-
-Repository remains pending because the repository bundle mounts the Material surface only when a
-server view supplies both `#js-material-repository-app` and a compatible adapter. Existing project
-repository views do not currently establish that route contract.
+Every row currently records `runtimeEvidence: 'not-captured'`. Source registration
+is evidence of a checked-in edge only. It is not built-artifact interaction or a
+capture claim.
 
 ## Verification
 
-Run the focused Jest specification and the independent source guard:
+Run the focused specification and the independent AST-based source guard:
 
 ```shell
 yarn jest spec/frontend/material_system/design_route_integration_spec.js --runInBand
 node scripts/verify-design-integration.mjs
 ```
 
-The specification deliberately removes the Admin row and its initializer requirement. Both changes
-make the inventory validation fail before the original row is restored.
+The focused negative cases remove an inventory row, import edge, initializer, and
+host. The independent guard parses imports and calls with Babel AST nodes, so a
+comment or unrelated substring cannot satisfy the source-wiring evidence.
