@@ -40,6 +40,36 @@ test('hand-written inventory contains exactly the 25 checked-in references', () 
   assert.equal(inventory.contracts.length, 25);
 });
 
+test('all capture routes follow the explicit production integration inventory', async () => {
+  const source = fs.readFileSync(path.join(root, 'app/assets/javascripts/material_system/surfaces/contracts.js'), 'utf8');
+  const { DESIGN_ROUTE_INTEGRATION_CONTRACTS: routes } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+  assert.equal(routes.length, 25);
+  const representativeRoutes = {
+    'surface.code': '/:namespace/:project/-/branches',
+    'surface.repository': '/:namespace/:project/-/tree/:ref',
+    'surface.command-palette': '/dashboard/projects',
+    'surface.regex-builder': '/dashboard/projects',
+    'surface.shell-b': '/dashboard/projects',
+    'surface.sidebar': '/dashboard/projects',
+  };
+  for (const route of routes) {
+    const row = inventory.contracts.find(({ id }) => id === route.id);
+    assert.ok(row, `Missing production capture row: ${route.id}`);
+    assert.equal(row.productionRoute, representativeRoutes[row.id] || route.route, row.id);
+    assert.equal(row.productionRouteEvidence, 'source-registration-only', row.id);
+    assert.equal(row.productionRouteStatus, 'known', row.id);
+    assert.doesNotMatch(row.productionRoute, /design-reference|command-palette|regex-builder|shell-[ab]/);
+    if (route.host && !['surface.command-palette', 'surface.regex-builder'].includes(row.id)) assert.equal(row.productionMount, route.host, row.id);
+  }
+  for (const slug of ['shell-a', 'shell-b', 'command-palette', 'regex-builder', 'sidebar']) {
+    const row = inventory.contracts.find(({ id }) => id === `surface.${slug}`);
+    assert.deepEqual(row.productionActions[0], { type: 'preference', key: 'shellVariant', value: slug === 'shell-a' ? 'a' : 'b', via: slug === 'shell-a' ? 'header-full' : 'header-minimal' });
+  }
+  for (const [slug, name] of [['command-palette', 'Open command palette (Ctrl+Shift+F)'], ['regex-builder', 'Open regex builder for search']]) {
+    assert.equal(inventory.contracts.find(({ id }) => id === `surface.${slug}`).productionActions[1].accessibleName, name);
+  }
+});
+
 test('negative regression turns red for every required parity boundary and green after restore', () => {
   const verdict = runNegativeRegression(inventory);
   assert.equal(verdict.valid, true, verdict.failures.join(', '));
@@ -119,7 +149,7 @@ test('strict completion stays red while the 25 rows intentionally hold pending e
   assert.equal(verdict.valid, false);
   assert.ok(verdict.errors.some((error) => error === 'sourceCommit must be a full 40-character commit for completion'));
   assert.ok(verdict.errors.some((error) => error === 'capturePolicy.evidenceStatus must be verified for completion'));
-  assert.ok(verdict.errors.some((error) => error.includes('surface.admin.productionRouteStatus must be known for completion')));
+  assert.ok(verdict.errors.some((error) => error.includes('surface.admin.materialAudit must be verified for completion')));
   assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw is not verified')));
 });
 

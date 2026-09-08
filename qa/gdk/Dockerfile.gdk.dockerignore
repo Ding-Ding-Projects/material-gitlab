@@ -44,6 +44,7 @@ ee/db/fixtures/
 !ee/db/fixtures/development/10_license_file.rb
 
 scripts/
+!scripts/design-parity
 !scripts/build_frontend_islands
 !scripts/frontend
 !scripts/lib/assets_sha.rb

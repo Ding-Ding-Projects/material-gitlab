@@ -18,10 +18,18 @@ The task remains in progress. No complete production parity verdict exists.
   Epics, Code, Repository, operational/security routes, and Analyze integration.
 - Both shared header designs are addressable through persisted preferences.
   Actual Rails request and visual verification remain pending for every route.
-- The complete Settings candidate is isolated at
-  `34f7d693a2d6d656990dc7edee4d1972ec7ad1f7`, with 82 isolated tests reported by its
-  implementation lane. It is awaiting independent review and standard checks.
-  The existing Settings route remains active on `main` until that review finishes.
+- Settings is integrated after independent source review of candidate
+  `34f7d693a2d6d656990dc7edee4d1972ec7ad1f7`. Its real project-edit route now owns
+  General and Advanced capabilities through the existing permission and service
+  contracts. Standard verification at `497e8c071` passed all 36 Material Jest
+  suites with 257 tests. Ruby syntax checks passed for nine Settings helpers and
+  the changed controller. Built route verification remains pending.
+- The capture inventory now identifies all 25 source-backed production targets.
+  Layout-owned and embedded surfaces use the dashboard plus normal controls,
+  not invented standalone URLs. All evidence and component audits remain pending.
+- `scripts/design-parity/seed.rb` is a scoped, idempotent native-data seed for an
+  explicitly designated development/test GDK instance. It has syntax validation
+  only; execution awaits the real database and Gitaly services.
 - Capture receipts now require decodable PNGs, source/build manifests, matching
   raw and derived records, font availability, and separate diff review records.
   Structural inventory validity and strict completion are separate checks.
