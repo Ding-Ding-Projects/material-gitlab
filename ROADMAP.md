@@ -17,6 +17,13 @@
 The older entries below describe historical source milestones. They do not
 upgrade the unchecked production-parity items above to completed work.
 
+## Blender graphics delivery
+
+- [x] Deliver and verify one hero and three feature compositions in light and dark treatments,
+      including editable scenes, transparent masters, responsive derivatives and recorded provenance.
+- [x] Preserve all outputs and retire only the disposable rendering distribution.
+- Page integration is deliberately excluded from this graphics-only task.
+
 ## Completed
 
 - Root Windows build entry points exist and document the supported local bootstrap path.

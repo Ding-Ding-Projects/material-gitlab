@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "platform": "WSL 2",
+  "distribution": "Ubuntu 24.04 LTS amd64",
+  "rootfsUrl": "https://cloud-images.ubuntu.com/wsl/releases/24.04/current/ubuntu-noble-wsl-amd64-wsl.rootfs.tar.gz",
+  "rootfsSha256": "8251e27ffff381a4af5f41dcb94d867de3e0d9774a9241908ab34555d99315ea",
+  "rootfsBytes": 356739129,
+  "rootfsNote": "The current URL can change. Compare this pinned digest and stop on mismatch; do not silently adopt a new image.",
+  "blenderVersion": "4.5.13 LTS",
+  "blenderBuildHash": "daeeeca98fb0",
+  "blenderUrl": "https://download.blender.org/release/Blender4.5/blender-4.5.13-linux-x64.tar.xz",
+  "blenderSha256": "da4e69b06b75b9e642d106496c50e7e240218b411d2f6e18271c1d1d819cef91",
+  "blenderBytes": 378033952,
+  "renderEngine": "Cycles",
+  "renderDevice": "NVIDIA GeForce RTX 3050 via CUDA",
+  "samples": 96,
+  "importMethod": "Precreate an empty destination, decompress rootfs to tar, and pass absolute native Windows paths to wsl --import NAME DESTINATION ROOTFS --version 2.",
+  "importRecovery": "Two compressed-input imports returned Wsl/Service/RPC_S_CALL_FAILED and corresponding wslservice.exe stack-overflow events. The third attempt changed path spelling, compression, and destination precreation together and succeeded. Individual causality was not established. No global WSL configuration, host driver, or unrelated distribution was changed.",
+  "packages": ["libx11-6", "libxi6", "libxrender1", "libxfixes3", "libxxf86vm1", "libxkbcommon0", "libsm6", "libgl1", "libegl1", "libgomp1", "libfontconfig1", "libdbus-1-3", "libglib2.0-0t64", "ca-certificates", "xz-utils"]
+}
