@@ -1,3 +1,5 @@
+jest.mock('~/lib/utils/axios_utils', () => ({ get: jest.fn(), post: jest.fn() }));
+
 import { createProjectRepositoryAdapter } from '~/material_system/surfaces/Repository/data';
 
 describe('project REST repository adapter', () => {
