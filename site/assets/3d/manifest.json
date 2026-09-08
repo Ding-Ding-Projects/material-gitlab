@@ -1,0 +1,567 @@
+{
+  "format": 1,
+  "render_info": [
+    {
+      "scene": "hero",
+      "theme": "light",
+      "width": 2400,
+      "height": 1600,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "hero-light.png",
+      "blend": "hero-light.blend"
+    },
+    {
+      "scene": "collaboration",
+      "theme": "light",
+      "width": 1200,
+      "height": 1200,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "collaboration-light.png",
+      "blend": "collaboration-light.blend"
+    },
+    {
+      "scene": "pipelines",
+      "theme": "light",
+      "width": 1200,
+      "height": 1200,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "pipelines-light.png",
+      "blend": "pipelines-light.blend"
+    },
+    {
+      "scene": "appearance",
+      "theme": "light",
+      "width": 1200,
+      "height": 1200,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "appearance-light.png",
+      "blend": "appearance-light.blend"
+    },
+    {
+      "scene": "hero",
+      "theme": "dark",
+      "width": 2400,
+      "height": 1600,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "hero-dark.png",
+      "blend": "hero-dark.blend"
+    },
+    {
+      "scene": "collaboration",
+      "theme": "dark",
+      "width": 1200,
+      "height": 1200,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "collaboration-dark.png",
+      "blend": "collaboration-dark.blend"
+    },
+    {
+      "scene": "pipelines",
+      "theme": "dark",
+      "width": 1200,
+      "height": 1200,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "pipelines-dark.png",
+      "blend": "pipelines-dark.blend"
+    },
+    {
+      "scene": "appearance",
+      "theme": "dark",
+      "width": 1200,
+      "height": 1200,
+      "blender": "4.5.13 LTS",
+      "expected_blender": "4.5.13",
+      "blender_build_hash": "daeeeca98fb0",
+      "engine": "CYCLES",
+      "device": "CUDA",
+      "device_names": [
+        "NVIDIA GeForce RTX 3050"
+      ],
+      "requested_device": "CUDA",
+      "samples": 96,
+      "scale": 100,
+      "denoiser": "OPENIMAGEDENOISE",
+      "filename": "appearance-dark.png",
+      "blend": "appearance-dark.blend"
+    }
+  ],
+  "source": {
+    "generator": "generate.py",
+    "generator_sha256": "2b0d7f37a17b408441bf4cd3e2609df32fccb667263c685b14f8ed733e94c927",
+    "exporter_pillow": "12.3.0",
+    "objects": [
+      {
+        "filename": "hero-light.png",
+        "kind": "input-png",
+        "bytes": 1663986,
+        "sha256": "359359639502b23f332ed3af37812a880b6083ccd88701b7c513b42434cc4cdd",
+        "width": 2400,
+        "height": 1600,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "hero-light.blend",
+        "kind": "input-blend",
+        "bytes": 192472,
+        "sha256": "b8a42c3eb9c7a93d90c547803adc981cec8c3065e631f1211336e51cf2d8e7c0"
+      },
+      {
+        "filename": "collaboration-light.png",
+        "kind": "input-png",
+        "bytes": 636987,
+        "sha256": "5ce15fc8d3680be57377cd895dbeb5055d3edd68992d2f813ffc617aeb3d2a56",
+        "width": 1200,
+        "height": 1200,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "collaboration-light.blend",
+        "kind": "input-blend",
+        "bytes": 198483,
+        "sha256": "bceaf7ebcd8ff91a98679552937977f8559b145ac22210b783e5b3f296f1c31b"
+      },
+      {
+        "filename": "pipelines-light.png",
+        "kind": "input-png",
+        "bytes": 602642,
+        "sha256": "3c2d786131e386adea271cc60f5e36fd3f4c87a52ab442806c53e6547f904845",
+        "width": 1200,
+        "height": 1200,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "pipelines-light.blend",
+        "kind": "input-blend",
+        "bytes": 113865,
+        "sha256": "93267849655b0c8a68394c5463ffb1e921e8390c258762dd35b1a85867a0a2f3"
+      },
+      {
+        "filename": "appearance-light.png",
+        "kind": "input-png",
+        "bytes": 865941,
+        "sha256": "8c31950b203c880d3951e4454b68a230c39ba472629eaa2a802d0e5baa2555f1",
+        "width": 1200,
+        "height": 1200,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "appearance-light.blend",
+        "kind": "input-blend",
+        "bytes": 153343,
+        "sha256": "01413f0f552af45b27ff9ee16ae45dd328a60566d1ac867baf3149c00894ab3b"
+      },
+      {
+        "filename": "hero-dark.png",
+        "kind": "input-png",
+        "bytes": 1692029,
+        "sha256": "c995c75a0bb2c96053b31f7c8fe2d985852c7757e6adb9d71f5dc6608497ea0c",
+        "width": 2400,
+        "height": 1600,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "hero-dark.blend",
+        "kind": "input-blend",
+        "bytes": 193062,
+        "sha256": "2a6be682b473b76adb7736443f55b3fb78f3d34d625820af2b6a017580b9d821"
+      },
+      {
+        "filename": "collaboration-dark.png",
+        "kind": "input-png",
+        "bytes": 647363,
+        "sha256": "cfe968354ae00c4a895c7db984799e96f18ed27e0baf2629b6dc5fbf7d39e5f9",
+        "width": 1200,
+        "height": 1200,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "collaboration-dark.blend",
+        "kind": "input-blend",
+        "bytes": 191376,
+        "sha256": "5c3fb43a36d2495b89d3ab79daabf07b3501aa9e6e7287bab493ec81126372d8"
+      },
+      {
+        "filename": "pipelines-dark.png",
+        "kind": "input-png",
+        "bytes": 600978,
+        "sha256": "327aaad9bfb4cac1946853ea99588a72fc5991edb75baf44f0957b8fac6b8886",
+        "width": 1200,
+        "height": 1200,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "pipelines-dark.blend",
+        "kind": "input-blend",
+        "bytes": 114138,
+        "sha256": "e1f88ad57be7eb0123ddbaed7b13f8ad3e4c58f48e1c48b860f929da34c32bbc"
+      },
+      {
+        "filename": "appearance-dark.png",
+        "kind": "input-png",
+        "bytes": 888634,
+        "sha256": "aa2d733bfa7c625bcfbe5013e49a0137ec381a413bd1a7ca1c7c5a5d5f06d99d",
+        "width": 1200,
+        "height": 1200,
+        "mode": "RGBA"
+      },
+      {
+        "filename": "appearance-dark.blend",
+        "kind": "input-blend",
+        "bytes": 153906,
+        "sha256": "9e23bd7558c1d605fd949aab45419e0db54b60ee78c216ce2066b27dcf614898"
+      }
+    ]
+  },
+  "files": [
+    {
+      "filename": "hero-light.png",
+      "kind": "png-master",
+      "bytes": 1663986,
+      "sha256": "359359639502b23f332ed3af37812a880b6083ccd88701b7c513b42434cc4cdd",
+      "width": 2400,
+      "height": 1600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "hero-light.blend",
+      "kind": "blend-source",
+      "bytes": 192472,
+      "sha256": "b8a42c3eb9c7a93d90c547803adc981cec8c3065e631f1211336e51cf2d8e7c0"
+    },
+    {
+      "filename": "hero-light.webp",
+      "kind": "webp-original",
+      "bytes": 453984,
+      "sha256": "c2755b1a3a9b38504f5f9268b0ed66b44a77fe4b4ce919c1b2eb8f72ea99491d",
+      "width": 2400,
+      "height": 1600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "hero-light-1200.webp",
+      "kind": "webp-responsive",
+      "bytes": 142218,
+      "sha256": "6c34e340036087408ce004d40d4b9c2fbb9bd0170707e15013a8e671c68b3c02",
+      "width": 1200,
+      "height": 800,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "collaboration-light.png",
+      "kind": "png-master",
+      "bytes": 636987,
+      "sha256": "5ce15fc8d3680be57377cd895dbeb5055d3edd68992d2f813ffc617aeb3d2a56",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "collaboration-light.blend",
+      "kind": "blend-source",
+      "bytes": 198483,
+      "sha256": "bceaf7ebcd8ff91a98679552937977f8559b145ac22210b783e5b3f296f1c31b"
+    },
+    {
+      "filename": "collaboration-light.webp",
+      "kind": "webp-original",
+      "bytes": 173746,
+      "sha256": "5e2a93f23d09ebbe23cd1c80d8c1a4976471b175686cb3ec545283c0ae3cb673",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "collaboration-light-600.webp",
+      "kind": "webp-responsive",
+      "bytes": 61670,
+      "sha256": "7127847cc5c751ddd909bf245f8495355f360b45962f08d52a11b4d2c686f11d",
+      "width": 600,
+      "height": 600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "pipelines-light.png",
+      "kind": "png-master",
+      "bytes": 602642,
+      "sha256": "3c2d786131e386adea271cc60f5e36fd3f4c87a52ab442806c53e6547f904845",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "pipelines-light.blend",
+      "kind": "blend-source",
+      "bytes": 113865,
+      "sha256": "93267849655b0c8a68394c5463ffb1e921e8390c258762dd35b1a85867a0a2f3"
+    },
+    {
+      "filename": "pipelines-light.webp",
+      "kind": "webp-original",
+      "bytes": 142060,
+      "sha256": "e22622379f07bde58a310b52c83efc5c906cd14c45b620077f174a887fee60bd",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "pipelines-light-600.webp",
+      "kind": "webp-responsive",
+      "bytes": 57590,
+      "sha256": "4ddfaafc2ff2cfeeef81ea9c7d989fcca6bbf9cd02416423e0c9aa9681eed8b8",
+      "width": 600,
+      "height": 600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "appearance-light.png",
+      "kind": "png-master",
+      "bytes": 865941,
+      "sha256": "8c31950b203c880d3951e4454b68a230c39ba472629eaa2a802d0e5baa2555f1",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "appearance-light.blend",
+      "kind": "blend-source",
+      "bytes": 153343,
+      "sha256": "01413f0f552af45b27ff9ee16ae45dd328a60566d1ac867baf3149c00894ab3b"
+    },
+    {
+      "filename": "appearance-light.webp",
+      "kind": "webp-original",
+      "bytes": 286410,
+      "sha256": "309c86003351ebc078159db5befd22c57d85ec872efeb6ab8361d03ca546730b",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "appearance-light-600.webp",
+      "kind": "webp-responsive",
+      "bytes": 94022,
+      "sha256": "3df19f99ead42818b5e6339a347e4f1134b3963d15f1dfbffed056dc37536bad",
+      "width": 600,
+      "height": 600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "hero-dark.png",
+      "kind": "png-master",
+      "bytes": 1692029,
+      "sha256": "c995c75a0bb2c96053b31f7c8fe2d985852c7757e6adb9d71f5dc6608497ea0c",
+      "width": 2400,
+      "height": 1600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "hero-dark.blend",
+      "kind": "blend-source",
+      "bytes": 193062,
+      "sha256": "2a6be682b473b76adb7736443f55b3fb78f3d34d625820af2b6a017580b9d821"
+    },
+    {
+      "filename": "hero-dark.webp",
+      "kind": "webp-original",
+      "bytes": 467174,
+      "sha256": "dedf3e4f3988415ceb848da4b81d9e8ac000c12f5058c5a60b0550fea647bd79",
+      "width": 2400,
+      "height": 1600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "hero-dark-1200.webp",
+      "kind": "webp-responsive",
+      "bytes": 148700,
+      "sha256": "2545d6c824b75e04677193dfe255fc9f95f10d98a811d1aaf3661b02aed293af",
+      "width": 1200,
+      "height": 800,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "collaboration-dark.png",
+      "kind": "png-master",
+      "bytes": 647363,
+      "sha256": "cfe968354ae00c4a895c7db984799e96f18ed27e0baf2629b6dc5fbf7d39e5f9",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "collaboration-dark.blend",
+      "kind": "blend-source",
+      "bytes": 191376,
+      "sha256": "5c3fb43a36d2495b89d3ab79daabf07b3501aa9e6e7287bab493ec81126372d8"
+    },
+    {
+      "filename": "collaboration-dark.webp",
+      "kind": "webp-original",
+      "bytes": 182032,
+      "sha256": "5ed68acaa12eb80094b684ea528025db59ffda055088af8662b191253a939f65",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "collaboration-dark-600.webp",
+      "kind": "webp-responsive",
+      "bytes": 65080,
+      "sha256": "ca2d03149eb40ad0ff979163411580851551e54ea5bec18617f9eea307680918",
+      "width": 600,
+      "height": 600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "pipelines-dark.png",
+      "kind": "png-master",
+      "bytes": 600978,
+      "sha256": "327aaad9bfb4cac1946853ea99588a72fc5991edb75baf44f0957b8fac6b8886",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "pipelines-dark.blend",
+      "kind": "blend-source",
+      "bytes": 114138,
+      "sha256": "e1f88ad57be7eb0123ddbaed7b13f8ad3e4c58f48e1c48b860f929da34c32bbc"
+    },
+    {
+      "filename": "pipelines-dark.webp",
+      "kind": "webp-original",
+      "bytes": 145646,
+      "sha256": "42375d28f94500ef9e8104c164c198049451dc41809329ea32a7307c89bdbacd",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "pipelines-dark-600.webp",
+      "kind": "webp-responsive",
+      "bytes": 58514,
+      "sha256": "3c7593a4a9318e94ee67b4360ddbbe99223aefa0a11720f9329a558ab08f6e61",
+      "width": 600,
+      "height": 600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "appearance-dark.png",
+      "kind": "png-master",
+      "bytes": 888634,
+      "sha256": "aa2d733bfa7c625bcfbe5013e49a0137ec381a413bd1a7ca1c7c5a5d5f06d99d",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "appearance-dark.blend",
+      "kind": "blend-source",
+      "bytes": 153906,
+      "sha256": "9e23bd7558c1d605fd949aab45419e0db54b60ee78c216ce2066b27dcf614898"
+    },
+    {
+      "filename": "appearance-dark.webp",
+      "kind": "webp-original",
+      "bytes": 309120,
+      "sha256": "f44d75509e115335051386825a4824ff6fed420e042e4f59ce5a8ae03b5fe720",
+      "width": 1200,
+      "height": 1200,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "appearance-dark-600.webp",
+      "kind": "webp-responsive",
+      "bytes": 103216,
+      "sha256": "0f4a2bf8d6dd655f920229dec9b5ae917addb2d05a93916e71dfeb35730cb31f",
+      "width": 600,
+      "height": 600,
+      "mode": "RGBA"
+    },
+    {
+      "filename": "contact-sheet.jpg",
+      "kind": "contact-sheet",
+      "bytes": 171252,
+      "sha256": "dc3b0a4e0896fb38ead2c9fd3eda43216400a9756b81250d11f9e6961c3371b4",
+      "width": 2220,
+      "height": 912,
+      "mode": "RGB"
+    }
+  ]
+}

@@ -1,5 +1,17 @@
 # Material GitLab overlay handoff
 
+## Blender graphics pack, 2026-09-08
+
+This section covers only the original illustration assets and their production tools.
+The existing application, release and design-parity work below is outside this task.
+
+- Source: `design/3d/`, including the generator, exporter, environment provenance and saved-scene verifier.
+- Delivery: `site/assets/3d/`, including eight editable scenes, eight transparent PNG masters,
+  sixteen lossless WebPs, a contact sheet and a SHA-256 manifest.
+- Renderer: Blender 4.5.13 LTS, Cycles, NVIDIA GeForce RTX 3050 via CUDA, 96 samples.
+- Verification and distribution retirement are recorded in `design/3d/delivery.json` when complete.
+- Page integration, page layout changes and an interactive 3D runtime were not requested or implemented.
+
 ## Pass of 2026-09-08: release pipeline, build repairs, README
 
 Read this section first. It supersedes any older statement it contradicts, and everything below it

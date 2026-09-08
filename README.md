@@ -38,6 +38,15 @@ honest answer is not the one the directory listing suggests.
 
 ---
 
+## Original 3D illustrations
+
+The [Blender graphics pack](design/3d/README.md) contains four original compositions in
+light and dark treatments, with transparent PNG masters, responsive WebP images and editable
+Blender scenes. See the [contact sheet](site/assets/3d/contact-sheet.jpg),
+[file manifest](site/assets/3d/manifest.json) and [reproduction procedure](design/3d/OPERATIONS.md).
+These are conceptual illustrations for the landing page, not screenshots or claims about
+deployed functionality. Page layout and image placement are unchanged by this asset delivery.
+
 ## Contents
 
 | Section | What you get |
