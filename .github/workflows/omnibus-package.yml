@@ -177,7 +177,24 @@ jobs:
             echo "::warning::Nothing referenced ftpmirror.gnu.org, so no substitution was made. The upstream layout may have changed and this step needs revisiting."
             exit 0
           fi
-          grep -rl 'ftpmirror\.gnu\.org' config/software | xargs sed -i "s|https://ftpmirror\.gnu\.org|$chosen|g" || true
+          # Two URL shapes live in these definitions and they must map differently:
+          #   ftpmirror.gnu.org/gnu/ncurses/...  already carries /gnu/
+          #   ftpmirror.gnu.org/libtool/...      does not
+          # The redirector accepts both. A real GNU host only serves /gnu/<package>/, so one
+          # blind prefix swap turns the first shape into /gnu/gnu/ and every fetch 404s. That
+          # is precisely what happened on the previous attempt: the 502s went away and were
+          # replaced by 404s on the single package using the longer form. Longest form first.
+          files="$(grep -rl 'ftpmirror\.gnu\.org' config/software)" || true
+          # shellcheck disable=SC2086
+          sed -i "s|https://ftpmirror\.gnu\.org/gnu/|$chosen/|g" $files
+          # shellcheck disable=SC2086
+          sed -i "s|https://ftpmirror\.gnu\.org/|$chosen/|g" $files
+          # A doubled path segment is the exact defect above, and it is silent: the build runs
+          # for minutes before any fetch is attempted. Catch it here, where it costs seconds.
+          if grep -rn '/gnu/gnu/' config/software; then
+            echo "::error::Substitution produced a doubled /gnu/gnu/ path, which 404s on every real mirror. Refusing to start a build that cannot fetch anything."
+            exit 1
+          fi
           after="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)" || true
           echo "references remaining: $after"
           if [ "$after" -ne 0 ]; then
