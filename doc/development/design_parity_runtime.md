@@ -80,3 +80,17 @@ Leaving the copied example on `localhost` caused a real build to wait inside
 libpq on `::1:5432` after gettext completed. No webpack process had started.
 This configuration change belongs only to the asset-build stage. Final GDK
 setup still generates its actual runtime database configuration.
+# RubyGems build compatibility
+
+The GDK base supplied RubyGems 4.0.20, while `.gitlab/ci/version.yml` specifies
+the 3.6 series. The build now installs the exact 3.6.9 patch recorded in
+`qa/gdk/rubygems-version` after Ruby tool installation and before Bundler setup.
+[RubyGems 3.6.9](https://rubygems.org/gems/rubygems-update/versions/3.6.9)
+is the published final patch in that declared series. Bundler remains pinned by
+`Gemfile.lock`. A version assertion prevents the stage from continuing on an
+unintended RubyGems version.
+
+The observed 4.0.20 failure occurred during Bundler checksum parsing, before
+Bootsnap or application initialization. Changing cache or coverage behavior is
+therefore not used as a repair. The next real build must verify this compatibility
+correction; its presence in source is not a successful runtime verdict.

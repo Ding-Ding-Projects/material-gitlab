@@ -36,6 +36,9 @@ try {
   if ([Convert]::ToBase64String([IO.File]::ReadAllBytes($binaryFixture)) -ne [Convert]::ToBase64String($binaryBytes)) { throw 'The shebang normalizer changed a non-shebang binary fixture.' }
 
   $versionSource = git show "$commit`:.gitlab/ci/version.yml"
+  $rubygemsVersion = (Get-Content -LiteralPath (Join-Path $repositoryRoot 'qa/gdk/rubygems-version') -Raw).Trim()
+  $rubygemsSeries = (($versionSource | Select-String 'RUBYGEMS_VERSION:').Line -replace '.*"([^"]+)".*', '$1')
+  if (-not $rubygemsVersion.StartsWith($rubygemsSeries + '.')) { throw 'The GDK RubyGems patch must match the declared CI series.' }
   $toolVersions = Get-Content -LiteralPath (Join-Path $repositoryRoot 'qa/gdk/.tool-versions')
   $expectedVersions = @(
     ('ruby ' + (($versionSource | Select-String 'RUBY_VERSION_DEFAULT:').Line -replace '.*"([^"]+)".*', '$1'))
