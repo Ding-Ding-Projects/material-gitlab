@@ -5,6 +5,8 @@ $repositoryRoot = (git rev-parse --show-toplevel).Trim()
 $helper = Join-Path $repositoryRoot 'scripts/build-design-parity-runtime.ps1'
 $commit = (git rev-parse HEAD).Trim()
 $taskOutput = Join-Path ([IO.Path]::GetTempPath()) ("material-gitlab-parity-test-" + [Guid]::NewGuid().ToString('N'))
+$fakeBin = Join-Path $taskOutput 'fake-bin'
+$fakeCommit = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
 try {
   $dryRun = & $helper -Commit $commit -OutputRoot $taskOutput -DryRun | ConvertFrom-Json
@@ -36,25 +38,25 @@ try {
   }
   if (-not $rejectedExistingCandidate) { throw 'Dry run accepted a nonempty candidate output directory.' }
 
-  function Invoke-SimulatedProcess {
-    param([string]$Command, [int]$TimeoutMilliseconds)
-    $processInfo = [Diagnostics.ProcessStartInfo]::new()
-    $processInfo.FileName = 'cmd.exe'
-    $processInfo.UseShellExecute = $false
-    $processInfo.RedirectStandardOutput = $true
-    $processInfo.RedirectStandardError = $true
-    foreach ($argument in @('/d', '/c', $Command)) { [void]$processInfo.ArgumentList.Add($argument) }
-    $process = [Diagnostics.Process]::Start($processInfo)
-    $process.BeginOutputReadLine(); $process.BeginErrorReadLine()
-    if (-not $process.WaitForExit($TimeoutMilliseconds)) {
-      & taskkill /PID $process.Id /T /F *> $null
-      return 'timeout'
-    }
-    return "exit:$($process.ExitCode)"
-  }
+  New-Item -ItemType Directory -Path $fakeBin -Force | Out-Null
+  $fakeGit = Join-Path $fakeBin 'fake-git.cmd'
+  $fakeDocker = Join-Path $fakeBin 'fake-docker.cmd'
+  [IO.File]::WriteAllText($fakeGit, "@echo off`r`nif `"%1`"==`"rev-parse`" if `"%2`"==`"--show-toplevel`" ( echo $repositoryRoot & exit /b 0 )`r`nif `"%1`"==`"rev-parse`" ( echo $fakeCommit & exit /b 0 )`r`nif `"%1`"==`"archive`" ( <nul set /p `"=fake-tar`" & exit /b 0 )`r`nexit /b 19`r`n")
+  [IO.File]::WriteAllText($fakeDocker, "@echo off`r`nif `"%1`"==`"buildx`" goto buildx`r`nif `"%1`"==`"image`" goto image`r`nexit /b 19`r`n:buildx`r`nmore >nul`r`nif `"%FAKE_DOCKER_MODE%`"==`"timeout`" powershell -NoProfile -Command `"Start-Sleep -Seconds 3`"`r`nexit /b 17`r`n:image`r`necho []`r`nexit /b 0`r`n")
 
-  if ((Invoke-SimulatedProcess 'exit /b 17' 1000) -ne 'exit:17') { throw 'Simulated non-zero process path was not observed.' }
-  if ((Invoke-SimulatedProcess 'powershell -NoProfile -Command "Start-Sleep -Seconds 3"' 100) -ne 'timeout') { throw 'Simulated timeout process path was not observed.' }
+  $env:FAKE_DOCKER_MODE = 'nonzero'
+  $nonzeroRoot = Join-Path $taskOutput 'nonzero'
+  $nonzeroFailure = $null
+  try { & $helper -Commit $fakeCommit -OutputRoot $nonzeroRoot -GitExecutable $fakeGit -DockerExecutable $fakeDocker *> $null } catch { $nonzeroFailure = $_.Exception.Message }
+  if ($nonzeroFailure -notmatch 'exit code 17') { throw "Actual helper path did not report the simulated Docker non-zero exit: $nonzeroFailure" }
+  if (-not (Test-Path -LiteralPath (Join-Path $nonzeroRoot $fakeCommit 'source.tar'))) { throw 'Actual helper path did not retain the streamed archive before Docker failed.' }
+
+  $env:FAKE_DOCKER_MODE = 'timeout'
+  $timeoutRoot = Join-Path $taskOutput 'timeout'
+  $timeoutFailure = $null
+  try { & $helper -Commit $fakeCommit -OutputRoot $timeoutRoot -TimeoutSeconds 1 -GitExecutable $fakeGit -DockerExecutable $fakeDocker *> $null } catch { $timeoutFailure = $_.Exception.Message }
+  if ($timeoutFailure -notmatch 'timed out') { throw 'Actual helper path did not report the simulated Docker timeout.' }
+  Remove-Item Env:FAKE_DOCKER_MODE -ErrorAction SilentlyContinue
   Write-Host 'build-design-parity-runtime helper tests passed.'
 } finally {
   if (Test-Path -LiteralPath $taskOutput) { Remove-Item -LiteralPath $taskOutput -Recurse -Force }
