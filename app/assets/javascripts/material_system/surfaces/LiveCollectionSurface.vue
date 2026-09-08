@@ -4,9 +4,10 @@
       <label class="material-live-surface__search">
         <span aria-hidden="true">⌕</span>
         <span class="sr-only">{{ searchLabel }}</span>
-        <input v-model="query" :placeholder="regexMode ? `Regex search — ${activeTab}` : `Search ${activeTab}`" @keydown.esc="query = ''" />
+        <input v-model="query" :placeholder="regexMode ? `Regex search — ${activeTab}` : `Search ${activeTab}`" :aria-invalid="regexError ? 'true' : null" :aria-describedby="regexError ? regexErrorId : null" @keydown.esc="query = ''" />
         <button type="button" :aria-pressed="regexMode" title="Toggle regex mode" @click="regexMode = !regexMode">.*</button>
       </label>
+      <p v-if="regexError" :id="regexErrorId" class="material-live-surface__regex-error" role="alert">{{ regexError }}</p>
       <button type="button" class="material-live-surface__icon" title="Command palette (Ctrl+Shift+F)" @click="paletteOpen = true">⌘</button>
       <button type="button" class="material-live-surface__icon" :title="dark ? 'Switch to light theme' : 'Switch to dark theme'" @click="$emit('toggle-theme')">{{ dark ? '☼' : '☾' }}</button>
       <span class="material-live-surface__avatar" aria-label="Current user">JD</span>
@@ -59,10 +60,22 @@ export default {
   },
   computed: {
     rows() { return this.rowsByTab[this.activeTab] || []; },
+    regexErrorId() { return `material-live-surface-regex-error-${this._uid}`; },
+    regexError() {
+      if (!this.regexMode || !this.query) return '';
+      try {
+        new RegExp(this.query, 'i');
+        return '';
+      } catch (_error) {
+        return 'Enter a valid regular expression to search these rows.';
+      }
+    },
     visibleRows() {
       if (!this.query) return this.rows;
       if (!this.regexMode) return this.rows.filter((row) => `${row.name || row.title} ${row.detail || row.sub || ''}`.toLowerCase().includes(this.query.toLowerCase()));
-      try { const expression = new RegExp(this.query, 'i'); return this.rows.filter((row) => expression.test(`${row.name || row.title} ${row.detail || row.sub || ''}`)); } catch (_error) { return this.rows; }
+      if (this.regexError) return [];
+      const expression = new RegExp(this.query, 'i');
+      return this.rows.filter((row) => expression.test(`${row.name || row.title} ${row.detail || row.sub || ''}`));
     },
   },
   mounted() {
