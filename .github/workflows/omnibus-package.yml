@@ -136,6 +136,52 @@ jobs:
           echo "--- diff ---"
           diff -u .custom_sources.yml.orig .custom_sources.yml || true
 
+      - name: Route GNU dependency downloads to a mirror that is actually up
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd omnibus-gitlab
+          # Several dependency tarballs are fetched from ftpmirror.gnu.org, which is a
+          # redirector rather than a host. When that redirector is down the build dies part
+          # way through compilation: libtool, libiconv and ncurses all failed here with
+          # 502 Bad Gateway and read timeouts, 22 minutes in, after real work had been done.
+          #
+          # This routes around an upstream outage; it does not fix one. It changes where the
+          # bytes come from and not which bytes are accepted, because every download is still
+          # verified against the checksum in its own software definition. A mirror serving
+          # different content would fail the build rather than quietly poison the package.
+          candidates=("https://ftpmirror.gnu.org" "https://ftp.gnu.org/gnu" "https://mirrors.kernel.org/gnu")
+          chosen=""
+          for c in "${candidates[@]}"; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 "$c/libtool/" || echo 000)"
+            echo "  $c -> $code"
+            if [ "$code" = "200" ]; then chosen="$c"; break; fi
+          done
+          if [ -z "$chosen" ]; then
+            echo "::error::No GNU source mirror responded. The build cannot fetch its dependencies and would fail late and confusingly, so it is stopping now."
+            exit 1
+          fi
+          echo "Using $chosen"
+          if [ "$chosen" = "https://ftpmirror.gnu.org" ]; then
+            echo "The usual redirector is healthy, so the software definitions are left untouched."
+            exit 0
+          fi
+          before="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)"
+          echo "software definitions pointing at the redirector: $before"
+          if [ "$before" -eq 0 ]; then
+            echo "::warning::Nothing referenced ftpmirror.gnu.org, so no substitution was made. The upstream layout may have changed and this step needs revisiting."
+            exit 0
+          fi
+          grep -rl 'ftpmirror\.gnu\.org' config/software | xargs sed -i "s|https://ftpmirror\.gnu\.org|$chosen|g"
+          after="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)"
+          echo "references remaining: $after"
+          if [ "$after" -ne 0 ]; then
+            echo "::error::Substitution left $after references behind, so the build would still reach the failing host. Refusing to start it."
+            exit 1
+          fi
+          echo "--- rewritten ---"
+          grep -rn "$chosen" config/software | head -8
+
       - name: Build the package in the official omnibus builder image
         shell: bash
         env:
