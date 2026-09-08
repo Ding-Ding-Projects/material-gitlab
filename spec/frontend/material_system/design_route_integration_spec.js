@@ -20,6 +20,7 @@ describe('Material design route integration inventory', () => {
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.shell-a')).toMatchObject({ status: 'wired', preference: { key: 'shellVariant', value: 'a' }, runtimeEvidence: 'not-captured' });
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.shell-b')).toMatchObject({ status: 'wired', runtimeEvidence: 'not-captured' });
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.secure')).toMatchObject({ status: 'wired', runtimeEvidence: 'not-captured' });
+    expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.settings')).toMatchObject({ status: 'wired', route: '/:namespace/:project/edit', entrypoint: 'app/assets/javascripts/pages/projects/edit/index.js', initializer: 'mountProjectSettings', host: '#material-project-settings', runtimeEvidence: 'not-captured' });
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.login')).toMatchObject({ status: 'server-rendered', runtimeEvidence: 'not-captured' });
   });
 
