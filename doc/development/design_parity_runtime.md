@@ -20,6 +20,10 @@ publishes an image. The build arguments fix the runtime contract to
 `RAILS_ENV=test`, `NODE_ENV=production`, `BABEL_ENV=production`, and
 `NODE_OPTIONS=--max-old-space-size=10240`. In the absence of a CI assets-cache hash,
 the recipe uses `/nonexistent/gitlab-assets-hash`, which selects asset compilation.
+The checked-in `qa/gdk/.tool-versions` is the build input for Gem and Node setup. Its
+Ruby, Node, and Go entries are derived from `.gitlab/ci/version.yml`; focused checks
+compare the two candidate-bound sources and confirm the derived manifest is present in
+the Git archive sent to Docker.
 
 Each successful build retains its archive and `receipt.json` under
 `<OutputRoot>/<commit-sha>/`. The receipt records the source SHA, archive SHA-256,

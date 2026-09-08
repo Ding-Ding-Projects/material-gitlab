@@ -20,6 +20,17 @@ try {
   if (Test-Path -LiteralPath $taskOutput) { throw 'Dry run must not create an output directory.' }
   if ($arguments[-1] -ne '-') { throw 'The immutable archive must be Docker stdin, not an extracted directory.' }
 
+  $versionSource = git show "$commit`:.gitlab/ci/version.yml"
+  $toolVersions = Get-Content -LiteralPath (Join-Path $repositoryRoot 'qa/gdk/.tool-versions')
+  $expectedVersions = @(
+    "ruby " + (($versionSource | Select-String 'RUBY_VERSION_DEFAULT:').Line -replace '.*"([^"]+)".*', '$1'),
+    "node " + (($versionSource | Select-String 'NODE_VERSION:').Line -replace '.*"([^"]+)".*', '$1'),
+    "golang " + (($versionSource | Select-String 'GO_VERSION:').Line -replace '.*"([^"]+)".*', '$1')
+  )
+  if (@(Compare-Object $expectedVersions $toolVersions).Count -ne 0) { throw 'qa/gdk/.tool-versions does not match the candidate version source.' }
+  $archivedToolVersions = git archive --format=tar $commit qa/gdk/.tool-versions | tar -tf -
+  if ($LASTEXITCODE -ne 0 -or $archivedToolVersions -notcontains 'qa/gdk/.tool-versions') { throw 'The candidate archive omits the GDK derived tool-version manifest.' }
+
   $rejectedRepositoryOutput = $false
   try {
     & $helper -Commit $commit -OutputRoot $repositoryRoot -DryRun *> $null
