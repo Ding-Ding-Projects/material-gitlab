@@ -166,21 +166,26 @@ jobs:
             echo "The usual redirector is healthy, so the software definitions are left untouched."
             exit 0
           fi
-          before="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)"
+          # grep exits 1 when it matches nothing, and under `set -e -o pipefail` that
+          # kills the step. The whole point of the line below is that after a successful
+          # substitution there is nothing left to find, so the success case was being
+          # treated as a failure. || true on the assignment keeps the count and drops the
+          # status; the explicit comparisons underneath are what actually decide.
+          before="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)" || true
           echo "software definitions pointing at the redirector: $before"
           if [ "$before" -eq 0 ]; then
             echo "::warning::Nothing referenced ftpmirror.gnu.org, so no substitution was made. The upstream layout may have changed and this step needs revisiting."
             exit 0
           fi
-          grep -rl 'ftpmirror\.gnu\.org' config/software | xargs sed -i "s|https://ftpmirror\.gnu\.org|$chosen|g"
-          after="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)"
+          grep -rl 'ftpmirror\.gnu\.org' config/software | xargs sed -i "s|https://ftpmirror\.gnu\.org|$chosen|g" || true
+          after="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)" || true
           echo "references remaining: $after"
           if [ "$after" -ne 0 ]; then
             echo "::error::Substitution left $after references behind, so the build would still reach the failing host. Refusing to start it."
             exit 1
           fi
           echo "--- rewritten ---"
-          grep -rn "$chosen" config/software | head -8
+          grep -rn "$chosen" config/software | head -8 || true
 
       - name: Build the package in the official omnibus builder image
         shell: bash
