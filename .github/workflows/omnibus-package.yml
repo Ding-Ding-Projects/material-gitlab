@@ -149,12 +149,30 @@ jobs:
           docker pull "$builder"
           docker run --rm \
             -e GITLAB_VERSION \
+            -e OMNIBUS_REF="${{ inputs.omnibus_ref }}" \
             -e BUILD_VERSION="${{ steps.target.outputs.version }}" \
             -v "$PWD/omnibus-gitlab:/omnibus" \
             -w /omnibus \
             "$builder" \
             bash -lc '
               set -euo pipefail
+              # The checkout is owned by the runner user and this container runs as root,
+              # so git refuses to read it: "detected dubious ownership in repository".
+              # Omnibus derives its version from `git describe --tags --exact-match`, so
+              # without this the build dies before compiling anything, with an error that
+              # names git rather than ownership.
+              git config --global --add safe.directory /omnibus
+              git config --global --add safe.directory "*"
+
+              # That describe also needs the tag itself, which a shallow branch clone does
+              # not always bring along. Create it locally when it is missing rather than
+              # letting omnibus fail on an empty version.
+              if ! git -C /omnibus describe --tags --exact-match >/dev/null 2>&1; then
+                echo "no exact tag on HEAD; creating ${OMNIBUS_REF} locally so omnibus can version the build"
+                git -C /omnibus tag -f "${OMNIBUS_REF}" HEAD
+              fi
+              git -C /omnibus describe --tags --exact-match
+
               bundle config set --local path /omnibus/.bundle-vendor
               bundle install --jobs 4
               bundle exec omnibus build gitlab --log-level=info
