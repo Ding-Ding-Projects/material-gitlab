@@ -159,8 +159,11 @@ COPY qa/gdk/normalize-executable-shebangs.rb /usr/local/lib/normalize-executable
 RUN ruby /usr/local/lib/normalize-executable-shebangs.rb ./bin ./scripts ./config ./lib ./ee
 
 RUN --mount=type=bind,target=node_modules,source=${GDK_DIR}/gitlab/node_modules,from=gitlab-node-modules \
+    set -eu; \
     cp config/gitlab.yml.example config/gitlab.yml; \
     cp config/database.yml.decomposed-postgresql config/database.yml; \
+    sed -i 's/localhost/postgres/g' config/database.yml; \
+    sed -i 's/username: git/username: postgres/g' config/database.yml; \
     echo "BABEL_ENV value: '${BABEL_ENV}'"; \
     [ "$BABEL_ENV" != "istanbul" ] && [ -s "${GLCI_GITLAB_ASSETS_HASH_FILE}" ] && echo "Cached assets found, skipping asset compilation!" || (echo "Compiling assets!" && bin/rake gitlab:assets:compile)
 

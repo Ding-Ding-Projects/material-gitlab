@@ -65,3 +65,16 @@ and failing archive, Docker, or inspection commands. It also refuses output root
 contain the source Oak Kay, are a child of it, or traverse a junction or another reparse
 point. It creates files only
 inside the requested output root and never removes output from a prior candidate.
+# Database-free asset compilation
+
+The frontend-assets stage mirrors `setup_database_yml` in `scripts/utils.sh`:
+it adapts the copied database host from `localhost` to `postgres` before Rails
+asset initialization. The canonical `.compile-assets-base` job uses this
+preparation with `SETUP_DB=false`. Rails handles an unavailable build database
+through its existing connection-error path; asset compilation is not replaced
+with a stub or prebuilt output.
+
+Leaving the copied example on `localhost` caused a real build to wait inside
+libpq on `::1:5432` after gettext completed. No webpack process had started.
+This configuration change belongs only to the asset-build stage. Final GDK
+setup still generates its actual runtime database configuration.
