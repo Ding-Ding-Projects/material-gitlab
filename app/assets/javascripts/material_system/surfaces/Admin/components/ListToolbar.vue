@@ -1,27 +1,26 @@
 <template>
   <div class="gl-mds-admin-toolbar">
     <label class="gl-mds-admin-toolbar__select-all">
-      <input
+      <material-checkbox
         ref="selectAll"
-        type="checkbox"
         :checked="allSelected"
         aria-label="Select all rows matching the current filter"
         @change="$emit('toggle-select-all')"
       />
       <span>{{ selectAllLabel }}</span>
     </label>
-    <button
+    <material-button
       type="button"
       class="gl-mds-admin-btn gl-mds-admin-btn--text gl-mds-admin-btn--sm"
       :disabled="!rowCount"
       @click="$emit('invert-selection')"
     >
       Invert selection
-    </button>
+    </material-button>
     <div class="gl-mds-admin-toolbar__spacer"></div>
     <template v-if="selectedCount">
       <span class="gl-mds-admin-toolbar__count" role="status">{{ selectedCount }} selected</span>
-      <button
+      <material-button
         v-for="action in bulkActions"
         :key="action.id"
         type="button"
@@ -30,14 +29,17 @@
         @click="$emit('bulk-action', action)"
       >
         {{ action.label }}
-      </button>
+      </material-button>
     </template>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 export default {
   name: 'ListToolbar',
+  components: { MaterialButton, MaterialCheckbox },
   props: {
     rowCount: { type: Number, required: true },
     selectedCount: { type: Number, required: true },

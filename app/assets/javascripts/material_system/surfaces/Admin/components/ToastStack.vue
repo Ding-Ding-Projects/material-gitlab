@@ -12,7 +12,7 @@
         <div class="gl-mds-admin-toast__message">{{ item.message }}</div>
       </div>
       <div v-if="item.actions.length" class="gl-mds-admin-toast__actions">
-        <button
+        <material-button
           v-for="action in item.actions"
           :key="action.id"
           type="button"
@@ -20,21 +20,22 @@
           @click="runAction(item.id, action.id)"
         >
           {{ action.label }}
-        </button>
+        </material-button>
       </div>
-      <button type="button" class="gl-mds-admin-iconbtn gl-mds-admin-iconbtn--sm" aria-label="Dismiss notification" @click="center.dismiss(item.id)">
+      <material-button variant="text" type="button" class="gl-mds-admin-iconbtn gl-mds-admin-iconbtn--sm" aria-label="Dismiss notification" @click="center.dismiss(item.id)">
         <Icon name="close" :size="14" />
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'ToastStack',
-  components: { Icon },
+  components: { Icon, MaterialButton },
   props: {
     center: { type: Object, required: true },
   },

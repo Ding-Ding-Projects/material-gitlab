@@ -21,4 +21,8 @@ This migration replaces supported, visible native controls in the Admin, Manage,
 
 The migration intentionally leaves native selects, composite dialogs, and controls in unsupported composite forms as open gaps. They are not registered as Material controls until an adapter supports their actual behavior.
 
+The follow-up migration also covers visible controls inside Admin and Manage confirmation dialogs, Admin tabs, toast actions, account and notification menus, Admin regex pattern input and actions, and Todos tabs and bulk action. These retain their existing component refs, keyboard handling, and enclosing dialog or menu semantics while the rendered action host is an official Material element.
+
+The Manage source fallback that removes labels when no adapter is provided is documented as a source-only audit boundary. The production host supplies `deleteLabelUrl`; this migration does not make a production claim for the fallback path.
+
 The focused spec checks the explicit inventory, compiles each owned template, verifies official custom-element constructors after mount, dispatches a real shadow-DOM interaction, and proves that a replacement native element fails the constructor assertion. Removing a listed adapter from an owned file, or replacing a mounted Material element with a native control, makes that check fail.

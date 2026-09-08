@@ -12,7 +12,7 @@
       @update:regex-mode="$emit('update:search-regex-mode', $event)"
     />
 
-    <button
+    <material-button
       type="button"
       class="gl-mds-admin-iconbtn"
       title="Command palette (Ctrl+Shift+F)"
@@ -20,11 +20,11 @@
       @click="$emit('open-palette')"
     >
       <Icon name="command" />
-    </button>
+    </material-button>
 
     <NotificationBell :center="notifications" />
 
-    <button
+    <material-button
       type="button"
       class="gl-mds-admin-iconbtn"
       :title="dark ? 'Switch to light theme' : 'Switch to dark theme'"
@@ -32,7 +32,7 @@
       @click="$emit('toggle-theme')"
     >
       <Icon :name="dark ? 'sun' : 'moon'" />
-    </button>
+    </material-button>
 
     <AccountMenu :initials="accountInitials" :name="accountName" @sign-out="$emit('sign-out')" />
   </header>
@@ -43,10 +43,11 @@ import Icon from './Icon.vue';
 import SearchField from './SearchField.vue';
 import NotificationBell from './NotificationBell.vue';
 import AccountMenu from './AccountMenu.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'TopBar',
-  components: { Icon, SearchField, NotificationBell, AccountMenu },
+  components: { Icon, SearchField, NotificationBell, AccountMenu, MaterialButton },
   props: {
     search: { type: String, default: '' },
     searchRegexMode: { type: Boolean, default: false },

@@ -10,19 +10,19 @@
   >
     <div class="gl-mds-admin-popover__header">
       <span class="gl-mds-admin-popover__title">Regex builder</span>
-      <button
+      <material-button
         type="button"
         class="gl-mds-admin-iconbtn"
         aria-label="Close regex builder"
         @click="$emit('close')"
       >
         <Icon name="close" :size="16" />
-      </button>
+      </material-button>
     </div>
 
     <label class="gl-mds-admin-popover__field">
       <span class="gl-mds-admin-popover__label">Pattern</span>
-      <input
+      <material-text-field
         ref="patternInput"
         v-model="pattern"
         type="text"
@@ -57,15 +57,15 @@
     </div>
 
     <div class="gl-mds-admin-popover__actions">
-      <button type="button" class="gl-mds-admin-btn gl-mds-admin-btn--text" @click="$emit('close')">Cancel</button>
-      <button
+      <material-button variant="text" type="button" class="gl-mds-admin-btn gl-mds-admin-btn--text" @click="$emit('close')">Cancel</material-button>
+      <material-button
         type="button"
         class="gl-mds-admin-btn gl-mds-admin-btn--filled"
         :disabled="!pattern || !syntax.valid"
         @click="apply"
       >
         Apply pattern
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
@@ -73,6 +73,8 @@
 <script>
 import Icon from './Icon.vue';
 import RegexBuilder from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const FLAG_INFO = Object.freeze([
   { name: 'i', tip: 'case-insensitive' },
@@ -83,7 +85,7 @@ const FLAG_INFO = Object.freeze([
 
 export default {
   name: 'RegexBuilderPopover',
-  components: { Icon },
+  components: { Icon, MaterialButton, MaterialTextField },
   props: {
     open: { type: Boolean, default: false },
     initialPattern: { type: String, default: '' },
