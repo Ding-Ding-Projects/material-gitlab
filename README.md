@@ -11,13 +11,23 @@
 ![Node](https://img.shields.io/badge/Node-20%2B-339933)
 ![Electron](https://img.shields.io/badge/Electron-Squirrel.Windows-47848F)
 ![Signing](https://img.shields.io/badge/installers-unsigned-important)
-![Releases](https://img.shields.io/badge/releases-none%20yet-lightgrey)
+[![Latest release](https://img.shields.io/github/v/release/Ding-Ding-Projects/material-gitlab)](https://github.com/Ding-Ding-Projects/material-gitlab/releases/latest)
 
 **Site:** [ding-ding-projects.github.io/material-gitlab](https://ding-ding-projects.github.io/material-gitlab/)
 
 </div>
 
 ---
+
+> [!NOTE]
+> Design parity is being implemented and is not yet verified in the real Rails
+> application. The desktop tools have published installers, including
+> [release windows-95-0a4dd948e9ab](https://github.com/Ding-Ding-Projects/material-gitlab/releases/tag/windows-95-0a4dd948e9ab).
+> The [local parity runtime build](doc/development/design_parity_runtime.md)
+> uses an immutable candidate and the existing GDK recipe. See the current
+> [handoff](HANDOFF.md) and [audit](doc/development/design_parity_audit.md) for
+> verified results and remaining work. Reference renders and test fixtures are
+> not production screenshots.
 
 ## What this actually is, in one honest paragraph
 

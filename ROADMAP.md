@@ -1,5 +1,22 @@
 # Material GitLab overlay roadmap
 
+## Current design-parity completion
+
+- [x] Separate structural inventory validation from strict evidence completion.
+- [x] Verify wrong-size and corrupt-image rejection using executable fixtures.
+- [x] Add an immutable local GDK build helper with tested process boundaries.
+- [x] Correct the shared-shell ownership and action contract with focused tests.
+- [ ] Finish all 25 production route integrations and backend capability contracts.
+- [ ] Activate Settings only after equivalent existing controls are implemented.
+- [ ] Build and start the final candidate on the current computer.
+- [ ] Retain genuine production interactions, captures, comparisons, and reviews
+      for every declared parity state. No demo screenshots qualify.
+- [ ] Integrate and verify the final work, then close out only proven task-owned
+      temporary branches and checkouts.
+
+The older entries below describe historical source milestones. They do not
+upgrade the unchecked production-parity items above to completed work.
+
 ## Completed
 
 - Root Windows build entry points exist and document the supported local bootstrap path.

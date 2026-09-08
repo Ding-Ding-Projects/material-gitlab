@@ -1,5 +1,51 @@
 # Material GitLab overlay handoff
 
+## Active design-parity implementation, 8 September 2026
+
+This section supersedes older runtime and release availability claims below.
+The task remains in progress. No complete production parity verdict exists.
+
+- The current computer started without a running Rails instance. The recorded
+  instance from the earlier computer must not be assumed to exist here.
+- The first preserved batch reached `main` at
+  `0a4dd948e9ab56afd3e8726675b9fd2aa609a0d4`. Both publication workflows completed
+  successfully, and non-draft release `windows-95-0a4dd948e9ab` targets that commit.
+  Its installers are the two desktop configuration tools, not proof that Rails
+  renders the designs.
+- Admin, Jobs, Pipelines, and Plan have real route integration changes. Shared
+  shell ownership and navigation have focused behavioral tests. Built route and
+  visual verification remain pending.
+- Settings API adapters are staged, but the existing Settings route remains
+  active because the proposed replacement does not yet cover all existing
+  operations. Do not activate it by deleting those working controls.
+- Capture receipts now require decodable PNGs, source/build manifests, matching
+  raw and derived records, font availability, and separate diff review records.
+  Structural inventory validity and strict completion are separate checks.
+  The production inventory remains pending; test fixtures are never production
+  screenshot evidence.
+- `scripts/build-design-parity-runtime.ps1` streams an exact committed archive
+  into the existing GDK recipe without publishing. It records source/archive and
+  recipe hashes, image configuration identity, real logs, and bounded process
+  outcomes. Use the task-owned builder and retain previous attempt directories.
+- The real build exposed two repaired prerequisites: the ignored root
+  `.tool-versions` input and committed CRLF shebangs. A tracked tool manifest and
+  source-only normalization now address them while preserving cached service
+  layers. A later build also lost its connection during a builder restart;
+  that transport failure does not establish a source defect.
+
+Focused verification so far: 7 interaction tests, 4 route-inventory tests,
+8 shell bootstrap/navigation tests, and 54 Plan/Settings tests pass under the
+normal Jest configuration. The design-reference tool has 12 passing tests,
+including strict green/red fixtures and 675 structural negative cases. The
+runtime helper's process and byte-normalization tests also pass. These checks
+do not establish Rails request behavior or visual parity.
+
+Continue the actual production route adapters, build the final candidate, and
+capture only the running Rails application for user-facing evidence. Reference
+renders remain internal comparison inputs. No demo screenshots are accepted.
+Additional findings and their scope are recorded in
+`doc/development/design_parity_audit.md`.
+
 ## Pass of 2026-09-08: release pipeline, build repairs, README
 
 Read this section first. It supersedes any older statement it contradicts, and everything below it

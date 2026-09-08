@@ -104,3 +104,15 @@
 - Record the official upstream GitLab repository and pinned commit for the overlay bootstrap lane.
 - Add a closed-fail provenance validator for the pinned upstream commit.
 - Document the repository-level Windows bootstrap, packaging, roadmap, and handoff entry points.
+# In-progress design parity, 8 September 2026
+
+- Connect real Admin, Jobs, Pipelines, and Plan route hosts to design surfaces.
+- Fix fail-closed authentication defaults, pipeline request/retry identity,
+  invalid regex states, and shared command-palette keyboard behavior.
+- Select one shared chrome owner and connect live navigation actions.
+- Validate decodable PNGs and linked evidence with a separate strict completion
+  check; keep the actual production inventory pending.
+- Add a candidate-pinned local GDK build helper and repair missing tool-version
+  and CRLF script inputs exposed by real build attempts.
+- Keep the existing Settings screen active until the staged replacement covers
+  its working capabilities. Production visual parity is not yet established.
