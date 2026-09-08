@@ -168,9 +168,21 @@ export async function fetchOperateData({ endpoints, fetchImpl } = {}) {
     requestJson(requireEndpoint(endpoints, 'terraform'), { fetchImpl }),
   ]);
   return {
-    environments: assertCollection(environments, 'environments'),
-    clusters: assertCollection(clusters, 'Kubernetes clusters'),
-    terraform: assertCollection(terraform, 'Terraform states'),
+    // Environment JSON is `{ environments: [] }` in the Rails controller;
+    // `requestJson` unwraps it. The remaining fields retain only API facts.
+    environments: assertCollection(environments, 'environments').map((env) => ({
+      id: String(env.id), name: env.name, kind: env.environment_type || env.kind || '',
+      version: env.last_deployment?.deployable?.tag || env.last_deployment?.sha,
+      ciNumber: env.last_deployment?.deployable?.iid, status: env.state || env.status,
+      updatedAt: env.updated_at || env.updatedAt || '', externalUrl: env.external_url,
+    })),
+    clusters: assertCollection(clusters, 'Kubernetes clusters').map((cluster) => ({
+      id: String(cluster.id), name: cluster.name, detail: cluster.platform_kubernetes?.namespace || cluster.namespace || '', status: cluster.status || '',
+    })),
+    terraform: assertCollection(terraform, 'Terraform states').map((state) => ({
+      id: String(state.id), name: state.name, lockedBy: state.locked_by || state.lockedBy,
+      version: state.serial || state.version, status: state.locked ? 'locked' : state.status || 'unlocked', updatedAt: state.updated_at || '',
+    })),
   };
 }
 

@@ -328,7 +328,15 @@ export async function fetchMonitorData({ endpoints, fetchImpl } = {}) {
   for (const tab of TABS) {
     const key = TAB_COLLECTION_KEY[tab];
     const payload = await requestJson(requireEndpoint(endpoints, key), { fetchImpl });
-    result[key] = assertCollection(payload, key);
+    result[key] = assertCollection(payload, key).map((item) => ({
+      id: String(item.id ?? item.iid ?? item.fingerprint),
+      name: item.title || item.name || item.message || '',
+      sub: item.description || item.web_url || item.assignees?.map((user) => user.name).join(', ') || '',
+      status: item.status || item.state || '',
+      sev: item.severity || item.severity_label || '',
+      when: item.updated_at || item.created_at || '',
+      until: item.ends_at || item.until || '',
+    }));
   }
   return result;
 }

@@ -19,13 +19,14 @@ export default {
       required: false,
       default: false,
     },
+    canCreateIssue: { type: Boolean, default: false },
   },
   computed: {
     statusOptions() {
       return STATUSES.map((status) => ({ status, ...statusColorVars(status) }));
     },
     createIssueLabel() {
-      return this.issueCreated ? 'Issue #4335 created ✓' : 'Create issue';
+      return this.issueCreated ? 'Issue created' : 'Create issue';
     },
   },
   mounted() {
@@ -85,7 +86,7 @@ export default {
           />
         </div>
       </div>
-      <button type="button" class="sec-button sec-drawer__create-issue" @click="$emit('create-issue')">
+      <button type="button" class="sec-button sec-drawer__create-issue" :disabled="!canCreateIssue" @click="$emit('create-issue')">
         <material-icon name="addTask" />
         {{ createIssueLabel }}
       </button>

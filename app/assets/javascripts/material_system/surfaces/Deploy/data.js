@@ -149,19 +149,56 @@ export function formatBytes(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(bytes >= 100 * 1024 * 1024 ? 0 : 1)} MB`;
 }
 
+const collectionOrEmpty = (payload, label) => {
+  if (payload == null) return [];
+  return assertCollection(payload, label);
+};
+
+/**
+ * Rails serializers and registry endpoints do not share the design row shape.
+ * Keep that translation at the boundary, preserving only server-provided
+ * values.  In particular, no client-side owner, status, or release label is
+ * invented when an API omits it.
+ */
+export function normalizeRelease(release) {
+  const tag = release.tag_name || release.tag || release.tag_ref || release.name;
+  const assets = release.assets?.count ?? release.assets?.links?.length ?? release.assets_count;
+  return {
+    id: String(release.id ?? tag),
+    name: release.name || tag,
+    tagRef: tag,
+    assetsCount: Number.isFinite(assets) ? assets : 0,
+    note: release.description || '',
+    createdAt: release.released_at || release.created_at || release.createdAt || '',
+    sub: [tag ? `Tag ${tag}` : '', Number.isFinite(assets) ? `${assets} asset${assets === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · '),
+  };
+}
+
+export function normalizeDeployCollection(kind, items) {
+  const normalizers = {
+    releases: normalizeRelease,
+    featureFlags: (flag) => ({ id: String(flag.id ?? flag.name), name: flag.name, sub: flag.description || flag.scope || '', on: Boolean(flag.active ?? flag.enabled) }),
+    packages: (pkg) => ({ id: String(pkg.id), name: [pkg.name, pkg.version].filter(Boolean).join(' '), sub: pkg.package_type || pkg.package_manager || '', sizeBytes: Number(pkg.size ?? pkg.size_bytes) || 0, createdAt: pkg.created_at || '' }),
+    containers: (image) => ({ id: String(image.id ?? image.path), name: image.name || image.path, sub: image.location || image.path || '', sizeBytes: Number(image.size ?? image.size_bytes) || 0, createdAt: image.created_at || '' }),
+  };
+  return collectionOrEmpty(items, kind).map(normalizers[kind]);
+}
+
 /** Fetch live Deploy collections. There is intentionally no fixture fallback. */
 export async function fetchDeployData({ endpoints, fetchImpl } = {}) {
+  const fetchCollection = async (key, label) => {
+    if (!endpoints?.[key]) return [];
+    return requestJson(requireEndpoint(endpoints, key), { fetchImpl }).then((payload) => collectionOrEmpty(payload, label));
+  };
   const [releases, flags, packages, containers] = await Promise.all([
-    requestJson(requireEndpoint(endpoints, 'releases'), { fetchImpl }),
-    requestJson(requireEndpoint(endpoints, 'featureFlags'), { fetchImpl }),
-    requestJson(requireEndpoint(endpoints, 'packages'), { fetchImpl }),
-    requestJson(requireEndpoint(endpoints, 'containers'), { fetchImpl }),
+    fetchCollection('releases', 'releases'), fetchCollection('featureFlags', 'feature flags'),
+    fetchCollection('packages', 'packages'), fetchCollection('containers', 'containers'),
   ]);
   return {
-    releases: assertCollection(releases, 'releases'),
-    flags: assertCollection(flags, 'feature flags'),
-    packages: assertCollection(packages, 'packages'),
-    containers: assertCollection(containers, 'containers'),
+    releases: normalizeDeployCollection('releases', releases),
+    flags: normalizeDeployCollection('featureFlags', flags),
+    packages: normalizeDeployCollection('packages', packages),
+    containers: normalizeDeployCollection('containers', containers),
   };
 }
 

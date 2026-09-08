@@ -89,8 +89,16 @@ async function fetchCollection(endpoint, label, fetchImpl) {
   return assertCollection(payload, label);
 }
 
+const normalizeDependency = (dependency) => ({
+  id: String(dependency.id), name: dependency.name || dependency.component_name || '',
+  packageManager: dependency.package_manager || dependency.packageManager || '',
+  origin: dependency.source?.name || dependency.source || dependency.location || '',
+  vulnerability: dependency.vulnerabilities?.[0]?.name || dependency.vulnerability || null,
+  license: dependency.licenses?.map((license) => license.name || license).join(', ') || dependency.license || '',
+});
+
 export function fetchDependencies({ endpoint, fetchImpl } = {}) {
-  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'dependencies', fetchImpl);
+  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'dependencies', fetchImpl).then((items) => items.map(normalizeDependency));
 }
 
 export function fetchAuditEvents({ endpoint, fetchImpl } = {}) {

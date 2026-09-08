@@ -18,6 +18,7 @@ import {
   vulnerabilitySearchText,
   fetchVulnerabilities,
   updateVulnerabilityStatus,
+  createVulnerabilityIssue,
 } from './data';
 
 /**
@@ -232,15 +233,22 @@ export default {
         updateVulnerabilityStatus({ endpoint: this.endpoints.vulnerability, id, status, fetchImpl: this.fetchImpl })
           .then(() => { vuln.status = status; })
           .catch((error) => notificationCenter.notify({ title: 'Status update failed', message: error.message, severity: 'error' }));
-      } else vuln.status = status;
+      } else {
+        notificationCenter.notify({
+          title: 'Status update unavailable',
+          message: 'This route did not provide a permitted vulnerability update endpoint.',
+          severity: 'warning',
+        });
+      }
     },
     createIssue(id) {
-      this.$set(this.issueCreatedMap, id, true);
-      notificationCenter.notify({
-        title: 'Issue created',
-        message: 'Issue #4335 was created from this vulnerability.',
-        severity: 'success',
-      });
+      if (!this.endpoints.createIssue) return;
+      createVulnerabilityIssue({ endpoint: this.endpoints.createIssue, id, fetchImpl: this.fetchImpl })
+        .then(() => {
+          this.$set(this.issueCreatedMap, id, true);
+          notificationCenter.notify({ title: 'Issue created', message: 'A tracking issue was created from this vulnerability.', severity: 'success' });
+        })
+        .catch((error) => notificationCenter.notify({ title: 'Issue creation failed', message: error.message, severity: 'error' }));
     },
     toggleSelected(id) {
       if (this.selectedMap[id]) this.$delete(this.selectedMap, id);
@@ -267,7 +275,7 @@ export default {
       this.selectedMap = {};
     },
     bulkSetStatus(status) {
-      const ids = Object.keys(this.selectedMap).map(Number);
+      const ids = Object.keys(this.selectedMap);
       ids.forEach((id) => this.setStatus(id, status));
       notificationCenter.notify({
         title: 'Bulk update applied',
@@ -367,6 +375,7 @@ export default {
       v-if="drawerVulnerability"
       :vulnerability="drawerVulnerability"
       :issue-created="issueCreated(drawerVulnerability.id)"
+      :can-create-issue="Boolean(endpoints.createIssue)"
       @close="closeDrawer"
       @set-status="(status) => setStatus(drawerVulnerability.id, status)"
       @create-issue="createIssue(drawerVulnerability.id)"

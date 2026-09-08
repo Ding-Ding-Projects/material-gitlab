@@ -160,10 +160,30 @@ export function buildRegexCorpus(vulnerabilities) {
   return vulnerabilities.map((vuln) => `${vuln.severity}  ${vuln.title}  ${vuln.location}`);
 }
 
+/** Normalize the project vulnerability REST/GraphQL fields into this surface's model. */
+export function normalizeVulnerability(vulnerability) {
+  const identifiers = vulnerability.identifiers || [];
+  const identifier = vulnerability.cve || identifiers.find((value) => value.name)?.name || identifiers[0]?.name || '';
+  const reportType = vulnerability.report_type || vulnerability.reportType || vulnerability.scanner?.name || '';
+  const state = vulnerability.state || vulnerability.status || 'Needs triage';
+  const status = STATUSES.includes(state) ? state : state === 'detected' ? 'Needs triage' : state === 'confirmed' ? 'Confirmed' : state === 'resolved' ? 'Resolved' : state === 'dismissed' ? 'Dismissed' : 'Needs triage';
+  return {
+    id: String(vulnerability.id ?? vulnerability.uuid),
+    severity: String(vulnerability.severity || 'low').toLowerCase(),
+    title: vulnerability.title || vulnerability.name || identifier || 'Untitled vulnerability',
+    scanner: reportType,
+    location: vulnerability.location?.file || vulnerability.location?.blob_path || vulnerability.location || '',
+    status,
+    cve: identifier,
+    detectedAt: vulnerability.detected_at || vulnerability.detectedAt || vulnerability.created_at || '',
+    description: vulnerability.description || vulnerability.solution || '',
+  };
+}
+
 /** Fetch the vulnerability connection from the host's real API/GraphQL adapter. */
 export async function fetchVulnerabilities({ endpoint, fetchImpl } = {}) {
   const payload = await requestJson(requireEndpoint({ vulnerabilities: endpoint }, 'vulnerabilities'), { fetchImpl });
-  return assertCollection(payload, 'vulnerabilities');
+  return assertCollection(payload, 'vulnerabilities').map(normalizeVulnerability);
 }
 
 export async function updateVulnerabilityStatus({ endpoint, id, status, fetchImpl } = {}) {
@@ -172,5 +192,15 @@ export async function updateVulnerabilityStatus({ endpoint, id, status, fetchImp
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status }),
+  });
+}
+
+/** Only hosts that expose a policy-authorized endpoint enable issue creation. */
+export async function createVulnerabilityIssue({ endpoint, id, fetchImpl } = {}) {
+  return requestJson(requireEndpoint({ createIssue: endpoint }, 'createIssue').replace(':id', encodeURIComponent(id)), {
+    fetchImpl,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ vulnerability_id: id }),
   });
 }
