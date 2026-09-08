@@ -19,7 +19,6 @@ The following routes mount a design surface through an existing page-specific en
 | Build | `/:namespace/:project/-/jobs` | `pages/projects/jobs/index/index.js` | `#js-material-build` |
 | Manage | `/:namespace/:project/-/manage` | `pages/projects/manage.js` | `#js-material-manage` |
 | Pipelines | `/:namespace/:project/-/pipelines` | `pages/projects/pipelines/index/index.js` | `#js-material-pipelines` |
-| Repository | project repository views | `repository/index.js` | `#js-material-repository-app` |
 | To-Dos | `/dashboard/todos` | `pages/dashboard/todos/index/index.js` | `#js-todos-app-root` |
 
 The admin dashboard entrypoint initializes both the Jihu transition banner and the Material Admin
@@ -35,6 +34,10 @@ mount would discard the route's router and live data contract.
 The remaining design surfaces have an explicit `route-contract-pending` row. They are not mounted
 on invented routes or generic eager bundles. Each row names the missing compatibility condition,
 such as a Rails host, live endpoint metadata, or a page-specific replacement boundary.
+
+Repository remains pending because the repository bundle mounts the Material surface only when a
+server view supplies both `#js-material-repository-app` and a compatible adapter. Existing project
+repository views do not currently establish that route contract.
 
 ## Verification
 
