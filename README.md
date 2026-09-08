@@ -271,20 +271,41 @@ passes.
 
 ## Verification
 
-| Check | Command | State |
+All results below were run locally on this commit. Each was run after a clean rebuild, because
+these tests read compiled output rather than source.
+
+| Check | Command | Result |
 | --- | --- | --- |
 | Upstream provenance | `node scripts/verify-upstream-overlay.mjs` | **Passes** |
+| Published file shorthand scan | `node scripts/verify-public-vocabulary.mjs` | **Passes**, 54,754 files scanned |
+| Design reference parity | `node --test test/*.test.mjs` in `tools/design-reference` | **6 of 6 pass**, includes a red then green negative regression |
+| Site completeness | `node scripts/completeness-check.mjs` in `site` | **Passes**, 28 rows, every removal rejected |
+| Deployer renderer boundary | `npm test` in `tools/material-gitlab-deployer` | **1 of 1 passes** after a clean build |
+| Instant renderer boundary | `npm test` in `tools/material-gitlab-instant` | **1 of 1 passes** |
+| Instant TypeScript build | `npm run build` in `tools/material-gitlab-instant` | **Passes**, see the note below |
 | Pages site build and publish | GitHub Actions, `pages.yml` | **Passes on `main`** |
-| Deployer renderer boundary test | `npm test` in `tools/material-gitlab-deployer` | **Fails**, see below |
 | Windows release and installers | GitHub Actions, `windows-release.yml` | **Has never completed successfully** |
-| Instant renderer boundary test | `npm test` in `tools/material-gitlab-instant` | Not yet recorded here |
+
+> [!NOTE]
+> **Rebuild before trusting these tests.** They read compiled output, not source. A stale `dist/`
+> left over from an earlier source revision makes the deployer boundary test fail against a build
+> that no longer corresponds to the tree, which reads exactly like a source defect and is not one.
+> Delete the output directory and rebuild first.
 
 > [!CAUTION]
-> **The deployer renderer boundary test currently fails.** It asserts that the compiled renderer
-> contains no `require(` call, and the compiled output contains `require("../shared/plan")`. The
-> renderer window is created with `contextIsolation: true` and `nodeIntegration: false`, so a
-> CommonJS `require` cannot resolve there at runtime. The test is reporting a real problem rather
-> than being over strict.
+> **The Instant package carries an unreferenced parallel implementation that does not compile.**
+> `src/main/lifecycle.ts` and `src/shared/model.ts` arrived together in commit `105c8e932`. Nothing
+> imports `lifecycle.ts`, and only `lifecycle.ts` imports `model.ts`. `lifecycle.ts` imports
+> `defaultConfiguration` and `parseInstanceConfig`, which `shared/configuration.ts` does not export,
+> and `model.ts` declares `Window.gitlabInstant` as a required readonly `GitlabInstantApi` while
+> `shared/bridge.ts` declares the same property as an optional `GitLabInstantBridge`. Two
+> conflicting global declarations for one property cannot coexist, so their presence failed the
+> whole package build with `TS2305`, `TS2687` and `TS2717`, and `tsc` exited 2.
+>
+> They are currently excluded in `tsconfig.json` rather than deleted, so the package builds while
+> the half-finished work stays visible. The wired implementation is
+> `main.ts` to `main/bridge.ts` to `shared/configuration.ts` and `shared/bridge.ts`. Finish that
+> island deliberately or remove it, then drop the exclude.
 
 ### Note on CI scope
 

@@ -10,5 +10,22 @@
     "skipLibCheck": true,
     "sourceMap": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "//exclude": [
+    "src/main/lifecycle.ts and src/shared/model.ts are an unreferenced parallel",
+    "implementation added in commit 105c8e932. Nothing imports lifecycle.ts, and",
+    "only lifecycle.ts imports model.ts. They do not compile: lifecycle.ts imports",
+    "defaultConfiguration and parseInstanceConfig, which shared/configuration.ts",
+    "does not export (it exports DEFAULT_LOCAL_CONFIG and parseLocalGitLabConfig),",
+    "and model.ts declares Window.gitlabInstant as a required readonly",
+    "GitlabInstantApi while shared/bridge.ts declares the same property as an",
+    "optional GitLabInstantBridge. Two conflicting global declarations for one",
+    "property cannot coexist, so their presence failed the whole package build with",
+    "TS2305, TS2687 and TS2717 and tsc exited 2. The wired implementation is",
+    "main.ts -> main/bridge.ts -> shared/configuration.ts + shared/bridge.ts.",
+    "They are excluded rather than deleted so the half-finished work stays visible",
+    "and can be finished or removed deliberately. Delete them or reconcile them",
+    "into the wired bridge, then drop this exclude."
+  ],
+  "exclude": ["src/main/lifecycle.ts", "src/shared/model.ts"]
 }
