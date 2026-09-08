@@ -14,7 +14,7 @@ try {
   if ($dryRun.sourceSha -ne $commit) { throw 'Dry run did not pin the requested commit.' }
   if ($dryRun.tag -ne "material-gitlab-parity:$commit") { throw 'Dry run emitted an unexpected local image tag.' }
   $arguments = @($dryRun.dockerArguments)
-  foreach ($requiredArgument in @('--load', '--platform', 'linux/amd64', 'RAILS_ENV=test', 'NODE_ENV=production', 'BABEL_ENV=production', 'NODE_OPTIONS=--max-old-space-size=10240', 'GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash')) {
+  foreach ($requiredArgument in @('--load', '--platform', 'linux/amd64', 'RAILS_ENV=test', 'NODE_ENV=production', 'BABEL_ENV=production', 'NO_COMPRESSION=1', 'NO_SOURCEMAPS=1', 'WEBPACK_MINIFY_IN_PROCESS=true', 'NODE_OPTIONS=--max-old-space-size=10240', 'GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash')) {
     if ($arguments -notcontains $requiredArgument) { throw "Dry run omitted required Docker argument: $requiredArgument" }
   }
   if (Test-Path -LiteralPath $taskOutput) { throw 'Dry run must not create an output directory.' }

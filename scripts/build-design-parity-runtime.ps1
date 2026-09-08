@@ -89,7 +89,14 @@ $recipeHash = Get-RecipeHash -SourceSha $sourceSha -GitCommand $GitExecutable
 $archiveArguments = @('-c', 'core.autocrlf=false', '-c', 'core.eol=lf', 'archive', '--format=tar', $sourceSha)
 $dockerArguments = @('buildx', 'build', '--load', '--platform', 'linux/amd64')
 if ($Builder) { $dockerArguments += @('--builder', $Builder) }
-$dockerArguments += @('--file', 'qa/gdk/Dockerfile.gdk', '--tag', $tag, '--build-arg', 'RAILS_ENV=test', '--build-arg', 'NODE_ENV=production', '--build-arg', 'BABEL_ENV=production', '--build-arg', 'NODE_OPTIONS=--max-old-space-size=10240', '--build-arg', 'GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash', '-')
+$dockerArguments += @(
+  '--file', 'qa/gdk/Dockerfile.gdk', '--tag', $tag,
+  '--build-arg', 'RAILS_ENV=test', '--build-arg', 'NODE_ENV=production',
+  '--build-arg', 'BABEL_ENV=production', '--build-arg', 'NODE_OPTIONS=--max-old-space-size=10240',
+  '--build-arg', 'GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash',
+  '--build-arg', 'NO_COMPRESSION=1', '--build-arg', 'NO_SOURCEMAPS=1',
+  '--build-arg', 'WEBPACK_MINIFY_IN_PROCESS=true', '-'
+)
 
 if (Test-Path -LiteralPath $candidateRoot) { throw "Candidate output already exists and will not be replaced: $candidateRoot" }
 if ($DryRun) {

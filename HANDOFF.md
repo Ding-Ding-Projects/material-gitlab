@@ -7,7 +7,7 @@ The task remains in progress. No complete production parity verdict exists.
 
 Source route integration is not component conformance. An independent review
 found native control lookalikes without a rendered-component provenance registry.
-The initial official-component migration is scoped to the two shared headers;
+The official-component foundation and two shared header migrations are integrated;
 the other surfaces and their built component audits remain open. Agent Memory's
 unsupported sync and simulated backend mutations now expose read-only limits;
 four focused tests pass, while built interaction remains pending.
@@ -64,8 +64,11 @@ success, failure, and timeout boundaries, three exact archive-to-blob byte check
 executable-mode verification, and three negative archive-conversion mutations.
 These checks do not establish Rails request behavior or visual parity.
 
-The corrected real Rails build is running from `b8ab0e36c` on an isolated,
-resource-bounded builder. Earlier runtime attempts are retained as failed evidence;
+The real Rails build from `b8ab0e36c` passed Ruby/service compilation and then
+exhausted its 16 GiB memory limit during frontend compilation. A new bounded
+profile disables source maps and precompression and uses in-process production
+minification. Two focused profile tests and the build-helper regressions pass.
+The next complete runtime attempt is pending. Earlier runtime attempts are retained as failed evidence;
 none produced an accepted product image or a product screenshot. Source-build Ruby
 and RubyGems repair steps still require a successful complete build before their
 runtime effect can be claimed.
@@ -361,3 +364,13 @@ The next decision is the repository owner's rather than a technical one: whether
 the Rails surfaces so they *are* the design, rather than restyling them underneath, which the design
 notes explicitly reject. Until that is answered, capturing built routes only produces evidence of
 stock GitLab, which is already measured and recorded above.
+
+## Official component foundation, 8 September 2026
+
+Source integration `0dc8058610d9587a010f51b01856d003050a2212` contains official
+`@material/web@2.5.0` constructors and Vue 2 adapters for the two shared headers.
+Independent review found no blocking source issue. The full standard Material
+suite passed 39 suites and 278 tests after installing the locked dependencies.
+The pinned Google Sans font is delivered through the Rails asset pipeline and
+matches the already verified reference font hash. Actual browser font loading,
+form/IME behavior, visuals, and remaining component migrations are unverified.

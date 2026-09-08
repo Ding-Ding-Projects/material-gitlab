@@ -114,3 +114,20 @@ The archive byte regression extracts the tool-version manifest, RubyGems version
 `bin/rake` from the exact dry-run archive command under an explicit hostile CRLF host
 setting. It compares all three against `git show` bytes and checks executable mode.
 Removing the archive configuration overrides must reproduce all three byte mismatches.
+
+## Resource-bounded compilation
+
+The source build at `b8ab0e36c78db0e8821f20e19bbe741d9e678868` passed Ruby and
+service compilation but exhausted the builder's 16 GiB memory limit during
+frontend compilation. It produced no accepted runtime image. The capture build
+profile now sets `NO_SOURCEMAPS=1`, `NO_COMPRESSION=1`, and
+`WEBPACK_MINIFY_IN_PROCESS=true`. The last flag retains production minification
+while disabling the default multi-process Terser pool. It does not disable
+application features or replace the Rails build with a preview.
+
+The optimizer override is opt-in. Ordinary builds keep webpack's normal
+minimizer when that flag is absent or false. A focused executable webpack fixture
+verifies the selected profile emits working minified code without a source map;
+invalid flag values fail. The helper dry run asserts all three build arguments.
+This profile still requires a successful complete runtime build before its memory
+benefit or capture readiness can be claimed.

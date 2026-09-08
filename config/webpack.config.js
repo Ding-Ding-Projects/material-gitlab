@@ -23,6 +23,7 @@ const VUE_LOADER_VERSION = require(`${VUE_LOADER_MODULE}/package.json`).version;
 const EXACT_VUE_VERSION = require('vue/package.json').version;
 
 const webpack = require('webpack');
+const webpackMemoryProfile = require('./helpers/webpack_memory_profile');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { StatsWriterPlugin } = require('webpack-stats-plugin');
 const WEBPACK_VERSION = require('webpack/package.json').version;
@@ -568,6 +569,7 @@ module.exports = {
   },
 
   optimization: {
+    ...webpackMemoryProfile(process.env.WEBPACK_MINIFY_IN_PROCESS, !NO_SOURCEMAPS),
     // Replace 'hashed' with 'deterministic' in webpack 5
     moduleIds: 'hashed',
     chunkIds: 'named', // at least makes named chunks stable,

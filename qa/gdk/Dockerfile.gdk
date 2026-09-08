@@ -9,6 +9,9 @@ ARG BABEL_ENV=production
 # A local candidate build has no CI assets archive.  Point the probe at a known
 # absent path so the existing compile branch is selected without an empty test.
 ARG GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash
+ARG NO_COMPRESSION=1
+ARG NO_SOURCEMAPS=1
+ARG WEBPACK_MINIFY_IN_PROCESS=true
 
 ARG GDK_SHA=ed5c438f1982d5c4653d7569aaf6ff3a0dedd499
 # Use tag prefix when running on 'stable' branch to make sure 'protected' image is used which is not deleted by registry cleanup
@@ -155,6 +158,9 @@ ARG NODE_OPTIONS
 ARG BABEL_ENV
 # Assets hash file is always packaged together with assets in the cache archive and if it is present, it indicates cached assets are present as well
 ARG GLCI_GITLAB_ASSETS_HASH_FILE
+ARG NO_COMPRESSION
+ARG NO_SOURCEMAPS
+ARG WEBPACK_MINIFY_IN_PROCESS
 
 ENV SKIP_FRONTEND_ISLANDS_BUILD=true
 
