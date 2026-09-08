@@ -2,9 +2,10 @@
   <div class="st-card" data-screen-label="Logo customization">
     <div class="st-card__title">Project avatar &amp; logo</div>
     <div class="st-logo-row">
-      <div class="st-logo-preview" :style="{ background: logoColor }" aria-hidden="true">{{ logoLetter }}</div>
+      <img v-if="logoUrl" class="st-logo-preview" :src="logoUrl" alt="Current project avatar" />
+      <div v-else class="st-logo-preview" :style="{ background: logoColor }" aria-hidden="true">{{ logoLetter }}</div>
       <div class="st-logo-controls">
-        <div class="st-logo-presets" role="radiogroup" aria-label="Logo color presets">
+        <div v-if="!production" class="st-logo-presets" role="radiogroup" aria-label="Logo color presets">
           <button
             v-for="color in presets"
             :key="color"
@@ -42,6 +43,8 @@ export default {
     logoColor: { type: String, required: true },
     logoLetter: { type: String, required: true },
     logoFileName: { type: String, default: '' },
+    logoUrl: { type: String, default: '' },
+    production: { type: Boolean, default: false },
   },
   data() {
     return { presets: LOGO_PRESET_COLORS };
@@ -49,8 +52,8 @@ export default {
   computed: {
     logoNote() {
       return this.logoFileName
-        ? `${this.logoFileName} — converted to 24/48/96px locally`
-        : 'PNG or SVG · converted locally into all display sizes';
+        ? `${this.logoFileName}: uploaded project avatar`
+        : 'Choose an image to upload as the project avatar.';
     },
   },
   methods: {

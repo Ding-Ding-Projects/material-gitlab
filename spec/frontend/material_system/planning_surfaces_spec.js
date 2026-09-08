@@ -4,6 +4,8 @@ import path from 'path';
 import {
   fetchMilestones,
   fetchWikiPages,
+  createProjectPlanAdapter,
+  PlanResourceUnavailableError,
 } from '~/material_system/surfaces/Plan/data';
 import {
   loadEpics,
@@ -30,6 +32,80 @@ describe('planning design-contract data adapters', () => {
       expect.objectContaining({ id: 'home', title: 'Home', body: 'Real wiki' }),
     ]);
     expect(fetcher).toHaveBeenCalledTimes(2);
+  });
+
+  it('adapts milestones and wiki pages through project REST routes with CSRF and preserved formats', async () => {
+    const root = { querySelector: jest.fn().mockReturnValue({ content: 'csrf-value' }) };
+    const fetcher = jest.fn()
+      .mockResolvedValueOnce(response([{ id: 7, iid: 3, title: 'Release', state: 'active' }]))
+      .mockResolvedValueOnce(response([{ slug: 'a/b', title: 'Home', content: 'Real wiki', format: 'rdoc' }]))
+      .mockResolvedValueOnce(response({ id: 7, title: 'Release', state: 'closed' }))
+      .mockResolvedValueOnce(response({ slug: 'a/b', title: 'Home', content: 'Updated', format: 'rdoc' }))
+      .mockResolvedValueOnce(response(null, 204));
+    const adapter = createProjectPlanAdapter({ projectId: 123, root, fetcher });
+
+    await expect(adapter.fetchMilestones()).resolves.toEqual([expect.objectContaining({ id: 7, name: 'Release' })]);
+    await expect(adapter.fetchWikiPages()).resolves.toEqual([expect.objectContaining({ id: 'a/b', format: 'rdoc' })]);
+    await adapter.mutateEntity({ resource: 'milestones', id: 7, changes: { state: 'closed' } });
+    await adapter.saveWiki({ id: 'a/b', body: 'Updated' });
+    await expect(adapter.deleteEntity({ resource: 'wiki', id: 'a/b' })).resolves.toBe(true);
+
+    expect(fetcher.mock.calls[0][0]).toContain('/api/v4/projects/123/milestones?state=all');
+    expect(fetcher.mock.calls[1][0]).toContain('/api/v4/projects/123/wikis?with_content=1');
+    expect(fetcher.mock.calls[2][0]).toContain('/milestones/7');
+    expect(fetcher.mock.calls[2][1]).toMatchObject({ method: 'PUT', headers: expect.objectContaining({ 'X-CSRF-Token': 'csrf-value' }) });
+    expect(JSON.parse(fetcher.mock.calls[2][1].body)).toEqual({ state_event: 'close' });
+    expect(fetcher.mock.calls[3][0]).toContain('/wikis/a%2Fb');
+    expect(JSON.parse(fetcher.mock.calls[3][1].body)).toEqual({ content: 'Updated', format: 'rdoc' });
+    expect(fetcher.mock.calls[4][1]).toMatchObject({ method: 'DELETE' });
+  });
+
+  it('reports CE-only resources independently, including an empty DELETE response', async () => {
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher: jest.fn() });
+    await expect(adapter.fetchRequirements()).rejects.toBeInstanceOf(PlanResourceUnavailableError);
+    await expect(adapter.deleteEntity({ resource: 'requirements', id: 9 })).rejects.toBeInstanceOf(PlanResourceUnavailableError);
+  });
+
+  it('follows milestone pagination without silently dropping later records', async () => {
+    const fetcher = jest.fn()
+      .mockResolvedValueOnce(response(Array.from({ length: 100 }, (_, id) => ({ id: id + 1, title: `Milestone ${id}`, state: 'active' }))))
+      .mockResolvedValueOnce(response([{ id: 101, title: 'Last milestone', state: 'closed' }]));
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher });
+    await expect(adapter.fetchMilestones()).resolves.toHaveLength(101);
+    expect(fetcher.mock.calls[1][0]).toContain('per_page=100&page=2');
+  });
+
+  it('normalizes real numeric iteration states and automatically scheduled titles', async () => {
+    const fetcher = jest.fn().mockResolvedValue(response([{ id: 10, sequence: 4, title: null, state: 2, web_url: '/groups/team/-/iterations/10' }]));
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher });
+    await expect(adapter.fetchIterations()).resolves.toMatchObject([{ id: 10, name: 'Iteration 4', state: 'active' }]);
+  });
+
+  it('reports forbidden iterations independently from accessible milestones', async () => {
+    const fetcher = jest.fn().mockResolvedValueOnce(response({}, 403)).mockResolvedValueOnce(response([{ id: 1, title: 'Accessible' }]));
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher });
+    await expect(adapter.fetchIterations()).rejects.toMatchObject({ status: 403, resource: 'iterations' });
+    await expect(adapter.fetchMilestones()).resolves.toHaveLength(1);
+  });
+
+  it('rejects malformed successful lists instead of treating them as empty', async () => {
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher: jest.fn().mockResolvedValue(response({ message: 'invalid list' })) });
+    await expect(adapter.fetchMilestones()).rejects.toThrow('Invalid milestones response');
+  });
+
+  it('rejects a wiki save without a matching server page', async () => {
+    const fetcher = jest.fn().mockResolvedValueOnce(response([{ slug: 'home', content: 'Existing', format: 'markdown' }])).mockResolvedValueOnce(response(null));
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher });
+    await adapter.fetchWikiPages();
+    await expect(adapter.saveWiki({ id: 'home', body: 'Changed' })).rejects.toThrow('did not return the saved wiki page');
+  });
+
+  it('rejects unauthorized mutation capabilities before transport', async () => {
+    const fetcher = jest.fn();
+    const adapter = createProjectPlanAdapter({ projectId: 123, fetcher, permissions: { milestones: false, wiki: false } });
+    await expect(adapter.mutateEntity({ resource: 'milestones', id: 1, changes: { state: 'closed' } })).rejects.toThrow('current project access');
+    await expect(adapter.saveWiki({ id: 'home', body: 'Changed' })).rejects.toThrow('current project access');
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it('follows every GraphQL epic page and never falls back to an inline list', async () => {
@@ -65,6 +141,7 @@ describe('planning design-contract data adapters', () => {
     const epicsEntry = fs.readFileSync(path.join(root, 'app/assets/javascripts/material_system/surfaces/Epics/index.js'), 'utf8');
     const todosEntry = fs.readFileSync(path.join(root, 'app/assets/javascripts/material_system/surfaces/Todos/index.js'), 'utf8');
     expect(planEntry).toContain('mountPlan');
+    expect(planEntry).toContain('createProjectPlanProps');
     expect(epicsEntry).toContain('mountEpics');
     expect(todosEntry).toContain('initTodosSurface');
     expect(fs.existsSync(path.join(root, 'design/Plan.dc.html'))).toBe(true);

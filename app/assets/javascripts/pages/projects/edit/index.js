@@ -1,4 +1,5 @@
 import { PROJECT_BADGE } from '~/badges/constants';
+import { mountProjectSettings } from '~/material_system/surfaces/Settings';
 import initConfirmDanger from '~/init_confirm_danger';
 import dirtySubmitFactory from '~/dirty_submit/dirty_submit_factory';
 import initFilePickers from '~/file_pickers';
@@ -19,27 +20,29 @@ import { initProjectPermissionsSettings } from '../shared/permissions/init_proje
 import initGitlabDuoSettings from '../shared/permissions/gitlab_duo_settings';
 import initProjectLoadingSpinner from '../shared/save_project_loader';
 
-initFilePickers();
-initConfirmDanger();
-initSettingsPanels();
-initProjectDeleteButton();
-initPruneObjectsButton();
-mountBadgeSettings(PROJECT_BADGE);
+if (!mountProjectSettings()) {
+  initFilePickers();
+  initConfirmDanger();
+  initSettingsPanels();
+  initProjectDeleteButton();
+  initPruneObjectsButton();
+  mountBadgeSettings(PROJECT_BADGE);
 
-new UserCallout({ className: 'js-service-desk-callout' }); // eslint-disable-line no-new
-initServiceDesk();
+  new UserCallout({ className: 'js-service-desk-callout' }); // eslint-disable-line no-new
+  initServiceDesk();
 
-initProjectLoadingSpinner();
-initProjectPermissionsSettings();
-initGitlabDuoSettings();
-initTransferProjectForm();
+  initProjectLoadingSpinner();
+  initProjectPermissionsSettings();
+  initGitlabDuoSettings();
+  initTransferProjectForm();
 
-dirtySubmitFactory(document.querySelectorAll('.js-general-settings-form, .js-mr-settings-form'));
+  dirtySubmitFactory(document.querySelectorAll('.js-general-settings-form, .js-mr-settings-form'));
 
-initSearchSettings();
-initArchiveSettings();
-initUnarchiveSettings();
-initTopicsTokenSelector();
-initProjectSelects();
+  initSearchSettings();
+  initArchiveSettings();
+  initUnarchiveSettings();
+  initTopicsTokenSelector();
+  initProjectSelects();
 
-initProjectNameValidation();
+  initProjectNameValidation();
+}

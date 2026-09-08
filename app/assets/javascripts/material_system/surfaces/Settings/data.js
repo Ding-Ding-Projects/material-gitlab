@@ -12,7 +12,7 @@ export const TABS = Object.freeze([
   { id: 'integrations', label: 'Integrations' },
 ]);
 
-export const ROLE_OPTIONS = Object.freeze(['Owner', 'Maintainer', 'Developer', 'Reporter', 'Guest']);
+export const ROLE_OPTIONS = Object.freeze(['Maintainer', 'Developer', 'Reporter', 'Planner', 'Guest']);
 
 export const VISIBILITY_OPTIONS = Object.freeze([
   { value: 'Private', icon: 'lock' },
@@ -42,6 +42,7 @@ export function createInitialState(overrides = {}) {
     visibility: '',
     logoColor: LOGO_PRESET_COLORS[0],
     logoFileName: '',
+    logoUrl: '',
     vocabularyStatus: 'No vocabulary loaded',
     vocabularyOk: null,
     converterStatus: 'No file chosen',

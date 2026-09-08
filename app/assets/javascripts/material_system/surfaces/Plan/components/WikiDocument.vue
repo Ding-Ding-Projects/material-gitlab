@@ -2,7 +2,7 @@
   <div class="gl-mds-plan__wikidoc">
     <div class="gl-mds-plan__wikidoc-head">
       <h2 class="gl-mds-plan__wikidoc-title">{{ page.title }}</h2>
-      <button type="button" class="gl-mds-plan__wikidoc-edit" @click="$emit('toggle-edit')">
+      <button v-if="canEdit && page.id" type="button" class="gl-mds-plan__wikidoc-edit" :disabled="saving" @click="$emit('toggle-edit')">
         <mds-icon :name="editing ? 'check' : 'edit'" size="sm" />{{ editing ? 'Save' : 'Edit' }}
       </button>
     </div>
@@ -11,6 +11,8 @@
       class="gl-mds-plan__wikidoc-textarea"
       rows="10"
       :value="page.body"
+      :disabled="saving"
+      aria-label="Wiki page content"
       @input="$emit('update-body', $event.target.value)"
     ></textarea>
     <div v-else class="gl-mds-plan__wikidoc-body">{{ page.body }}</div>
@@ -27,6 +29,8 @@ export default {
   props: {
     page: { type: Object, required: true },
     editing: { type: Boolean, default: false },
+    canEdit: { type: Boolean, default: true },
+    saving: { type: Boolean, default: false },
   },
 };
 </script>

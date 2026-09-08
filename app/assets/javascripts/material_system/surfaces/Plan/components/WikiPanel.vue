@@ -4,6 +4,8 @@
     <wiki-document
       :page="activePage"
       :editing="editing"
+      :can-edit="canEdit"
+      :saving="saving"
       @toggle-edit="$emit('toggle-edit')"
       @update-body="$emit('update-body', $event)"
     />
@@ -21,6 +23,8 @@ export default {
     filteredPages: { type: Array, required: true },
     activePage: { type: Object, required: true },
     editing: { type: Boolean, default: false },
+    canEdit: { type: Boolean, default: true },
+    saving: { type: Boolean, default: false },
   },
 };
 </script>

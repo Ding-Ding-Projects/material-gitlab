@@ -3,7 +3,8 @@
     <select-checkbox :checked="selected" :label="`Select ${row.title}`" @change="$emit('toggle-select', row.id)" />
     <mds-icon :name="row.icon" :style="{ color: row.iconColor }" />
     <div class="gl-mds-plan__row-text">
-      <div class="gl-mds-plan__row-title">{{ row.title }}</div>
+      <gl-link v-if="row.href" class="gl-mds-plan__row-title" :href="row.href">{{ row.title }}</gl-link>
+      <div v-else class="gl-mds-plan__row-title">{{ row.title }}</div>
       <div class="gl-mds-plan__row-sub">{{ row.sub }}</div>
     </div>
     <div v-if="row.pct" class="gl-mds-plan__row-progress">
@@ -17,12 +18,13 @@
 </template>
 
 <script>
+import { GlLink } from '@gitlab/ui';
 import MdsIcon from './MdsIcon.vue';
 import SelectCheckbox from './SelectCheckbox.vue';
 
 export default {
   name: 'RecordRow',
-  components: { MdsIcon, SelectCheckbox },
+  components: { GlLink, MdsIcon, SelectCheckbox },
   props: {
     row: { type: Object, required: true },
     selected: { type: Boolean, default: false },

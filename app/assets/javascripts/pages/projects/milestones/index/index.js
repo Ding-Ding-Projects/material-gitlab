@@ -1,3 +1,3 @@
-import InitMoreActionsDropdown from '~/milestones/init_more_actions_dropdown';
+import { mountPlan } from '~/material_system/surfaces/Plan';
 
-InitMoreActionsDropdown();
+mountPlan(document.querySelector('[data-material-plan-project-id]'));
