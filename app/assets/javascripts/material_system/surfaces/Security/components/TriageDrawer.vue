@@ -19,6 +19,7 @@ export default {
       required: false,
       default: false,
     },
+    canUpdate: { type: Boolean, default: false },
     canCreateIssue: { type: Boolean, default: false },
   },
   computed: {
@@ -72,7 +73,8 @@ export default {
         <div><strong>Location</strong> · <span class="sec-row__location">{{ vulnerability.location }}</span></div>
         <div><strong>Identified</strong> · {{ vulnerability.detectedAt }}</div>
       </div>
-      <div class="sec-drawer__status">
+      <a v-if="vulnerability.href" :href="vulnerability.href">Open full vulnerability details</a>
+      <div v-if="canUpdate" class="sec-drawer__status">
         <div class="sec-drawer__status-label">Set status</div>
         <div class="sec-drawer__status-chips">
           <status-chip
@@ -86,7 +88,7 @@ export default {
           />
         </div>
       </div>
-      <button type="button" class="sec-button sec-drawer__create-issue" :disabled="!canCreateIssue" @click="$emit('create-issue')">
+      <button type="button" class="sec-button sec-drawer__create-issue" :disabled="!canCreateIssue || issueCreated" @click="$emit('create-issue')">
         <material-icon name="addTask" />
         {{ createIssueLabel }}
       </button>
