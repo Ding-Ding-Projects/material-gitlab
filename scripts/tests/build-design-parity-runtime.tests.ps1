@@ -20,15 +20,20 @@ try {
   if (Test-Path -LiteralPath $taskOutput) { throw 'Dry run must not create an output directory.' }
   if ($arguments[-1] -ne '-') { throw 'The immutable archive must be Docker stdin, not an extracted directory.' }
 
+  New-Item -ItemType Directory -Path $taskOutput -Force | Out-Null
   $normalizer = Join-Path $repositoryRoot 'qa/gdk/normalize-executable-shebangs.sh'
   $crlfFixture = Join-Path $taskOutput 'crlf-shebang-fixture'
   [IO.File]::WriteAllText($crlfFixture, "#!/usr/bin/env ruby`r`nputs 'fixture'`r`n")
   $gitExecutable = (Get-Command git).Source
   $gitBash = Join-Path (Split-Path (Split-Path $gitExecutable -Parent) -Parent) 'bin/bash.exe'
   if (-not (Test-Path -LiteralPath $gitBash -PathType Leaf)) { throw 'Git Bash is required for the CRLF shebang fixture.' }
-  & $gitBash -c "chmod +x '$($crlfFixture.Replace('\', '/'))'; '$($normalizer.Replace('\', '/'))' '$($crlfFixture.Replace('\', '/'))'" *> $null
+  $fixtureUnixPath = (& $gitBash -c "cygpath -u '$crlfFixture'").Trim()
+  $normalizerUnixPath = (& $gitBash -c "cygpath -u '$normalizer'").Trim()
+  $normalizerOutput = & $gitBash -c "chmod +x '$fixtureUnixPath'; '$normalizerUnixPath' '$fixtureUnixPath'" 2>&1
+  if ($LASTEXITCODE -ne 0) { throw 'The CRLF shebang normalizer fixture exited non-zero.' }
+  if (($normalizerOutput | Out-String) -notmatch 'Normalized CRLF shebang files: 1') { throw 'The CRLF fixture did not exercise a normalizer transformation.' }
   $fixtureBytes = [IO.File]::ReadAllBytes($crlfFixture)
-  if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -match "\r\n") { throw 'CRLF shebang fixture remained CRLF after normalization.' }
+  if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -match "\r\n") { throw "CRLF shebang fixture remained CRLF after normalization: $normalizerOutput" }
   if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -notmatch '^#!/usr/bin/env ruby\n') { throw 'Shebang fixture did not preserve its executable interpreter line.' }
 
   $versionSource = git show "$commit`:.gitlab/ci/version.yml"

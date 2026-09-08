@@ -26,9 +26,9 @@ compare the two candidate-bound sources and confirm the derived manifest is pres
 the Git archive sent to Docker.
 
 Before each GDK source stage executes candidate scripts, the recipe runs
-`qa/gdk/normalize-executable-shebangs.sh`. It changes only executable files whose
-first line is a CRLF-terminated shebang, converting their line endings to LF. This
-keeps binary files and non-executable text untouched while making a committed
+`qa/gdk/normalize-executable-shebangs.sh`. It examines only files whose first line is
+a shebang and converts CRLF line endings to LF when present. A shebang is the bounded
+executable-source marker, so binary files and ordinary text remain untouched while a committed
 `#!/usr/bin/env ruby\r\n` runnable in the Linux build context.
 
 Each successful build retains its archive and `receipt.json` under
