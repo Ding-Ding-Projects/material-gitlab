@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
+import { existingFile, outputFile } from './evidence-paths.mjs';
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -12,8 +13,7 @@ const hash = (file) => crypto.createHash('sha256').update(fs.readFileSync(file))
 const hashJson = (value) => crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const normalized = (file) => path.relative(ROOT, file).replaceAll('\\', '/');
 function rawReceipt(receiptArg, input, kind, id, commit, tuple) {
-  const receiptPath = path.resolve(ROOT, String(receiptArg));
-  if (!fs.existsSync(receiptPath)) throw new Error(`raw receipt is missing: ${receiptArg}`);
+  const receiptPath = existingFile(ROOT, String(receiptArg), 'raw receipt path');
   const receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'));
   if (receipt.schemaVersion !== 2 || receipt.id !== id || receipt.kind !== kind || receipt.sourceCommit !== commit || receipt.raw?.path !== normalized(input) || receipt.raw?.sha256 !== hash(input) || JSON.stringify(receipt.tuple) !== JSON.stringify(tuple)) throw new Error(`raw receipt does not match ${kind} PNG, tuple, or source commit`);
   return { path: normalized(receiptPath), sha256: hash(receiptPath) };
@@ -21,8 +21,7 @@ function rawReceipt(receiptArg, input, kind, id, commit, tuple) {
 try {
   if (!args.id || !args.reference || !args.built || !args.output || !args.tuple || !args.commit || !args['reference-receipt'] || !args['built-receipt']) throw new Error('usage requires --id, --reference, --built, --output, --tuple, --commit, --reference-receipt, and --built-receipt');
   const { PNG } = require('pngjs');
-  const referencePath = path.resolve(ROOT, String(args.reference)); const builtPath = path.resolve(ROOT, String(args.built)); const output = path.resolve(ROOT, String(args.output));
-  if (!fs.existsSync(referencePath) || !fs.existsSync(builtPath)) throw new Error('both raw PNG inputs must exist; no placeholder diff is created');
+  const referencePath = existingFile(ROOT, String(args.reference), 'reference raw PNG'); const builtPath = existingFile(ROOT, String(args.built), 'built raw PNG'); const output = outputFile(ROOT, String(args.output), 'diff output');
   const reference = PNG.sync.read(fs.readFileSync(referencePath)); const built = PNG.sync.read(fs.readFileSync(builtPath));
   if (reference.width !== built.width || reference.height !== built.height) throw new Error(`raw dimensions differ: reference ${reference.width}x${reference.height}, built ${built.width}x${built.height}`);
   const threshold = Math.max(0, Number(args.threshold || 0)); let changedPixels = 0; let totalDelta = 0; let maxDelta = 0;

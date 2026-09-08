@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { runNegativeRegression, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
@@ -58,15 +59,29 @@ test('pending evidence is explicit and cannot claim a fabricated hash', () => {
   assert.ok(verdict.errors.some((error) => error.includes('pending evidence must not claim a hash')));
 });
 
-test('a rejected capture never writes a receipt fixture', () => {
+test('a valid manifest fixture turns a wrong-size capture red without writing a receipt', () => {
   const fixture = path.join(root, 'tools', 'design-reference', 'test', `.tmp-rejected-capture-${process.pid}`);
   const raw = path.join(fixture, 'raw.png');
+  const wrong = path.join(fixture, 'wrong.png');
+  const artifact = path.join(fixture, 'artifact.bin');
+  const manifest = path.join(fixture, 'manifest.json');
+  const session = path.join(fixture, 'session.json');
   fs.mkdirSync(fixture, { recursive: true });
-  fs.writeFileSync(raw, Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAF/gL+9y5nNwAAAABJRU5ErkJggg==', 'base64'));
+  const pngHeader = (width, height) => { const bytes = Buffer.alloc(24); Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(bytes); bytes.write('IHDR', 12, 'ascii'); bytes.writeUInt32BE(width, 16); bytes.writeUInt32BE(height, 20); return bytes; };
+  fs.writeFileSync(raw, pngHeader(1280, 800));
+  fs.writeFileSync(wrong, pngHeader(1, 1));
+  fs.writeFileSync(artifact, 'artifact');
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  const relative = (file) => path.relative(root, file).replaceAll('\\', '/');
+  const artifactHash = crypto.createHash('sha256').update(fs.readFileSync(artifact)).digest('hex');
+  fs.writeFileSync(manifest, JSON.stringify({ schemaVersion: 1, sourceCommit: commit, artifacts: [{ path: relative(artifact), sha256: artifactHash }] }));
+  fs.writeFileSync(session, JSON.stringify({ schemaVersion: 1, sourceCommit: commit, id: 'surface.admin', kind: 'built', target: 'fixture://built' }));
   try {
-    assert.throws(() => execFileSync(process.execPath, ['scripts/capture.mjs', '--id=surface.admin', '--kind=built', '--png=tools/design-reference/test/' + path.basename(fixture) + '/raw.png', '--commit=' + commit, '--artifact-manifest=tools/design-reference/test/' + path.basename(fixture) + '/missing.json', '--artifact=tools/design-reference/test/' + path.basename(fixture) + '/artifact.exe'], { cwd: path.join(root, 'tools', 'design-reference'), stdio: 'pipe' }));
-    assert.equal(fs.existsSync(`${raw}.receipt.json`), false);
+    const args = ['scripts/capture.mjs', '--id=surface.admin', '--kind=built', '--commit=' + commit, '--artifact-manifest=' + relative(manifest), '--artifact=' + relative(artifact), '--session-provenance=' + relative(session)];
+    execFileSync(process.execPath, [...args, '--png=' + relative(raw)], { cwd: path.join(root, 'tools', 'design-reference'), stdio: 'pipe' });
+    assert.equal(fs.existsSync(`${raw}.receipt.json`), true);
+    assert.throws(() => execFileSync(process.execPath, [...args, '--png=' + relative(wrong)], { cwd: path.join(root, 'tools', 'design-reference'), stdio: 'pipe' }));
+    assert.equal(fs.existsSync(`${wrong}.receipt.json`), false);
   } finally {
     fs.rmSync(fixture, { recursive: true, force: true });
   }

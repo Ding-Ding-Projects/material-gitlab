@@ -31,8 +31,8 @@ only from those retained raw inputs.
 node scripts/parity-guard.mjs
 node scripts/parity-guard.mjs --negative
 node scripts/parity-guard.mjs --strict
-node scripts/capture.mjs --id=surface.issues --kind=reference --png=artifacts/parity/surface.issues/reference.png --commit=<sha> --artifact-manifest=<reference-manifest.json> --artifact=<reference-artifact> --font-proof='<document-fonts-proof-json>'
-node scripts/capture.mjs --id=surface.issues --kind=built --png=artifacts/parity/surface.issues/built.png --commit=<sha> --artifact-manifest=<built-manifest.json> --artifact=<built-artifact>
+node scripts/capture.mjs --id=surface.issues --kind=reference --png=artifacts/parity/surface.issues/reference.png --commit=<sha> --artifact-manifest=<reference-manifest.json> --artifact=<reference-artifact> --session-provenance=<reference-session.json> --font-proof='<document-fonts-proof-json>'
+node scripts/capture.mjs --id=surface.issues --kind=built --png=artifacts/parity/surface.issues/built.png --commit=<sha> --artifact-manifest=<built-manifest.json> --artifact=<built-artifact> --session-provenance=<built-session.json>
 node scripts/side-by-side.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --reference-receipt=artifacts/parity/surface.issues/reference.png.receipt.json --built-receipt=artifacts/parity/surface.issues/built.png.receipt.json --output=artifacts/parity/surface.issues/side-by-side.svg --tuple='<tuple-json>' --commit=<sha>
 node scripts/diff.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --reference-receipt=artifacts/parity/surface.issues/reference.png.receipt.json --built-receipt=artifacts/parity/surface.issues/built.png.receipt.json --output=artifacts/parity/surface.issues/diff.json --tuple='<tuple-json>' --commit=<sha>
 node scripts/review-diff.mjs --diff=artifacts/parity/surface.issues/diff.json --reviewer='<reviewer>' --approval='<approval record>'
@@ -49,6 +49,9 @@ and verified against the actual local artifact. A receipt cannot be substituted 
 another row's input. Derived tools reject raw images unless the matching raw receipts
 also bind their source commit and tuple. A diff remains immutable and unreviewed until
 `review-diff.mjs` writes its separate approval record.
+The required session-provenance record binds the actual launched capture target to the
+row, capture kind, and source commit. It is a separate boundary: a file manifest proves
+bytes on disk, not that those bytes were the process or bundle loaded by the capture.
 Reference receipts also need a cheap-headless `document.fonts` proof for every named
 reference family. That proof blocks strict completion when a remote design font falls
 back locally. It records the problem without downloading or substituting a font asset.

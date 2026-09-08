@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { existingFile } from './evidence-paths.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const INVENTORY_PATH = path.join(ROOT, 'design', 'parity-inventory.json');
@@ -26,11 +27,7 @@ function sameJson(left, right) {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
-function rootFile(root, relative) {
-  if (typeof relative !== 'string' || path.isAbsolute(relative)) return null;
-  const file = path.resolve(root, relative);
-  return file.startsWith(`${root}${path.sep}`) ? file : null;
-}
+function rootFile(root, relative) { try { return existingFile(root, relative, 'evidence path'); } catch { return null; } }
 
 function requiredReferenceFonts(row, root) {
   const source = fs.readFileSync(path.join(root, row.referenceFile), 'utf8');
@@ -92,6 +89,14 @@ function checkReceipt(errors, row, key, root, sourceCommit) {
       const artifactPath = rootFile(root, receipt?.artifact?.path);
       if (!artifactPath || !fs.existsSync(artifactPath) || sha256(artifactPath) !== receipt?.artifact?.sha256) issue(errors, `${row.id}.evidence.${key} rendered artifact is missing or stale`);
     }
+    const sessionPath = rootFile(root, receipt?.sessionProvenance?.path);
+    if (!sessionPath || sha256(sessionPath) !== receipt?.sessionProvenance?.sha256) issue(errors, `${row.id}.evidence.${key} capture session provenance is missing or stale`);
+    else {
+      let session;
+      try { session = JSON.parse(fs.readFileSync(sessionPath, 'utf8')); }
+      catch { issue(errors, `${row.id}.evidence.${key} capture session provenance is not valid JSON`); }
+      if (session && (session.schemaVersion !== 1 || session.sourceCommit !== sourceCommit || session.id !== row.id || session.kind !== expectedKind || typeof session.target !== 'string' || !session.target)) issue(errors, `${row.id}.evidence.${key} capture session provenance does not bind the launched target`);
+    }
     if (key === 'referenceRaw') {
       const proof = receipt.fontProof;
       if (proof?.transport !== 'cheap Lowlevel headless route' || !proof?.availability || typeof proof.availability !== 'object') issue(errors, `${row.id}.evidence.referenceRaw receipt needs a cheap Lowlevel document.fonts proof`);
@@ -106,7 +111,9 @@ function checkReceipt(errors, row, key, root, sourceCommit) {
       const inputReceiptPath = rootFile(root, inputReceipt?.path);
       if (!inputReceiptPath || !fs.existsSync(inputReceiptPath) || sha256(inputReceiptPath) !== inputReceipt.sha256) issue(errors, `${row.id}.evidence.${key} ${kind} raw receipt is missing or stale`);
       else {
-        const raw = JSON.parse(fs.readFileSync(inputReceiptPath, 'utf8'));
+        let raw;
+        try { raw = JSON.parse(fs.readFileSync(inputReceiptPath, 'utf8')); }
+        catch { issue(errors, `${row.id}.evidence.${key} ${kind} raw receipt is not valid JSON`); continue; }
         if (raw.id !== row.id || raw.kind !== kind || raw.sourceCommit !== sourceCommit || raw.raw?.path !== evidenceInput.path || raw.raw?.sha256 !== evidenceInput.sha256 || !sameJson(raw.tuple, row.tuple)) issue(errors, `${row.id}.evidence.${key} ${kind} raw receipt does not match its input`);
       }
     }
@@ -119,7 +126,9 @@ function checkReceipt(errors, row, key, root, sourceCommit) {
       const reviewPath = `${evidencePath}.review.json`;
       if (!fs.existsSync(reviewPath)) issue(errors, `${row.id}.evidence.diff requires an immutable approval record`);
       else {
-        const review = JSON.parse(fs.readFileSync(reviewPath, 'utf8'));
+        let review;
+        try { review = JSON.parse(fs.readFileSync(reviewPath, 'utf8')); }
+        catch { issue(errors, `${row.id}.evidence.diff approval record is not valid JSON`); return; }
         if (review.schemaVersion !== 1 || review.status !== 'approved' || review.id !== row.id || review.sourceCommit !== sourceCommit || review.tupleHash !== hashJson(row.tuple) || review.diff?.path !== evidence.path || review.diff?.sha256 !== evidence.sha256 || typeof review.reviewer !== 'string' || !review.reviewer.trim() || typeof review.approval !== 'string' || !review.approval.trim()) issue(errors, `${row.id}.evidence.diff approval record is incomplete or stale`);
       }
     }

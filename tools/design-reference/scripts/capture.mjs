@@ -3,6 +3,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { existingFile } from './evidence-paths.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const inventory = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'parity-inventory.json'), 'utf8'));
@@ -13,23 +14,22 @@ function hash(file) { return crypto.createHash('sha256').update(fs.readFileSync(
 function hashJson(value) { return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
 function rowFor(id) { const row = inventory.contracts.find((candidate) => candidate.id === id); if (!row) throw new Error(`unknown inventory row ${id}`); return row; }
 function currentCommit() { return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); }
-function localFile(value, label) {
-  if (path.isAbsolute(value)) throw new Error(`${label} must be relative to the repository root`);
-  const file = path.resolve(ROOT, value);
-  if (!file.startsWith(`${ROOT}${path.sep}`)) throw new Error(`${label} escapes the repository root`);
-  return file;
-}
 function artifactFromManifest(manifestValue, artifactValue, sourceCommit) {
-  const manifestPath = localFile(manifestValue, 'artifact manifest path');
-  if (!fs.existsSync(manifestPath)) throw new Error(`artifact manifest is missing: ${manifestValue}`);
+  const manifestPath = existingFile(ROOT, manifestValue, 'artifact manifest path');
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   if (manifest?.schemaVersion !== 1 || manifest.sourceCommit !== sourceCommit || !Array.isArray(manifest.artifacts)) throw new Error('artifact manifest must have schemaVersion 1, matching sourceCommit, and artifacts');
   const artifactPath = String(artifactValue || '');
   const entry = manifest.artifacts.find((candidate) => candidate?.path === artifactPath);
   if (!entry || !/^[a-f0-9]{64}$/.test(entry.sha256 || '')) throw new Error('artifact manifest must contain the requested artifact path and SHA-256');
-  const file = localFile(artifactPath, 'artifact path');
-  if (!fs.existsSync(file) || sha256(file) !== entry.sha256) throw new Error(`artifact hash does not match manifest: ${artifactPath}`);
-  return { path: artifactPath, sha256: entry.sha256, manifest: { path: manifestValue, sha256: sha256(manifestPath) } };
+  const file = existingFile(ROOT, artifactPath, 'artifact path');
+  if (sha256(file) !== entry.sha256) throw new Error(`artifact hash does not match manifest: ${artifactPath}`);
+  return { path: artifactPath, sha256: entry.sha256, manifest: { path: manifestValue, sha256: hash(manifestPath) } };
+}
+function captureSession(value, sourceCommit, id, kind) {
+  const file = existingFile(ROOT, value, 'capture session provenance');
+  const session = JSON.parse(fs.readFileSync(file, 'utf8'));
+  if (session?.schemaVersion !== 1 || session.sourceCommit !== sourceCommit || session.id !== id || session.kind !== kind || typeof session.target !== 'string' || !session.target) throw new Error('capture session provenance must bind schema, source commit, row, kind, and launched target');
+  return { path: value, sha256: sha256(file) };
 }
 function pngInfo(file) {
   const bytes = fs.readFileSync(file);
@@ -44,7 +44,7 @@ if (!id || !['reference', 'built'].includes(kind)) { fail('usage requires --id=s
 else {
   try {
     const row = rowFor(id);
-      const output = args.png ? localFile(String(args.png), 'raw PNG path') : null;
+      const output = args.png ? existingFile(ROOT, String(args.png), 'raw PNG path') : null;
     if (!output) {
       console.log(JSON.stringify({ status: 'capture-required', id, kind, route: row[`${kind}Route`] || row.referenceRoute, tuple: row.tuple, transport: 'cheap Lowlevel headless route', next: 'Capture the real app with the approved hidden-desktop route, then rerun with --png=<raw PNG path>.' }, null, 2));
       process.exitCode = 2;
@@ -55,6 +55,8 @@ else {
       if (sourceCommit !== currentCommit()) throw new Error(`capture source commit ${sourceCommit} does not match current HEAD`);
       if (!args['artifact-manifest'] || !args.artifact) throw new Error('capture receipt requires --artifact-manifest=<relative manifest> and --artifact=<relative rendered artifact>');
       const artifact = artifactFromManifest(String(args['artifact-manifest']), String(args.artifact), sourceCommit);
+      if (!args['session-provenance']) throw new Error('capture receipt requires --session-provenance=<relative launched-target record>');
+      const sessionProvenance = captureSession(String(args['session-provenance']), sourceCommit, id, kind);
       let fontProof = null;
       if (kind === 'reference') {
         if (!args['font-proof']) throw new Error('reference capture receipt requires --font-proof=<JSON from document.fonts checks>; fallback fonts cannot complete parity');
@@ -77,6 +79,7 @@ else {
         tupleHash: hashJson(row.tuple),
         deterministic: row.deterministic,
         artifact,
+        sessionProvenance,
         ...(fontProof ? { fontProof } : {}),
         raw: { path: path.relative(ROOT, output).replaceAll('\\', '/'), sha256: hash(output), ...info },
         sourceCommit,

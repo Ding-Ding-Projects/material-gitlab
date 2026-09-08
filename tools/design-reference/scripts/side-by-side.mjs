@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { existingFile, outputFile } from './evidence-paths.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const args = Object.fromEntries(process.argv.slice(2).filter((arg) => arg.startsWith('--')).map((arg) => { const [key, ...rest] = arg.slice(2).split('='); return [key, rest.join('=') || true]; }));
@@ -10,8 +11,7 @@ const hash = (file) => crypto.createHash('sha256').update(fs.readFileSync(file))
 const hashJson = (value) => crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
 const normalized = (file) => path.relative(ROOT, file).replaceAll('\\', '/');
 function rawReceipt(receiptArg, input, kind, id, commit, tuple) {
-  const receiptPath = path.resolve(ROOT, String(receiptArg));
-  if (!fs.existsSync(receiptPath)) throw new Error(`raw receipt is missing: ${receiptArg}`);
+  const receiptPath = existingFile(ROOT, String(receiptArg), 'raw receipt path');
   const receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'));
   if (receipt.schemaVersion !== 2 || receipt.id !== id || receipt.kind !== kind || receipt.sourceCommit !== commit || receipt.raw?.path !== normalized(input) || receipt.raw?.sha256 !== hash(input) || JSON.stringify(receipt.tuple) !== JSON.stringify(tuple)) throw new Error(`raw receipt does not match ${kind} PNG, tuple, or source commit`);
   return { path: normalized(receiptPath), sha256: hash(receiptPath) };
@@ -23,10 +23,9 @@ const png = (file) => {
 };
 try {
   if (!args.id || !args.reference || !args.built || !args.output || !args.tuple || !args.commit || !args['reference-receipt'] || !args['built-receipt']) throw new Error('usage requires --id, --reference, --built, --output, --tuple, --commit, --reference-receipt, and --built-receipt');
-  const referencePath = path.resolve(ROOT, String(args.reference));
-  const builtPath = path.resolve(ROOT, String(args.built));
-  const output = path.resolve(ROOT, String(args.output));
-  if (!fs.existsSync(referencePath) || !fs.existsSync(builtPath)) throw new Error('both raw PNG inputs must exist; no placeholder output is created');
+  const referencePath = existingFile(ROOT, String(args.reference), 'reference raw PNG');
+  const builtPath = existingFile(ROOT, String(args.built), 'built raw PNG');
+  const output = outputFile(ROOT, String(args.output), 'side-by-side output');
   const reference = png(referencePath); const built = png(builtPath);
   if (reference.width !== built.width || reference.height !== built.height) throw new Error(`raw dimensions differ: reference ${reference.width}x${reference.height}, built ${built.width}x${built.height}`);
   const tuple = JSON.parse(String(args.tuple));
