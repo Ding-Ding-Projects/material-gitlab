@@ -26,11 +26,13 @@ compare the two candidate-bound sources and confirm the derived manifest is pres
 the Git archive sent to Docker.
 
 Before each GDK source stage executes candidate scripts, the recipe runs
-`qa/gdk/normalize-executable-shebangs.rb`. It uses one Ruby process over only the
+`qa/gdk/normalize-executable-shebangs.py`. It uses one Python process over only the
 candidate-owned `bin`, `scripts`, `config`, `lib`, and `ee` roots, skips symlinks and
 `node_modules`, and changes only files whose first bytes are a shebang. Binary files and
-ordinary text remain untouched while a committed
-`#!/usr/bin/env ruby\r\n` runnable in the Linux build context.
+ordinary text remain untouched, while committed CRLF interpreter lines become
+runnable in the Linux build context. The pinned base already includes Python.
+Ruby's directory walker raised an internal `NotImplementedError` on the real
+candidate tree, so normalization uses the independent standard-library walker.
 
 Each successful build retains its archive and `receipt.json` under
 `<OutputRoot>/<commit-sha>/`. The receipt records the source SHA, archive SHA-256,
