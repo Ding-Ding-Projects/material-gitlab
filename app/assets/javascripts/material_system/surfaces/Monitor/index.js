@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Monitor from './Monitor.vue';
-import '../operations.scss';
 import { readSurfaceConfig, resolveSurfaceElement } from '../live-data';
 export { default as MonitorSurface } from './Monitor.vue';
 export * from './data';

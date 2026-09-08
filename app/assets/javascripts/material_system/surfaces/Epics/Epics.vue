@@ -377,6 +377,8 @@ export default {
 };
 </script>
 
+<style lang="scss" src="./epics.scss"></style>
+
 <template>
   <div class="gl-mds-epics" :class="themeClass" data-material-topbar-owner="surface.epics">
     <epics-toolbar

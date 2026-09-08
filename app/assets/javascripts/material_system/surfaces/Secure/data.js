@@ -119,7 +119,7 @@ export async function fetchAuditEvents({ endpoint, fetchImpl } = {}) {
       return url.pathname + url.search;
     },
   });
-  return rows.map((event) => ({ id: String(event.id), name: event.action, sub: [event.author?.name, event.target].filter(Boolean).join(' · '), when: event.date, href: event.object?.url }));
+  return rows.map((event) => ({ id: String(event.id), name: event.action, sub: [event.author?.name, event.target].filter(Boolean).join(' Â· '), when: event.date, href: event.object?.url }));
 }
 
 export async function fetchScanPolicies({ endpoint, projectPath, fetchImpl } = {}) {

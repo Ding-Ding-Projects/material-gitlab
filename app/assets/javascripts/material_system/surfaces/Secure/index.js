@@ -2,7 +2,6 @@
  * Entry point for the Secure surface (dependency list, audit events, scan
  * policies, on-demand scans), ported from design/Secure.dc.html.
  */
-import './secure.scss';
 import Vue from 'vue';
 import { readSurfaceConfig, resolveSurfaceElement } from '../live-data';
 import SecureSurface from './Secure.vue';

@@ -386,3 +386,5 @@ export default {
     <notification-stack />
   </div>
 </template>
+
+<style lang="scss" src="./security.scss"></style>

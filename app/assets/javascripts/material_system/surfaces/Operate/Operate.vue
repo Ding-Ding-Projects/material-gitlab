@@ -41,7 +41,6 @@
 <script>
 import CommandPalette from '../Deploy/components/CommandPalette.vue';
 import RegexBuilderPopover from '../Deploy/components/RegexBuilderPopover.vue';
-import '../Deploy/deploy.scss';
 import ConfirmDialog from '../Deploy/components/ConfirmDialog.vue';
 import { loadSettings, updateSettings } from '../../settings';
 import { OPERATE_TABS, fetchOperateData, stopEnvironment, changeStateLock } from './data';
@@ -83,3 +82,6 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" src="../Deploy/deploy.scss"></style>
+<style lang="scss" src="../operations.scss"></style>

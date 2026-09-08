@@ -1,6 +1,5 @@
 import Vue from 'vue';
 import Operate from './Operate.vue';
-import '../operations.scss';
 import { readSurfaceConfig, resolveSurfaceElement } from '../live-data';
 export { default as OperateSurface } from './Operate.vue';
 export * from './data';

@@ -1,7 +1,6 @@
 import Vue from 'vue';
 import Epics from './Epics.vue';
 import { loadEpics, mutateEpic, deleteEpic } from './data';
-import './epics.scss';
 
 export { default as Epics } from './Epics.vue';
 export * from './data';

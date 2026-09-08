@@ -11,8 +11,8 @@ describe('shared shell design contracts', () => {
       expect.objectContaining({ id: 'surface.shell-a', reference: 'design/Shell A.dc.html' }),
       expect.objectContaining({ id: 'surface.shell-b', reference: 'design/Shell B.dc.html' }),
       expect.objectContaining({ id: 'surface.sidebar', mount: '.m3-shell-sidebar-host' }),
-      expect.objectContaining({ id: 'surface.command-palette', mount: '#material-command-palette-root' }),
-      expect.objectContaining({ id: 'surface.regex-builder', mount: '[data-regex-builder-target]' }),
+      expect.objectContaining({ id: 'surface.command-palette', kind: 'embedded-overlay', mount: 'ShellB.vue' }),
+      expect.objectContaining({ id: 'surface.regex-builder', kind: 'embedded-overlay', mount: 'ShellB.vue' }),
       expect.objectContaining({ id: 'surface.analyze', mount: '#js-explore-analytics-dashboards' }),
     ]));
   });

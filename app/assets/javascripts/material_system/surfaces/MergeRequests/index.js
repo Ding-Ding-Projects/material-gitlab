@@ -6,7 +6,6 @@ import Vue from 'vue';
 import MergeRequests from './MergeRequests.vue';
 import { createProjectMergeRequestsAdapter } from './data';
 
-import './mergerequests.scss';
 
 export { default as MergeRequests } from './MergeRequests.vue';
 export { default as MrTopBar } from './components/MrTopBar.vue';

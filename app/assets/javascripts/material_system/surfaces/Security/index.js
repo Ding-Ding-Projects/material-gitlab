@@ -2,7 +2,6 @@ import Vue from 'vue';
 import SecurityDashboard from './Security.vue';
 import { readSurfaceConfig, resolveSurfaceElement, parseSurfacePayload } from '../live-data';
 
-import './security.scss';
 
 export { default as SecurityDashboard } from './Security.vue';
 export { default as TopBar } from './components/TopBar.vue';

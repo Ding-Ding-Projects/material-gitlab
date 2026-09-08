@@ -416,3 +416,5 @@ export default {
   },
 };
 </script>
+
+<style lang="scss" src="./secure.scss"></style>
