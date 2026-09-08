@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import settle from 'helpers/wait_for_promises';
 import Plan from '~/material_system/surfaces/Plan/Plan.vue';
 import CicdTab from '~/material_system/surfaces/Settings/components/CicdTab.vue';
 import Settings from '~/material_system/surfaces/Settings/Settings.vue';
@@ -7,7 +8,6 @@ import { SETTINGS_ADAPTER_METHODS } from '~/material_system/surfaces/Settings/ad
 jest.mock('@gitlab/ui', () => ({ GlButton: { name: 'GlButton', template: '<button><slot /></button>' }, GlLink: { name: 'GlLink', template: '<a><slot /></a>' }, GlForm: { name: 'GlForm', template: '<form><slot /></form>' }, GlFormGroup: { name: 'GlFormGroup', template: '<div><slot /></div>' }, GlFormInput: { name: 'GlFormInput', template: '<input />' }, GlFormCheckbox: { name: 'GlFormCheckbox', template: '<input type="checkbox" />' } }));
 jest.mock('~/material_system/notifications', () => ({ __esModule: true, default: { notify: jest.fn(), subscribe: () => () => {} } }));
 
-const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
 const planProps = () => ({
   production: true, permissions: { milestones: true, wiki: true },
   fetchMilestones: jest.fn().mockResolvedValue([{ id: 1, name: 'Release', state: 'active' }]),
