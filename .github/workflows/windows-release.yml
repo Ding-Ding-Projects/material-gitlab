@@ -171,7 +171,19 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $catalogUrl = 'https://raw.githubusercontent.com/Ding-Ding-Projects/dim-sum-photos/main/catalog/index.json'
-          $apiHeaders = @{ 'User-Agent' = 'material-gitlab-windows-release'; Accept = 'application/vnd.github+json' }
+          # Authenticate these calls. Unauthenticated GitHub API access is 60 requests per
+          # hour shared across the whole runner IP, and this step alone spends eleven of
+          # them paginating the photo catalog, so it failed with "API rate limit exceeded"
+          # before it could pick a dish. GH_TOKEN is already in this step's environment and
+          # simply was not being used; authenticated access is 5,000 per hour.
+          if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+            throw 'GH_TOKEN is empty, so the dim-sum catalog calls would be unauthenticated and rate limited. Refusing to start.'
+          }
+          $apiHeaders = @{
+            'User-Agent'    = 'material-gitlab-windows-release'
+            Accept          = 'application/vnd.github+json'
+            Authorization   = "Bearer $env:GH_TOKEN"
+          }
           $catalogPath = Join-Path $env:RUNNER_TEMP 'dim-sum-catalog.json'
           Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $catalogUrl -OutFile $catalogPath
           $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
@@ -183,7 +195,9 @@ jobs:
               Where-Object { $_.tag_name -match '^catalog-v1(?:$|-)' } |
               ForEach-Object { $_.assets } |
               Where-Object { $_.name -match '^hk-dish-\d{4}-.+\.(png|jpg|jpeg)$' })
-            if ($releases.Count -eq 0) { break }
+            # A short page is the last page. Without this the loop always spent the full
+            # ten requests, which is most of an unauthenticated hourly budget for nothing.
+            if ($releases.Count -lt 100) { break }
           }
           if (-not $assets) { throw 'No published catalog-v1 photo assets were found.' }
           $prior = Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100"
