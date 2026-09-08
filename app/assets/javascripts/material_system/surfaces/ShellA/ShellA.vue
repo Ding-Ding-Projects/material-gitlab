@@ -3,15 +3,14 @@
     <slot name="sidebar"><material-sidebar v-if="!chromeOnly" :sections="sections" :active="active" /></slot>
     <div class="material-shell__body">
       <header class="material-shell__topbar" role="banner">
-        <button v-if="!chromeOnly" type="button" class="material-shell__menu" aria-label="Toggle sidebar" @click="$emit('toggle-sidebar')">☰</button>
-        <a class="material-shell__brand" :href="homeHref">{{ brand }}</a>
+        <material-icon-button v-if="!chromeOnly" type="button" class="material-shell__menu" aria-label="Toggle sidebar" @click="$emit('toggle-sidebar')">☰</material-icon-button>
+        <material-text-button class="material-shell__brand" :href="homeHref">{{ brand }}</material-text-button>
         <div class="material-shell__search-wrap">
-          <label class="sr-only" :for="searchId">Search</label>
-          <input :id="searchId" ref="search" v-model="query" type="search" placeholder="Search or go to…" @keydown.enter="submitSearch" />
-          <button type="button" class="material-shell__regex" aria-label="Open regex builder for search" @click="regexOpen = true">.*</button>
+          <material-text-field :id="searchId" ref="search" v-model="query" class="material-shell__search" type="search" label="Search" aria-label="Search" placeholder="Search or go to…" @keydown.enter="submitSearch" />
+          <material-icon-button type="button" class="material-shell__regex" aria-label="Open regex builder for search" @click="regexOpen = true">.*</material-icon-button>
         </div>
-        <button type="button" class="material-shell__icon-button" aria-label="Open command palette (Ctrl+Shift+F)" @click="paletteOpen = true">⌘</button>
-        <button type="button" class="material-shell__icon-button" aria-label="Toggle theme" @click="toggleTheme">{{ theme === 'dark' ? '☀' : '☾' }}</button>
+        <material-icon-button type="button" class="material-shell__icon-button material-shell__palette" aria-label="Open command palette (Ctrl+Shift+F)" @click="paletteOpen = true">⌘</material-icon-button>
+        <material-icon-button type="button" class="material-shell__icon-button material-shell__theme" aria-label="Toggle theme" @click="toggleTheme">{{ theme === 'dark' ? '☀' : '☾' }}</material-icon-button>
         <slot name="actions" />
       </header>
       <p v-if="preferenceError" role="alert">{{ preferenceError }}</p>
@@ -23,13 +22,16 @@
 </template>
 
 <script>
+import MaterialIconButton from '../../components/material_icon_button';
+import MaterialTextButton from '../../components/material_text_button';
+import MaterialTextField from '../../components/material_text_field';
 import CommandPalette from '../CommandPalette/CommandPalette.vue';
 import RegexBuilder from '../RegexBuilder/RegexBuilder.vue';
 import Sidebar from '../Sidebar/Sidebar.vue';
 
 export default {
   name: 'MaterialShellA',
-  components: { CommandPalette, RegexBuilder, MaterialSidebar: Sidebar },
+  components: { MaterialIconButton, MaterialTextButton, MaterialTextField, CommandPalette, RegexBuilder, MaterialSidebar: Sidebar },
   props: {
     managedTheme: Boolean,
     preferenceError: { type: String, default: '' },

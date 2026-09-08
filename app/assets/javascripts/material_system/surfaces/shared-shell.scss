@@ -38,10 +38,10 @@
 .material-shell__body { display: flex; flex: 1; min-width: 0; flex-direction: column; }
 .material-shell__topbar { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 24px; box-sizing: border-box; border-bottom: 1px solid var(--m3-surface-container-high); }
 .material-shell__brand { color: var(--m3-on-surface); font-weight: 700; text-decoration: none; white-space: nowrap; }
-.material-shell__menu, .material-shell__icon-button, .material-shell__regex, .material-analyze__topbar > button { min-width: 40px; min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
-.material-shell__menu:hover, .material-shell__icon-button:hover, .material-shell__regex:hover, .material-analyze__topbar > button:hover { background: var(--m3-surface-container-high); }
-.material-shell__search-wrap, .material-analyze__search-wrap { display: flex; align-items: center; flex: 1; max-width: 640px; gap: 8px; margin-left: auto; padding: 4px 8px 4px 16px; border-radius: 999px; background: var(--m3-surface-container); }
-.material-shell__search-wrap input, .material-analyze__search-wrap input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; }
+.material-analyze__topbar > button { min-width: 40px; min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+.material-analyze__topbar > button:hover { background: var(--m3-surface-container-high); }
+.material-analyze__search-wrap { display: flex; align-items: center; flex: 1; max-width: 640px; gap: 8px; margin-left: auto; padding: 4px 8px 4px 16px; border-radius: 999px; background: var(--m3-surface-container); }
+.material-analyze__search-wrap input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: inherit; font: inherit; }
 .material-shell__main { flex: 1; min-width: 0; padding: 24px; }
 .material-sidebar { display: flex; flex: 0 0 248px; min-height: 100%; flex-direction: column; gap: 4px; overflow-y: auto; box-sizing: border-box; padding: 12px 10px; background: var(--m3-surface-container); }
 .material-sidebar__brand { display: flex; align-items: center; gap: 10px; padding: 8px 12px 14px; color: inherit; font-weight: 700; text-decoration: none; }
@@ -110,3 +110,24 @@
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; clip-path: inset(50%); }
 @media (max-width: 720px) { .material-sidebar { flex-basis: 64px; padding-inline: 6px; } .material-sidebar__brand, .material-sidebar__item { justify-content: center; padding-inline: 6px; } .material-sidebar__brand > span:last-child, .material-sidebar__item > span:not(.material-sidebar__icon), .material-sidebar__project, .material-sidebar__section h2 { display: none; } .material-shell__topbar, .material-analyze__topbar, .material-analyze__heading, .material-analyze__content { padding-inline: 12px; } .material-analyze__heading { align-items: flex-start; flex-direction: column; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; } }
+
+// Bridge the established shell scheme to Material Web's documented color roles.
+// Official elements retain their own state layers, focus rings, and disabled styles.
+.material-shell {
+  --md-sys-color-primary: var(--m3-primary);
+  --md-sys-color-on-primary: var(--m3-on-primary);
+  --md-sys-color-primary-container: var(--m3-primary-container);
+  --md-sys-color-on-primary-container: var(--m3-on-primary-container);
+  --md-sys-color-surface: var(--m3-surface);
+  --md-sys-color-surface-container: var(--m3-surface-container);
+  --md-sys-color-surface-container-highest: var(--m3-surface-container-high);
+  --md-sys-color-on-surface: var(--m3-on-surface);
+  --md-sys-color-on-surface-variant: var(--m3-on-surface-variant);
+  --md-sys-color-outline: var(--m3-outline);
+  --md-ref-typeface-plain: 'Google Sans Text', sans-serif;
+  --md-ref-typeface-brand: 'Google Sans', sans-serif;
+  font-family: var(--md-ref-typeface-plain);
+}
+.material-shell__search-wrap { display: flex; align-items: center; flex: 1; min-width: 0; max-width: 640px; gap: 8px; margin-left: auto; }
+.material-shell__search { flex: 1; min-width: 0; }
+.material-shell__menu, .material-shell__icon-button, .material-shell__regex { flex: 0 0 auto; }

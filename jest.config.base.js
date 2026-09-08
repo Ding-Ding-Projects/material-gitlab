@@ -30,7 +30,11 @@ module.exports = (path, options = {}) => {
   const VUE_JEST_TRANSFORMER = USE_VUE3_COMPILER
     ? '@vue/vue3-jest'
     : '<rootDir>/spec/frontend/__helpers__/vue2_jest_transformer.js';
-  const setupFilesAfterEnv = [`<rootDir>/${path}/test_setup.js`, 'jest-canvas-mock'];
+  const setupFilesAfterEnv = [
+    '<rootDir>/spec/frontend/material_system/material_web_test_setup.js',
+    `<rootDir>/${path}/test_setup.js`,
+    'jest-canvas-mock',
+  ];
   const vueModuleNameMappers = {
     // consume @gitlab-ui from source to allow us to compile in either Vue 2 or Vue 3
     '@gitlab/ui/dist/charts$': '@gitlab/ui/src/charts',
@@ -212,6 +216,12 @@ module.exports = (path, options = {}) => {
   };
 
   const transformIgnoreNodeModules = [
+    '@material/web',
+    '@lit',
+    'lit/',
+    'lit-html',
+    'lit-element',
+    'element-internals-polyfill',
     'vue-test-utils-compat',
     '@gitlab/svgs',
     '@gitlab/ui',
