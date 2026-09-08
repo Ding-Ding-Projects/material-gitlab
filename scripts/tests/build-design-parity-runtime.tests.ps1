@@ -23,9 +23,9 @@ try {
   $versionSource = git show "$commit`:.gitlab/ci/version.yml"
   $toolVersions = Get-Content -LiteralPath (Join-Path $repositoryRoot 'qa/gdk/.tool-versions')
   $expectedVersions = @(
-    "ruby " + (($versionSource | Select-String 'RUBY_VERSION_DEFAULT:').Line -replace '.*"([^"]+)".*', '$1'),
-    "node " + (($versionSource | Select-String 'NODE_VERSION:').Line -replace '.*"([^"]+)".*', '$1'),
-    "golang " + (($versionSource | Select-String 'GO_VERSION:').Line -replace '.*"([^"]+)".*', '$1')
+    ('ruby ' + (($versionSource | Select-String 'RUBY_VERSION_DEFAULT:').Line -replace '.*"([^"]+)".*', '$1'))
+    ('node ' + (($versionSource | Select-String 'NODE_VERSION:').Line -replace '.*"([^"]+)".*', '$1'))
+    ('golang ' + (($versionSource | Select-String 'GO_VERSION:').Line -replace '.*"([^"]+)".*', '$1'))
   )
   if (@(Compare-Object $expectedVersions $toolVersions).Count -ne 0) { throw 'qa/gdk/.tool-versions does not match the candidate version source.' }
   $archivedToolVersions = git archive --format=tar $commit qa/gdk/.tool-versions | tar -tf -
