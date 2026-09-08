@@ -243,17 +243,17 @@ jobs:
           # fail slowly for reasons that have nothing to do with this fork.
           builder="registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ubuntu_24.04:latest"
           docker pull "$builder"
+          # Without this, the gitlab-rails definition takes its "copy the assets a CI
+          # job already built" path and syncs "$CI_PROJECT_DIR/$ASSET_PATH" into
+          # public/assets. Outside GitLab own CI both variables are empty, so that path
+          # collapses to "/" and it copies the entire filesystem root into the package.
+          # It ran for 43 seconds doing exactly that before dying trying to recreate
+          # /usr/bin inside public/assets. Compiling the assets here is the correct route
+          # and the only one available, since there is no upstream job to copy from.
           docker run --rm \
             -e GITLAB_VERSION \
             -e OMNIBUS_REF="${{ inputs.omnibus_ref }}" \
             -e OPENSSL_VERSION="${{ steps.omnibusvars.outputs.openssl_version }}" \
-            # Without this, the gitlab-rails definition takes its "copy the assets a CI
-            # job already built" path and syncs "$CI_PROJECT_DIR/$ASSET_PATH" into
-            # public/assets. Outside GitLab own CI both variables are empty, so that path
-            # collapses to "/" and it copies the entire filesystem root into the package.
-            # It ran for 43 seconds doing exactly that before dying trying to recreate
-            # /usr/bin inside public/assets. Compiling the assets here is the correct route
-            # and the only one available, since there is no upstream job to copy from.
             -e COMPILE_ASSETS=true \
             -e BUILD_VERSION="${{ steps.target.outputs.version }}" \
             -v "$PWD/omnibus-gitlab:/omnibus" \
