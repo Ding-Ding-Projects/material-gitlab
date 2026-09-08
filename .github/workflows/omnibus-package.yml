@@ -204,6 +204,34 @@ jobs:
           echo "--- rewritten ---"
           grep -rn "$chosen" config/software | head -8 || true
 
+      - name: Read the toolchain versions this upstream ref declares
+        id: omnibusvars
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd omnibus-gitlab
+          # config/software/openssl.rb chooses between OpenSSL 1.1.1 and 3.x purely on whether
+          # OPENSSL_VERSION starts with "3". Unset means 1.1.1, and curl at this ref refuses to
+          # configure against anything below 3.0.0. The result is a build that fetches and
+          # compiles happily for 25 minutes and then dies on "OpenSSL 3.0.0 or upper required",
+          # with nothing anywhere naming the variable that was never set.
+          #
+          # Read the value from the ref's own CI variables rather than hard coding it, so it
+          # stays correct when the ref moves instead of silently going stale.
+          f=gitlab-ci-config/variables.yml
+          test -f "$f" || { echo "::error::$f is missing, so the toolchain versions this ref expects cannot be read. The omnibus layout may have changed."; exit 1; }
+          ver="$(grep -oE '^[[:space:]]*OPENSSL_VERSION:[[:space:]]*[0-9][0-9.]*' "$f" | head -1 | awk '{print $2}')" || true
+          if [ -z "${ver:-}" ]; then
+            echo "::error::No OPENSSL_VERSION found in $f. Guessing one would build the wrong OpenSSL and fail far later, so this stops here."
+            exit 1
+          fi
+          case "$ver" in
+            3*) : ;;
+            *) echo "::error::This ref declares OPENSSL_VERSION=$ver, which selects the 1.1.1 definition that curl will reject."; exit 1 ;;
+          esac
+          echo "openssl_version=$ver" >> "$GITHUB_OUTPUT"
+          echo "This ref expects OpenSSL $ver"
+
       - name: Build the package in the official omnibus builder image
         shell: bash
         env:
@@ -218,6 +246,7 @@ jobs:
           docker run --rm \
             -e GITLAB_VERSION \
             -e OMNIBUS_REF="${{ inputs.omnibus_ref }}" \
+            -e OPENSSL_VERSION="${{ steps.omnibusvars.outputs.openssl_version }}" \
             -e BUILD_VERSION="${{ steps.target.outputs.version }}" \
             -v "$PWD/omnibus-gitlab:/omnibus" \
             -w /omnibus \
