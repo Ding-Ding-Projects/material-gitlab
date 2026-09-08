@@ -10,8 +10,6 @@
 
 %h1.gl-sr-only= title
 
-#js-material-code-app{ data: { project_path: current_project.full_path } }
-
 .gl-flex.gl-border-b-1.gl-border-b-solid.gl-border-b-default.gl-flex-wrap-reverse
   = gl_tabs_nav({ class: 'gl-grow gl-border-b-0' }) do
     = gl_tab_link_to s_('Branches|Overview'), project_branches_path(@project), { item_active: @mode == 'overview', title: s_('Branches|Show overview of the branches') }

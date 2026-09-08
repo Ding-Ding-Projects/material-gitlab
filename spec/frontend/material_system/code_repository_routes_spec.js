@@ -5,15 +5,6 @@ const root = path.resolve(__dirname, '../../..');
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 describe('material Code and Repository production routes', () => {
-  it('mounts Code on the branches page with the current project full path', () => {
-    const view = read('app/views/projects/branches/index.html.haml');
-    const entry = read('app/assets/javascripts/pages/projects/branches/index/index.js');
-
-    expect(view).toMatch(/#js-material-code-app\{ data: \{ project_path: current_project\.full_path \} \}/);
-    expect(entry).toMatch(/import \{ mountCodeSurface \} from '~\/material_system\/surfaces\/Code';/);
-    expect(entry).toMatch(/mountCodeSurface\(materialCodeEl\)/);
-  });
-
   it('hosts Repository on tree and blob routes with separately supplied ref and path', () => {
     const treeView = read('app/views/projects/tree/show.html.haml');
     const blobView = read('app/views/projects/blob/show.html.haml');

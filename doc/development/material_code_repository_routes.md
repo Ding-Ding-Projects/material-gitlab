@@ -1,6 +1,6 @@
 # Material Code and Repository routes
 
-The Material Code surface mounts on the project branches route. The host passes the current project's full path through `data-project-path`, and the surface reads branches, commits, tags, snippets, and comparisons from the existing same-origin project REST API.
+The Material Code surface has a same-origin REST data layer for branches, commits, tags, snippets, and comparisons. Its production route host remains pending until destructive branch, tag, and snippet operations await real REST mutations rather than changing local state alone.
 
 The Material Repository surface mounts on project tree and blob routes. Rails supplies `project_path`, `ref`, and `path` as separate data attributes. This preserves refs that contain slashes and avoids reconstructing repository state from a browser URL.
 
