@@ -5,7 +5,12 @@ module.exports = (request, options) => {
   try {
     // Strip webpack loader queries; the resolved file is handled by the normal
     // transform pipeline (e.g. workers, raw text, static assets).
-    return options.defaultResolver(request.replace(/\?(vue3|worker|raw|url)$/, ''), options);
+    // Lit's browser build is required when exercising real custom elements in jsdom.
+    // Keep every unrelated package's existing export conditions unchanged.
+    const resolveOptions = /^(?:lit(?:-html|-element)?(?:\/|$)|@lit(?:-labs)?\/)/.test(request)
+      ? { ...options, conditions: ['browser', 'require', 'default'] }
+      : options;
+    return options.defaultResolver(request.replace(/\?(vue3|worker|raw|url)$/, ''), resolveOptions);
   } catch (e) {
     if (request.match(/tmp\/tests\/frontend\/fixtures/) && !fs.existsSync(request)) {
       console.error(
