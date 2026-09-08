@@ -12,12 +12,16 @@ The task remains in progress. No complete production parity verdict exists.
   successfully, and non-draft release `windows-95-0a4dd948e9ab` targets that commit.
   Its installers are the two desktop configuration tools, not proof that Rails
   renders the designs.
-- Admin, Jobs, Pipelines, and Plan have real route integration changes. Shared
-  shell ownership and navigation have focused behavioral tests. Built route and
-  visual verification remain pending.
-- Settings API adapters are staged, but the existing Settings route remains
-  active because the proposed replacement does not yet cover all existing
-  operations. Do not activate it by deleting those working controls.
+- The next preserved integration reached `main` at
+  `c10fc6a350fb5ee19f84f8cb4712e72db9f2fc40`. Both publication workflows completed
+  successfully. Subsequent source work includes live Issues, Merge Requests,
+  Epics, Code, Repository, operational/security routes, and Analyze integration.
+- Both shared header designs are addressable through persisted preferences.
+  Actual Rails request and visual verification remain pending for every route.
+- The complete Settings candidate is isolated at
+  `34f7d693a2d6d656990dc7edee4d1972ec7ad1f7`, with 82 isolated tests reported by its
+  implementation lane. It is awaiting independent review and standard checks.
+  The existing Settings route remains active on `main` until that review finishes.
 - Capture receipts now require decodable PNGs, source/build manifests, matching
   raw and derived records, font availability, and separate diff review records.
   Structural inventory validity and strict completion are separate checks.
@@ -35,13 +39,21 @@ The task remains in progress. No complete production parity verdict exists.
   layers. A later build also lost its connection during a builder restart;
   that transport failure does not establish a source defect.
 
-Focused verification so far: 7 interaction tests, 4 route-inventory tests,
-8 shell bootstrap/navigation tests, and 54 Plan/Settings tests pass under the
-normal Jest configuration. The design-reference tool has 12 passing tests,
-including strict green/red fixtures and 675 structural negative cases. The
-runtime helper's process and byte-normalization tests also pass. These checks
-do not establish Rails request behavior or visual parity.
+Verification at `b8ab0e36c78db0e8821f20e19bbe741d9e678868`: all 26 Material
+Jest suites pass under the standard repository configuration, with 196 tests.
+An additional 43 Node tests cover Analyze, Code/Repository, and operational
+contracts. The public-vocabulary scan passes across 54,868 tracked files. The
+reference tool's previously verified 12 tests include strict green/red fixtures
+and 675 structural negative cases. The runtime helper passes its actual process
+success, failure, and timeout boundaries, three exact archive-to-blob byte checks,
+executable-mode verification, and three negative archive-conversion mutations.
+These checks do not establish Rails request behavior or visual parity.
 
+The corrected real Rails build is running from `b8ab0e36c` on an isolated,
+resource-bounded builder. Earlier runtime attempts are retained as failed evidence;
+none produced an accepted product image or a product screenshot. Source-build Ruby
+and RubyGems repair steps still require a successful complete build before their
+runtime effect can be claimed.
 Continue the actual production route adapters, build the final candidate, and
 capture only the running Rails application for user-facing evidence. Reference
 renders remain internal comparison inputs. No demo screenshots are accepted.
