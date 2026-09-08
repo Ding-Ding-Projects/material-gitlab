@@ -1,6 +1,7 @@
 <template>
   <div class="st-card" data-screen-label="Project details">
     <div class="st-card__title">Project</div>
+    <label v-if="projectId" class="st-field">Project ID<gl-form-input :value="projectId" readonly aria-label="Project ID" /></label>
     <label class="st-field">
       Project name
       <input
@@ -35,13 +36,15 @@
 
 <script>
 import StIcon from './StIcon.vue';
+import { GlFormInput } from '@gitlab/ui';
 import { VISIBILITY_OPTIONS } from '../data';
 
 export default {
   name: 'ProjectDetailsCard',
-  components: { StIcon },
+  components: { StIcon, GlFormInput },
   props: {
     projectName: { type: String, required: true },
+    projectId: { type: [String, Number], default: null },
     visibility: { type: String, required: true },
     canChangeVisibility: { type: Boolean, default: true },
     allowedVisibilityLevels: { type: Array, default: () => [0, 10, 20] },

@@ -1,11 +1,10 @@
 <template>
-  <div class="st-surface" :data-st-theme="themeAttr">
+  <div class="st-surface" :data-st-theme="themeAttr" data-material-topbar-owner="surface.settings">
     <TopBar :dark="dark" :user-name="userName" :user-initials="userInitials" @toggle-theme="toggleTheme" @open-palette="paletteOpen = true" />
 
     <TabStrip :tabs="tabs" :active="tab" @select="selectTab" />
 
     <main class="st-main">
-      <p v-if="production && tab === 'general'" role="status">This settings view supports project name, visibility and avatar. Description, topics, badges, feature permissions, service desk, transfer, archive and deletion controls are not represented here yet.</p>
       <div v-if="loading || adapterError || adapterErrors.length" class="st-adapter-status" :class="{ 'st-adapter-status--error': adapterError || adapterErrors.length }" role="status">
         <strong v-if="loading">Loading project settings…</strong>
         <strong v-else-if="adapterError">Settings unavailable</strong>
@@ -14,8 +13,10 @@
         <span v-for="error in adapterErrors" :key="error">{{ error }}</span>
       </div>
       <GeneralTab
+        v-if="generalAllowed"
         v-show="tab === 'general'"
         :project-name="projectNameDraft"
+        :project-id="projectId"
         :visibility="visibility"
         :logo-color="logoColor"
         :logo-letter="logoLetter"
@@ -42,6 +43,7 @@
       />
 
       <MembersTab
+        v-if="generalAllowed"
         v-show="tab === 'members'"
         ref="membersTab"
         :members="members"
@@ -50,6 +52,7 @@
       />
 
       <CicdTab
+        v-if="generalAllowed"
         v-show="tab === 'cicd'"
         ref="cicdTab"
         :variables="variables"
@@ -64,6 +67,7 @@
       />
 
       <IntegrationsTab
+        v-if="generalAllowed"
         v-show="tab === 'integrations'"
         ref="integrationsTab"
         :integrations="integrations"
@@ -72,6 +76,16 @@
         @toggle="onToggleIntegration"
         @bulk-toggle="onBulkToggleIntegrations"
       />
+      <section v-if="advancedOpened" v-show="tab === 'advanced'" id="st-tabpanel-advanced" role="tabpanel" aria-labelledby="st-tab-advanced" class="st-advanced-panels">
+        <SearchField :value="advancedSearch" label="Search advanced settings" placeholder="Search advanced settings" :regex-mode="advancedRegex" :regex-open="advancedRegexOpen" :valid="advancedMatcher.valid" :error="advancedMatcher.error" :corpus="advancedSections" corpus-title="Advanced settings" @input="advancedSearch = $event" @toggle-regex="advancedRegex = !advancedRegex" @toggle-builder="advancedRegexOpen = !advancedRegexOpen" @apply-regex="applyAdvancedRegex" />
+        <ProjectPermissionsCard v-if="permissionsMetadata.allowed === true" v-show="advancedMatches('Project features and permissions')" :metadata="permissionsMetadata" :visibility="visibility" />
+        <AdditionalProjectSettings v-if="Object.keys(additionalMetadata).length" v-show="advancedMatches('Duo, work-item templates, classification and repository size')" :metadata="additionalMetadata" />
+        <DuoContextSettings v-if="Object.keys(duoContextMetadata).length" v-show="advancedMatches('Duo context, governance and readiness')" :metadata="duoContextMetadata" />
+        <ServiceDeskSettings v-if="serviceDeskMetadata.supported === true" v-show="advancedMatches('Service Desk and custom email')" :metadata="serviceDeskMetadata" :active="tab === 'advanced'" />
+        <SpecialCapabilitiesSettings v-if="hasSpecialSettings" v-show="advancedMatches('CI/CD Catalog and pipeline policy access')" :metadata="specialMetadata" />
+        <SecretsManagerSettingsCard v-if="secretsMetadata.available === true" v-show="advancedMatches('Secrets Manager lifecycle and permissions')" :metadata="secretsMetadata" />
+        <AdvancedSettings v-if="hasLifecycleSettings" v-show="advancedMatches('Project lifecycle, export, path, transfer, archive and deletion')" :metadata="advancedMetadata" />
+      </section>
     </main>
 
     <CommandPalette v-if="paletteOpen" :actions="paletteActions" @close="paletteOpen = false" />
@@ -88,12 +102,21 @@ import CicdTab from './components/CicdTab.vue';
 import IntegrationsTab from './components/IntegrationsTab.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
+import ProjectPermissionsCard from './components/ProjectPermissionsCard.vue';
+import AdditionalProjectSettings from './components/AdditionalProjectSettings.vue';
+import AdvancedSettings from './components/AdvancedSettings.vue';
+import ServiceDeskSettings from './components/ServiceDeskSettings.vue';
+import SpecialCapabilitiesSettings from './components/SpecialCapabilitiesSettings.vue';
+import SecretsManagerSettingsCard from './components/SecretsManagerSettingsCard.vue';
+import DuoContextSettings from './components/DuoContextSettings.vue';
+import SearchField from './components/SearchField.vue';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import {
   TABS,
   createInitialState,
   logoLetterFor,
+  createMatcher,
 } from './data';
 import {
   SETTINGS_ADAPTER_ERROR,
@@ -104,8 +127,9 @@ import {
 
 export default {
   name: 'Settings',
-  components: { TopBar, TabStrip, GeneralTab, MembersTab, CicdTab, IntegrationsTab, CommandPalette, ConfirmDialog },
+  components: { TopBar, TabStrip, GeneralTab, MembersTab, CicdTab, IntegrationsTab, CommandPalette, ConfirmDialog, ProjectPermissionsCard, AdditionalProjectSettings, AdvancedSettings, ServiceDeskSettings, SpecialCapabilitiesSettings, SecretsManagerSettingsCard, DuoContextSettings, SearchField },
   props: {
+    projectId: { type: [String, Number], default: null },
     userName: { type: String, default: '' },
     userInitials: { type: String, default: '' },
     production: { type: Boolean, default: false },
@@ -114,6 +138,15 @@ export default {
     avatarRemoval: { type: Object, default: () => ({}) },
     allowedVisibilityLevels: { type: Array, default: () => [] },
     visibilityConfirmationPhrase: { type: String, default: '' },
+    generalAllowed: { type: Boolean, default: true },
+    initialTab: { type: String, default: 'general' },
+    permissionsMetadata: { type: Object, default: () => ({}) },
+    additionalMetadata: { type: Object, default: () => ({}) },
+    advancedMetadata: { type: Object, default: () => ({}) },
+    serviceDeskMetadata: { type: Object, default: () => ({}) },
+    specialMetadata: { type: Object, default: () => ({}) },
+    secretsMetadata: { type: Object, default: () => ({}) },
+    duoContextMetadata: { type: Object, default: () => ({}) },
     // Production state and mutations must come from a real host adapter.
     adapter: { type: Object, default: null },
     // Compatibility alias for callers that named this seam explicitly.
@@ -124,7 +157,13 @@ export default {
     return {
       ...createInitialState(),
       projectNameDraft: '',
-      tabs: TABS,
+      tabs: this.generalAllowed ? TABS : TABS.filter((tab) => tab.id === 'advanced'),
+      tab: this.generalAllowed && this.initialTab !== 'advanced' ? 'general' : 'advanced',
+      advancedOpened: !this.generalAllowed || this.initialTab === 'advanced',
+      advancedSearch: '',
+      advancedRegex: false,
+      advancedRegexOpen: false,
+      advancedSections: ['Project features and permissions', 'Duo, work-item templates, classification and repository size', 'Duo context, governance and readiness', 'Service Desk and custom email', 'CI/CD Catalog and pipeline policy access', 'Secrets Manager lifecycle and permissions', 'Project lifecycle, export, path, transfer, archive and deletion'],
       paletteOpen: false,
       theme: loadSettings().theme,
       loading: false,
@@ -136,6 +175,9 @@ export default {
     };
   },
   computed: {
+    hasSpecialSettings() { return this.specialMetadata.ci_catalog?.available === true || this.specialMetadata.bot_access?.available === true; },
+    hasLifecycleSettings() { return Object.values(this.advancedMetadata).some((entry) => entry.allowed === true || entry.mode === 'blocked'); },
+    advancedMatcher() { return createMatcher(this.advancedSearch, { regexMode: this.advancedRegex }); },
     effectiveAdapter() {
       return this.adapter || this.settingsAdapter;
     },
@@ -211,6 +253,7 @@ export default {
       this.adapterErrors = normalized.errors;
     },
     async refreshAdapter() {
+      if (!this.generalAllowed) { this.loading = false; this.adapterReady = false; this.adapterError = ''; return; }
       if (!isSettingsAdapter(this.effectiveAdapter)) {
         this.loading = false;
         this.adapterReady = false;
@@ -258,8 +301,12 @@ export default {
       }
     },
     selectTab(id) {
+      if (!this.tabs.some((tab) => tab.id === id)) return;
+      if (id === 'advanced') this.advancedOpened = true;
       this.tab = id;
     },
+    advancedMatches(title) { return this.advancedMatcher.test(title); },
+    applyAdvancedRegex(pattern) { this.advancedSearch = pattern; this.advancedRegex = true; this.advancedRegexOpen = false; },
     toggleTheme() {
       const next = this.dark ? 'light' : 'dark';
       this.theme = next;
@@ -368,6 +415,12 @@ export default {
   padding: 8px 24px 24px;
   max-width: 860px;
   width: 100%;
+}
+
+.st-advanced-panels {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .st-adapter-status {

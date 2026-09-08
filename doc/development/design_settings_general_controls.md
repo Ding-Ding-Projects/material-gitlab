@@ -1,6 +1,6 @@
 # Design-owned general project controls
 
-This staged Settings unit implements description and topics, badge management, avatar removal, and visibility confirmation using design-owned components. It does not activate the project settings route or embed the original settings panels.
+This Settings unit implements description and topics, badge management, avatar removal, and visibility confirmation using design-owned components. It is bound by the project Settings metadata host without embedding original settings panels.
 
 Description and topics are selected from project GraphQL metadata. Saving sends the existing Rails `project[description]` and comma-separated `project[topics]` fields through the already-authorized JSON update action, then reloads authoritative metadata. Empty descriptions and topic lists are valid; unsuccessful updates retain the editable draft.
 
@@ -12,4 +12,4 @@ Visibility changes require the dedicated visibility capability, a level present 
 
 The reusable metadata helper contains only safe project identity, routes, display identity, capability flags, and allowed visibility values. It does not render or copy legacy controls, retrieve stored CI values, or include a runner registration credential.
 
-Focused coverage lives in `settings_general_controls_spec.js`, `settings_project_adapter_spec.js`, and `project_surfaces_interaction_spec.js`. The production route remains unchanged until the remaining permissions, enterprise settings, Service Desk, and Advanced capability inventory is implemented and independently verified.
+Focused coverage lives in `settings_general_controls_spec.js`, `settings_project_adapter_spec.js`, and `project_surfaces_interaction_spec.js`. The source route now uses the completed capability bindings. Built Rails interaction and visual parity evidence remain pending independent candidate verification.

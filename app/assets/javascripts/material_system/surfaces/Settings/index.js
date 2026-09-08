@@ -5,16 +5,18 @@
 import Vue from 'vue';
 import Settings from './Settings.vue';
 import { createProjectSettingsAdapter } from './project_adapter';
+import { assertSettingsRouteConfig } from './route_contract';
 
 export { createProjectSettingsAdapter } from './project_adapter';
 
-export function mountProjectSettings(el = document.querySelector('[data-material-project-settings]')) {
+export function mountProjectSettings(el = document.querySelector('[data-material-project-settings]'), options = {}) {
   if (!el) return null;
-  const config = JSON.parse(el.dataset.materialProjectSettings);
-  const adapter = createProjectSettingsAdapter({ ...config, root: document });
+  const config = assertSettingsRouteConfig(JSON.parse(el.dataset.materialProjectSettings));
+  if (window.location.hash === '#material-settings-advanced') config.initialTab = 'advanced';
+  const adapter = options.adapter || createProjectSettingsAdapter({ ...config, root: document });
   return new Vue({
     name: 'ProjectSettingsRoot',
-    render: (h) => h(Settings, { props: { adapter, production: true, integrationSettingsPath: config.integrationSettingsPath, variablesEditorPath: config.variablesEditorPath, userName: config.userName, userInitials: config.userInitials, avatarRemoval: config.avatarRemoval, allowedVisibilityLevels: config.allowedVisibilityLevels, visibilityConfirmationPhrase: config.visibilityConfirmationPhrase } }),
+    render: (h) => h(Settings, { props: { ...config, adapter, production: true } }),
   }).$mount(el);
 }
 

@@ -19,6 +19,7 @@
     <ProjectDetailsCard
       v-if="visible.project"
       :project-name="projectName"
+      :project-id="projectId"
       :visibility="visibility"
       :can-change-visibility="canChangeVisibility"
       :allowed-visibility-levels="allowedVisibilityLevels"
@@ -80,6 +81,7 @@ export default {
   components: { SearchField, ProjectDetailsCard, ProjectLogoCard, VocabularyCard, FileConverterCard, DescriptionTopicsCard, BadgesCard },
   props: {
     projectName: { type: String, required: true },
+    projectId: { type: [String, Number], default: null },
     visibility: { type: String, required: true },
     logoColor: { type: String, required: true },
     logoLetter: { type: String, required: true },
