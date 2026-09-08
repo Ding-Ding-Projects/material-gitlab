@@ -20,7 +20,6 @@ export {
   filterTags,
   filterSnippets,
   buildRegexCorpus,
-  describeCompareResult,
   fetchBranches,
   fetchCommits,
   fetchTags,
@@ -48,7 +47,9 @@ export function createCodeSurfaceComponent() {
 
 export function mountCodeSurface(el, { propsData = {} } = {}) {
   const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
-  const projectPath = propsData.projectPath || mountEl?.dataset?.projectPath;
+  if (!mountEl) return null;
+  const projectPath = propsData.projectPath || mountEl.dataset.projectPath;
+  const config = { initialTab: mountEl.dataset.initialTab, initialRef: mountEl.dataset.initialRef, initialPath: mountEl.dataset.initialPath, projectUrl: mountEl.dataset.projectUrl, permissions: JSON.parse(mountEl.dataset.permissions || '{}'), routes: JSON.parse(mountEl.dataset.routes || '{}') };
   if (!projectPath) throw new Error('Code surface requires data-project-path.');
-  return new Vue({ el: mountEl, render: (h) => h(CodeSurface, { props: { ...propsData, projectPath } }) });
+  return new Vue({ el: mountEl, render: (h) => h(CodeSurface, { props: { ...config, ...propsData, projectPath } }) });
 }
