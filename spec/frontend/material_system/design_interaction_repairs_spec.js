@@ -1,4 +1,5 @@
 import { mount, shallowMount } from '@vue/test-utils';
+import waitForPromises from 'helpers/wait_for_promises';
 import { authenticate } from '~/material_system/surfaces/Login/data';
 import LiveCollectionSurface from '~/material_system/surfaces/LiveCollectionSurface.vue';
 import CommandPalette from '~/material_system/surfaces/CommandPalette/CommandPalette.vue';
@@ -22,8 +23,6 @@ jest.mock('~/material_system/settings', () => ({
   subscribeSettings: () => jest.fn(),
 }));
 jest.mock('~/material_system/notifications', () => ({ notificationCenter: { notify: jest.fn() } }));
-
-const flushPromises = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 describe('design interaction repairs', () => {
   it('does not authenticate nonempty credentials without host authentication', async () => {
@@ -122,12 +121,12 @@ describe('design interaction repairs', () => {
     ]);
 
     const wrapper = shallowMount(PipelinesSurface, { propsData: { projectPath: 'group/project' } });
-    await flushPromises();
+    await waitForPromises();
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find('[role="alert"]').text()).toContain('Offline');
     await wrapper.find('[role="alert"] button').trigger('click');
-    await flushPromises();
+    await waitForPromises();
     await wrapper.vm.$nextTick();
 
     expect(fetchPipelines).toHaveBeenCalledTimes(2);
