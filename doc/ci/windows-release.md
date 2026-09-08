@@ -57,6 +57,12 @@ duration. The clock starts at the first job's actual `startedAt` value and ends
 at the final release-publication step. The release tag, target commit, package
 manifest, and asset digests are checked against the same immutable commit.
 
+The job carries a 360 minute limit, which is the ceiling a hosted runner
+allows for a single job rather than a number chosen here. It replaced a two
+hour limit that was cancelling runs before they could publish. A run that
+reaches the ceiling has genuinely run out of time and is reported as such; it
+is not treated as a build failure, because it is not one.
+
 ## Line count and dim-sum metadata
 
 The committed line-count script produces the release table. It must report at
