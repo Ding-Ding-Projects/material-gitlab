@@ -44,6 +44,7 @@ honest answer is not the one the directory listing suggests.
 | [Quick start](#quick-start) | The two commands that build this on a clean Windows machine |
 | [What ships](#what-ships) | The two desktop tools and the site, and what each one really does |
 | [Deployment status](#deployment-status-read-this-before-you-plan-anything) | The honest answer about deploying |
+| [Deploying a real GitLab](#deploying-a-real-gitlab) | Docker over SSH, and the apt Omnibus install |
 | [Screens](#screens) | Verified captures from the built artifact |
 | [Repository layout](#repository-layout) | Where the overlay code lives inside the upstream tree |
 | [Size of the work](#size-of-the-work) | Measured line counts and a human time estimate |
@@ -146,17 +147,181 @@ This section exists because the repository looks far more deployable than it is.
 
 | Route | State | Detail |
 | --- | --- | --- |
-| `docker-compose.yml` | **Stub** | The entire file is `app:` and `image: gitlab/gitlab-ce:latest`. It has no `services:` key, so it is legacy v1 syntax, and it references the upstream community image rather than anything this project builds. |
+| `docker-compose.yml` | **Runs upstream GitLab CE** | Now a working Compose file for the official `gitlab/gitlab-ce` image, with persistent volumes, a remapped SSH port and a health check. See [Deploying a real GitLab](#deploying-a-real-gitlab). It was previously a one line stub, `app:` plus an image reference, with no `services:` key; `docker compose config` rejected it with `additional properties 'app' not allowed`, so it could never have run. |
 | Material GitLab Deployer | **Preview only** | Renders a command plan. Executes nothing, by explicit design. |
 | GitLab Instant | **Client only** | Opens an instance you already run. Provisions nothing. |
 | GitLab tree itself | **Source install** | `INSTALLATION_TYPE` is `source` and `VERSION` is `19.3.0-pre`. A source install needs Ruby, PostgreSQL, Redis, Gitaly, Workhorse and gitlab-shell, and this repository automates none of it. |
 | Container image | **Absent** | The only Dockerfiles are `Dockerfile.assets`, `qa/Dockerfile` and `vendor/Dockerfile`. None builds a runnable application image. |
 | Helm or Kubernetes chart | **Absent** | No `chart/`, `helm/`, `k8s/`, or `deploy/` directory exists. |
 
-> [!WARNING]
-> To actually run GitLab, use an upstream distribution: the Omnibus package, the official Docker
-> image, or the GitLab Helm chart. This repository is an overlay and a set of Windows tools around
-> it, and treating it as a deployment source will not work.
+---
+
+## Deploying a real GitLab
+
+> [!IMPORTANT]
+> **Both routes below install upstream GitLab CE, not the Material Design overlay in this
+> repository.** You get the standard GitLab interface. The overlay is a design and tooling project
+> around a pinned upstream snapshot; it is not a distribution you can install.
+
+**Sizing, before you start.** GitLab needs 4 GB of RAM as a practical minimum and is comfortable at
+8 GB, plus 2 CPU cores and room for repositories. First boot takes several minutes before the
+instance answers, on either route.
+
+### Route A: Docker on a remote host over SSH
+
+This is the closest match to how most people run a self-hosted GitLab. The
+[`docker-compose.yml`](docker-compose.yml) in this repository is a working file for it.
+
+**On the remote host**, once: install Docker Engine and the Compose plugin, and make sure your SSH
+key can reach it.
+
+**From your machine**, point the Docker CLI at that host rather than copying files around. The CLI
+tunnels over SSH and runs everything remotely:
+
+```bash
+docker context create gitlab-host \
+  --docker "host=ssh://deploy@docker.example.internal"
+docker context use gitlab-host
+docker context ls          # confirm the starred context is gitlab-host
+```
+
+<details>
+<summary><b>Prefer not to create a context?</b></summary>
+
+A single environment variable does the same thing for one command:
+
+```bash
+DOCKER_HOST="ssh://deploy@docker.example.internal" docker compose up -d
+```
+
+</details>
+
+Then set where data lives on the remote host and bring it up:
+
+```bash
+export GITLAB_HOME=/srv/gitlab
+export GITLAB_HOSTNAME=gitlab.example.com
+
+docker compose up -d
+docker compose ps
+```
+
+Watch the first boot until the health check reports healthy, which takes a few minutes:
+
+```bash
+docker compose logs -f gitlab      # Ctrl-C to stop following
+docker inspect --format='{{.State.Health.Status}}' gitlab
+```
+
+Read the generated root password. **The file is deleted automatically 24 hours after the first
+reconfigure**, so collect it early and change the password:
+
+```bash
+docker exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
+```
+
+Sign in at `http://gitlab.example.com` as `root`. Clone URLs will use port `2224`, because the
+container's port 22 is remapped to leave the host's own SSH alone.
+
+<details>
+<summary><b>Everyday operations</b></summary>
+
+```bash
+# Apply a configuration change made in $GITLAB_HOME/config/gitlab.rb
+docker exec -it gitlab gitlab-ctl reconfigure
+
+# Service status and logs
+docker exec -it gitlab gitlab-ctl status
+docker exec -it gitlab gitlab-ctl tail
+
+# Upgrade: pull, recreate, and let it reconfigure on boot
+docker compose pull
+docker compose up -d
+
+# Back up application data
+docker exec -t gitlab gitlab-backup create
+```
+
+Do not skip minor versions when upgrading GitLab; follow the upstream upgrade path.
+
+</details>
+
+> [!TIP]
+> Put GitLab behind a reverse proxy with TLS, or set `external_url` to an `https://` address and let
+> the bundled Let's Encrypt integration obtain a certificate. Serving a real instance over plain HTTP
+> sends credentials in the clear.
+
+### Route B: apt install, the Omnibus package
+
+For a Debian or Ubuntu host with no Docker involved. This is the officially packaged install.
+
+```bash
+# 1. Dependencies
+sudo apt-get update
+sudo apt-get install -y curl openssh-server ca-certificates tzdata perl
+
+# 2. Optional: outbound email notifications.
+#    Skip this if you plan to use an external SMTP server instead.
+sudo apt-get install -y postfix
+
+# 3. Add the official GitLab CE package repository
+curl -fsSL https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh \
+  | sudo bash
+
+# 4. Install, naming the URL the instance will serve on.
+#    An https:// URL here requests a Let's Encrypt certificate automatically.
+sudo EXTERNAL_URL="https://gitlab.example.com" apt-get install -y gitlab-ce
+```
+
+Then read the generated root password, which again is **deleted 24 hours** after the first
+reconfigure:
+
+```bash
+sudo cat /etc/gitlab/initial_root_password
+```
+
+<details>
+<summary><b>Everyday operations</b></summary>
+
+```bash
+# Edit configuration, then apply it
+sudo editor /etc/gitlab/gitlab.rb
+sudo gitlab-ctl reconfigure
+
+# Service status and logs
+sudo gitlab-ctl status
+sudo gitlab-ctl tail
+
+# Upgrade to the newest packaged version
+sudo apt-get update && sudo apt-get install -y gitlab-ce
+
+# Back up application data
+sudo gitlab-backup create
+```
+
+Pin with `sudo apt-mark hold gitlab-ce` if you want to control upgrade timing yourself, and follow
+the upstream upgrade path rather than jumping across minor versions.
+
+</details>
+
+> [!NOTE]
+> Piping an install script into a shell runs remote code as root. That is the vendor's documented
+> install path, and it is worth knowing that is what the command does. To inspect it first, download
+> `script.deb.sh`, read it, then run it. GitLab also publishes the repository configuration steps
+> manually if you would rather add the apt source and key by hand.
+
+### Which route to pick
+
+| | Docker over SSH | apt Omnibus |
+| --- | --- | --- |
+| Isolation from the host | Container | Installs into the host |
+| Upgrades | Pull a new image tag | `apt-get install gitlab-ce` |
+| Rollback | Retag and recreate | Reinstall the previous package version |
+| Config lives in | `$GITLAB_HOME/config/gitlab.rb` | `/etc/gitlab/gitlab.rb` |
+| Suits | A shared Docker host you already run | A dedicated machine or VM |
+
+Both use the same Omnibus package underneath, so `gitlab-ctl` and `gitlab.rb` behave identically
+once you are inside.
 
 ---
 

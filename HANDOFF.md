@@ -1,5 +1,69 @@
 # Material GitLab overlay handoff
 
+## Pass of 2026-09-08: release pipeline, build repairs, README
+
+Read this section first. It supersedes any older statement it contradicts, and everything below it
+from earlier passes still stands unless it does.
+
+### What was wrong, and is now fixed on `main`
+
+- **The Windows release workflow had never once published, and the repository still has zero
+  releases and zero tags.** Two independent causes. First, the notes step inlined the entire
+  line-count JSON report into the release body; on a tree tracking 107,565 files the report's
+  exclusion inventory alone serialises to 161,470 characters, measured, against GitHub's 125,000
+  character limit, so `gh release create` failed with HTTP 422. The verification step then got a 404
+  and threw `Published release did not resolve to the exact non-draft target commit`, which points a
+  reader at completely the wrong problem. Second, the job carried `timeout-minutes: 120` and several
+  runs were cancelled at exactly that cap.
+- **Both workflows triggered on every branch.** Each feature push started a multi-hour Windows
+  build, and the Pages `deploy` job had no branch condition at all, so a push to any branch deployed
+  that branch to the live published site.
+- **The Instant package did not compile.** `tsc` exited 2 with `TS2305`, `TS2687` and `TS2717`.
+
+### Traps this pass hit, recorded so nobody pays for them twice
+
+- **Actions evaluates a workflow trigger from the file on the pushed ref, not from `main`.** After
+  restricting the triggers on `main`, pushing 18 preservation branches still started 18 release runs,
+  because those branches carry the old unfiltered `on: push`. They were cancelled by hand. The
+  triggers only settle once each branch is merged or removed.
+- **These package tests read compiled output, not source.** The deployer renderer boundary test
+  failed against an untracked `dist/` left over from 14 August that no longer matched its source.
+  That reads exactly like a source defect and is not one. Delete the output directory and rebuild
+  before believing any of these tests.
+- **`$?` after a pipeline reports the last command, not the build.** `npm run build | tail -3`
+  reported success while `tsc` was exiting 2. Redirect to a log and capture the real exit code.
+
+### Verified locally on this commit
+
+| Check | Result |
+| --- | --- |
+| `scripts/verify-upstream-overlay.mjs` | passes |
+| `scripts/verify-public-vocabulary.mjs` | passes, 54,754 files scanned |
+| `tools/design-reference` tests | 6 of 6, including a red then green negative regression |
+| `site/scripts/completeness-check.mjs` | passes, 28 rows, every removal rejected |
+| `tools/material-gitlab-deployer` tests | 1 of 1, after a clean rebuild |
+| `tools/material-gitlab-instant` tests | 1 of 1 |
+| `tools/material-gitlab-instant` build | exits 0, all entry points emitted |
+
+### State of the branches
+
+All 18 non-`main` branches were pushed to the remote for preservation. Every one is unmerged and
+carries unique commits, 77 in total, which before this pass existed only on one machine. They belong
+to other tasks and sessions, were not adopted by this pass, and were deliberately **not** merged or
+deleted. Anyone completing them should verify each one on its own merits.
+
+Two stashes remain. `stash@{0}` is empty. `stash@{1}` holds an untracked older `.github/workflows/pages.yml`
+that is superseded by the current file; its one useful idea, the main-only trigger, is now restored.
+
+### What is still not proven
+
+- **No release has been published yet.** The pipeline reached the publish step for the first time
+  during this pass; until a run actually creates one, the fix is unproven end to end.
+- **Nothing in this repository deploys GitLab.** Both desktop tools are configuration and preview
+  shells by explicit design, `docker-compose.yml` is a one line stub pointing at the upstream
+  `gitlab/gitlab-ce` image, and there is no application Dockerfile and no chart. This is recorded in
+  the README so readers stop assuming otherwise.
+
 ## Scope
 
 This repository is being bootstrapped as an original overlay project. It records the official upstream GitLab repository and pinned commit for provenance while keeping the overlay code, tooling, and documentation separate from upstream EE source.
