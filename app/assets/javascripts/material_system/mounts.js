@@ -9,6 +9,16 @@ const parseJson = (value, fallback) => {
   try { return JSON.parse(value); } catch (_error) { return fallback; }
 };
 
+export const safeNavigationHref = (href) => {
+  if (typeof href !== 'string' || !href.trim() || href === '#') return null;
+  try {
+    const url = new URL(href, window.location.href);
+    return ['http:', 'https:'].includes(url.protocol) && !url.username && !url.password ? url.href : null;
+  } catch {
+    return null;
+  }
+};
+
 const toSections = (payload) => {
   const source = payload?.current_menu_items || payload?.menu_items || payload?.items || [];
   const sections = [];
@@ -16,11 +26,11 @@ const toSections = (payload) => {
     const rows = (items || []).map((item) => ({
       id: item.id,
       label: item.title || item.text || item.label,
-      href: item.link || item.href || '#',
+      href: safeNavigationHref(item.link || item.href),
       icon: item.icon,
       count: item.count ?? item.pill_count,
       active: Boolean(item.is_active || item.active),
-    })).filter((item) => item.label);
+    })).filter((item) => item.label && item.href);
     if (rows.length) sections.push({ name, items: rows });
     (items || []).forEach((item) => walk(item.items, item.title || item.text || name));
   };
@@ -46,9 +56,15 @@ export function mountAuthenticatedShell(el = document.querySelector('.m3-shell-t
   if (!el) return null;
   const payload = options.data || parseJson(document.querySelector('.m3-shell-sidebar-host')?.dataset.sidebar, {});
   const sections = options.sections || toSections(payload);
-  const paletteActions = options.paletteActions || sections.flatMap((section) => section.items).filter(({ href }) => href && href !== '#').map((item) => ({ id: `navigate-${item.id || item.href}`, title: item.label, action: () => { window.location.assign(item.href); } }));
+  const navigate = options.navigate || ((href) => window.location.assign(href));
+  const paletteActions = options.paletteActions || sections.flatMap((section) => section.items)
+    .filter(({ href }) => safeNavigationHref(href))
+    .map((item) => ({ id: `navigate-${item.id || item.href}`, label: item.label, run: () => navigate(safeNavigationHref(item.href)) }));
   const navigateSearch = (query) => {
-    if (query && query.trim()) window.location.assign(`/search?search=${encodeURIComponent(query.trim())}`);
+    if (query && query.trim()) {
+      const prefix = window.gon?.relative_url_root || '';
+      navigate(`${prefix}/search?search=${encodeURIComponent(query.trim())}`);
+    }
   };
   return mount(el, ShellB, { chromeOnly: true, brand: options.brand || 'GitLab M3', sections, paletteActions, listeners: { search: navigateSearch, 'regex-change': ({ pattern }) => navigateSearch(pattern) } });
 }

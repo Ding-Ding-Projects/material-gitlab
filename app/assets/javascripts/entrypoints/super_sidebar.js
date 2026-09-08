@@ -24,9 +24,13 @@ if (materialSidebarHost && superSidebarData) {
   initSuperSidebar(superSidebarData);
 }
 
-const pageOwnsTopbar = Boolean(document.querySelector('#js-material-admin, #js-material-build, #js-material-pipelines'));
-if (materialTopbarHost && superSidebarData && !pageOwnsTopbar) {
-  mountAuthenticatedShell(materialTopbarHost, { data: superSidebarData.sidebarData });
+const pageOwnsTopbar = Boolean(document.querySelector('#js-material-admin, #js-material-build, #js-material-pipelines, [data-material-topbar-owner]'));
+if (materialTopbarHost && superSidebarData) {
+  if (pageOwnsTopbar) {
+    materialTopbarHost.hidden = true;
+  } else {
+    mountAuthenticatedShell(materialTopbarHost, { data: superSidebarData.sidebarData });
+  }
 } else if (superSidebarData) {
   initSuperTopbar(superSidebarData);
 }
