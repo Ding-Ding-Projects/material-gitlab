@@ -18,6 +18,7 @@ The following routes mount a design surface through an existing page-specific en
 | Agent Memory | `/-/agent_memory` | `pages/agent_memory/index.js` | `#js-material-agent-memory` |
 | Build | `/:namespace/:project/-/jobs` | `pages/projects/jobs/index/index.js` | `#js-material-build` |
 | Manage | `/:namespace/:project/-/manage` | `pages/projects/manage.js` | `#js-material-manage` |
+| Pipelines | `/:namespace/:project/-/pipelines` | `pages/projects/pipelines/index/index.js` | `#js-material-pipelines` |
 | Repository | project repository views | `repository/index.js` | `#js-material-repository-app` |
 | To-Dos | `/dashboard/todos` | `pages/dashboard/todos/index/index.js` | `#js-todos-app-root` |
 

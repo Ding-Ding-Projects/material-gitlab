@@ -4,4 +4,4 @@
 
 = render_if_exists "shared/shared_runners_minutes_limit_flash_message"
 
-#pipelines-list-vue{ data: pipelines_list_data(@project) }
+#js-material-pipelines{ data: { project_path: @project.full_path } }

@@ -35,6 +35,7 @@ describe('Material design route integration inventory', () => {
         'surface.agent-memory': 'app/views/agent_memory/index.html.haml',
         'surface.build': 'app/views/projects/jobs/index.html.haml',
         'surface.manage': 'app/views/projects/manage.html.haml',
+        'surface.pipelines': 'app/views/projects/pipelines/index.html.haml',
         'surface.repository': 'app/assets/javascripts/repository/index.js',
         'surface.todos': 'app/views/dashboard/todos/index.html.haml',
       }[contract.id];

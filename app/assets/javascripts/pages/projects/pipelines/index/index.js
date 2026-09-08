@@ -1,3 +1,3 @@
-import { initPipelinesIndex } from '~/ci/pipeline_details/pipelines_index';
+import { mountPipelines } from '~/material_system/surfaces/Pipelines';
 
-initPipelinesIndex();
+mountPipelines('#js-material-pipelines');
