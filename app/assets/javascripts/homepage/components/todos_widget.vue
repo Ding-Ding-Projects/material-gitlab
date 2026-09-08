@@ -1,12 +1,19 @@
 <script>
 import { computed } from 'vue';
-import { GlCollapsibleListbox, GlTooltipDirective, GlSkeletonLoader } from '@gitlab/ui';
+import {
+  GlButton,
+  GlCollapsibleListbox,
+  GlFormInput,
+  GlSkeletonLoader,
+  GlTooltipDirective,
+} from '@gitlab/ui';
 import emptyTodosAllDoneSvg from '@gitlab/svgs/dist/illustrations/status/status-success-sm.svg';
 import emptyTodosFilteredSvg from '@gitlab/svgs/dist/illustrations/search-sm.svg';
 import { s__ } from '~/locale';
 import { InternalEvents } from '~/tracking';
 import { dashboardTodosPath } from '~/lib/utils/path_helpers/dashboard';
 import * as Sentry from '~/sentry/sentry_browser_wrapper';
+import { RegexBuilder } from '~/material_system';
 import {
   TABS_INDICES,
   TODO_ACTION_TYPE_BUILD_FAILED,
@@ -18,6 +25,7 @@ import {
 } from '~/todos/constants';
 import TodoItem from '~/todos/components/todo_item.vue';
 import getTodosQuery from '~/todos/components/queries/get_todos.query.graphql';
+import AnchoredRegexBuilder from '~/todos/components/anchored_regex_builder.vue';
 import {
   EVENT_USER_FOLLOWS_LINK_ON_HOMEPAGE,
   TRACKING_LABEL_TODO_ITEMS,
@@ -66,8 +74,11 @@ const FILTER_OPTIONS = [
 export default {
   name: 'TodosWidget',
   components: {
+    AnchoredRegexBuilder,
     TodoItem,
+    GlButton,
     GlCollapsibleListbox,
+    GlFormInput,
     GlSkeletonLoader,
     BaseWidget,
   },
@@ -89,6 +100,9 @@ export default {
       todos: [],
       showLoading: true,
       hasError: false,
+      filterSearch: '',
+      filterSearchIsRegex: false,
+      filterSearchFlags: 'i',
     };
   },
   computed: {
@@ -104,6 +118,24 @@ export default {
     },
     todosPath() {
       return dashboardTodosPath();
+    },
+    filterSearchCorpus() {
+      return FILTER_OPTIONS.map((option) => `${option.text} ${option.description}`);
+    },
+    filteredFilterOptions() {
+      const query = this.filterSearch.trim();
+      if (!query) return FILTER_OPTIONS;
+      const builder = new RegexBuilder({
+        pattern: query,
+        flags: this.filterSearchFlags.replace(/[gy]/g, ''),
+        regex: this.filterSearchIsRegex,
+      });
+      return FILTER_OPTIONS.filter((option) => {
+        const state = builder.update({
+          sample: `${option.text} ${option.description}`,
+        });
+        return state.syntax.valid && state.matches.length > 0;
+      });
     },
   },
   apollo: {
@@ -130,6 +162,14 @@ export default {
     },
   },
   methods: {
+    toggleFilterSearchMode() {
+      this.filterSearchIsRegex = !this.filterSearchIsRegex;
+    },
+    applyFilterRegex({ pattern, flags, isRegex }) {
+      this.filterSearch = pattern;
+      this.filterSearchFlags = flags;
+      this.filterSearchIsRegex = isRegex;
+    },
     reload() {
       this.showLoading = true;
       this.hasError = false;
@@ -146,31 +186,74 @@ export default {
   emptyTodosAllDoneSvg,
   emptyTodosFilteredSvg,
   FILTER_OPTIONS,
+  i18n: {
+    filterSearch: s__('Todos|Search to-do filters'),
+    regexMode: s__('Todos|Use regular expression matching for to-do filters'),
+    plainTextMode: s__('Todos|Use plain text matching for to-do filters'),
+    regexBuilder: s__('Todos|Build a to-do filter expression'),
+  },
 };
 </script>
 
 <template>
   <base-widget data-testid="homepage-todos-widget" @visible="reload">
-    <div class="gl-mb-2 gl-flex gl-items-center gl-justify-between gl-gap-2">
+    <div
+      class="homepage-widget-heading gl-mb-2 gl-flex gl-flex-wrap gl-items-center gl-justify-between gl-gap-2"
+    >
       <div class="gl-flex gl-items-center gl-gap-2">
-        <h2 class="gl-heading-4 gl-m-0 gl-grow">{{ __('Items that need your attention') }}</h2>
+        <h2 class="gl-heading-4 gl-m-0 gl-grow">
+          {{ __('Items that need your attention') }}
+        </h2>
       </div>
 
-      <gl-collapsible-listbox
+      <div
         v-if="!hasError"
-        v-model="filter"
-        :items="$options.FILTER_OPTIONS"
-        :toggle-text="selectedFilterText"
+        class="homepage-widget-filter gl-flex gl-flex-wrap gl-items-center gl-gap-2"
       >
-        <template #list-item="{ item }">
-          <div class="gl-flex gl-w-full gl-flex-col gl-gap-1">
-            <div class="gl-font-weight-semibold gl-text-default">{{ item.text }}</div>
-            <div class="gl-line-height-normal gl-text-sm gl-text-subtle">
-              {{ item.description }}
+        <div class="homepage-widget-filter__search gl-flex gl-min-w-0 gl-items-center gl-gap-1">
+          <gl-form-input
+            v-model="filterSearch"
+            type="search"
+            class="homepage-widget-filter__input"
+            :placeholder="$options.i18n.filterSearch"
+            :aria-label="$options.i18n.filterSearch"
+          />
+          <gl-button
+            class="homepage-widget-filter__mode"
+            :selected="filterSearchIsRegex"
+            :aria-pressed="filterSearchIsRegex"
+            :aria-label="
+              filterSearchIsRegex ? $options.i18n.plainTextMode : $options.i18n.regexMode
+            "
+            :title="filterSearchIsRegex ? $options.i18n.plainTextMode : $options.i18n.regexMode"
+            @click="toggleFilterSearchMode"
+            >.*</gl-button
+          >
+          <anchored-regex-builder
+            :value="filterSearchIsRegex ? filterSearch : ''"
+            :corpus="filterSearchCorpus"
+            :title="$options.i18n.regexBuilder"
+            @apply="applyFilterRegex"
+          />
+        </div>
+        <gl-collapsible-listbox
+          v-model="filter"
+          searchable
+          :items="filteredFilterOptions"
+          :toggle-text="selectedFilterText"
+        >
+          <template #list-item="{ item }">
+            <div class="gl-flex gl-w-full gl-flex-col gl-gap-1">
+              <div class="gl-font-weight-semibold gl-text-default">
+                {{ item.text }}
+              </div>
+              <div class="gl-line-height-normal gl-text-sm gl-text-subtle">
+                {{ item.description }}
+              </div>
             </div>
-          </div>
-        </template>
-      </gl-collapsible-listbox>
+          </template>
+        </gl-collapsible-listbox>
+      </div>
     </div>
 
     <p v-if="hasError" class="gl-mb-3">
@@ -225,3 +308,39 @@ export default {
     </template>
   </base-widget>
 </template>
+
+<style scoped>
+.homepage-widget-filter__search {
+  padding: 0.125rem 0.25rem 0.125rem 0.75rem;
+  border: 1px solid var(--homepage-outline, var(--gl-color-border-subtle));
+  border-radius: 999px;
+  background: var(--homepage-surface-container, var(--gl-color-neutral-50));
+}
+
+.homepage-widget-filter__input {
+  width: min(14rem, 34vw);
+  min-width: 8rem;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.homepage-widget-filter__mode {
+  min-width: 2.5rem;
+  border-radius: 999px;
+  font-family: var(--gl-font-family-monospace);
+  font-weight: 700;
+}
+
+@media (max-width: 48rem) {
+  .homepage-widget-filter,
+  .homepage-widget-filter__search {
+    width: 100%;
+  }
+
+  .homepage-widget-filter__input {
+    width: auto;
+    flex: 1;
+  }
+}
+</style>

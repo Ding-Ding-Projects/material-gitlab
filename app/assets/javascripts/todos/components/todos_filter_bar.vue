@@ -1,5 +1,12 @@
 <script>
-import { GlSorting, GlFilteredSearch, GlFilteredSearchToken, GlAlert } from '@gitlab/ui';
+import {
+  GlAlert,
+  GlButton,
+  GlFilteredSearch,
+  GlFilteredSearchToken,
+  GlFormInput,
+  GlSorting,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import {
   OPERATORS_IS,
@@ -13,6 +20,7 @@ import {
   FILTERED_SEARCH_TERM,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import Tracking from '~/tracking';
+import { RegexBuilder } from '~/material_system';
 import {
   TODO_TARGET_TYPE_ISSUE,
   TODO_TARGET_TYPE_MERGE_REQUEST,
@@ -41,6 +49,7 @@ import {
 import GroupToken from './filtered_search_tokens/group_token.vue';
 import ProjectToken from './filtered_search_tokens/project_token.vue';
 import AuthorToken from './filtered_search_tokens/author_token.vue';
+import AnchoredRegexBuilder from './anchored_regex_builder.vue';
 
 export const SORT_OPTIONS = [
   {
@@ -257,11 +266,18 @@ export default {
       'Todos|Raw text search is not currently supported. Please use the available search tokens.',
     ),
     filteredSearchPlaceholder: s__('Todos|Filter to-do items'),
+    localSearchPlaceholder: s__('Todos|Search loaded to-do items'),
+    regexMode: s__('Todos|Use regular expression matching'),
+    plainTextMode: s__('Todos|Use plain text matching'),
+    regexBuilderTitle: s__('Todos|Build a to-do search expression'),
   },
   components: {
+    AnchoredRegexBuilder,
     GlSorting,
     GlFilteredSearch,
     GlAlert,
+    GlButton,
+    GlFormInput,
   },
   mixins: [Tracking.mixin()],
   props: {
@@ -269,14 +285,22 @@ export default {
       type: Array,
       required: true,
     },
+    searchCorpus: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
   },
-  emits: ['filters-changed'],
+  emits: ['filters-changed', 'local-search-changed'],
   data() {
     return {
       isAscending: false,
       sortBy: SORT_OPTIONS[0].value,
       filterTokens: [],
       showFullTextSearchWarning: false,
+      localSearch: '',
+      localSearchIsRegex: false,
+      localSearchFlags: 'i',
     };
   },
   computed: {
@@ -341,6 +365,14 @@ export default {
         (token) => token.type === FILTERED_SEARCH_TERM && token.value.data.length,
       );
     },
+    localSearchSyntax() {
+      if (!this.localSearchIsRegex || !this.localSearch) return { valid: true, message: '' };
+      return new RegexBuilder({
+        pattern: this.localSearch,
+        flags: this.localSearchFlags.replace(/[gy]/g, ''),
+        regex: true,
+      }).snapshot().syntax;
+    },
   },
   watch: {
     filters: {
@@ -352,7 +384,9 @@ export default {
         const reducedOld = reduceFilter(oldValue);
         for (const filter of reduceNew) {
           if (!reducedOld.has(filter)) {
-            this.track(INSTRUMENT_TODO_FILTER_CHANGE, { label: `filter_${filter}` });
+            this.track(INSTRUMENT_TODO_FILTER_CHANGE, {
+              label: `filter_${filter}`,
+            });
           }
         }
       },
@@ -392,6 +426,23 @@ export default {
     }
   },
   methods: {
+    sendLocalSearchChanged() {
+      this.$emit('local-search-changed', {
+        query: this.localSearch,
+        isRegex: this.localSearchIsRegex,
+        flags: this.localSearchFlags,
+      });
+    },
+    toggleLocalSearchMode() {
+      this.localSearchIsRegex = !this.localSearchIsRegex;
+      this.sendLocalSearchChanged();
+    },
+    applyRegex({ pattern, flags, isRegex }) {
+      this.localSearch = pattern;
+      this.localSearchFlags = flags;
+      this.localSearchIsRegex = isRegex;
+      this.sendLocalSearchChanged();
+    },
     trackSortBy() {
       this.track(INSTRUMENT_TODO_SORT_CHANGE, {
         label: this.isAscending ? `${this.sortBy}_ASC` : `${this.sortBy}_DESC`,
@@ -458,28 +509,98 @@ export default {
     >
       {{ $options.i18n.fullTextSearchWarning }}
     </gl-alert>
-    <div class="gl-border-b gl-flex gl-flex-col gl-gap-3 gl-bg-subtle gl-p-5 @sm/panel:gl-flex-row">
-      <gl-filtered-search
-        v-model="filterTokens"
-        class="gl-min-w-0 gl-flex-grow"
-        terms-as-tokens
-        :placeholder="$options.i18n.filteredSearchPlaceholder"
-        :available-tokens="filteredSearchTokens"
-        :search-text-option-label="$options.i18n.searchTextOptionLabel"
-        @submit="sendFilterChanged"
-        @clear="onFiltersCleared"
-      />
-      <gl-sorting
-        data-testid="todos-sorting"
-        class="gl-flex"
-        dropdown-class="gl-w-full"
-        block
-        :sort-options="$options.SORT_OPTIONS"
-        :sort-by="sortBy"
-        :is-ascending="isAscending"
-        @sortByChange="onSortByChange"
-        @sortDirectionChange="onDirectionChange"
-      />
+    <div class="todos-filters__surface gl-flex gl-flex-col gl-gap-3 gl-p-5">
+      <div class="todos-filters__local-search gl-flex gl-min-w-0 gl-items-center gl-gap-2">
+        <gl-form-input
+          v-model="localSearch"
+          class="todos-filters__local-input gl-min-w-0 gl-flex-grow"
+          type="search"
+          :placeholder="$options.i18n.localSearchPlaceholder"
+          :aria-label="$options.i18n.localSearchPlaceholder"
+          data-testid="todos-local-search"
+          @input="sendLocalSearchChanged"
+        />
+        <gl-button
+          class="todos-filters__mode"
+          :selected="localSearchIsRegex"
+          :aria-pressed="localSearchIsRegex"
+          :aria-label="localSearchIsRegex ? $options.i18n.plainTextMode : $options.i18n.regexMode"
+          :title="localSearchIsRegex ? $options.i18n.plainTextMode : $options.i18n.regexMode"
+          @click="toggleLocalSearchMode"
+          >.*</gl-button
+        >
+        <anchored-regex-builder
+          :value="localSearchIsRegex ? localSearch : ''"
+          :corpus="searchCorpus"
+          :title="$options.i18n.regexBuilderTitle"
+          @apply="applyRegex"
+        />
+      </div>
+      <gl-alert
+        v-if="!localSearchSyntax.valid"
+        variant="danger"
+        :dismissible="false"
+        data-testid="todos-local-search-error"
+      >
+        {{ localSearchSyntax.message }}
+      </gl-alert>
+      <div class="gl-flex gl-flex-col gl-gap-3 @sm/panel:gl-flex-row">
+        <gl-filtered-search
+          v-model="filterTokens"
+          class="gl-min-w-0 gl-flex-grow"
+          terms-as-tokens
+          :placeholder="$options.i18n.filteredSearchPlaceholder"
+          :available-tokens="filteredSearchTokens"
+          :search-text-option-label="$options.i18n.searchTextOptionLabel"
+          @submit="sendFilterChanged"
+          @clear="onFiltersCleared"
+        />
+        <gl-sorting
+          data-testid="todos-sorting"
+          class="gl-flex"
+          dropdown-class="gl-w-full"
+          block
+          :sort-options="$options.SORT_OPTIONS"
+          :sort-by="sortBy"
+          :is-ascending="isAscending"
+          @sortByChange="onSortByChange"
+          @sortDirectionChange="onDirectionChange"
+        />
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.todos-filters__surface {
+  border: 1px solid var(--gl-color-border-subtle, var(--gl-color-neutral-200));
+  border-radius: 1rem;
+  background: var(--gl-color-surface-container-low, var(--gl-color-neutral-50));
+}
+
+.todos-filters__local-search {
+  max-width: 52rem;
+  padding: 0.25rem 0.375rem 0.25rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: var(--gl-color-surface-container, var(--gl-color-neutral-0));
+}
+
+.todos-filters__local-search:focus-within {
+  border-color: var(--gl-color-border-focus, var(--gl-color-blue-500));
+  box-shadow: 0 0 0 2px var(--gl-color-alpha-blue-200, rgb(31 117 203 / 20%));
+}
+
+.todos-filters__local-input {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.todos-filters__mode {
+  min-width: 2.75rem;
+  border-radius: 999px;
+  font-family: var(--gl-font-family-monospace);
+  font-weight: 700;
+}
+</style>

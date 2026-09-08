@@ -69,6 +69,9 @@ function mountBoardApp(el) {
 
   const rawFilterParams = queryToObject(window.location.search, { gatherArrays: true });
 
+  el.classList.add('m3-epic-board-surface');
+  el.dataset.materialSurface = 'epic-board';
+
   const initialFilterParams = {
     ...convertObjectPropsToCamelCase(rawFilterParams),
   };

@@ -31,6 +31,7 @@ import {
   TOKEN_TYPE_MY_REACTION,
 } from '~/vue_shared/components/filtered_search_bar/constants';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import AnchoredRegexBuilder from 'ee/security_dashboard/components/shared/anchored_regex_builder.vue';
 import { setLocalSettingsInCache, expectPayload } from '../local_cache_helpers';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -90,6 +91,8 @@ describe('RoadmapFilters', () => {
 
   const findSettingsButton = () => wrapper.findComponentByTestId('settings-button');
   const findFilteredSearchBar = () => wrapper.findComponent(FilteredSearchBar);
+  const findLocalSearch = () => wrapper.findComponentByTestId('roadmap-local-search');
+  const findRegexBuilder = () => wrapper.findComponent(AnchoredRegexBuilder);
 
   describe('watch', () => {
     describe('urlParams', () => {
@@ -133,6 +136,27 @@ describe('RoadmapFilters', () => {
       createComponent();
 
       expect(findSettingsButton().exists()).toBe(true);
+    });
+
+    it('emits a local plain-text search without changing roadmap GraphQL filters', () => {
+      createComponent();
+
+      findLocalSearch().vm.$emit('input', 'platform');
+
+      expect(wrapper.emitted('local-search')).toEqual([
+        [{ pattern: 'platform', flags: 'i', regex: false }],
+      ]);
+      expect(updateLocalSettingsMutationMock).not.toHaveBeenCalled();
+    });
+
+    it('applies a local regex search from the shared builder adapter', () => {
+      createComponent();
+
+      findRegexBuilder().vm.$emit('apply', { pattern: '^Platform', flags: 'im' });
+
+      expect(wrapper.emitted('local-search')).toEqual([
+        [{ pattern: '^Platform', flags: 'im', regex: true }],
+      ]);
     });
 
     it('emits toggle-settings event on click settings button', () => {
