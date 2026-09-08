@@ -55,7 +55,36 @@ export const DESIGN_ROUTE_INTEGRATION_CONTRACTS = Object.freeze([
   Object.freeze({ id: 'surface.todos', reference: 'design/Todos.dc.html', status: 'wired', route: '/dashboard/todos', entrypoint: 'app/assets/javascripts/pages/dashboard/todos/index/index.js', initializer: 'initTodosSurface', host: '#js-todos-app-root' }),
 ]);
 
-export const DESIGN_ROUTE_INTEGRATION_IDS = Object.freeze(DESIGN_ROUTE_INTEGRATION_CONTRACTS.map(({ id }) => id));
+// Keep this independent from the rows above. A registry-derived ID list would
+// silently agree with a deleted row and turn a completeness check into a
+// discovery check.
+export const DESIGN_ROUTE_INTEGRATION_IDS = Object.freeze([
+  'surface.admin',
+  'surface.agent-memory',
+  'surface.analyze',
+  'surface.build',
+  'surface.code',
+  'surface.command-palette',
+  'surface.deploy',
+  'surface.epics',
+  'surface.issues',
+  'surface.login',
+  'surface.manage',
+  'surface.merge-requests',
+  'surface.monitor',
+  'surface.operate',
+  'surface.pipelines',
+  'surface.plan',
+  'surface.regex-builder',
+  'surface.repository',
+  'surface.secure',
+  'surface.security',
+  'surface.settings',
+  'surface.shell-a',
+  'surface.shell-b',
+  'surface.sidebar',
+  'surface.todos',
+]);
 
 export function validateDesignRouteIntegrationContracts(contracts = DESIGN_ROUTE_INTEGRATION_CONTRACTS) {
   const errors = [];

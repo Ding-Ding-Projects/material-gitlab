@@ -15,11 +15,15 @@ const expectedIds = [
 ];
 
 const inventorySource = contractSource.slice(contractSource.indexOf('DESIGN_ROUTE_INTEGRATION_CONTRACTS'));
-const missing = expectedIds.filter((id) => !inventorySource.includes(`id: 'surface.${id}'`));
+const rowIds = [...inventorySource.matchAll(/id: 'surface\.([^']+)'/g)].map((match) => match[1]);
+const declaredIds = [...contractSource.matchAll(/'surface\.([^']+)'/g)].map((match) => match[1]);
+const missing = expectedIds.filter((id) => !rowIds.includes(id));
 if (missing.length) throw new Error(`Missing design route contracts: ${missing.join(', ')}`);
-if ((inventorySource.match(/id: 'surface\./g) || []).length !== expectedIds.length) {
+if (rowIds.length !== expectedIds.length || new Set(rowIds).size !== expectedIds.length) {
   throw new Error('Design route integration inventory must contain exactly 25 rows');
 }
+const missingDeclaredIds = expectedIds.filter((id) => !declaredIds.includes(id));
+if (missingDeclaredIds.length) throw new Error(`Missing independent route contract IDs: ${missingDeclaredIds.join(', ')}`);
 if (!/^import \{ initAdminMaterial \} from '~\/material_system\/surfaces\/Admin';$/m.test(adminSource)) {
   throw new Error('Admin dashboard must import initAdminMaterial from its page-specific surface module');
 }
