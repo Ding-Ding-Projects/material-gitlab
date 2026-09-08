@@ -29,7 +29,9 @@ describe('Material Repository adapter boundary', () => {
     expect(normalized.project.name).toBe('real-project');
     expect(normalized.tree[''][0].path).toBe('README.md');
     expect(normalized.blobs['README.md'].lines).toEqual(['# real']);
-    expect(() => normalizeRepositoryData({ ...validData, branches: [] })).toThrow('no branches');
+    expect(() => normalizeRepositoryData({ ...validData, branches: [], defaultBranch: '' })).toThrow('no branches');
+    expect(normalizeRepositoryData({ ...validData, branches: [], defaultBranch: 'v1.0' }).defaultBranch).toBe('v1.0');
+    expect(normalizeRepositoryData({ ...validData, branches: [], emptyRepository: true }).defaultBranch).toBe('');
     expect(() => normalizeRepositoryData({ ...validData, project: null })).toThrow('no project metadata');
   });
 
