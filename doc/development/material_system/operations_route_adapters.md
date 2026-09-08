@@ -1,0 +1,31 @@
+# Operations design production routes
+
+These adapters replace the collection content on existing authorized project routes. They do not create a demo endpoint or use fixture factories. The enclosing Rails project layout continues to own project navigation and the signed-in identity.
+
+| Surface | Existing Rails host | Production mount | Page entrypoint |
+| --- | --- | --- | --- |
+| Deploy | `projects/releases#index` | `#js-material-deploy` | `pages/projects/releases/index/index.js` |
+| Operate | `projects/environments#index` | `#js-material-operate` | `pages/projects/environments/index/index.js` |
+| Monitor | `projects/alert_management#index` | `#js-material-monitor` | `pages/projects/alert_management/index/index.js` |
+| Secure | EE `projects/dependencies#index` | `#js-material-secure` | EE `pages/projects/dependencies/index/index.js` |
+| Security | EE `projects/security/dashboard#index` | `#js-security-dashboard` | EE `pages/projects/security/dashboard/index/index.js` |
+
+## Live data and retained workflows
+
+- Deploy reads paginated v4 releases, feature flags, packages and container repositories. Feature flags use the flag **name** in the resource URL and the API's `active` property. Confirmed single and bulk updates persist before success is reported. Package and container deletion use separate resource URLs and confirmations. The container API lists repositories, so deletion is explicitly labelled as repository deletion, not deletion of one tag. Release titles link to their actual detail page; the existing release creation, feature-flag configuration, package and container management routes remain directly available.
+- Operate reads both active and stopped scopes from the existing environment JSON endpoint. The `nested` query argument is intentionally omitted because the controller treats any supplied string, including `false`, as a request for grouped folders. The serializer's environment path and per-environment `can_stop` determine available navigation and stop actions. Stop calls the existing POST route. Cluster agents and Terraform states use cursor-paginated native GraphQL connections. Terraform lock and unlock use `terraformStateLock` and `terraformStateUnlock` with the real global ID. Detailed environment, cluster agent, Terraform-management and state-download paths remain accessible. Restart/redeploy runs through the environment detail workflow; the list does not invent a restart endpoint.
+- Monitor loads each tab independently, so an unconfigured error-tracking integration does not prevent alert or incident access. Alerts and on-call schedules use native GraphQL connections; incidents and Service Desk tickets use issue-type-filtered v4 collections; error tracking follows the existing JSON response's next cursor. Alert acknowledge/resolve/reopen calls `updateAlertStatus`; incident and ticket close/reopen use the issue API. Error details and schedule/rotation authoring remain on their existing routes.
+- Secure unwraps the dependency JSON serializer's `dependencies` collection and preserves `occurrence_id`, `packager`, version, source path and supplied vulnerability links. Audit events reuse the existing controller, date/filter parameters, authorization and serialized rows; its new JSON response supplies `events` plus an explicit `next_page`. Policy lists use native `securityPolicies`, with editor links because enabling a policy is a configuration-commit workflow, not a generic boolean PUT. Scan lists use the existing on-demand DAST pipeline query; cancellation and retry use native pipeline mutations. New scan profiles and schedules remain on the existing management route. A dependency row is not treated as a vulnerability ID for invented issue creation.
+- Security uses cursor-paginated `project.vulnerabilities`, including its native detail URL and uppercase state/severity enums. Confirm, resolve, dismiss and revert-to-detected call their respective native mutations. Bulk operations report success only after all server responses succeed, then reload actual state. Issue creation uses `vulnerabilitiesCreateIssue` with the project and vulnerability global IDs. The full vulnerability report and detail workflows remain available for location evidence, tracked-reference filters and other advanced controls.
+
+## Permissions and transport
+
+Rails determines endpoint availability using existing abilities; the backend remains authoritative for per-resource authorization. Unavailable features are omitted from the tab set. A denied read or mutation is an error, never an empty success. All requests require the same origin, include same-origin credentials, and send the session CSRF header when present. Cursor and page traversal is bounded at 100 pages, rejects repeated cursors and off-instance next links, and reports the limit instead of claiming a complete list.
+
+## Verification and limits
+
+`node --test spec/frontend/material_system/operations_routes.test.cjs` exercises real adapter behavior against the documented shapes from the checked-in Rails serializers, GraphQL queries and mutations: page/cursor traversal, cross-origin rejection, name-based feature flag writes, CSRF propagation, exact resource deletes, environment permission fields, audit next-page metadata, dependency fields, pipeline cancellation and rejected vulnerability mutations. It also parses the GraphQL documents and compiles every Vue script/template in all five surface directories. Ruby syntax checks cover the changed controller and helpers.
+
+The full project Jest configuration requires the repository's complete frontend helper tree. In the sparse implementation checkout it could not initialize because `spec/frontend/__helpers__/test_constants` was absent. The focused suite uses an independent Node configuration and does not claim the full Jest suite passed.
+
+No production Rails runtime, browser interaction, design parity or visual evidence is asserted by these adapter tests. Those require the built GitLab instance and actual backend responses. The checked-in designs still require final per-state layout and interaction review, including the full selection and bulk-action behavior on Operate and Monitor. No demo screenshots were produced.
