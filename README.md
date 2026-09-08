@@ -30,10 +30,11 @@ supporting scripts. If you are looking for a running GitLab, read
 honest answer is not the one the directory listing suggests.
 
 > [!IMPORTANT]
-> **Nothing in this repository deploys GitLab.** Both desktop tools are configuration and preview
-> surfaces by explicit design, and the `docker-compose.yml` at the root is a one line stub that
-> points at the upstream `gitlab/gitlab-ce` image rather than anything built here. The detail is in
-> [Deployment status](#deployment-status-read-this-before-you-plan-anything).
+> **The Material work is real, and nothing here can install it.** The fork modifies the GitLab
+> application itself, across 376 files, but this repository builds no package and no image for it,
+> so there is currently no `apt-get install` and no image to pull that gets you this project. Every
+> install route that works today installs stock upstream GitLab instead. See
+> [Installing this fork](#installing-this-fork) for exactly what is missing and what it would take.
 
 ---
 
@@ -44,7 +45,8 @@ honest answer is not the one the directory listing suggests.
 | [Quick start](#quick-start) | The two commands that build this on a clean Windows machine |
 | [What ships](#what-ships) | The two desktop tools and the site, and what each one really does |
 | [Deployment status](#deployment-status-read-this-before-you-plan-anything) | The honest answer about deploying |
-| [Deploying a real GitLab](#deploying-a-real-gitlab) | Docker over SSH, and the apt Omnibus install |
+| [Installing this fork](#installing-this-fork) | Why you cannot yet, and exactly what is missing |
+| [Running stock upstream GitLab](#running-stock-upstream-gitlab) | Docker over SSH, and the apt Omnibus install |
 | [Screens](#screens) | Verified captures from the built artifact |
 | [Repository layout](#repository-layout) | Where the overlay code lives inside the upstream tree |
 | [Size of the work](#size-of-the-work) | Measured line counts and a human time estimate |
@@ -143,25 +145,93 @@ view, and a command palette. It is published to GitHub Pages from `main` only.
 
 ## Deployment status, read this before you plan anything
 
-This section exists because the repository looks far more deployable than it is.
+This section exists because the gap here is specific and easy to miss: **the Material work is real,
+and there is no way to install it.**
 
 | Route | State | Detail |
 | --- | --- | --- |
-| `docker-compose.yml` | **Runs upstream GitLab CE** | Now a working Compose file for the official `gitlab/gitlab-ce` image, with persistent volumes, a remapped SSH port and a health check. See [Deploying a real GitLab](#deploying-a-real-gitlab). It was previously a one line stub, `app:` plus an image reference, with no `services:` key; `docker compose config` rejected it with `additional properties 'app' not allowed`, so it could never have run. |
+| **The Material overlay itself** | **Real code, no install path** | 376 files under `app/assets/javascripts/material_system/`, including whole Vue surfaces, SCSS, and a runtime, plus 25 design contracts in `design/`. It is a genuine fork of the GitLab application, not a skin applied from outside. Nothing in this repository builds or packages it. |
+| Omnibus or `.deb` for this fork | **Absent** | No `omnibus/` or `packaging/` directory. There is no apt repository serving this fork, so no `apt-get install` can reach it. |
+| Container image for this fork | **Absent** | The only Dockerfiles are `Dockerfile.assets` (which is `FROM scratch` and merely carries `public/assets`), `qa/Dockerfile` and `vendor/Dockerfile`. None builds a runnable application image. |
+| Helm or Kubernetes chart | **Absent** | No `chart/`, `helm/`, `k8s/`, or `deploy/` directory exists. |
+| Source install of this fork | **Possible, unverified here** | `INSTALLATION_TYPE` is `source` and `VERSION` is `19.3.0-pre`, so upstream's from-source procedure applies to this tree. It needs Ruby, PostgreSQL, Redis, Gitaly, Workhorse and gitlab-shell, and this repository automates none of it and has never been proven to complete. |
+| `docker-compose.yml` | **Runs stock upstream GitLab** | A working Compose file for the official `gitlab/gitlab-ce` image. Useful as a comparison baseline; it does **not** run this fork. It was previously a one line stub, `app:` plus an image reference, with no `services:` key, which `docker compose config` rejected with `additional properties 'app' not allowed`, so it could never have run at all. |
 | Material GitLab Deployer | **Preview only** | Renders a command plan. Executes nothing, by explicit design. |
 | GitLab Instant | **Client only** | Opens an instance you already run. Provisions nothing. |
-| GitLab tree itself | **Source install** | `INSTALLATION_TYPE` is `source` and `VERSION` is `19.3.0-pre`. A source install needs Ruby, PostgreSQL, Redis, Gitaly, Workhorse and gitlab-shell, and this repository automates none of it. |
-| Container image | **Absent** | The only Dockerfiles are `Dockerfile.assets`, `qa/Dockerfile` and `vendor/Dockerfile`. None builds a runnable application image. |
-| Helm or Kubernetes chart | **Absent** | No `chart/`, `helm/`, `k8s/`, or `deploy/` directory exists. |
 
 ---
 
-## Deploying a real GitLab
+## Installing this fork
+
+This is the section that should matter, and right now it is the one with a hole in it.
+
+> [!CAUTION]
+> **There is no packaged install of this fork, and that is the single most important thing missing
+> from this project.** The Material work is real application code, but nothing here turns it into
+> something you can install. There is no `apt-get install material-gitlab`, because no apt
+> repository serves it. There is no image to pull, because nothing builds one. Every install
+> instruction that currently works installs **stock upstream GitLab**, which is precisely the
+> product this fork exists to replace.
+
+### What it would take
+
+Two routes could make this fork installable. Neither is built, and neither has been verified in this
+repository. They are recorded here so the work is scoped rather than vague, and they are the top
+item on [ROADMAP.md](ROADMAP.md).
+
+<details>
+<summary><b>Route 1: build a container image from this tree</b> (the shorter path)</summary>
+
+The Material work is largely frontend: Vue surfaces, SCSS, and a JavaScript runtime under
+`app/assets/javascripts/material_system/`, plus the layout and navigation hooks that mount them.
+That suggests compiling this tree's assets and layering them onto the official image at a matching
+version, rather than rebuilding the whole application:
+
+```dockerfile
+# Sketch only. Not built, not tested, not shipped.
+FROM gitlab/gitlab-ce:<version matching this tree>
+COPY public/assets  /opt/gitlab/embedded/service/gitlab-rails/public/assets
+COPY app/views      /opt/gitlab/embedded/service/gitlab-rails/app/views
+```
+
+The real work is producing `public/assets` from this tree, which needs the full Ruby and Node
+toolchain and a successful `webpack` asset build, and then keeping the base image version pinned in
+step with the tree. Anything served from the Rails side rather than compiled into assets has to be
+layered too, and every layered path is a place the fork can silently drift from its base.
+
+</details>
+
+<details>
+<summary><b>Route 2: build an Omnibus package</b> (the complete path)</summary>
+
+Upstream ships GitLab as an Omnibus package, which is what both the apt route and the official image
+use underneath. Producing one for this fork means running `omnibus-gitlab` against this tree instead
+of upstream's, publishing the resulting `.deb` to a repository, and then `apt-get install` reaches
+this fork the same way it reaches upstream today.
+
+This is the honest answer to "why am I installing official GitLab", and it is a substantial piece of
+build engineering rather than a documentation fix.
+
+</details>
+
+### What you can do today
+
+Run this fork through upstream's from-source install procedure, using **this tree** in place of
+upstream's. `INSTALLATION_TYPE` is already `source`, so the procedure applies. It needs Ruby,
+PostgreSQL, Redis, Gitaly, Workhorse and gitlab-shell, it is long, and **this repository automates
+none of it and has never been proven to complete it.** Treat it as a known-possible route rather
+than a supported one, and expect to debug.
+
+---
+
+## Running stock upstream GitLab
 
 > [!IMPORTANT]
-> **Both routes below install upstream GitLab CE, not the Material Design overlay in this
-> repository.** You get the standard GitLab interface. The overlay is a design and tooling project
-> around a pinned upstream snapshot; it is not a distribution you can install.
+> **Everything in this section installs stock upstream GitLab CE, not this fork.** You get the
+> standard GitLab interface, without any of the Material work. It is here because it is genuinely
+> useful as a comparison baseline for design parity, and because it is what the Compose file in this
+> repository actually runs. If you came here to install this project, read
+> [Installing this fork](#installing-this-fork) above instead.
 
 **Sizing, before you start.** GitLab needs 4 GB of RAM as a practical minimum and is comfortable at
 8 GB, plus 2 CPU cores and room for repositories. First boot takes several minutes before the

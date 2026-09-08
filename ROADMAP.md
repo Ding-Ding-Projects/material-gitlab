@@ -17,8 +17,27 @@
 
 ## Next
 
+- [ ] **Make this fork installable. This is the single most important thing missing.** The Material
+      work is real application code, 376 files under `app/assets/javascripts/material_system/`, and
+      nothing in this repository turns it into something anyone can install. There is no apt
+      repository serving it, so `apt-get install` reaches only stock upstream GitLab, and no
+      Dockerfile builds a runnable image of it. Every working install instruction in the README
+      installs the exact product this fork exists to replace. Two candidate routes, neither built:
+      - Compile this tree's assets with the existing standalone path (`yarn install`, then
+        `yarn webpack-prod`, which runs `webpack --config config/webpack.config.js` without needing
+        the Rails stack) and layer the resulting `public/assets` plus the changed `app/views` onto
+        the official image at a matching version. Note the base image and tree versions must be kept
+        pinned in step: the tree is `19.3.0-pre` while the currently published package is
+        `19.3.1-ce.0`.
+      - Build an Omnibus package from this tree and publish it, which is what would make
+        `apt-get install` reach this fork the same way it reaches upstream today.
 - Run the production Rails application at the same commit and finish built-route captures,
   side-by-side comparisons, Material audits, and visual diffs for all 25 parity rows.
+  Design folder parity itself is currently intact and independently verified: all 25 reference
+  hashes match, no file is missing, and no `.dc.html` on disk is absent from the inventory. What is
+  missing is the visual evidence. `capturePolicy.evidenceStatus` is `pending-capture` and
+  `sourceCommit` is the literal string `WORKTREE` rather than a commit, so no row is yet bound to a
+  real revision. 20 of the 25 production routes are `known`; 5 remain `placeholder`.
 - Keep the reference hashes, production routes, evidence receipts, and documentation synchronized
   whenever a design or surface changes.
 
