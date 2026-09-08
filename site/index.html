@@ -29,16 +29,16 @@
     </header>
 
     <section class="navigation-shell section-shell" aria-label="Site navigation tools">
-      <div class="tab-strip" role="tablist" aria-label="Primary pages" data-navigation-tabs>
-        <button type="button" role="tab" aria-selected="true" aria-controls="overview" data-nav-tab="overview">Overview</button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="guides" data-nav-tab="guides">Guides</button>
-        <button type="button" role="tab" aria-selected="false" aria-controls="reference" data-nav-tab="reference">Reference</button>
+      <div class="navigation-tabs" role="tablist" aria-label="Primary pages" data-navigation-tabs>
+        <button type="button" class="navigation-tab" role="tab" aria-selected="true" aria-controls="overview" data-nav-tab="overview">Overview</button>
+        <button type="button" class="navigation-tab" role="tab" aria-selected="false" aria-controls="guides" data-nav-tab="guides">Guides</button>
+        <button type="button" class="navigation-tab" role="tab" aria-selected="false" aria-controls="reference" data-nav-tab="reference">Reference</button>
       </div>
       <div class="navigation-tools">
         <label for="tab-search">Search tabs</label>
         <input id="tab-search" type="search" data-tab-search placeholder="Search tabs" />
-        <button type="button" data-regex-toggle aria-expanded="false">Regex builder</button>
-        <button type="button" data-command-palette aria-haspopup="dialog">Command palette <kbd>Ctrl+Shift+F</kbd></button>
+        <button type="button" class="button button-tonal" data-regex-toggle aria-expanded="false">Regex builder</button>
+        <button type="button" class="button button-tonal" data-command-palette aria-haspopup="dialog">Command palette <kbd>Ctrl+Shift+F</kbd></button>
       </div>
       <div class="regex-builder" data-regex-builder hidden>
         <label for="tab-regex">Pattern</label>
@@ -101,9 +101,9 @@
 
       <section id="library" class="section-shell content-section library-section" aria-labelledby="library-title">
         <div class="section-heading"><div><p class="eyebrow">Live library</p><h2 id="library-title">Canonical docs, one calm surface</h2></div></div>
-        <div class="tab-strip" role="tablist" aria-label="Documentation library">
-          <button type="button" role="tab" aria-selected="true" aria-controls="inventory-panel" data-tab-target="inventory-panel">Feature inventory</button>
-          <button type="button" role="tab" aria-selected="false" aria-controls="documents-panel" data-tab-target="documents-panel">Documentation</button>
+        <div class="navigation-tabs" role="tablist" aria-label="Documentation library">
+          <button type="button" class="navigation-tab" role="tab" aria-selected="true" aria-controls="inventory-panel" data-tab-target="inventory-panel">Feature inventory</button>
+          <button type="button" class="navigation-tab" role="tab" aria-selected="false" aria-controls="documents-panel" data-tab-target="documents-panel">Documentation</button>
         </div>
         <div id="inventory-panel" role="tabpanel" class="library-panel" data-tab-panel="inventory-panel">
           <p class="runtime-status" data-runtime-status>Loading the universal feature inventory…</p>

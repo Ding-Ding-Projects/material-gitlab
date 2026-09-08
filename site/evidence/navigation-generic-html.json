@@ -1,0 +1,30 @@
+{
+  "feature": "navigation-generic-html-repair",
+  "defect": "The navigation tab strip and the two tool buttons rendered as raw browser-default controls. index.html used .tab-strip and bare <button> elements, while navigation.css only defines .navigation-tabs, .navigation-tab and the button classes. No rule matched, so those controls fell back to unstyled browser defaults.",
+  "fix": "Renamed the markup classes to the ones the stylesheet actually defines, and set align-items to center on .navigation-shell so its children stop inflating to the grid row height.",
+  "capturedAt": "2026-09-08T03:30:00Z",
+  "route": "http://127.0.0.1:4321/",
+  "servedFrom": "site/dist (the built artifact, not the source tree)",
+  "viewport": "1280x900 window, 1898x1339 captured client area",
+  "theme": "light",
+  "displayScale": "150%",
+  "method": "hidden Windows desktop, isolated guest Edge profile with sync and extensions disabled, exactly one CDP page target verified before capture, background window capture by handle",
+  "verificationState": "verified",
+  "captures": [
+    {
+      "path": "site/evidence/pages-landing-2026-09-08.png",
+      "state": "before",
+      "bytes": 203073,
+      "sha256": "75f838d9378cb4c54b8f95152475e56165685405d4102c63f604058c63b7ecf5",
+      "shows": "Tab strip and tool buttons rendered as raw browser-default grey controls above the styled header."
+    },
+    {
+      "path": "site/evidence/pages-landing-2026-09-08-after.png",
+      "state": "after",
+      "bytes": 199524,
+      "sha256": "ed4f5152b9a826b6ebd470552e551c9b14b85d5aeeb37a992694146f19c67d75",
+      "shows": "The same controls rendered as Material pills and tonal buttons, with the selected tab carrying its tonal background."
+    }
+  ],
+  "knownRemaining": "The two tool buttons still stack full width rather than sitting inline beside the search field, and a gap remains between the navigation shell and the hero. Both predate this repair and are not caused by it."
+}

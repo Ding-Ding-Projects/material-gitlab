@@ -420,6 +420,34 @@ Receipt: [`site/evidence/command-palette.json`](site/evidence/command-palette.js
 
 </details>
 
+<details open>
+<summary><b>Navigation controls, before and after the unstyled-control repair</b> (1898 x 1339, light theme, 150% scale)</summary>
+
+The navigation tab strip and its two tool buttons were rendering as **raw browser-default
+controls**. The markup used `.tab-strip` and bare `<button>` elements while the stylesheet only
+defines `.navigation-tabs`, `.navigation-tab` and the button classes, so no rule matched and the
+browser fell back to its own defaults.
+
+**Before.** Grey default buttons and a default input sitting above the styled Material header:
+
+![The Material GitLab site header with a block of unstyled browser-default controls above it: Overview, Guides and Reference as plain grey buttons, a default Search tabs input, and full width default Regex builder and Command palette buttons](site/evidence/pages-landing-2026-09-08.png)
+
+**After.** The same controls as Material pills and tonal buttons, with the selected tab carrying
+its tonal background:
+
+![The same site header with the navigation controls now rendered as Material Design pills: Overview selected with a tonal purple background, and Regex builder and Command palette as tonal buttons](site/evidence/pages-landing-2026-09-08-after.png)
+
+Receipt: [`site/evidence/navigation-generic-html.json`](site/evidence/navigation-generic-html.json)
+
+Both captures come from the built `site/dist`, served locally and photographed on a hidden Windows
+desktop through an isolated guest browser profile, with exactly one debugger page target verified
+before each capture. Their SHA-256 values are recorded in the receipt.
+
+Still open, and visible in the after image: the two tool buttons stack full width instead of
+sitting inline beside the search field, and a gap remains before the hero. Both predate this repair.
+
+</details>
+
 > [!NOTE]
 > **Coverage is partial and it is worth saying so.** These two captures were taken at commit
 > `c74f6331`, since when `site/index.html` has changed by 3 lines. There are no captures yet of the
