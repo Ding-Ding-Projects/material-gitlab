@@ -34,7 +34,38 @@ result:
 ```powershell
 node tools/design-reference/scripts/parity-guard.mjs
 node tools/design-reference/scripts/parity-guard.mjs --negative
+node tools/design-reference/scripts/parity-guard.mjs --strict
 ```
+
+The default command is a structural inventory check. It remains green while rows
+honestly record pending capture evidence. `--strict` is the completion check and
+remains red until every row has known production routing, verified raw and derived
+evidence, a completed Material Design 3 audit, and an approved intentional-deviation
+record when one exists. Each raw receipt is bound to its exact route, capture tuple,
+source commit, raw input hash, and rendered artifact SHA-256. The current inventory
+contains 25 pending rows, so strict completion is expected to remain red until the
+real hidden-desktop capture program supplies that evidence.
+
+For the reference capture, the receipt also records cheap-headless `document.fonts`
+availability for every explicitly named family in the design source. A missing local
+font blocks strict completion, preventing a fallback-font capture from becoming parity
+evidence. The guard records the absence only. It neither downloads nor substitutes a
+font asset.
+
+An artifact SHA-256 is never accepted from a capture command by itself. The capture
+tool reads it from a repository-relative manifest whose source commit and listed
+artifact are both validated on disk. Side-by-side and diff generation each require
+the two raw receipts and reject a tuple, PNG, or commit mismatch. Diff measurements
+remain immutable; a separate approval record binds reviewer and approval evidence to
+the retained diff hash.
+
+The reference runtime serves a pinned local Google Sans v14.000 variable font and
+records its release hash, source path, axes, and OFL provenance in
+`tools/design-reference/fonts/GoogleSans-v14.000.provenance.json`. The two CSS faces
+pin `Google Sans` to optical size 18 and `Google Sans Text` to optical size 17. Before
+a capture, wait for `window.__DESIGN_REFERENCE_CAPTURE_READY__` and inspect the
+resulting font proof. This prevents a fallback rendering from being treated as real
+reference evidence.
 
 The negative regression removes each required reference, route, tuple, deterministic
 input, audit, and evidence boundary from every row in memory. It must turn red for the
