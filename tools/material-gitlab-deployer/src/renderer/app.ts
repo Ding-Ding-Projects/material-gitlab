@@ -81,3 +81,4 @@ function render(): void {
   appRoot.querySelector<HTMLButtonElement>('#cancel')?.addEventListener('click', () => { phase = 'cancelled'; planText = ''; errorText = ''; render(); });
 }
 render();
+
