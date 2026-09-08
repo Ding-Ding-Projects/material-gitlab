@@ -1,3 +1,3 @@
-import initCycleAnalytics from '~/analytics/cycle_analytics';
+import { mountAnalyze } from '~/material_system/surfaces/Analyze';
 
-initCycleAnalytics();
+mountAnalyze();
