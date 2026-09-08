@@ -12,9 +12,21 @@ import {
   getSuperSidebarData,
   initSuperTopbar,
 } from '~/super_sidebar/super_sidebar_bundle';
+import { mountAuthenticatedShell, mountSidebar } from '~/material_system/mounts';
 
 const superSidebarData = getSuperSidebarData();
+const materialSidebarHost = document.querySelector('.m3-shell-sidebar-host[data-material-shell]');
+const materialTopbarHost = document.querySelector('.m3-shell-topbar-host[data-material-shell]');
 
-initSuperSidebar(superSidebarData);
-initSuperTopbar(superSidebarData);
+if (materialSidebarHost && superSidebarData) {
+  mountSidebar(materialSidebarHost, { data: superSidebarData.sidebarData });
+} else if (superSidebarData) {
+  initSuperSidebar(superSidebarData);
+}
+
+if (materialTopbarHost && superSidebarData) {
+  mountAuthenticatedShell(materialTopbarHost, { data: superSidebarData.sidebarData });
+} else if (superSidebarData) {
+  initSuperTopbar(superSidebarData);
+}
 initPageBreadcrumbs();
