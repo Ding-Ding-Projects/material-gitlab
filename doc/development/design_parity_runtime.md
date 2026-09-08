@@ -94,3 +94,16 @@ The observed 4.0.20 failure occurred during Bundler checksum parsing, before
 Bootsnap or application initialization. Changing cache or coverage behavior is
 therefore not used as a repair. The next real build must verify this compatibility
 correction; its presence in source is not a successful runtime verdict.
+# Ruby runtime reconstruction
+
+The inherited Ruby binary produced internal string/hash exceptions and an
+interpreter crash during isolated package-manager operations. The gem stage now
+rebuilds the same Ruby version declared in `qa/gdk/.tool-versions`, using the
+installed GitLab Ruby plugin's documented `USE_PRECOMPILED_RUBY=false` path.
+`qa/gdk/ruby-build-revision` pins the build definitions. The RubyGems compatibility
+pin is applied after that installation, and both active versions are printed and
+checked before the application bundle is installed.
+
+This changes the toolchain inside the task image only. It does not alter a host's
+installed Ruby or other workloads. Real build and runtime results are still
+required; reconstructing the toolchain is not itself a parity verdict.
