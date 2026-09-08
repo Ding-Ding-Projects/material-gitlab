@@ -62,9 +62,9 @@ export default {
   cursor: pointer;
 
   md-checkbox {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--prim);
+    --md-checkbox-selected-container-color: var(--prim);
+    --md-checkbox-selected-icon-color: var(--onprim);
+    --md-checkbox-unselected-outline-color: var(--outl);
     cursor: pointer;
   }
 
