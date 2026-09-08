@@ -1,5 +1,7 @@
 <template>
   <div id="st-tabpanel-integrations" role="tabpanel" aria-labelledby="st-tab-integrations" class="st-tab-panel">
+    <p v-if="readOnly" role="status">Only active integrations are listed here. Use the dedicated editor to add or change an integration and validate its required configuration.</p>
+    <gl-button v-if="settingsPath" :href="settingsPath">Configure integrations</gl-button>
     <SearchField
       :value="search"
       placeholder="Search integrations"
@@ -18,7 +20,7 @@
 
     <div class="st-card st-card--flush">
       <SelectionToolbar
-        v-if="integrations.length > 0"
+        v-if="integrations.length > 0 && !readOnly"
         :visible-count="filtered.length"
         :selected-count="selectedIds.length"
         item-noun="integrations"
@@ -39,6 +41,7 @@
         :key="integration.id"
         :integration="integration"
         :selected="selectedIds.includes(integration.id)"
+        :read-only="readOnly"
         @toggle-select="toggleSelect"
         @toggle="$emit('toggle', $event)"
       />
@@ -50,6 +53,7 @@
 </template>
 
 <script>
+import { GlButton } from '@gitlab/ui';
 import SearchField from './SearchField.vue';
 import SelectionToolbar from './SelectionToolbar.vue';
 import IntegrationRow from './IntegrationRow.vue';
@@ -57,9 +61,11 @@ import { createMatcher } from '../data';
 
 export default {
   name: 'IntegrationsTab',
-  components: { SearchField, SelectionToolbar, IntegrationRow },
+  components: { GlButton, SearchField, SelectionToolbar, IntegrationRow },
   props: {
     integrations: { type: Array, required: true },
+    readOnly: { type: Boolean, default: false },
+    settingsPath: { type: String, default: '' },
   },
   data() {
     return { search: '', regexMode: false, regexOpen: false, selectedIds: [] };

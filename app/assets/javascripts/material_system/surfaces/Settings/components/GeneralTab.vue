@@ -28,6 +28,8 @@
       :logo-color="logoColor"
       :logo-letter="logoLetter"
       :logo-file-name="logoFileName"
+      :logo-url="logoUrl"
+      :production="production"
       @update:logo-color="$emit('update:logo-color', $event)"
       @upload-logo="$emit('upload-logo', $event)"
     />
@@ -73,6 +75,8 @@ export default {
     logoColor: { type: String, required: true },
     logoLetter: { type: String, required: true },
     logoFileName: { type: String, default: '' },
+    logoUrl: { type: String, default: '' },
+    production: { type: Boolean, default: false },
     vocabularyStatus: { type: String, required: true },
     vocabularyOk: { type: Boolean, default: null },
     converterStatus: { type: String, required: true },

@@ -5,6 +5,7 @@
     <TabStrip :tabs="tabs" :active="tab" @select="selectTab" />
 
     <main class="st-main">
+      <p v-if="production && tab === 'general'" role="status">This settings view supports project name, visibility and avatar. Description, topics, badges, feature permissions, service desk, transfer, archive and deletion controls are not represented here yet.</p>
       <div v-if="loading || adapterError || adapterErrors.length" class="st-adapter-status" :class="{ 'st-adapter-status--error': adapterError || adapterErrors.length }" role="status">
         <strong v-if="loading">Loading project settings…</strong>
         <strong v-else-if="adapterError">Settings unavailable</strong>
@@ -19,6 +20,8 @@
         :logo-color="logoColor"
         :logo-letter="logoLetter"
         :logo-file-name="logoFileName"
+        :logo-url="logoUrl"
+        :production="production"
         :vocabulary-status="vocabularyStatus"
         :vocabulary-ok="vocabularyOk"
         :converter-status="converterStatus"
@@ -43,6 +46,9 @@
         ref="cicdTab"
         :variables="variables"
         :protected-branches="protectedBranches"
+        :busy="mutationPending"
+        :allow-reveal="!production"
+        :variables-editor-path="variablesEditorPath"
         @add-variable="onAddVariable"
         @toggle-reveal="onToggleReveal"
         @remove-variables="onRemoveVariables"
@@ -53,6 +59,8 @@
         v-show="tab === 'integrations'"
         ref="integrationsTab"
         :integrations="integrations"
+        :read-only="production"
+        :settings-path="integrationSettingsPath"
         @toggle="onToggleIntegration"
         @bulk-toggle="onBulkToggleIntegrations"
       />
@@ -90,6 +98,9 @@ export default {
   props: {
     userName: { type: String, default: '' },
     userInitials: { type: String, default: '' },
+    production: { type: Boolean, default: false },
+    integrationSettingsPath: { type: String, default: '' },
+    variablesEditorPath: { type: String, default: '' },
     // Production state and mutations must come from a real host adapter.
     adapter: { type: Object, default: null },
     // Compatibility alias for callers that named this seam explicitly.
@@ -107,6 +118,7 @@ export default {
       adapterReady: false,
       adapterError: SETTINGS_ADAPTER_ERROR,
       adapterErrors: [],
+      mutationPending: false,
     };
   },
   computed: {
@@ -171,7 +183,7 @@ export default {
   methods: {
     applyAdapterState(snapshot) {
       const normalized = normalizeSettingsState(snapshot);
-      const fields = ['projectName', 'visibility', 'logoColor', 'logoFileName', 'members', 'variables', 'protectedBranches', 'integrations', 'permissions'];
+      const fields = ['projectName', 'visibility', 'logoColor', 'logoFileName', 'logoUrl', 'members', 'variables', 'protectedBranches', 'integrations', 'permissions'];
       fields.forEach((field) => {
         if (Object.prototype.hasOwnProperty.call(snapshot || {}, field)
           || (field === 'projectName' && snapshot?.project?.name != null)
@@ -206,10 +218,12 @@ export default {
       }
     },
     async runAdapter(method, payload) {
+      if (this.mutationPending) return false;
       if (!this.adapterReady || !isSettingsAdapter(this.effectiveAdapter)) {
         this.adapterError = SETTINGS_ADAPTER_ERROR;
         return false;
       }
+      this.mutationPending = true;
       try {
         assertSettingsAdapter(this.effectiveAdapter);
         const snapshot = await this.effectiveAdapter[method](payload);
@@ -217,9 +231,16 @@ export default {
         this.adapterError = '';
         return true;
       } catch (error) {
+        // A multi-item request can fail after earlier items were accepted.
+        // Reload authoritative state before reporting the failed operation.
+        if (this.production) {
+          try { this.applyAdapterState(await this.effectiveAdapter.load()); } catch (_refreshError) { /* Keep the last confirmed state. */ }
+        }
         this.adapterError = error?.message || `Settings action ${method} failed.`;
         this.notifications.notify({ title: 'Settings update failed', message: this.adapterError, severity: 'error' });
         return false;
+      } finally {
+        this.mutationPending = false;
       }
     },
     selectTab(id) {
@@ -231,6 +252,7 @@ export default {
       updateSettings({ theme: next });
     },
     onProjectNameChange(value) {
+      if (value === this.projectName) return;
       this.projectNameDraft = value;
       this.runAdapter('updateProject', { name: value }).then((ok) => {
         if (ok) this.projectName = value;
@@ -276,8 +298,8 @@ export default {
         if (ok) this.notifications.notify({ title: 'Member access removed', message: `${ids.length} member${ids.length === 1 ? '' : 's'} removed from this project.`, severity: 'warning' });
       });
     },
-    onAddVariable() {
-      this.runAdapter('createVariable', {}).then((ok) => {
+    onAddVariable(payload) {
+      this.runAdapter('createVariable', payload).then((ok) => {
         if (ok) this.notifications.notify({ title: 'Variable added', message: 'The server returned the new variable state.', severity: 'info' });
       });
     },

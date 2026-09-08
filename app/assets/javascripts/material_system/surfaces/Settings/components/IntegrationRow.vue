@@ -1,6 +1,7 @@
 <template>
   <div class="st-row" data-screen-label="Integration row">
     <input
+      v-if="!readOnly"
       type="checkbox"
       class="st-row__checkbox"
       :checked="selected"
@@ -13,6 +14,7 @@
       <div class="st-row__desc">{{ integration.desc }}</div>
     </div>
     <button
+      v-if="!readOnly"
       type="button"
       role="switch"
       class="st-switch"
@@ -23,6 +25,7 @@
     >
       <span class="st-switch__knob"></span>
     </button>
+    <span v-else>{{ integration.on ? 'Enabled' : 'Disabled' }}</span>
   </div>
 </template>
 
@@ -35,6 +38,7 @@ export default {
   props: {
     integration: { type: Object, required: true },
     selected: { type: Boolean, default: false },
+    readOnly: { type: Boolean, default: false },
   },
 };
 </script>

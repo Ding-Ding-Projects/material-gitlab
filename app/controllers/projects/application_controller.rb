@@ -109,6 +109,16 @@ class Projects::ApplicationController < ApplicationController
   end
 
   def handle_update_result(result)
+    if request.format.json?
+      if result[:status] == :success
+        return render json: { name: @project.name, visibility: @project.visibility,
+                              avatar_url: @project.avatar_url }
+      end
+
+      return render json: { message: _('Project settings could not be saved. Check the submitted fields.') },
+        status: :unprocessable_entity
+    end
+
     if result[:status] == :success
       flash[:notice] = format(_("Project '%{project_name}' was successfully updated."), project_name: @project.name)
       redirect_to(edit_project_path(@project, anchor: 'js-general-project-settings'))

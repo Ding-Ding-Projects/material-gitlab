@@ -35,6 +35,9 @@
       </div>
 
       <main class="gl-mds-plan__content">
+        <gl-button v-if="activeTab === 'Milestones' && newMilestonePath" :href="newMilestonePath">New milestone</gl-button>
+        <gl-button v-if="activeTab === 'Wiki' && wikiPath" :href="wikiPath">Open wiki editor and page history</gl-button>
+        <p v-if="production && activeTab === 'Iterations'">Iteration scheduling is managed in the parent group's iteration editor. This view supports reading and export.</p>
         <div v-if="loading" class="gl-mds-plan__loading" role="status">Loading…</div>
         <div v-else-if="loadError" class="gl-mds-plan__error" role="alert">
           <strong>Plan data could not be loaded.</strong>
@@ -42,11 +45,18 @@
           <button type="button" @click="loadAll">Retry</button>
         </div>
         <template v-else>
+          <div v-if="activeResourceError" class="gl-mds-plan__error" role="alert">
+            <strong>{{ activeTab }} are unavailable.</strong>
+            <span>{{ activeResourceError.message }}</span>
+            <button type="button" @click="loadResource(activeTab)">Retry</button>
+          </div>
           <wiki-panel
-            v-if="activeTab === 'Wiki'"
+            v-else-if="activeTab === 'Wiki'"
             :filtered-pages="filteredWikiPages"
             :active-page="activePage"
             :editing="wikiEditing"
+            :can-edit="!production || permissions.wiki === true"
+            :saving="wikiSaving"
             @select="selectWikiPage"
             @toggle-edit="toggleWikiEdit"
             @update-body="updateWikiBody"
@@ -81,6 +91,7 @@
 </template>
 
 <script>
+import { GlButton } from '@gitlab/ui';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import TopBar from './components/TopBar.vue';
@@ -100,7 +111,6 @@ import {
   withoutIds,
   rowsToCsv,
   updateWikiBody as applyWikiBody,
-  markWikiSaved,
   fetchMilestones as defaultFetchMilestones,
   fetchIterations as defaultFetchIterations,
   fetchRequirements as defaultFetchRequirements,
@@ -116,6 +126,7 @@ const BULK_VALUE_BY_ACTION = { close: 'closed', reopen: 'active', satisfied: 'sa
 export default {
   name: 'Plan',
   components: {
+    GlButton,
     TopBar,
     PlanTabs,
     RecordList,
@@ -133,7 +144,11 @@ export default {
     mutateEntity: { type: Function, default: defaultMutatePlanEntity },
     deleteEntity: { type: Function, default: defaultDeletePlanEntity },
     saveWiki: { type: Function, default: defaultSaveWikiPage },
-    avatarInitials: { type: String, default: 'JD' },
+    avatarInitials: { type: String, default: '' },
+    production: { type: Boolean, default: false },
+    permissions: { type: Object, default: () => ({}) },
+    newMilestonePath: { type: String, default: '' },
+    wikiPath: { type: String, default: '' },
   },
   data() {
     return {
@@ -150,9 +165,11 @@ export default {
       wikiPages: [],
       activeWikiPageId: '',
       wikiEditing: false,
+      wikiSaving: false,
       selection: { Milestones: [], Iterations: [], Requirements: [] },
       confirmState: null,
       loadError: null,
+      resourceErrors: {},
     };
   },
   computed: {
@@ -197,7 +214,13 @@ export default {
       });
       return actions;
     },
+    activeResourceError() {
+      return this.resourceErrors[this.activeTab] || null;
+    },
     bulkActions() {
+      if (this.production && (this.activeTab !== 'Milestones' || this.permissions.milestones !== true)) {
+        return [{ id: 'export', label: 'Export CSV', icon: 'download' }];
+      }
       if (this.activeTab === 'Milestones' || this.activeTab === 'Iterations') {
         return [
           { id: 'close', label: 'Close', icon: 'check' },
@@ -245,27 +268,43 @@ export default {
     async loadAll() {
       this.loading = true;
       this.loadError = null;
-      try {
-        const [milestones, iterations, requirements, wikiPages] = await Promise.all([
-          this.fetchMilestones(),
-          this.fetchIterations(),
-          this.fetchRequirements(),
-          this.fetchWikiPages(),
-        ]);
-        this.milestones = milestones;
-        this.iterations = iterations;
-        this.requirements = requirements;
-        this.wikiPages = wikiPages;
-        this.activeWikiPageId = wikiPages[0] ? wikiPages[0].id : '';
-      } catch (error) {
-        this.loadError = error;
+      const results = await Promise.allSettled([
+        this.fetchMilestones(), this.fetchIterations(), this.fetchRequirements(), this.fetchWikiPages(),
+      ]);
+      const tabs = ['Milestones', 'Iterations', 'Requirements', 'Wiki'];
+      const fields = ['milestones', 'iterations', 'requirements', 'wikiPages'];
+      const errors = {};
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') this[fields[index]] = result.value;
+        else errors[tabs[index]] = result.reason;
+      });
+      this.resourceErrors = errors;
+      if (results.every((result) => result.status === 'rejected')) {
+        this.loadError = results[0].reason;
         notificationCenter.notify({
           title: 'Plan unavailable',
-          message: error?.message || 'The server could not load planning records.',
+          message: this.loadError?.message || 'The server could not load planning records.',
           severity: 'error',
         });
       }
+      this.activeWikiPageId = this.wikiPages[0] ? this.wikiPages[0].id : '';
       this.loading = false;
+    },
+    async loadResource(tab) {
+      const loaders = {
+        Milestones: ['milestones', this.fetchMilestones],
+        Iterations: ['iterations', this.fetchIterations],
+        Requirements: ['requirements', this.fetchRequirements],
+        Wiki: ['wikiPages', this.fetchWikiPages],
+      };
+      const [field, loader] = loaders[tab];
+      try {
+        this[field] = await loader();
+        this.resourceErrors = { ...this.resourceErrors, [tab]: undefined };
+        if (tab === 'Wiki') this.activeWikiPageId = this.wikiPages[0] ? this.wikiPages[0].id : '';
+      } catch (error) {
+        this.resourceErrors = { ...this.resourceErrors, [tab]: error };
+      }
     },
     selectTab(tab) {
       this.activeTab = tab;
@@ -300,19 +339,24 @@ export default {
       if (result.ok) this.themeSetting = result.value.theme;
     },
     selectWikiPage(id) {
+      if (this.wikiSaving) return;
       this.activeWikiPageId = id;
       this.wikiEditing = false;
     },
-    toggleWikiEdit() {
+    async toggleWikiEdit() {
+      if (this.wikiSaving || !this.activePage.id || (this.production && this.permissions.wiki !== true)) return;
       if (this.wikiEditing) {
-        this.saveWiki({ id: this.activePage.id, body: this.activePage.body })
-          .then(() => {
-            this.wikiPages = markWikiSaved(this.wikiPages, this.activeWikiPageId);
-            notificationCenter.notify({ title: 'Wiki page saved', message: `"${this.activePage.title}" was updated.`, severity: 'success' });
-          })
-          .catch((error) => notificationCenter.notify({ title: 'Wiki page not saved', message: error.message, severity: 'error' }));
-      }
-      this.wikiEditing = !this.wikiEditing;
+        const { id, title, body } = this.activePage;
+        this.wikiSaving = true;
+        try {
+          const saved = await this.saveWiki({ id, body });
+          if (saved) this.wikiPages = this.wikiPages.map((page) => page.id === id ? saved : page);
+          this.wikiEditing = false;
+          notificationCenter.notify({ title: 'Wiki page saved', message: `"${title}" was updated.`, severity: 'success' });
+        } catch (error) {
+          notificationCenter.notify({ title: 'Wiki page not saved', message: error.message, severity: 'error' });
+        } finally { this.wikiSaving = false; }
+      } else this.wikiEditing = true;
     },
     updateWikiBody(body) {
       this.wikiPages = applyWikiBody(this.wikiPages, this.activeWikiPageId, body);
@@ -359,7 +403,10 @@ export default {
           notificationCenter.notify({ title: `${tab} updated`, message: `${ids.length} ${tab.toLowerCase()} marked ${value}.`, severity: 'success' });
           this.selection = { ...this.selection, [tab]: [] };
         })
-        .catch((error) => notificationCenter.notify({ title: `${tab} was not updated`, message: error.message, severity: 'error' }));
+        .catch(async (error) => {
+          await this.loadResource(tab);
+          notificationCenter.notify({ title: `${tab} was not updated`, message: error.message, severity: 'error' });
+        });
     },
     requestDeleteRequirements(ids) {
       this.confirmState = {

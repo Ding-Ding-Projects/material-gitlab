@@ -40,6 +40,8 @@ const normalizeVariable = (variable) => ({
   value: variable?.revealed ? String(variable?.value || '') : '',
   maskedValue: String(variable?.maskedValue || ''),
   protected: Boolean(variable?.protected),
+  hidden: Boolean(variable?.hidden),
+  environmentScope: String(variable?.environmentScope || '*'),
   revealed: Boolean(variable?.revealed),
 });
 
@@ -65,6 +67,7 @@ export function normalizeSettingsState(snapshot = {}) {
     visibility: String(source.visibility || source.project?.visibility || ''),
     logoColor: String(source.logoColor || '#6750c4'),
     logoFileName: String(source.logoFileName || source.project?.avatarFileName || ''),
+    logoUrl: String(source.logoUrl || ''),
     members: arrayOrEmpty(source.members).map(normalizeMember).filter((member) => member.id && member.name),
     variables: arrayOrEmpty(source.variables).map(normalizeVariable).filter((variable) => variable.id && variable.key),
     protectedBranches: arrayOrEmpty(source.protectedBranches).map(normalizeBranch).filter((branch) => branch.id && branch.name),

@@ -4,6 +4,7 @@
  */
 import Vue from 'vue';
 import Plan from './Plan.vue';
+import { createProjectPlanProps } from './data';
 
 export { default as Plan } from './Plan.vue';
 export { default as TopBar } from './components/TopBar.vue';
@@ -29,9 +30,15 @@ export function mountPlan(el, props = {}) {
   if (mountEl.dataset.materialPlan) {
     window.__MATERIAL_PLAN_ENDPOINTS__ = { ...window.__MATERIAL_PLAN_ENDPOINTS__, ...mountEl.dataset };
   }
+  const projectId = props.projectId || mountEl.dataset.projectId || mountEl.dataset.materialPlanProjectId;
+  const permissions = props.permissions || {
+    milestones: mountEl.dataset.canManageMilestones === 'true',
+    wiki: mountEl.dataset.canManageWiki === 'true',
+  };
+  const adapterProps = props.adapter ? props.adapter : projectId ? createProjectPlanProps({ projectId, root: mountEl, permissions }) : {};
   return new Vue({
     name: 'PlanRoot',
-    render: (h) => h(Plan, { props }),
+    render: (h) => h(Plan, { props: { ...adapterProps, newMilestonePath: mountEl.dataset.newMilestonePath || '', wikiPath: mountEl.dataset.wikiPath || '', avatarInitials: mountEl.dataset.avatarInitials || '', ...props } }),
   }).$mount(mountEl);
 }
 

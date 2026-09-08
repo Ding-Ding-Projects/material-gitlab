@@ -28,10 +28,13 @@
           v-for="role in roles"
           :key="role"
           role="option"
+          tabindex="0"
           class="st-role-menu__item"
           :class="{ 'st-role-menu__item--active': role === member.role }"
           :aria-selected="role === member.role"
           @click="$emit('set-role', { id: member.id, role })"
+          @keydown.enter.prevent="$emit('set-role', { id: member.id, role })"
+          @keydown.space.prevent="$emit('set-role', { id: member.id, role })"
         >
           {{ role }}
         </li>

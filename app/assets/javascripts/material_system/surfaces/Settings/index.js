@@ -2,7 +2,21 @@
  * Settings surface entry point. Ported from design/Settings.dc.html.
  */
 
+import Vue from 'vue';
 import Settings from './Settings.vue';
+import { createProjectSettingsAdapter } from './project_adapter';
+
+export { createProjectSettingsAdapter } from './project_adapter';
+
+export function mountProjectSettings(el = document.querySelector('[data-material-project-settings]')) {
+  if (!el) return null;
+  const config = JSON.parse(el.dataset.materialProjectSettings);
+  const adapter = createProjectSettingsAdapter({ ...config, root: document });
+  return new Vue({
+    name: 'ProjectSettingsRoot',
+    render: (h) => h(Settings, { props: { adapter, production: true, integrationSettingsPath: config.integrationSettingsPath, variablesEditorPath: config.variablesEditorPath, userName: config.userName, userInitials: config.userInitials } }),
+  }).$mount(el);
+}
 
 export default Settings;
 export { default as Settings } from './Settings.vue';
