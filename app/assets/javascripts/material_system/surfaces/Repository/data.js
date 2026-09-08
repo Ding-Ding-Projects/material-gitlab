@@ -107,7 +107,13 @@ export function createRepositoryAdapter(implementation) {
 
 const projectApiPath = (projectPath, suffix = '') => `/api/v4/projects/${encodeURIComponent(requiredString(projectPath, 'project path'))}${suffix}`;
 const responseData = (response) => response.data;
-const decodeContent = (content) => (typeof content === 'string' && typeof atob === 'function' ? atob(content.replace(/\s/g, '')) : content || '');
+const decodeContent = (content) => {
+  if (typeof content !== 'string' || typeof atob !== 'function') return content || '';
+  const binary = atob(content.replace(/\s/g, ''));
+  if (typeof TextDecoder === 'undefined') return binary;
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+};
 
 export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '', client = axios, navigate = window.location.assign.bind(window.location) } = {}) {
   const base = projectApiPath(projectPath);
@@ -118,7 +124,7 @@ export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '
     async load({ branch, path: currentPath } = {}) {
       const project = await loadProject();
       const selectedBranch = branch || ref || project.default_branch;
-      const treePath = currentPath || path || '';
+      const treePath = currentPath !== undefined ? currentPath : path || '';
       const [branches, entries, commits, tags] = await Promise.all([
         loadBranches(),
         request(`${base}/repository/tree`, { params: { ref: selectedBranch, path: treePath || undefined, per_page: 100 } }),
@@ -140,7 +146,13 @@ export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '
     async branches() { return (await loadBranches()).map((item) => item.name); },
     async toggleStar() { const project = await loadProject(); return client.post(`${base}/${project.starred ? 'unstar' : 'star'}`).then(responseData); },
     async fork() { return client.post(`${base}/fork`).then(responseData); },
-    async download({ branch } = {}) { navigate(`${base}/repository/archive?sha=${encodeURIComponent(branch || ref)}`); return {}; },
+    async download({ branch, paths = [] } = {}) {
+      if (paths.length > 1) throw new Error('Download one selected item at a time.');
+      const search = new URLSearchParams({ sha: branch || ref });
+      if (paths.length === 1) search.set('path', paths[0]);
+      navigate(`${base}/repository/archive?${search.toString()}`);
+      return {};
+    },
     async deleteEntries() { throw new Error('Delete files from their dedicated repository route.'); },
   });
 }
