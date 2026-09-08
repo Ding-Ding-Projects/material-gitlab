@@ -30,13 +30,36 @@ only from those retained raw inputs.
 ```powershell
 node scripts/parity-guard.mjs
 node scripts/parity-guard.mjs --negative
-node scripts/capture.mjs --id=surface.issues --kind=reference --png=artifacts/parity/surface.issues/reference.png --commit=<sha>
-node scripts/capture.mjs --id=surface.issues --kind=built --png=artifacts/parity/surface.issues/built.png --commit=<sha>
-node scripts/side-by-side.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --output=artifacts/parity/surface.issues/side-by-side.svg
-node scripts/diff.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --output=artifacts/parity/surface.issues/diff.json
+node scripts/parity-guard.mjs --strict
+node scripts/capture.mjs --id=surface.issues --kind=reference --png=artifacts/parity/surface.issues/reference.png --commit=<sha> --artifact-manifest=<reference-manifest.json> --artifact=<reference-artifact> --session-provenance=<reference-session.json> --font-proof='<document-fonts-proof-json>'
+node scripts/capture.mjs --id=surface.issues --kind=built --png=artifacts/parity/surface.issues/built.png --commit=<sha> --artifact-manifest=<built-manifest.json> --artifact=<built-artifact> --session-provenance=<built-session.json>
+node scripts/side-by-side.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --reference-receipt=artifacts/parity/surface.issues/reference.png.receipt.json --built-receipt=artifacts/parity/surface.issues/built.png.receipt.json --output=artifacts/parity/surface.issues/side-by-side.svg --tuple='<tuple-json>' --commit=<sha>
+node scripts/diff.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --reference-receipt=artifacts/parity/surface.issues/reference.png.receipt.json --built-receipt=artifacts/parity/surface.issues/built.png.receipt.json --output=artifacts/parity/surface.issues/diff.json --tuple='<tuple-json>' --commit=<sha>
+node scripts/review-diff.mjs --diff=artifacts/parity/surface.issues/diff.json --reviewer='<reviewer>' --approval='<approval record>'
 ```
 
 The inventory currently records explicit pending evidence because no capture was
-fabricated in this implementation lane. A row becomes verified only after both raw
-images, the labelled comparison, the diff record, and a reviewed Material Design 3
-audit are present and hash-bound to the same tuple and source commit.
+fabricated in this implementation lane. The structural command validates the
+hand-written inventory while preserving those honest pending rows. `--strict` is the
+completion command: it stays red until every row has known production routing,
+verified raw inputs, comparison and diff evidence, audited Material Design 3 controls,
+and hash-bound receipts for the exact route, tuple, source commit, and rendered
+application artifact. The artifact hash is read from a source-commit-bound manifest
+and verified against the actual local artifact. A receipt cannot be substituted for
+another row's input. Derived tools reject raw images unless the matching raw receipts
+also bind their source commit and tuple. A diff remains immutable and unreviewed until
+`review-diff.mjs` writes its separate approval record.
+The required session-provenance record binds the actual launched capture target to the
+row, capture kind, and source commit. It is a separate boundary: a file manifest proves
+bytes on disk, not that those bytes were the process or bundle loaded by the capture.
+Reference receipts also need a cheap-headless `document.fonts` proof for every named
+reference family. That proof blocks strict completion when a remote design font falls
+back locally. It records the problem without downloading or substituting a font asset.
+
+The renderer includes one pinned local variable Google Sans v14.000 file under
+`fonts/`, with `Google Sans` explicitly fixed to optical size 18 and `Google Sans Text`
+to optical size 17. `fonts/GoogleSans-v14.000.provenance.json` records its official
+release, source path, hashes, axes, and OFL provenance. At runtime, wait for
+`window.__DESIGN_REFERENCE_CAPTURE_READY__` and record
+`window.__DESIGN_REFERENCE_FONT_PROOF__`; those values make actual loaded-family
+availability inspectable before capture.

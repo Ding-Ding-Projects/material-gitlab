@@ -1,3 +1,5 @@
+import { __ } from '~/locale';
+
 /**
  * View model for the Login surface, ported from Login.dc.html's renderVals().
  * Kept as plain data + pure functions so a real authentication API can be
@@ -47,14 +49,15 @@ export function validateCredentials({ username, password }) {
 }
 
 /**
- * Default local authenticator. Mirrors the design's mock doSignIn(), which
- * only validates presence and never contacts a server. Replace it for real
- * use by passing an `authenticate` prop returning
- * `Promise<{ ok, error, redirectTo? }>` — a truthy `redirectTo` sends the
- * browser onward immediately instead of showing the inline success banner.
+ * Default authenticator for an unconfigured host. It intentionally refuses
+ * every request: production authentication must be provided by the host via
+ * the `authenticate` prop and must never be fabricated from local input.
  */
 export async function authenticate({ username, password }) {
   const validation = validateCredentials({ username, password });
   if (!validation.ok) return validation;
-  return { ok: true, error: null, redirectTo: null };
+  return {
+    ok: false,
+    error: __('Sign-in is unavailable because no authentication service is configured.'),
+  };
 }

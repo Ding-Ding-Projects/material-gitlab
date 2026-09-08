@@ -20,6 +20,6 @@ The installer uses the committed `build\icon.ico` mark (generated from `assets\i
 
 Local packaging is build-only: `build-installer.bat` creates and verifies an unsigned installer on this machine, but it never publishes a release, creates a tag, uploads an asset, or contacts a release service.
 
-Squirrel packaging uses the public immutable-on-`main` icon URL configured in `package.json`; the icon asset must be dewed to `Ding-Ding-Projects/material-gitlab` before packaging can complete.
+Squirrel packaging uses the public icon URL configured in `package.json`; the icon asset must be published to `Ding-Ding-Projects/material-gitlab` before packaging can complete. The URL currently follows `main` and is therefore mutable.
 
 The build scripts do not create hosts, contact SSH endpoints, expose ports, or provision a local Docker/WSL2 environment. Those are user-selected configuration choices only.

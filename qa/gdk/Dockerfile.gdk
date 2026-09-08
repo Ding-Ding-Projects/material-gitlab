@@ -3,8 +3,12 @@
 ARG MISE_DATA_DIR=/home/gdk/.local/share/mise
 ARG GDK_DIR=/home/gdk/gitlab-development-kit
 ARG RAILS_ENV=test
-ARG NODE_ENV=test
+ARG NODE_ENV=production
 ARG NODE_OPTIONS=--max-old-space-size=10240
+ARG BABEL_ENV=production
+# A local candidate build has no CI assets archive.  Point the probe at a known
+# absent path so the existing compile branch is selected without an empty test.
+ARG GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash
 
 ARG GDK_SHA=ed5c438f1982d5c4653d7569aaf6ff3a0dedd499
 # Use tag prefix when running on 'stable' branch to make sure 'protected' image is used which is not deleted by registry cleanup
@@ -77,7 +81,7 @@ RUN set -eux; \
 #
 FROM base AS gitlab-gems
 
-COPY --chown=gdk:gdk Gemfile Gemfile.lock .tool-versions ./gitlab/
+COPY --chown=gdk:gdk Gemfile Gemfile.lock qa/gdk/.tool-versions ./gitlab/
 COPY --chown=gdk:gdk vendor/gems/ ./gitlab/vendor/gems/
 COPY --chown=gdk:gdk gems/ ./gitlab/gems/
 RUN set -eu; \
@@ -89,7 +93,7 @@ RUN set -eu; \
 #
 FROM base AS gitlab-node-modules
 
-COPY --chown=gdk:gdk package.json yarn.lock .tool-versions ./gitlab/
+COPY --chown=gdk:gdk package.json yarn.lock qa/gdk/.tool-versions ./gitlab/
 COPY --chown=gdk:gdk patches/ ./gitlab/patches/
 COPY --chown=gdk:gdk scripts/frontend/postinstall.js ./gitlab/scripts/frontend/postinstall.js
 COPY --chown=gdk:gdk scripts/frontend/preinstall.mjs ./gitlab/scripts/frontend/preinstall.mjs
