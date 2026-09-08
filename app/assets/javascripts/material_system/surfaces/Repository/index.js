@@ -1,9 +1,9 @@
 import Vue from 'vue';
 import Repository from './Repository.vue';
-import { assertRepositoryAdapter } from './data';
+import { assertRepositoryAdapter, createProjectRepositoryAdapter } from './data';
 
 export { default as Repository } from './Repository.vue';
-export { assertRepositoryAdapter, normalizeRepositoryData, createRepositoryAdapter, createRailsRepositoryAdapter, createGraphqlRepositoryAdapter } from './data';
+export { assertRepositoryAdapter, normalizeRepositoryData, createRepositoryAdapter, createProjectRepositoryAdapter, createRailsRepositoryAdapter, createGraphqlRepositoryAdapter } from './data';
 
 /**
  * Mounts the Repository surface onto `el`.
@@ -12,10 +12,16 @@ export { assertRepositoryAdapter, normalizeRepositoryData, createRepositoryAdapt
  * @returns {Vue} the mounted Vue instance.
  */
 export function mountRepositorySurface(el, propsData = {}) {
-  assertRepositoryAdapter(propsData.adapter);
+  const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
+  const adapter = propsData.adapter || createProjectRepositoryAdapter({
+    projectPath: propsData.projectPath || mountEl?.dataset?.projectPath,
+    ref: propsData.ref || mountEl?.dataset?.ref,
+    path: propsData.path || mountEl?.dataset?.path,
+  });
+  assertRepositoryAdapter(adapter);
   return new Vue({
-    el,
-    render: (h) => h(Repository, { props: propsData }),
+    el: mountEl,
+    render: (h) => h(Repository, { props: { ...propsData, adapter } }),
   });
 }
 

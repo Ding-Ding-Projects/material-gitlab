@@ -45,13 +45,11 @@ export default function setupVueRepositoryList() {
   } = dataset;
   const router = createRouter(projectPath, escapedRef, fullName);
 
-  // Material Repository is opt-in per host page. A declared mount point must
-  // carry a real GraphQL/Rails adapter; never render a sample tree silently.
+  // Material Repository is opt-in per host page and uses the existing
+  // same-origin project REST API with server-extracted ref and path data.
   const materialRepositoryEl = document.getElementById('js-material-repository-app');
   if (materialRepositoryEl) {
-    const adapter = materialRepositoryEl.__materialRepositoryAdapter;
-    if (!adapter) throw new Error('Material Repository mount requires a real repository adapter');
-    mountRepositorySurface(materialRepositoryEl, { adapter });
+    mountRepositorySurface(materialRepositoryEl);
   }
 
   initFileTreeBrowser(router, { projectPath, ref, refType });

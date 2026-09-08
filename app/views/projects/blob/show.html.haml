@@ -15,6 +15,8 @@
 
   = render 'projects/last_push'
 
+  #js-material-repository-app{ data: { project_path: @project.full_path, ref: @ref, path: @blob.path } }
+
   .gl-flex.navigation-root
     -# Pre-reserve width to prevent CLS; must match TREE_WIDTH in file_tree_browser.vue
     #js-file-browser{ style: 'width:320px' }

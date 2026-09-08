@@ -1,3 +1,5 @@
+import axios from '~/lib/utils/axios_utils';
+
 /**
  * Repository data boundary.
  *
@@ -100,6 +102,46 @@ export function createRepositoryAdapter(implementation) {
     fork: implementation.fork.bind(implementation),
     download: implementation.download.bind(implementation),
     deleteEntries: implementation.deleteEntries.bind(implementation),
+  });
+}
+
+const projectApiPath = (projectPath, suffix = '') => `/api/v4/projects/${encodeURIComponent(requiredString(projectPath, 'project path'))}${suffix}`;
+const responseData = (response) => response.data;
+const decodeContent = (content) => (typeof content === 'string' && typeof atob === 'function' ? atob(content.replace(/\s/g, '')) : content || '');
+
+export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '', client = axios, navigate = window.location.assign.bind(window.location) } = {}) {
+  const base = projectApiPath(projectPath);
+  const request = (url, options = {}) => client.get(url, options).then(responseData);
+  const loadProject = () => request(base);
+  const loadBranches = () => request(`${base}/repository/branches`, { params: { per_page: 100 } });
+  return createRepositoryAdapter({
+    async load({ branch, path: currentPath } = {}) {
+      const project = await loadProject();
+      const selectedBranch = branch || ref || project.default_branch;
+      const treePath = currentPath || path || '';
+      const [branches, entries, commits, tags] = await Promise.all([
+        loadBranches(),
+        request(`${base}/repository/tree`, { params: { ref: selectedBranch, path: treePath || undefined, per_page: 100 } }),
+        request(`${base}/repository/commits`, { params: { ref_name: selectedBranch, per_page: 20 } }),
+        request(`${base}/repository/tags`, { params: { per_page: 20 } }),
+      ]);
+      return {
+        project: { name: project.name, visibility: project.visibility, stars: project.star_count, starred: project.starred, forks: project.forks_count, commitCount: project.commit_count, branchCount: branches.length, tagCount: tags.length, storage: project.repository_storage, cloneUrls: { https: project.http_url_to_repo, ssh: project.ssh_url_to_repo } },
+        branches: branches.map((item) => item.name),
+        defaultBranch: project.default_branch,
+        tree: { [treePath]: entries.map((entry) => ({ name: entry.name, kind: entry.type === 'tree' ? 'dir' : 'file', path: entry.path })) },
+        commits: commits.map((commit) => ({ sha: commit.short_id || commit.id, message: commit.title || commit.message, author: commit.author_name || commit.author_email, when: commit.committed_date || commit.created_at })),
+      };
+    },
+    async loadBlob({ path: filePath, branch } = {}) {
+      const file = await request(`${base}/repository/files/${encodeURIComponent(requiredString(filePath, 'file path'))}`, { params: { ref: branch || ref } });
+      return { name: file.file_name, path: file.file_path, bytes: file.size, rawText: decodeContent(file.content) };
+    },
+    async branches() { return (await loadBranches()).map((item) => item.name); },
+    async toggleStar() { const project = await loadProject(); return client.post(`${base}/${project.starred ? 'unstar' : 'star'}`).then(responseData); },
+    async fork() { return client.post(`${base}/fork`).then(responseData); },
+    async download({ branch } = {}) { navigate(`${base}/repository/archive?sha=${encodeURIComponent(branch || ref)}`); return {}; },
+    async deleteEntries() { throw new Error('Delete files from their dedicated repository route.'); },
   });
 }
 

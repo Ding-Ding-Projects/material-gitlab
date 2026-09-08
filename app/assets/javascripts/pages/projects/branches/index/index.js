@@ -6,6 +6,7 @@ import initDeleteMergedBranches from '~/branches/init_delete_merged_branches';
 import initBranchMoreActions from '~/branches/init_branch_more_actions';
 import initIssuablePopovers from '~/issuable/popover';
 import initSourceCodeDropdowns from '~/vue_shared/components/download_dropdown/init_download_dropdowns';
+import { mountCodeSurface } from '~/material_system/surfaces/Code';
 
 const { divergingCountsEndpoint, defaultBranch } =
   document.querySelector('.js-branch-list').dataset;
@@ -20,3 +21,6 @@ document.querySelectorAll('.js-branch-more-actions').forEach((elem) => initBranc
 initIssuablePopovers(document.querySelectorAll('[data-reference-type="commit"]'));
 
 initDeleteBranchModal();
+
+const materialCodeEl = document.getElementById('js-material-code-app');
+if (materialCodeEl) mountCodeSurface(materialCodeEl);
