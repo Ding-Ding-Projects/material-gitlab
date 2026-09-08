@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Design parity implementation, 8 September 2026, in progress
+
+- Integrate real Rails routes for the project, collaboration, operations, security,
+  analytics, and Settings surfaces, retaining native authorization and service contracts.
+- Preserve shared-header preferences and separate source route registration from
+  the still-pending 25-screen runtime capture and component-conformance review.
+- Correct host-dependent CRLF conversion in immutable build archives, with exact
+  archive-to-commit byte regressions and negative mutations.
+- Prepare an explicitly scoped native Rails data seed and correct production
+  capture plans so they cannot select internal reference routes.
+- Standard frontend verification reached 36 suites and 257 passing tests before
+  the new official-component migration. Genuine product screenshots remain pending.
+
 ### Packaging: the build now reaches real compilation
 
 - A package workflow is committed and has been run seven times. Every failure had a cause that was

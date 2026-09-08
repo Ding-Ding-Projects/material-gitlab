@@ -34,6 +34,24 @@ reproduction.
 
 ## Completion boundary
 
+An exact-source review at `007ab7cf36280d00e9f31b876845e45bfc349d42` found a
+blocking component-conformance gap. Surface Vue files contain 427 native-button
+lines, 151 native-input lines, 6 native-select lines, and 14 native-textarea
+lines. Those are source counts, not counts of controls simultaneously visible.
+The feature registry and route inventory do not provide rendered component
+provenance. Styled native controls and accessibility attributes alone cannot
+establish the required genuine Material Design 3 component implementation.
+The first repair lane establishes an official component package and migrates the
+two shared headers. Remaining surfaces require their own conversion and review;
+the pending component audits must not be marked complete from that first lane.
+
+The same review found that the actual Agent Memory route exposes a sync action
+whose component has no `runSync` method. Dormant skill, session, and history
+actions also simulate backend success locally. The current controller returns
+empty collections and supplies no matching mutation endpoints. Their repair
+must expose honest capability availability rather than invent a working sync
+or accept a timer as backend evidence.
+
 Route inventory checks, unit tests, successful compilation, and a working
 reference renderer do not establish production parity. Each contract still needs
 real production interaction, matching tuples, current provenance, raw captures,

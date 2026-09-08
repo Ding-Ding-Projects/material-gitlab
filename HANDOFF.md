@@ -5,6 +5,13 @@
 This section supersedes older runtime and release availability claims below.
 The task remains in progress. No complete production parity verdict exists.
 
+Source route integration is not component conformance. An independent review
+found native control lookalikes without a rendered-component provenance registry.
+The initial official-component migration is scoped to the two shared headers;
+the other surfaces and their built component audits remain open. Agent Memory's
+unsupported sync and simulated backend mutations now expose read-only limits;
+four focused tests pass, while built interaction remains pending.
+
 - The current computer started without a running Rails instance. The recorded
   instance from the earlier computer must not be assumed to exist here.
 - The first preserved batch reached `main` at

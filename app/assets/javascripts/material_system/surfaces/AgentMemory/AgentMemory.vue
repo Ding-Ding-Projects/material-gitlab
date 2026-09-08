@@ -393,7 +393,11 @@ export default {
         this.sessions = withStartedAt(data.sessions || [], this.now);
         this.history = data.history || [];
         this.baseSyncSteps = data.syncSteps || [];
-        this.capabilities = { ...this.capabilities, ...(data.capabilities || {}) };
+        // No mutation adapter is implemented. Provider flags alone cannot enable
+        // controls that have no operation to call.
+        this.capabilities = Object.fromEntries(
+          Object.keys(this.capabilities).map((capability) => [capability, false]),
+        );
         this.loading = {
           targets: false,
           blocks: false,

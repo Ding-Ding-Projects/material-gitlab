@@ -7,7 +7,10 @@
 - [x] Add an immutable local GDK build helper with tested process boundaries.
 - [x] Correct the shared-shell ownership and action contract with focused tests.
 - [ ] Finish all 25 production route integrations and backend capability contracts.
-- [ ] Activate Settings only after equivalent existing controls are implemented.
+- [ ] Verify the activated Settings route and equivalent controls in the real built application.
+- [ ] Replace styled native control lookalikes with registered Material Design 3 primitives,
+      retaining component provenance and negative replacement tests for every surface.
+- [ ] Remove Agent Memory's unsupported sync action and simulated backend success.
 - [ ] Build and start the final candidate on the current computer.
 - [ ] Retain genuine production interactions, captures, comparisons, and reviews
       for every declared parity state. No demo screenshots qualify.

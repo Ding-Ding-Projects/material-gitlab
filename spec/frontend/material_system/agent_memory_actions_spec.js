@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount, shallowMount } from '@vue/test-utils';
 import AgentMemory from '~/material_system/surfaces/AgentMemory/AgentMemory.vue';
 import { notificationCenter } from '~/material_system/notifications';
 
@@ -8,10 +8,10 @@ jest.mock('~/material_system/settings', () => ({
   subscribeSettings: () => jest.fn(),
 }));
 
-jest.mock('~/material_system/notifications', () => ({ notificationCenter: { notify: jest.fn() } }));
+jest.mock('~/material_system/notifications', () => ({ notificationCenter: { notify: jest.fn(), subscribe: () => () => {} } }));
 
 const readOnlyData = {
-  skills: [{ id: 'skill-one', name: 'Skill one', removable: true, status: 'installed' }],
+  skills: [{ id: 'skill-one', name: 'Skill one', icon: 'chip', removable: true, status: 'installed' }],
   sessions: [{ id: 1, agent: 'Agent one', task: 'Task', statusTone: 'good', minutesAgo: 0 }],
   history: [{ id: 'r1', icon: 'undo', title: 'Revision one', when: 'today' }],
   syncSteps: [],
@@ -26,21 +26,25 @@ const readOnlyData = {
 };
 
 describe('AgentMemory read-only actions', () => {
-  const createWrapper = () =>
-    shallowMount(AgentMemory, { propsData: { initialData: readOnlyData } });
+  const createWrapper = (render = shallowMount) =>
+    render(AgentMemory, { propsData: { initialData: readOnlyData } });
 
   it('keeps unsupported actions disabled and shows the provider limitation', async () => {
-    const wrapper = createWrapper();
+    const wrapper = createWrapper(mount);
     await wrapper.vm.$nextTick();
 
-    wrapper.setData({ activeTab: 'skills' });
+    wrapper.setData({ activeTab: 'skills', selection: { blocks: [], skills: ['skill-one'], sessions: [], history: [] } });
     await wrapper.vm.$nextTick();
     expect(wrapper.text()).toContain('read-only Agent Memory provider');
     expect(wrapper.findComponent({ name: 'SkillsTab' }).props('canReinstall')).toBe(false);
+    const reinstall = wrapper.findAll('button').wrappers.find((button) => button.text().includes('Reinstall selected'));
+    expect(reinstall.element.disabled).toBe(true);
 
     wrapper.setData({ activeTab: 'sync' });
     await wrapper.vm.$nextTick();
     expect(wrapper.findComponent({ name: 'SyncTab' }).props('supported')).toBe(false);
+    expect(wrapper.text()).toContain('Canonical sync is unavailable');
+    expect(wrapper.findComponent({ name: 'SyncTab' }).find('button').exists()).toBe(false);
     wrapper.destroy();
   });
 
@@ -73,6 +77,15 @@ describe('AgentMemory read-only actions', () => {
     ).toBe(true);
 
     timer.mockRestore();
+    wrapper.destroy();
+  });
+
+  it('does not enable absent mutation adapters from provider capability flags', () => {
+    const wrapper = shallowMount(AgentMemory, { propsData: { initialData: {
+      ...readOnlyData,
+      capabilities: Object.fromEntries(Object.keys(readOnlyData.capabilities).map((name) => [name, true])),
+    } } });
+    expect(Object.values(wrapper.vm.capabilities).every((available) => available === false)).toBe(true);
     wrapper.destroy();
   });
 
