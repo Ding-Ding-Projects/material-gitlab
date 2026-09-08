@@ -6,6 +6,7 @@ export default {
   name: 'FileTree',
   components: { MIcon, FileTreeRow },
   props: {
+    canDelete: { type: Boolean, default: false },
     entries: { type: Array, required: true },
     selected: { type: Array, required: true },
     scopeLabel: { type: String, required: true },
@@ -58,17 +59,18 @@ export default {
           <m-icon name="copy" :size="15" decorative />
           Copy paths
         </button>
-        <button type="button" class="file-tree__action" :disabled="!selected.length" @click="$emit('download-selected')">
+        <button type="button" class="file-tree__action" :disabled="selected.length !== 1" title="Select exactly one file or directory" @click="$emit('download-selected')">
           <m-icon name="download" :size="15" decorative />
           Download
         </button>
-        <button type="button" class="file-tree__action file-tree__action--danger" :disabled="!selected.length" @click="$emit('request-delete')">
+        <button v-if="canDelete" type="button" class="file-tree__action file-tree__action--danger" :disabled="!selected.length" @click="$emit('request-delete')">
           <m-icon name="trash" :size="15" decorative />
           Delete
         </button>
       </div>
     </div>
 
+    <p v-if="selected.length > 1" role="status">Download supports one selected file or directory at a time.</p>
     <div v-if="!entries.length" class="file-tree__empty">
       <template v-if="searchQuery">
         <p>No files match &ldquo;{{ searchQuery }}&rdquo;.</p>

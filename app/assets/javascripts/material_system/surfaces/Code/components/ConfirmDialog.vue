@@ -1,6 +1,8 @@
 <template>
   <div class="gl-code-overlay" @click.self="$emit('cancel')">
     <div
+      ref="panel"
+      @keydown.tab="keepFocus"
       class="gl-code-dialog gl-code-dialog--confirm"
       role="alertdialog"
       aria-modal="true"
@@ -40,8 +42,18 @@ export default {
     titleId() { return `gl-code-confirm-title-${this.uid}`; },
     bodyId() { return `gl-code-confirm-body-${this.uid}`; },
   },
+  methods: {
+    keepFocus(event) {
+      const buttons = [...this.$refs.panel.querySelectorAll('button:not([disabled])')];
+      const first = buttons[0]; const last = buttons[buttons.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    },
+  },
+  beforeDestroy() { if (this.previousFocus?.isConnected) this.previousFocus.focus(); },
   mounted() {
-    this.$nextTick(() => this.$refs.confirmBtn && this.$refs.confirmBtn.focus());
+    this.previousFocus = document.activeElement;
+    this.$nextTick(() => this.$refs.panel.querySelector('button')?.focus());
   },
 };
 </script>

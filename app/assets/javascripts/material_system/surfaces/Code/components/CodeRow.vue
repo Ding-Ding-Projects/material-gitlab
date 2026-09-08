@@ -11,7 +11,8 @@
       <material-icon :name="row.icon" :size="19" />
     </span>
     <div class="gl-code-row__body">
-      <div class="gl-code-row__title" :class="{ 'gl-code-row__title--mono': row.titleMono }">{{ row.title }}</div>
+      <a v-if="row.href" :href="row.href" class="gl-code-row__title">{{ row.title }}</a>
+      <div v-else class="gl-code-row__title" :class="{ 'gl-code-row__title--mono': row.titleMono }">{{ row.title }}</div>
       <div class="gl-code-row__sub">{{ row.sub }}</div>
     </div>
     <span

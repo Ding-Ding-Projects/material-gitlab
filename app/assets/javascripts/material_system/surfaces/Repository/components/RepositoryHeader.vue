@@ -42,12 +42,13 @@ export default {
           type="button"
           class="repo-header__pill"
           :aria-pressed="project.starred"
+          :disabled="!project.canStar"
           @click="toggleStar"
         >
           <m-icon name="star" :size="17" decorative />
           {{ project.starred ? 'Starred' : 'Star' }} &middot; {{ project.stars }}
         </button>
-        <button type="button" class="repo-header__pill" @click="fork">
+        <button v-if="project.canFork" type="button" class="repo-header__pill" @click="fork">
           <m-icon name="fork" :size="17" decorative />
           Fork &middot; {{ project.forks }}
         </button>
@@ -73,10 +74,10 @@ export default {
       </div>
     </div>
     <div class="repo-header__stats">
-      <span><b>{{ project.commitCount.toLocaleString() }}</b> commits</span>
+      <span v-if="project.commitCount !== null"><b>{{ project.commitCount.toLocaleString() }}</b> commits</span>
       <span><b>{{ project.branchCount }}</b> branches</span>
-      <span><b>{{ project.tagCount }}</b> tags</span>
-      <span><b>{{ project.storage }}</b> storage</span>
+      <span v-if="project.tagCount !== null"><b>{{ project.tagCount }}</b> tags</span>
+      <span v-if="project.storage"><b>{{ project.storage }}</b> repository size</span>
     </div>
   </div>
 </template>

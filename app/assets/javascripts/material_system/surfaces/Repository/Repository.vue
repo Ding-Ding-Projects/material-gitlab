@@ -45,6 +45,9 @@ export default {
     NotificationHost,
   },
   props: {
+    initialRef: { type: String, default: '' },
+    initialPath: { type: String, default: '' },
+    initialKind: { type: String, default: 'tree' },
     adapter: {
       type: Object,
       required: true,
@@ -61,10 +64,11 @@ export default {
       regexOpen: false,
       paletteOpen: false,
       deleteConfirmOpen: false,
-      currentBranch: '',
-      path: [],
+      currentBranch: this.initialRef,
+      path: (this.initialKind === 'blob' ? this.initialPath.split('/').slice(0, -1) : this.initialPath.split('/')).filter(Boolean),
       blobName: null,
       selected: [],
+      initialBlobPending: this.initialKind === 'blob',
     };
   },
   computed: {
@@ -186,6 +190,13 @@ export default {
         }));
         if (requestId !== this._requestId) return;
         this.repository = value;
+        if (this.initialBlobPending) {
+          const blob = await this.adapter.loadBlob({ path: this.initialPath, branch: this.currentBranch || value.defaultBranch });
+          if (requestId !== this._requestId) return;
+          this.$set(this.repository.blobs, this.initialPath, blob);
+          this.blobName = this.initialPath;
+          this.initialBlobPending = false;
+        }
         if (!this.currentBranch) this.currentBranch = value.defaultBranch;
       } catch (error) {
         if (requestId === this._requestId) this.loadError = error?.message || 'Repository data could not be loaded.';
@@ -260,6 +271,7 @@ export default {
       updateSettings({ theme: this.dark ? 'dark' : 'light' });
     },
     async switchBranch(branch) {
+      this.initialBlobPending = false;
       this.currentBranch = branch;
       this.path = [];
       this.blobName = null;
@@ -267,20 +279,25 @@ export default {
       await this.loadRepository();
     },
     async navigateTo(path) {
+      this.initialBlobPending = false;
       this.path = path;
       this.blobName = null;
       this.selected = [];
       await this.loadRepository();
     },
     async openEntry(entry) {
+      if (entry.kind === 'submodule') { this.notify({ severity: 'info', message: `Submodule ${entry.path} points to commit ${entry.sha}. Open its source repository to browse its files.` }); return; }
       if (entry.kind === 'dir') {
         await this.navigateTo([...this.path, entry.name]);
         return;
       }
+      const location = `${this.currentBranch}:${this.pathKey}`;
       try {
         const blob = await this.adapter.loadBlob({ path: entry.path || [...this.path, entry.name].join('/'), branch: this.currentBranch });
-        this.$set(this.repository.blobs, entry.name, blob);
-        this.blobName = entry.name;
+        if (location !== `${this.currentBranch}:${this.pathKey}`) return;
+        const canonicalPath = entry.path || [...this.path, entry.name].join('/');
+        this.$set(this.repository.blobs, canonicalPath, blob);
+        this.blobName = canonicalPath;
       } catch (error) {
         this.notify({ severity: 'error', message: error?.message || `Unable to load ${entry.name}.` });
       }
@@ -319,10 +336,12 @@ export default {
       }
     },
     async downloadSelected() {
-      const paths = this.selected.map((name) => [...this.path, name].join('/'));
-      await this.runAdapterAction(this.adapter.download, { paths, branch: this.currentBranch }, `Download requested for ${paths.length} item${paths.length === 1 ? '' : 's'}.`);
+      const entries = this.rawEntries.filter((entry) => this.selected.includes(entry.name));
+      const result = await this.runAdapterAction(this.adapter.download, { entries, branch: this.currentBranch });
+      if (result?.requested) this.notify({ severity: 'info', message: `Download requested for ${entries[0].path}.` });
     },
     requestDelete() {
+      if (!this.adapter.capabilities?.deleteEntries) return;
       this.rememberFocus();
       this.deleteConfirmOpen = true;
     },
@@ -345,8 +364,7 @@ export default {
       await this.loadRepository();
     },
     async fork() {
-      await this.runAdapterAction(this.adapter.fork, { branch: this.currentBranch }, 'Fork request submitted.');
-      await this.loadRepository();
+      await this.runAdapterAction(this.adapter.fork, { branch: this.currentBranch });
     },
   },
 };
@@ -377,18 +395,20 @@ export default {
       <template v-else>
         <repository-header :project="repository.project" @toggle-star="toggleStar" @fork="fork" @notify="notify" />
 
-        <language-bar :languages="repository.languages" />
+        <language-bar v-if="repository.languages.length" :languages="repository.languages" />
 
         <div class="mtl-repo__nav-row">
-          <branch-switcher ref="branchSwitcher" :branches="repository.branches" :active-branch="currentBranch" @switch="switchBranch" />
+          <branch-switcher v-if="repository.branches.length" ref="branchSwitcher" :branches="repository.branches" :active-branch="currentBranch" @switch="switchBranch" />
           <breadcrumbs :crumbs="breadcrumbs" @navigate="navigateTo" />
         </div>
 
         <blob-viewer v-if="activeBlob" :blob="activeBlob" @close="closeBlob" />
 
+<p v-else-if="repository.emptyRepository" role="status">This repository has no commits yet. Use its clone URL to add the first commit.</p>
         <div v-else class="mtl-repo__browser">
           <file-tree
             :entries="filteredEntries"
+            :can-delete="adapter.capabilities && adapter.capabilities.deleteEntries"
             :selected="selected"
             :scope-label="scopeLabel"
             :search-query="search"
