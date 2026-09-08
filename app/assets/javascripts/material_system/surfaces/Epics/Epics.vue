@@ -8,7 +8,7 @@ import EpicsHeader from './components/EpicsHeader.vue';
 import BulkActionBar from './components/BulkActionBar.vue';
 import EpicTree from './components/EpicTree.vue';
 import RoadmapView from './components/RoadmapView.vue';
-import RegexBuilderPopover from './components/RegexBuilderPopover.vue';
+import RegexBuilderDialog from './components/RegexBuilderDialog.vue';
 import CommandPaletteOverlay from './components/CommandPaletteOverlay.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import {
@@ -47,7 +47,7 @@ export default {
     BulkActionBar,
     EpicTree,
     RoadmapView,
-    RegexBuilderPopover,
+    RegexBuilderDialog,
     CommandPaletteOverlay,
     ConfirmDialog,
   },
@@ -402,7 +402,7 @@ export default {
       />
       <roadmap-view v-else :rows="visibleRoadmapRows" :has-query="hasQuery" />
     </main>
-    <regex-builder-popover
+    <regex-builder-dialog
       v-if="regexOpen"
       :initial="regexInitial"
       :corpus="regexCorpus"
