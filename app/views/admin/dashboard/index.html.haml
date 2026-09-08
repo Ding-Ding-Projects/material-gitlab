@@ -1,17 +1,17 @@
 - page_title _("Dashboard")
-- stats = [
-  { id: 'users', value: approximate_count_with_delimiters(@counts, User), label: _('Users') },
+-# Hamlit ends a `-` statement at the line break, so an opener that sits alone on its
+-# line compiles to `stats = [;` and raises a syntax error before the page can render.
+-# Keeping the first element on the opening line makes it a normal trailing-comma
+-# continuation, which Hamlit accepts.
+- stats = [{ id: 'users', value: approximate_count_with_delimiters(@counts, User), label: _('Users') },
   { id: 'groups', value: approximate_count_with_delimiters(@counts, Group), label: _('Groups') },
   { id: 'projects', value: approximate_count_with_delimiters(@counts, Project), label: _('Projects') },
   { id: 'runners', value: Ci::Runner.count.to_s, label: _('Runners') },
   { id: 'version', value: Gitlab::VERSION, label: _('Version') },
-  { id: 'uptime', value: _('Not reported'), label: _('Uptime') }
-]
-- health = [
-  { id: 'database', label: _('Database'), status: 'good', note: database_versions.values.map { |v| v[:version] }.compact.join(', ').presence || _('Connected') },
+  { id: 'uptime', value: _('Not reported'), label: _('Uptime') }]
+- health = [{ id: 'database', label: _('Database'), status: 'good', note: database_versions.values.map { |v| v[:version] }.compact.join(', ').presence || _('Connected') },
   { id: 'redis', label: _('Redis'), status: @redis_versions.present? ? 'good' : 'warn', note: @redis_versions.presence&.join(', ') || _('Not reported') },
-  { id: 'background-migrations', label: _('Background migrations'), status: 'good', note: _('Reported by the instance') }
-]
+  { id: 'background-migrations', label: _('Background migrations'), status: 'good', note: _('Reported by the instance') }]
 
 #js-material-admin{ data: {
   initial_data: Gitlab::Json.dump(@material_admin_data),

@@ -421,6 +421,35 @@ Receipt: [`site/evidence/command-palette.json`](site/evidence/command-palette.js
 </details>
 
 <details open>
+<summary><b>The Material admin surface mounted in the running application</b> (1440 x 960, dark theme)</summary>
+
+This is the fork's own Material surface rendering inside a real GitLab instance, not a design file
+and not a prototype. The content area is
+`app/assets/javascripts/material_system/surfaces/Admin`: the **Admin area** heading with its
+instance chip, Material segmented tabs with **Overview** selected in a tonal pill, a Material search
+field carrying the regex and tools affordances, and the instance health card.
+
+![The GitLab admin dashboard in dark theme, with the Material admin surface mounted in the content area showing an Admin area heading, an instance chip, Overview Users Runners Projects segmented tabs with Overview selected, a Material search field, and an instance health card](site/evidence/app-admin.png)
+
+Receipt: [`site/evidence/instance-running.json`](site/evidence/instance-running.json)
+
+> [!NOTE]
+> **Two honest limits are visible here.** GitLab's stock chrome still surrounds the surface: the left
+> sidebar and top bar are upstream's, not the fork's, so this is a mounted surface rather than the
+> full replacement the design specifies. And the instance health card is empty, because the data the
+> surface expects is not populated on this instance.
+>
+> Getting even this far needed three separate repairs, recorded because each was invisible from the
+> source: the compiled assets (the execute-bit fix), a HAML syntax error in the view that meant it
+> had **never** rendered, and the fork's own admin controller and route, without which the view
+> raises `undefined method 'admin_dashboard_actions_path'`. **Views and assets alone cannot mount a
+> Material surface.** That is why the layering route in
+> [Installing this fork](#installing-this-fork) is not sufficient on its own, and why the packaged
+> build is the real answer.
+
+</details>
+
+<details>
 <summary><b>A running instance serving this fork's compiled frontend</b> (1898 x 1339, dark theme, 150% scale)</summary>
 
 This is a real GitLab instance, Omnibus 19.3.1 on WSL2, with this fork's webpack output layered

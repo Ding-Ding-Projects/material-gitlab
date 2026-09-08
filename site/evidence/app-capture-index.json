@@ -1,0 +1,44 @@
+[
+  {
+    "path": "/",
+    "landed": "/dashboard/projects",
+    "title": "Projects \u00b7 GitLab",
+    "file": "app-dashboard.png",
+    "materialMount": null
+  },
+  {
+    "path": "/admin",
+    "landed": "/admin",
+    "title": "Dashboard \u00b7 Admin area \u00b7 GitLab",
+    "file": "app-admin.png",
+    "materialMount": null
+  },
+  {
+    "path": "/dashboard/todos",
+    "landed": "/dashboard/todos",
+    "title": "To-Do List \u00b7 GitLab",
+    "file": "app-todos.png",
+    "materialMount": null
+  },
+  {
+    "path": "/dashboard/projects",
+    "landed": "/dashboard/projects",
+    "title": "Projects \u00b7 GitLab",
+    "file": "app-projects.png",
+    "materialMount": null
+  },
+  {
+    "path": "/-/user_settings/profile",
+    "landed": "/-/user_settings/profile",
+    "title": "Edit Profile \u00b7 User Settings \u00b7 GitLab",
+    "file": "app-profile.png",
+    "materialMount": null
+  },
+  {
+    "path": "/explore",
+    "landed": "/explore/projects/active",
+    "title": "Explore projects \u00b7 GitLab",
+    "file": "app-explore.png",
+    "materialMount": null
+  }
+]
