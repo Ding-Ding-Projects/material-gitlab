@@ -116,7 +116,7 @@ try {
       $read = $archive.StandardOutput.BaseStream.ReadAsync($buffer, 0, $buffer.Length, $cancellation.Token).GetAwaiter().GetResult()
       if ($read -eq 0) { break }
       $archiveFile.Write($buffer, 0, $read)
-      $docker.StandardInput.BaseStream.WriteAsync($buffer, 0, $read, $cancellation.Token).GetAwaiter().GetResult()
+      [void]$docker.StandardInput.BaseStream.WriteAsync($buffer, 0, $read, $cancellation.Token).GetAwaiter().GetResult()
     }
   } finally {
     $archiveFile.Dispose()
@@ -127,7 +127,7 @@ try {
   if ($archive.ExitCode -ne 0) { throw "git archive failed with exit code $($archive.ExitCode). See $candidateRoot\git-archive.log" }
   $remaining = [Math]::Max(1, [int]($deadline - [DateTime]::UtcNow).TotalMilliseconds)
   if (-not $docker.WaitForExit($remaining)) { throw "Docker build timed out after $TimeoutSeconds seconds." }
-  $archiveErrorCopy.GetAwaiter().GetResult(); $dockerOutputCopy.GetAwaiter().GetResult(); $dockerErrorCopy.GetAwaiter().GetResult()
+  [void]$archiveErrorCopy.GetAwaiter().GetResult(); [void]$dockerOutputCopy.GetAwaiter().GetResult(); [void]$dockerErrorCopy.GetAwaiter().GetResult()
   if ($docker.ExitCode -ne 0) { throw "Docker build failed with exit code $($docker.ExitCode). See $candidateRoot\docker-build.log" }
   $imageId = Invoke-Native $DockerExecutable @('image', 'inspect', $tag, '--format', '{{.Id}}')
   $repoDigests = Invoke-Native $DockerExecutable @('image', 'inspect', $tag, '--format', '{{json .RepoDigests}}') | ConvertFrom-Json

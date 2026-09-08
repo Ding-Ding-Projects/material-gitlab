@@ -53,7 +53,7 @@ try {
   $fakeGit = Join-Path $fakeBin 'fake-git.cmd'
   $fakeDocker = Join-Path $fakeBin 'fake-docker.cmd'
   [IO.File]::WriteAllText($fakeGit, "@echo off`r`nif `"%1`"==`"rev-parse`" if `"%2`"==`"--show-toplevel`" ( echo $repositoryRoot & exit /b 0 )`r`nif `"%1`"==`"rev-parse`" ( echo $fakeCommit & exit /b 0 )`r`nif `"%1`"==`"archive`" ( <nul set /p `"=fake-tar`" & exit /b 0 )`r`nexit /b 19`r`n")
-  [IO.File]::WriteAllText($fakeDocker, "@echo off`r`nif `"%1`"==`"buildx`" goto buildx`r`nif `"%1`"==`"image`" goto image`r`nexit /b 19`r`n:buildx`r`nmore >nul`r`nif `"%FAKE_DOCKER_MODE%`"==`"timeout`" powershell -NoProfile -Command `"Start-Sleep -Seconds 3`"`r`nexit /b 17`r`n:image`r`necho []`r`nexit /b 0`r`n")
+  [IO.File]::WriteAllText($fakeDocker, "@echo off`r`nif `"%1`"==`"buildx`" goto buildx`r`nif `"%1`"==`"image`" goto image`r`nexit /b 19`r`n:buildx`r`nmore >nul`r`nif `"%FAKE_DOCKER_MODE%`"==`"timeout`" powershell -NoProfile -Command `"Start-Sleep -Seconds 3`"`r`nif `"%FAKE_DOCKER_MODE%`"==`"success`" exit /b 0`r`nexit /b 17`r`n:image`r`necho %* | findstr /C:`"RepoDigests`" >nul`r`nif not errorlevel 1 ( echo [] & exit /b 0 )`r`necho sha256:fake-image-id`r`nexit /b 0`r`n")
 
   $env:FAKE_DOCKER_MODE = 'nonzero'
   $nonzeroRoot = Join-Path $taskOutput 'nonzero'
@@ -67,6 +67,12 @@ try {
   $timeoutFailure = $null
   try { & $helper -Commit $fakeCommit -OutputRoot $timeoutRoot -TimeoutSeconds 1 -GitExecutable $fakeGit -DockerExecutable $fakeDocker *> $null } catch { $timeoutFailure = $_.Exception.Message }
   if ($timeoutFailure -notmatch 'timed out') { throw 'Actual helper path did not report the simulated Docker timeout.' }
+  $env:FAKE_DOCKER_MODE = 'success'
+  $successRoot = Join-Path $taskOutput 'success'
+  $successOutput = & $helper -Commit $fakeCommit -OutputRoot $successRoot -GitExecutable $fakeGit -DockerExecutable $fakeDocker
+  if ($LASTEXITCODE -ne 0) { throw 'Actual helper success path returned a non-zero exit code.' }
+  if (($successOutput | Out-String) -match 'VoidTaskResult') { throw 'Actual helper success output leaked task return values.' }
+  if (-not (Test-Path -LiteralPath (Join-Path $successRoot $fakeCommit 'receipt.json'))) { throw 'Actual helper success path did not write a receipt.' }
   Remove-Item Env:FAKE_DOCKER_MODE -ErrorAction SilentlyContinue
   Write-Host 'build-design-parity-runtime helper tests passed.'
 } finally {
