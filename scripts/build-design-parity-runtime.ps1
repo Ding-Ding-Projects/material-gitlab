@@ -26,7 +26,7 @@ function Get-Sha256 {
 
 function Get-RecipeHash {
   param([Parameter(Mandatory)][string]$SourceSha, [Parameter(Mandatory)][string]$GitCommand)
-  $recipeFiles = @('qa/gdk/Dockerfile.gdk', 'qa/gdk/Dockerfile.gdk.dockerignore', 'qa/gdk/.tool-versions', 'qa/gdk/gdk.yml', 'qa/gdk/entrypoint', 'qa/gdk/pre-receive')
+  $recipeFiles = @('qa/gdk/Dockerfile.gdk', 'qa/gdk/Dockerfile.gdk.dockerignore', 'qa/gdk/.tool-versions', 'qa/gdk/gdk.yml', 'qa/gdk/normalize-executable-shebangs.sh', 'qa/gdk/entrypoint', 'qa/gdk/pre-receive')
   $entries = foreach ($relativePath in $recipeFiles) {
     $blobSha = Invoke-Native $GitCommand @('rev-parse', '--verify', "${SourceSha}:$relativePath")
     if ($blobSha -notmatch '^[0-9a-f]{40}$') { throw "Required GDK recipe file is missing from $SourceSha`: $relativePath" }

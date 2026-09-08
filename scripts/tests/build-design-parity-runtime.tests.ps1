@@ -20,6 +20,17 @@ try {
   if (Test-Path -LiteralPath $taskOutput) { throw 'Dry run must not create an output directory.' }
   if ($arguments[-1] -ne '-') { throw 'The immutable archive must be Docker stdin, not an extracted directory.' }
 
+  $normalizer = Join-Path $repositoryRoot 'qa/gdk/normalize-executable-shebangs.sh'
+  $crlfFixture = Join-Path $taskOutput 'crlf-shebang-fixture'
+  [IO.File]::WriteAllText($crlfFixture, "#!/usr/bin/env ruby`r`nputs 'fixture'`r`n")
+  $gitExecutable = (Get-Command git).Source
+  $gitBash = Join-Path (Split-Path (Split-Path $gitExecutable -Parent) -Parent) 'bin/bash.exe'
+  if (-not (Test-Path -LiteralPath $gitBash -PathType Leaf)) { throw 'Git Bash is required for the CRLF shebang fixture.' }
+  & $gitBash -c "chmod +x '$($crlfFixture.Replace('\', '/'))'; '$($normalizer.Replace('\', '/'))' '$($crlfFixture.Replace('\', '/'))'" *> $null
+  $fixtureBytes = [IO.File]::ReadAllBytes($crlfFixture)
+  if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -match "\r\n") { throw 'CRLF shebang fixture remained CRLF after normalization.' }
+  if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -notmatch '^#!/usr/bin/env ruby\n') { throw 'Shebang fixture did not preserve its executable interpreter line.' }
+
   $versionSource = git show "$commit`:.gitlab/ci/version.yml"
   $toolVersions = Get-Content -LiteralPath (Join-Path $repositoryRoot 'qa/gdk/.tool-versions')
   $expectedVersions = @(
