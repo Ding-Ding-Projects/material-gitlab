@@ -18,7 +18,10 @@ env:
 jobs:
   build-release:
     runs-on: windows-2022
-    timeout-minutes: 120
+    # 360 minutes is the GitHub-hosted runner ceiling for a single job, so this is
+    # the longest a job can be allowed to run; the limit cannot be removed entirely.
+    # The previous 120-minute cap cancelled this build repeatedly part-way through.
+    timeout-minutes: 360
     steps:
       - name: Check out the exact triggering commit
         uses: actions/checkout@v4
@@ -217,10 +220,80 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Committed line counter failed: $($lineCountOutput -join ' ')" }
           $lineCountOutput -join "`n" | Set-Content -LiteralPath $lineCountPath -Encoding utf8
           $lineCount = Get-Content -Raw -LiteralPath $lineCountPath | ConvertFrom-Json
-          $lineCountJson = Get-Content -Raw -LiteralPath $lineCountPath
-          $notes = @("## Windows release", "", "Target commit: $sha", "Dim-sum code name: **$env:DIM_SUM_CODE**", "Photo: $env:DIM_SUM_PHOTO_URL", "", "### Workflow timing (UTC)", "- Workflow started: $($started.ToString('o'))", "- Workflow completed: $($completed.ToString('o'))", "- Workflow duration: $durationText", "", "### Exact committed line-count report", '```json', $lineCountJson.Trim(), '```', "", "Artifacts are unsigned Windows Squirrel.Windows assets. No tests, lint, type checks, or static-analysis jobs run in this workflow.")
+
+          # Publish the exact report as a release asset rather than inlining it.
+          # GitHub rejects a release body longer than 125000 characters. This
+          # repository tracks over 100000 files, so the report's exclusion
+          # inventory alone serialises past that ceiling; inlining it previously
+          # failed publication with HTTP 422 and left the release uncreated.
+          $lineCountAsset = Join-Path $env:RELEASE_ASSET_DIR 'LINE-COUNT.json'
+          Copy-Item -LiteralPath $lineCountPath -Destination $lineCountAsset -Force
+          $lineCountHash = (Get-FileHash -LiteralPath $lineCountAsset -Algorithm SHA256).Hash
+          Add-Content -LiteralPath (Join-Path $env:RELEASE_ASSET_DIR 'SHA256SUMS.txt') -Value "LINE-COUNT.json $lineCountHash"
+
+          $counted = $lineCount.counted
+          $bucketRows = @(foreach ($name in @($counted.buckets.PSObject.Properties.Name | Sort-Object)) {
+            $bucket = $counted.buckets.$name
+            "| $name | $($bucket.files) | $($bucket.total) | $($bucket.nonBlank) |"
+          })
+          $reasonRows = @(foreach ($name in @($lineCount.exclusions.byReason.PSObject.Properties.Name | Sort-Object)) {
+            "| $name | $($lineCount.exclusions.byReason.$name) |"
+          })
+          $agentLines = [int]$lineCount.attribution.agentLines
+          $humanLines = [int]$counted.total - $agentLines
+          $notes = @(
+            "## Windows release",
+            "",
+            "Target commit: $sha",
+            "Dim-sum code name: **$env:DIM_SUM_CODE**",
+            "Photo: $env:DIM_SUM_PHOTO_URL",
+            "",
+            "### Workflow timing (UTC)",
+            "",
+            "| Field | Value |",
+            "| --- | --- |",
+            "| Workflow started | $($started.ToString('o')) |",
+            "| Workflow completed | $($completed.ToString('o')) |",
+            "| Workflow duration | $durationText |",
+            "",
+            "### Committed line-count report",
+            "",
+            "| Bucket | Files | Total lines | Non-blank |",
+            "| --- | --- | --- | --- |"
+          ) + $bucketRows + @(
+            "| **Counted total** | **$($counted.files)** | **$($counted.total)** | **$($counted.nonBlank)** |",
+            "| **Grand total, including excluded** | **$($lineCount.grandTotal.files)** | **$($lineCount.grandTotal.total)** | **$($lineCount.grandTotal.nonBlank)** |",
+            "",
+            "Generated files: $($counted.generated.files) files, $($counted.generated.total) total lines.",
+            "",
+            "#### Authorship of surviving lines",
+            "",
+            "| Origin | Lines |",
+            "| --- | --- |",
+            "| Agent-written | $agentLines |",
+            "| Human-written | $humanLines |",
+            "",
+            "Attribution rule: $($lineCount.attribution.rule)",
+            "",
+            "#### Exclusions",
+            "",
+            "| Reason | Files |",
+            "| --- | --- |"
+          ) + $reasonRows + @(
+            "| **Total excluded** | **$($lineCount.exclusions.files)** |",
+            "",
+            "The complete machine-readable report is attached to this release as LINE-COUNT.json (SHA-256 $lineCountHash). It is summarised here because GitHub caps a release body at 125000 characters.",
+            "",
+            "Reproduce locally with: node scripts/release/line_count.mjs --json --revision=$sha",
+            "",
+            "Artifacts are unsigned Windows Squirrel.Windows assets. No tests, lint, type checks, or static-analysis jobs run in this workflow."
+          )
+          $notesBody = $notes -join "`n"
+          if ($notesBody.Length -gt 120000) {
+            throw "Release body is $($notesBody.Length) characters; GitHub rejects a body over 125000. Trim this summary rather than inlining a full report."
+          }
           $notesPath = Join-Path $env:RUNNER_TEMP 'windows-release-notes.md'
-          $notes -join "`n" | Set-Content -LiteralPath $notesPath -Encoding utf8
+          $notesBody | Set-Content -LiteralPath $notesPath -Encoding utf8
           "RELEASE_NOTES_PATH=$notesPath" >> $env:GITHUB_ENV
           $tag = "windows-${{ github.run_number }}-$($sha.Substring(0, 12))"
           "release_tag=$tag" >> $env:GITHUB_OUTPUT
