@@ -33,6 +33,7 @@ export default {
     this.$refs.input.focus();
   },
   methods: {
+    __,
     stop(event) {
       event.stopPropagation();
     },

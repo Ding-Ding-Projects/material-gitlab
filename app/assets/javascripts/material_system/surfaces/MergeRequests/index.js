@@ -4,6 +4,7 @@
  */
 import Vue from 'vue';
 import MergeRequests from './MergeRequests.vue';
+import { createProjectMergeRequestsAdapter } from './data';
 
 import './mergerequests.scss';
 
@@ -25,18 +26,20 @@ export * from './data';
  * Mounts the Merge requests surface onto `el`, replacing its contents.
  * Returns the created Vue instance so a caller can destroy() it on teardown.
  */
-export function initMergeRequests(el) {
+export function initMergeRequests(el, options = {}) {
   const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
   if (!mountEl) return null;
 
-  const projectPath = mountEl.dataset.projectPath || mountEl.dataset.projectPathEncoded;
+  const projectPath = mountEl.dataset.projectPath;
   if (!projectPath) throw new Error('Merge requests surface requires data-project-path.');
 
+  const permissions = { create: mountEl.dataset.canCreate === 'true', update: mountEl.dataset.canUpdate === 'true' };
+  const currentUser = JSON.parse(mountEl.dataset.currentUser || '{}');
+  const listAdapter = options.adapter || createProjectMergeRequestsAdapter({ projectPath, permissions });
   return new Vue({
-    el: mountEl,
-    propsData: { projectPath },
-    render: (createElement) => createElement(MergeRequests, { props: { projectPath } }),
-  });
+    name: 'ProjectMergeRequestsRoot',
+    render: (createElement) => createElement(MergeRequests, { props: { projectPath, currentUser, permissions, listAdapter, production: true, newMergeRequestPath: mountEl.dataset.newMergeRequestPath || '' } }),
+  }).$mount(mountEl);
 }
 
 export default MergeRequests;

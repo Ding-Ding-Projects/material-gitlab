@@ -1,22 +1,28 @@
 <template>
   <div class="gl-mds-header">
     <h1 class="gl-mds-header__title">Issues</h1>
-    <view-switcher :view="view" @update:view="$emit('update:view', $event)" />
-    <button type="button" class="gl-mds-header__new" @click="$emit('open-new')">
+    <gl-button v-if="boardPath" :href="boardPath">Open project board</gl-button>
+    <view-switcher v-else :view="view" @update:view="$emit('update:view', $event)" />
+    <gl-button v-if="canCreate && newIssuePath" :href="newIssuePath" variant="confirm">New issue</gl-button>
+    <button v-else-if="canCreate" type="button" class="gl-mds-header__new" @click="$emit('open-new')">
       <mds-icon name="add" size="sm" />New issue
     </button>
   </div>
 </template>
 
 <script>
+import { GlButton } from '@gitlab/ui';
 import MdsIcon from './MdsIcon.vue';
 import ViewSwitcher from './ViewSwitcher.vue';
 
 export default {
   name: 'SurfaceHeader',
-  components: { MdsIcon, ViewSwitcher },
+  components: { GlButton, MdsIcon, ViewSwitcher },
   props: {
     view: { type: String, required: true },
+    canCreate: { type: Boolean, default: true },
+    newIssuePath: { type: String, default: '' },
+    boardPath: { type: String, default: '' },
   },
 };
 </script>

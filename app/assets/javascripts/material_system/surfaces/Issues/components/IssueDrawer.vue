@@ -18,6 +18,7 @@
       </div>
 
       <h2 :id="titleId" class="gl-mds-drawer__title">{{ issue.title }}</h2>
+      <gl-link v-if="issue.web_url" :href="issue.web_url">Open issue details, discussion and full editing</gl-link>
       <p class="gl-mds-drawer__body">{{ issue.body || 'No description provided.' }}</p>
 
       <section class="gl-mds-drawer__section">
@@ -31,6 +32,7 @@
             :class="{ 'gl-mds-drawer__label-chip--on': label.on }"
             :style="label.on ? { background: label.bg, color: label.fg, borderColor: label.bg } : null"
             :aria-pressed="label.on"
+            :disabled="!canUpdate"
             @click="$emit('toggle-label', label.name)"
           >
             {{ label.name }}
@@ -48,6 +50,7 @@
             class="gl-mds-drawer__assignee-chip"
             :class="{ 'gl-mds-drawer__assignee-chip--on': person.on }"
             :aria-pressed="person.on"
+            :disabled="!canUpdate"
             @click="$emit('pick-assignee', person)"
           >
             <span class="gl-mds-drawer__assignee-avatar">{{ person.avatar }}</span>{{ person.name }}
@@ -55,7 +58,7 @@
         </div>
       </section>
 
-      <button type="button" class="gl-mds-drawer__toggle-state" @click="$emit('toggle-state')">
+      <button v-if="canUpdate" type="button" class="gl-mds-drawer__toggle-state" @click="$emit('toggle-state')">
         {{ issue.state === 'Open' ? 'Close issue' : 'Reopen issue' }}
       </button>
     </aside>
@@ -63,15 +66,17 @@
 </template>
 
 <script>
+import { GlLink } from '@gitlab/ui';
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'IssueDrawer',
-  components: { MdsIcon },
+  components: { GlLink, MdsIcon },
   props: {
     issue: { type: Object, required: true },
     allLabels: { type: Array, required: true },
     assignees: { type: Array, required: true },
+    canUpdate: { type: Boolean, default: true },
   },
   computed: {
     titleId() {

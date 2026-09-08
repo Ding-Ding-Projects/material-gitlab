@@ -1,5 +1,5 @@
 <template>
-  <div class="mr-app" :data-theme="dark ? 'dark' : 'light'">
+  <div class="mr-app" :data-theme="dark ? 'dark' : 'light'" data-material-topbar-owner="surface.merge-requests">
     <mr-top-bar
       :search="search"
       :regex-mode="regexMode"
@@ -18,10 +18,11 @@
     />
 
     <template v-if="!currentDetail">
-      <mr-list-header :count="filteredMrs.length" @create="createMergeRequest" />
+      <mr-list-header :count="filteredMrs.length" :can-create="!production || permissions.create === true" :new-path="newMergeRequestPath" @create="createMergeRequest" />
       <mr-filter-chips :filters="filters" @toggle="toggleFilter" />
+      <p v-if="production && regexMode">Regular expressions filter the current page.</p>
       <mr-bulk-action-bar
-        v-if="selectedIds.length"
+        v-if="selectedIds.length && (!production || permissions.update === true)"
         :selected-count="selectedIds.length"
         :total-count="filteredMrs.length"
         :closeable-count="closeableSelectedCount"
@@ -31,6 +32,10 @@
       <main class="mr-list-main">
         <div v-if="loading" class="mr-list">
           <div class="mr-list__empty" role="status">Loading merge requests…</div>
+        </div>
+        <div v-else-if="loadError" role="alert">
+          <p>Merge requests could not be loaded: {{ loadError.message }}</p>
+          <gl-button @click="loadListPage">Retry</gl-button>
         </div>
         <mr-list
           v-else
@@ -42,6 +47,11 @@
           @select-none="selectNone"
           @invert-selection="invertSelection"
         />
+        <nav v-if="production && !loading && !loadError" aria-label="Merge request pages">
+          <gl-button :disabled="page <= 1" @click="changePage(page - 1)">Previous</gl-button>
+          <span>Page {{ page }}<template v-if="totalPages"> of {{ totalPages }}</template></span>
+          <gl-button :disabled="!hasNextPage" @click="changePage(page + 1)">Next</gl-button>
+        </nav>
       </main>
     </template>
 
@@ -70,6 +80,7 @@
 </template>
 
 <script>
+import { GlButton } from '@gitlab/ui';
 import MrTopBar from './components/MrTopBar.vue';
 import MrListHeader from './components/MrListHeader.vue';
 import MrFilterChips from './components/MrFilterChips.vue';
@@ -100,6 +111,7 @@ import { loadSettings, updateSettings } from '~/material_system/settings';
 export default {
   name: 'MergeRequestsSurface',
   components: {
+    GlButton,
     MrTopBar,
     MrListHeader,
     MrFilterChips,
@@ -113,6 +125,11 @@ export default {
   props: {
     projectPath: { type: String, required: true },
     currentUser: { type: Object, default: () => ({ name: '', initials: '' }) },
+    production: { type: Boolean, default: false },
+    permissions: { type: Object, default: () => ({}) },
+    listAdapter: { type: Object, default: null },
+    newMergeRequestPath: { type: String, default: '' },
+    navigate: { type: Function, default: (url) => window.location.assign(url) },
   },
   data() {
     return {
@@ -130,14 +147,19 @@ export default {
       avatarLabel: 'Signed in user',
       confirmDialog: { open: false, title: '', message: '', confirmLabel: 'Confirm', action: null },
       loadError: null,
+      page: 1,
+      totalPages: null,
+      hasNextPage: false,
+      mutationPending: false,
     };
   },
   computed: {
     filteredMrs() {
       const matches = buildQueryMatcher(this.search, this.regexMode);
-      return this.mrs.filter((mr) => matchesFilters(mr, this.filters, this.currentUser.name) && matches(searchableText(mr)));
+      return this.mrs.filter((mr) => matchesFilters(mr, this.production ? { ...this.filters, mine: false } : this.filters, this.currentUser.name) && matches(searchableText(mr)));
     },
     currentDetail() {
+      if (this.production) return null;
       return this.mrs.find((mr) => mr.id === this.detailId) || null;
     },
     corpus() {
@@ -154,7 +176,7 @@ export default {
       if (this.currentDetail) {
         actions.push({ label: 'Back to merge requests list', icon: 'arrow_back', run: () => { this.detailId = null; } });
       } else {
-        actions.push({ label: 'New merge request', icon: 'add', run: this.createMergeRequest });
+        if (!this.production || this.permissions.create === true) actions.push({ label: 'New merge request', icon: 'add', run: this.createMergeRequest });
         FILTER_DEFS.forEach((def) => {
           actions.push({ label: `Toggle filter: ${def.label}`, icon: 'filter_alt', run: () => this.toggleFilter(def.key) });
         });
@@ -163,6 +185,15 @@ export default {
     },
   },
   watch: {
+    search() {
+      if (!this.production) return;
+      clearTimeout(this.searchTimer);
+      this.page = 1;
+      this.searchTimer = setTimeout(() => this.loadListPage(), 250);
+    },
+    regexMode() {
+      if (this.production) { this.page = 1; this.loadListPage(); }
+    },
     filteredMrs(list) {
       const visible = new Set(list.map((mr) => mr.id));
       this.selectedIds = this.selectedIds.filter((id) => visible.has(id));
@@ -178,12 +209,15 @@ export default {
     this.dark = settings.theme === 'dark' || prefersDark;
   },
   mounted() {
+    if (this.production) this.loadListPage();
+    else {
     this.api = createGitLabClient(this.projectPath);
     fetchMergeRequests({ projectPath: this.projectPath, client: this.api }).then((mrs) => {
       this.mrs = mrs;
     }).catch((error) => {
       this.loadError = error;
     }).finally(() => { this.loading = false; });
+    }
     this.onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && (event.key === 'F' || event.key === 'f')) {
         event.preventDefault();
@@ -193,15 +227,39 @@ export default {
     window.addEventListener('keydown', this.onKeydown);
   },
   beforeDestroy() {
+    clearTimeout(this.searchTimer);
+    this.loadGeneration = (this.loadGeneration || 0) + 1;
     window.removeEventListener('keydown', this.onKeydown);
   },
   methods: {
+    async loadListPage() {
+      if (!this.production || !this.listAdapter) return;
+      const generation = (this.loadGeneration || 0) + 1;
+      this.loadGeneration = generation;
+      this.loading = true;
+      this.loadError = null;
+      try {
+        const state = this.filters.open && !this.filters.merged ? 'opened' : this.filters.merged && !this.filters.open ? 'merged' : 'all';
+        const result = await this.listAdapter.listPage({ page: this.page, state, mine: this.filters.mine, search: this.regexMode ? '' : this.search });
+        if (generation !== this.loadGeneration) return;
+        this.mrs = result.items;
+        this.totalPages = result.totalPages;
+        this.hasNextPage = result.hasNextPage;
+      } catch (error) { if (generation === this.loadGeneration) this.loadError = error; }
+      finally { if (generation === this.loadGeneration) this.loading = false; }
+    },
+    changePage(page) {
+      if (page < 1 || (page > this.page && !this.hasNextPage)) return;
+      this.page = page;
+      this.loadListPage();
+    },
     toggleDark() {
       this.dark = !this.dark;
       updateSettings({ theme: this.dark ? 'dark' : 'light' });
     },
     toggleFilter(key) {
       this.filters = { ...this.filters, [key]: !this.filters[key] };
+      if (this.production) { this.page = 1; this.loadListPage(); }
     },
     applyRegex({ pattern }) {
       this.search = pattern;
@@ -215,6 +273,10 @@ export default {
       });
     },
     createMergeRequest() {
+      if (this.production) {
+        if (this.permissions.create === true && this.newMergeRequestPath) this.navigate(this.newMergeRequestPath);
+        return;
+      }
       this.$emit('create-merge-request');
       window.location.assign(`/${this.projectPath}/-/merge_requests/new`);
     },
@@ -250,6 +312,20 @@ export default {
       if (action) action();
     },
     async closeSelectedMrs() {
+      if (this.production) {
+        if (this.permissions.update !== true || this.mutationPending) return;
+        this.mutationPending = true;
+        const candidates = this.mrs.filter((mr) => this.selectedIds.includes(mr.id) && mr.state === 'Open');
+        const results = await Promise.allSettled(candidates.map((mr) => this.listAdapter.close(mr.iid)));
+        const accepted = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+        this.mrs = this.mrs.map((mr) => accepted.find((item) => item.id === mr.id) || mr);
+        this.selectedIds = this.selectedIds.filter((id) => !accepted.some((mr) => mr.id === id));
+        if (accepted.length) notificationCenter.notify({ title: 'Merge requests closed', message: `${accepted.length} merge requests closed.`, severity: 'success' });
+        const rejected = results.find((result) => result.status === 'rejected');
+        if (rejected) notificationCenter.notify({ title: 'Some merge requests were not closed', message: rejected.reason.message, severity: 'error' });
+        this.mutationPending = false;
+        return;
+      }
       const ids = [...this.selectedIds];
       try {
         await Promise.all(ids.map((id) => {
@@ -321,6 +397,12 @@ export default {
       }
     },
     async openDetail(id) {
+      if (this.production) {
+        const current = this.mrs.find((mr) => mr.id === id);
+        if (current?.webUrl) this.navigate(current.webUrl);
+        else notificationCenter.notify({ title: 'Merge request link unavailable', message: 'Reload the list to retrieve its review link.', severity: 'error' });
+        return;
+      }
       this.detailId = id;
       const current = this.mrs.find((mr) => mr.id === id);
       if (!current) return;

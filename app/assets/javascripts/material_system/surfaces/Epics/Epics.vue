@@ -54,8 +54,11 @@ export default {
   props: {
     currentUser: {
       type: Object,
-      default: () => ({ name: __('Jordan Diaz'), initials: 'JD' }),
+      default: () => ({ name: '', initials: '' }),
     },
+    permissions: { type: Object, default: () => ({}) },
+    createPath: { type: String, default: '' },
+    roadmapPath: { type: String, default: '' },
     mutateEpic: { type: Function, default: defaultMutateEpic },
     deleteEpic: { type: Function, default: defaultDeleteEpic },
     fetchEpicsData: { type: Function, default: loadEpics },
@@ -163,18 +166,20 @@ export default {
           run: () => this.setView('tree'),
         },
         {
-          id: 'view-roadmap',
-          label: __('Switch to roadmap'),
-          icon: 'timeline',
-          run: () => this.setView('roadmap'),
-        },
-        {
           id: 'open-regex-builder',
           label: __('Open regex builder'),
           icon: 'tune',
           run: this.openRegexBuilder,
         },
       ];
+      if (!this.roadmapPath) {
+        actions.splice(2, 0, {
+          id: 'view-roadmap',
+          label: __('Switch to roadmap'),
+          icon: 'timeline',
+          run: () => this.setView('roadmap'),
+        });
+      }
       if (this.search) {
         actions.push({ id: 'clear-search', label: __('Clear search'), icon: 'close', run: () => this.setSearch('') });
       }
@@ -190,6 +195,12 @@ export default {
     },
     selectedCount() {
       return this.selectedIds.length;
+    },
+    canUpdateEpics() {
+      return this.permissions.update === true;
+    },
+    canDeleteEpics() {
+      return this.permissions.delete === true;
     },
   },
   mounted() {
@@ -213,6 +224,9 @@ export default {
     if (this._unsubscribeSettings) this._unsubscribeSettings();
   },
   methods: {
+    __,
+    sprintf,
+    n__,
     async fetchEpics() {
       this.loading = true;
       this.fetchError = null;
@@ -254,6 +268,7 @@ export default {
       if (result.ok) this.settings = result.value;
     },
     setView(view) {
+      if (view === 'roadmap' && this.roadmapPath) return;
       this.view = view;
     },
     toggleCollapse(id) {
@@ -284,6 +299,7 @@ export default {
       this.selectedIds = [];
     },
     bulkSetState(state) {
+      if (!this.canUpdateEpics) return;
       const count = this.selectedIds.length;
       Promise.all(this.selectedIds.map((id) => this.mutateEpic({ id, changes: { state } })))
         .then(() => {
@@ -328,12 +344,14 @@ export default {
       });
     },
     requestDelete() {
+      if (!this.canDeleteEpics) return;
       this.confirmDeleteOpen = true;
     },
     cancelDelete() {
       this.confirmDeleteOpen = false;
     },
     confirmDelete() {
+      if (!this.canDeleteEpics) return;
       const count = this.selectedIds.length;
       Promise.all(this.selectedIds.map((id) => this.deleteEpic({ id })))
         .then(() => {
@@ -360,7 +378,7 @@ export default {
 </script>
 
 <template>
-  <div class="gl-mds-epics" :class="themeClass">
+  <div class="gl-mds-epics" :class="themeClass" data-material-topbar-owner="surface.epics">
     <epics-toolbar
       :search="search"
       :regex-mode="regexMode"
@@ -373,9 +391,11 @@ export default {
       @open-palette="openPalette"
       @toggle-theme="toggleTheme"
     />
-    <epics-header :view="view" @change-view="setView" />
+    <epics-header :view="view" :create-path="createPath" :roadmap-path="roadmapPath" @change-view="setView" />
     <bulk-action-bar
       :count="selectedCount"
+      :can-update="canUpdateEpics"
+      :can-delete="canDeleteEpics"
       @reopen="bulkSetState('opened')"
       @close="bulkSetState('closed')"
       @export="exportSelected"

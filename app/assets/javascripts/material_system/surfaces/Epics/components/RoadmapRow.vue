@@ -3,6 +3,10 @@ import { __, sprintf } from '~/locale';
 import { EPIC_STATE, progressPercent, progressTotal, formatMonthRange, roadmapBarGeometry } from '../data';
 
 export default {
+  methods: {
+    __,
+    sprintf,
+  },
   name: 'RoadmapRow',
   props: {
     epicItem: { type: Object, required: true },

@@ -1,10 +1,12 @@
 import { createGitLabClient, requireProjectPath } from '../gitlabApi';
+import axios from '~/lib/utils/axios_utils';
 
 export const MERGE_REQUEST_STATES = Object.freeze(['Open', 'Merged', 'Closed']);
 export const PIPELINE_STATUS_META = Object.freeze({
   success: Object.freeze({ icon: 'check_circle', colorVar: '--mr-good', label: 'Pipeline passed' }),
   running: Object.freeze({ icon: 'sync', colorVar: '--mr-warn', label: 'Pipeline running' }),
   failed: Object.freeze({ icon: 'cancel', colorVar: '--mr-err', label: 'Pipeline failed' }),
+  unknown: Object.freeze({ icon: 'help', colorVar: '--mr-onsurfv', label: 'Pipeline status unavailable' }),
 });
 export const DETAIL_TABS = Object.freeze([
   { id: 'overview', label: 'Overview' },
@@ -25,7 +27,7 @@ export const MERGE_PHRASES = Object.freeze([
 ]);
 
 const displayState = (state) => (state === 'merged' ? 'Merged' : state === 'closed' ? 'Closed' : 'Open');
-const displayPipeline = (pipeline) => ['success', 'failed', 'running'].includes(pipeline?.status) ? pipeline.status : 'created';
+const displayPipeline = (pipeline) => ['success', 'failed', 'running'].includes(pipeline?.status) ? pipeline.status : 'unknown';
 const authorName = (author) => author?.name || author?.username || 'Unknown author';
 
 function mapChanges(changes = []) {
@@ -60,15 +62,47 @@ export function normalizeMergeRequest(item, approvals = null) {
     state: displayState(item.state),
     author: authorName(item.author),
     when: item.updated_at || item.created_at || '',
-    pipeline: displayPipeline(item.pipeline),
-    approvals: `${approvedCount}/${requiredCount}`,
+    pipeline: displayPipeline(item.head_pipeline || item.pipeline),
+    approvals: approvals || item.approved_by ? `${approvedCount}/${requiredCount}` : 'Unavailable',
     approvedByMe: Boolean(approvals?.user_has_approved ?? item.user_has_approved),
     canMerge: Boolean(item.merge_status === 'can_be_merged' || item.detailed_merge_status === 'mergeable'),
     body: item.description || '',
     files: mapChanges(item.changes),
     threads: mapThreads(item.discussions),
+    discussionCount: Number.isInteger(item.user_notes_count) ? item.user_notes_count : null,
     webUrl: item.web_url,
     mergeStatus: item.detailed_merge_status || item.merge_status,
+  };
+}
+
+/** List-route adapter. Full review and authoring stay on their existing routes. */
+export function createProjectMergeRequestsAdapter({ projectPath, permissions = {}, http = axios } = {}) {
+  requireProjectPath(projectPath);
+  const root = globalThis.gon?.relative_url_root || '';
+  const base = `${root}/api/v4/projects/${encodeURIComponent(projectPath)}/merge_requests`;
+  const accept = (item) => {
+    if (!item?.id || !item?.iid || typeof item.title !== 'string' || !['opened', 'closed', 'merged', 'locked'].includes(item.state)) throw new Error('The server returned an invalid merge request.');
+    return normalizeMergeRequest(item);
+  };
+  return {
+    async listPage({ page = 1, perPage = 20, state = 'opened', mine = false, search = '' } = {}) {
+      const response = await http.get(base, { params: { page, per_page: perPage, state, scope: mine ? 'created_by_me' : 'all', ...(search ? { search } : {}) } });
+      if (!Array.isArray(response.data)) throw new Error('The server returned an invalid merge requests list.');
+      const headers = response.headers || {};
+      return {
+        items: response.data.map(accept),
+        page: Number(headers['x-page'] || page),
+        totalPages: headers['x-total-pages'] ? Number(headers['x-total-pages']) : null,
+        hasNextPage: headers['x-next-page'] !== undefined ? Boolean(headers['x-next-page']) : response.data.length === perPage,
+      };
+    },
+    async close(iid) {
+      if (permissions?.update !== true) throw new Error('Closing merge requests is unavailable for your current project access.');
+      const response = await http.put(`${base}/${encodeURIComponent(iid)}`, { state_event: 'close' });
+      const item = accept(response.data);
+      if (item.state !== 'Closed') throw new Error('The server did not confirm that the merge request was closed.');
+      return item;
+    },
   };
 }
 

@@ -36,20 +36,23 @@
       </span>
       <span class="mr-list-item__stat">
         <span class="material-symbols-outlined mr-list-item__stat-icon" aria-hidden="true">chat_bubble</span>
-        {{ mr.threads.length }}
-        <span class="mr-sr-only">discussion threads</span>
+        {{ mr.discussionCount == null ? 'Unavailable' : mr.discussionCount }}
+        <span class="mr-sr-only">comments</span>
       </span>
       <span class="mr-list-item__avatar" :title="mr.author" aria-hidden="true">{{ avatar }}</span>
       <span class="mr-sr-only">Author: {{ mr.author }}.</span>
     </button>
+    <gl-link v-if="mr.webUrl" :href="mr.webUrl">Open full review</gl-link>
   </div>
 </template>
 
 <script>
+import { GlLink } from '@gitlab/ui';
 import { avatarInitials, stateVisuals, PIPELINE_STATUS_META } from '../data';
 
 export default {
   name: 'MrListItem',
+  components: { GlLink },
   props: {
     mr: { type: Object, required: true },
     selected: { type: Boolean, default: false },
@@ -62,7 +65,7 @@ export default {
       return stateVisuals(this.mr.state);
     },
     pipeline() {
-      return PIPELINE_STATUS_META[this.mr.pipeline];
+      return PIPELINE_STATUS_META[this.mr.pipeline] || PIPELINE_STATUS_META.unknown;
     },
     metaLabel() {
       return this.mr.state === 'Merged' ? `merged · ${this.mr.author}` : `opened ${this.mr.when} · ${this.mr.author}`;

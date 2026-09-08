@@ -60,6 +60,7 @@ export default {
     if (this.unsubscribe) this.unsubscribe();
   },
   methods: {
+    __,
     dismiss(id) {
       notificationCenter.dismiss(id);
     },

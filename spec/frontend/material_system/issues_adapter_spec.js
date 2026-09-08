@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
+jest.mock('~/api', () => ({ buildUrl: (value) => value.replace(':version', 'v4') }));
+jest.mock('~/lib/utils/axios_utils', () => ({}));
+
 import {
   createGitLabIssuesAdapter,
   createIssuesApi,
@@ -44,7 +47,7 @@ describe('Material Issues production adapter', () => {
     expect(http.get).toHaveBeenCalledWith('/api/v4/projects/123/issues', {
       params: { page: 2, per_page: 20, state: 'opened', scope: 'assigned_to_me' },
     });
-    expect(result.pagination).toEqual({ page: 2, perPage: 20, total: 61, totalPages: 4 });
+    expect(result.pagination).toEqual({ page: 2, perPage: 20, total: 61, totalPages: 4, hasNextPage: true });
     expect(result.issues[0]).toMatchObject({ iid: 42, state: 'Open' });
   });
 
@@ -55,7 +58,7 @@ describe('Material Issues production adapter', () => {
       put: jest.fn().mockResolvedValue(response({ ...issue, labels: ['bug'], state: 'closed' })),
       delete: jest.fn().mockResolvedValue(response(null)),
     };
-    const adapter = createGitLabIssuesAdapter({ projectId: 123, http });
+    const adapter = createGitLabIssuesAdapter({ projectId: 123, http, permissions: { create: true, update: true, delete: true } });
     await adapter.list();
     await adapter.create({ title: 'New issue', body: 'Description', labels: ['bug'], assigneeId: 7 });
     await adapter.update(9001, { labels: ['frontend', 'bug'], assigneeId: 7, state: 'Closed' });

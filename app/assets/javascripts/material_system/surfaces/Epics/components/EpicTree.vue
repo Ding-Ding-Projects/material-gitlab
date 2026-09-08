@@ -50,6 +50,9 @@ export default {
     },
   },
   methods: {
+    __,
+    sprintf,
+    n__,
     rowTabindex(index) {
       return index === this.activeIndex ? 0 : -1;
     },

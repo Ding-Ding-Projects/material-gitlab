@@ -3,10 +3,16 @@ import { __, n__ } from '~/locale';
 import MdsIcon from './MdsIcon.vue';
 
 export default {
+  methods: {
+    __,
+    n__,
+  },
   name: 'BulkActionBar',
   components: { MdsIcon },
   props: {
     count: { type: Number, required: true },
+    canUpdate: { type: Boolean, default: false },
+    canDelete: { type: Boolean, default: false },
   },
   computed: {
     countLabel() {
@@ -19,10 +25,10 @@ export default {
 <template>
   <div v-if="count > 0" class="gl-mds-epics__bulkbar" role="toolbar" :aria-label="__('Bulk actions')">
     <span class="gl-mds-epics__bulkbar-count">{{ countLabel }}</span>
-    <button type="button" class="gl-mds-epics__bulkbar-btn" @click="$emit('reopen')">
+    <button v-if="canUpdate" type="button" class="gl-mds-epics__bulkbar-btn" @click="$emit('reopen')">
       <mds-icon name="refresh" size="sm" />{{ __('Reopen') }}
     </button>
-    <button type="button" class="gl-mds-epics__bulkbar-btn" @click="$emit('close')">
+    <button v-if="canUpdate" type="button" class="gl-mds-epics__bulkbar-btn" @click="$emit('close')">
       <mds-icon name="check-circle" size="sm" />{{ __('Close') }}
     </button>
     <button type="button" class="gl-mds-epics__bulkbar-btn" @click="$emit('export', 'csv')">
@@ -32,6 +38,7 @@ export default {
       <mds-icon name="copy" size="sm" />{{ __('Export JSON') }}
     </button>
     <button
+      v-if="canDelete"
       type="button"
       class="gl-mds-epics__bulkbar-btn gl-mds-epics__bulkbar-btn--danger"
       @click="$emit('delete')"
