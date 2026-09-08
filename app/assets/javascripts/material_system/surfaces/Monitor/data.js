@@ -6,7 +6,7 @@
  * by the production mount.
  */
 
-import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+import { operationsCollection, operationsConnection, operationsGraphql, operationsRequest } from '../Deploy/transport';
 
 export const TABS = Object.freeze(['Incidents', 'Alerts', 'Errors', 'On-call', 'Service desk']);
 
@@ -323,20 +323,63 @@ export function buildRegexCorpus(data) {
   ];
 }
 
-export async function fetchMonitorData({ endpoints, fetchImpl } = {}) {
+export const MONITOR_ALERTS_QUERY = `query MaterialMonitorAlerts($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { alertManagementAlerts(first: 100, after: $after, domain: operations) {
+    nodes { id iid title severity status startedAt }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+export const MONITOR_ONCALL_QUERY = `query MaterialMonitorOncall($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { incidentManagementOncallSchedules(first: 100, after: $after) {
+    nodes { iid name description timezone }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+
+export async function fetchMonitorTab(key, { endpoints, fetchImpl } = {}) {
+  const endpoint = endpoints[key];
+  if (!endpoint) throw new Error('This monitoring feature is unavailable or not permitted for this project.');
+  let rows;
+  if (key === 'alerts' || key === 'oncall') {
+    rows = await operationsConnection(endpoint, key === 'alerts' ? MONITOR_ALERTS_QUERY : MONITOR_ONCALL_QUERY,
+      { projectPath: endpoints.projectPath }, (data) => key === 'alerts' ? data.project?.alertManagementAlerts : data.project?.incidentManagementOncallSchedules, { fetchImpl });
+  } else if (key === 'errors') {
+    rows = await operationsCollection(endpoint, { fetchImpl, unwrap: (payload) => payload.errors, nextPage: (payload, original) => {
+      const cursor = payload.pagination?.next?.cursor;
+      if (!cursor) return '';
+      const url = new URL(original, globalThis.location?.origin || 'http://localhost');
+      url.searchParams.set('cursor', cursor);
+      return url.pathname + url.search;
+    } });
+  } else rows = await operationsCollection(endpoint, { fetchImpl });
+  return rows.map((item) => ({
+    id: String(item.id ?? item.iid), iid: String(item.iid || ''),
+    name: item.title || item.name || item.message || '',
+    sub: item.description || item.timezone || '',
+    status: String(item.status || item.state || '').toLowerCase(), severity: item.severity || '',
+    when: item.startedAt || item.last_seen || item.updated_at || item.created_at || '',
+    href: item.web_url || (key === 'alerts' ? `${endpoints.projectUrl}/-/alert_management/${encodeURIComponent(item.iid)}/details` : key === 'errors' ? `${endpoints.errorsPath}/${encodeURIComponent(item.id)}/details` : endpoints.oncallPath),
+    kind: key,
+  }));
+}
+
+export async function fetchMonitorData(options = {}) {
   const result = {};
-  for (const tab of TABS) {
-    const key = TAB_COLLECTION_KEY[tab];
-    const payload = await requestJson(requireEndpoint(endpoints, key), { fetchImpl });
-    result[key] = assertCollection(payload, key).map((item) => ({
-      id: String(item.id ?? item.iid ?? item.fingerprint),
-      name: item.title || item.name || item.message || '',
-      sub: item.description || item.web_url || item.assignees?.map((user) => user.name).join(', ') || '',
-      status: item.status || item.state || '',
-      sev: item.severity || item.severity_label || '',
-      when: item.updated_at || item.created_at || '',
-      until: item.ends_at || item.until || '',
-    }));
-  }
+  for (const key of Object.values(TAB_COLLECTION_KEY)) if (options.endpoints?.[key]) result[key] = await fetchMonitorTab(key, options);
   return result;
+}
+
+export async function changeMonitorStatus(row, endpoints, { fetchImpl } = {}) {
+  if (row.kind === 'alerts') {
+    if (!endpoints.updateAlert) throw new Error('Alert updates are not permitted.');
+    const status = row.status === 'resolved' ? 'TRIGGERED' : row.status === 'triggered' ? 'ACKNOWLEDGED' : 'RESOLVED';
+    const data = await operationsGraphql(endpoints.updateAlert, `mutation MaterialMonitorAlert($projectPath: ID!, $iid: String!, $status: AlertManagementStatus!) {
+      updateAlertStatus(input: { projectPath: $projectPath, iid: $iid, status: $status }) { errors alert { id status } }
+    }`, { projectPath: endpoints.projectPath, iid: row.iid, status }, { fetchImpl });
+    const result = data.updateAlertStatus;
+    if (!result?.alert || result.errors?.length) throw new Error(result?.errors?.join('; ') || 'The alert transition was not accepted.');
+  } else {
+    if (!endpoints.updateIssue || !['incidents', 'tickets'].includes(row.kind)) throw new Error('This resource cannot be updated here.');
+    await operationsRequest(endpoints.updateIssue.replace(':id', encodeURIComponent(row.iid)), { fetchImpl, method: 'PUT', body: { state_event: row.status === 'closed' ? 'reopen' : 'close' } });
+  }
 }
