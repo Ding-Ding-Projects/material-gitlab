@@ -6,4 +6,4 @@
 = content_for :meta_tags do
   = auto_discovery_link_tag(:atom, project_releases_path(@project, rss_url_options), title: "#{@project.name} releases")
 
-#js-material-deploy{ data: { endpoints: material_deploy_endpoints.to_json } }
+#js-material-deploy{ data: { endpoints: material_deploy_endpoints.to_json, material_topbar_owner: 'surface.deploy' } }

@@ -1,3 +1,3 @@
 - page_title _('Plan')
 
-#material-project-plan{ data: { material_plan_project_id: @project.id, can_manage_milestones: can?(current_user, :admin_milestone, @project), can_manage_wiki: can?(current_user, :create_wiki, @project), new_milestone_path: (new_project_milestone_path(@project) if can?(current_user, :admin_milestone, @project)), wiki_path: project_wiki_path(@project, :home), avatar_initials: current_user&.name.to_s.split.map { |part| part.first }.first(2).join } }
+#material-project-plan{ data: { material_topbar_owner: 'surface.plan', material_plan_project_id: @project.id, can_manage_milestones: can?(current_user, :admin_milestone, @project), can_manage_wiki: can?(current_user, :create_wiki, @project), new_milestone_path: (new_project_milestone_path(@project) if can?(current_user, :admin_milestone, @project)), wiki_path: project_wiki_path(@project, :home), avatar_initials: current_user&.name.to_s.split.map { |part| part.first }.first(2).join } }
