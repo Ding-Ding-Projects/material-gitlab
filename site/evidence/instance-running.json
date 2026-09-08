@@ -1,0 +1,29 @@
+{
+  "feature": "running-instance-with-fork-assets",
+  "what": "A real GitLab instance running this fork's compiled frontend, so the Material work can be judged from a running application rather than from source.",
+  "capturedAt": "2026-09-08T04:05:00Z",
+  "route": "http://localhost:8929/users/sign_in",
+  "servedFrom": "Omnibus GitLab 19.3.1 in WSL2 Ubuntu 26.04, with this fork's webpack output layered over the stock webpack directory",
+  "forkCommit": "14f0df7dd2efec7478d382803b95962db3b06b35",
+  "forkVersion": "19.3.0-pre",
+  "instanceVersion": "19.3.1",
+  "webpackFilesServed": 11317,
+  "stockWebpackFilesReplaced": 7237,
+  "sprocketsAssetsPreserved": true,
+  "viewport": "1280x900 window, 1898x1339 captured client area",
+  "theme": "dark",
+  "displayScale": "150%",
+  "method": "hidden Windows desktop, isolated guest Edge profile with sync and extensions disabled, exactly one CDP page target verified before capture, window resolved by explicit handle from the headless desktop listing",
+  "verificationState": "verified",
+  "captures": [
+    {
+      "path": "site/evidence/instance-sign-in-2026-09-08.png",
+      "state": "sign-in",
+      "bytes": 60089,
+      "sha256": "9d85883e8dfbbd2bfbdc6ee210a8f1e923179f3e7109183fd6b12825d384d853",
+      "shows": "The GitLab Community Edition sign-in page served by the instance, rendered from this fork's compiled webpack bundles."
+    }
+  ],
+  "honestReading": "This surface renders as stock GitLab. That is expected and consistent with the measured wiring: pages/devise/sessions/new.js imports only login.scss from material_system, so no Material surface mounts here. Of 25 design contracts and 25 written surface directories, only three mount points are rendered by any Rails view: admin, agent-memory and manage. Capturing those needs an authenticated session and is not yet done.",
+  "limitation": "WSL2 terminates the distro shortly after the last command exits, which stops GitLab. A keepalive process must hold the distro open for the duration of any capture run, or the browser will get ERR_CONNECTION_REFUSED against an instance that answered curl moments earlier."
+}

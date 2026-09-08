@@ -421,6 +421,29 @@ Receipt: [`site/evidence/command-palette.json`](site/evidence/command-palette.js
 </details>
 
 <details open>
+<summary><b>A running instance serving this fork's compiled frontend</b> (1898 x 1339, dark theme, 150% scale)</summary>
+
+This is a real GitLab instance, Omnibus 19.3.1 on WSL2, with this fork's webpack output layered
+over the stock one: **11,317 compiled files replacing the stock 7,237**, sprockets assets left
+intact. It is the first time this fork's frontend has been built and served at all, which was only
+possible after restoring the execute bits the import had stripped.
+
+![The GitLab Community Edition sign-in page served by a local instance, dark theme, showing the username and password fields, Sign in and Passkey buttons, and the Explore, Help and About GitLab footer links](site/evidence/instance-sign-in-2026-09-08.png)
+
+Receipt: [`site/evidence/instance-running.json`](site/evidence/instance-running.json)
+
+> [!IMPORTANT]
+> **Read this one honestly: it renders as stock GitLab, and that is the expected result.**
+> `pages/devise/sessions/new.js` imports only `login.scss` from `material_system`, so no Material
+> surface mounts on the sign-in page. The assets are genuinely this fork's; the Material work simply
+> is not wired into this surface. That is the same gap the
+> [deployment status](#deployment-status-read-this-before-you-plan-anything) table records: 25
+> design contracts, 25 written surface directories, and only three mount points that any Rails view
+> actually renders.
+
+</details>
+
+<details open>
 <summary><b>Navigation controls, before and after the unstyled-control repair</b> (1898 x 1339, light theme, 150% scale)</summary>
 
 The navigation tab strip and its two tool buttons were rendering as **raw browser-default
