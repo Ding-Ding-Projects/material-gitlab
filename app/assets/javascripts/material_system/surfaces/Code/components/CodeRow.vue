@@ -1,12 +1,11 @@
 <template>
   <div class="gl-code-row" :class="{ 'is-selected': selected }">
-    <input
-      type="checkbox"
+    <material-checkbox
       class="gl-code-checkbox"
       :checked="selected"
       :aria-label="`Select ${row.title}`"
       @change="$emit('toggle', row.id)"
-    >
+    ></material-checkbox>
     <span class="gl-code-row__icon" :style="{ color: row.iconColor }">
       <material-icon :name="row.icon" :size="19" />
     </span>
@@ -21,22 +20,25 @@
       :style="{ background: row.badgeBg, color: row.badgeFg }"
     >{{ row.badge }}</span>
     <span class="gl-code-meta">{{ row.meta }}</span>
-    <button
+    <material-button
       v-if="row.actionLabel"
       type="button"
+      variant="text"
       class="gl-code-row__action"
       :style="{ color: row.actionColor }"
       @click="row.onAction && row.onAction()"
-    >{{ row.actionLabel }}</button>
+    >{{ row.actionLabel }}</material-button>
   </div>
 </template>
 
 <script>
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'CodeRow',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialButton, MaterialCheckbox },
   props: {
     row: { type: Object, required: true },
     selected: { type: Boolean, default: false },

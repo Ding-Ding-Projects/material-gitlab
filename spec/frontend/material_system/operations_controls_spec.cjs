@@ -13,7 +13,7 @@ function source(relative) {
 
 test('operations control inventory names every migrated surface and its official element', () => {
   const inventory = source('operations-controls-inventory.md');
-  for (const value of ['Analyze', 'Monitor', 'Operate', 'MaterialTextField', 'MaterialTextButton', 'MaterialIconButton', 'md-filled-text-field', 'md-text-button', 'md-icon-button']) assert.match(inventory, new RegExp('`?' + value.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&') + '`?'));
+  for (const value of ['Analyze', 'Monitor', 'Operate', 'Build', 'Code', 'Deploy', 'Pipelines', 'Repository', 'Secure', 'Security', 'MaterialTextField', 'MaterialTextButton', 'MaterialIconButton', 'MaterialCheckbox', 'MaterialButton', 'md-filled-text-field', 'md-text-button', 'md-icon-button', 'md-checkbox']) assert.match(inventory, new RegExp('`?' + value.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&') + '`?'));
 });
 
 test('migrated operations controls use registered wrapper constructors and no native button or text input remains at each migrated root', () => {
@@ -35,9 +35,12 @@ test('registered wrapper constructors render the exact official Material Web tag
     material_text_field: 'md-filled-text-field',
     material_text_button: 'md-text-button',
     material_icon_button: 'md-icon-button',
+    material_checkbox: 'md-checkbox',
+    material_button: 'md-filled-button',
   };
   for (const [moduleName, tag] of Object.entries(expectedTags)) {
     const contents = fs.readFileSync(path.join(components, `${moduleName}.js`), 'utf8');
-    assert.match(contents, new RegExp(`h\\(\\s*['\"]${tag}['\"]`), `${moduleName} no longer constructs ${tag}`);
+    if (moduleName === 'material_button') assert.match(contents, new RegExp(`['\"]${tag}['\"]`), `${moduleName} no longer maps filled buttons to ${tag}`);
+    else assert.match(contents, new RegExp(`h\\(\\s*['\"]${tag}['\"]`), `${moduleName} no longer constructs ${tag}`);
   }
 });

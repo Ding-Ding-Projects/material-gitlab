@@ -1,14 +1,13 @@
 <template>
   <div class="mgl-pl-list-card">
     <div v-if="pipelines.length" class="mgl-pl-list-head">
-      <input
-        ref="selectAll"
-        type="checkbox"
+      <material-checkbox
         class="mgl-pl-row-check"
         :checked="allSelected"
+        :indeterminate="someSelected"
         aria-label="Select all pipelines matching the current filters"
         @change="$emit('toggle-select-all')"
-      />
+      ></material-checkbox>
       <span>{{ selectAllLabel }}</span>
     </div>
     <ul class="mgl-pl-list" role="list" aria-label="Pipelines">
@@ -27,10 +26,11 @@
 
 <script>
 import PipelineRow from './PipelineRow.vue';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'PipelinesList',
-  components: { PipelineRow },
+  components: { PipelineRow, MaterialCheckbox },
   props: {
     pipelines: { type: Array, required: true },
     selectedIds: { type: Array, required: true },
@@ -47,16 +47,6 @@ export default {
       const selectedHere = this.pipelines.filter((pl) => this.selectedIds.includes(pl.id)).length;
       if (selectedHere > 0) return `${selectedHere} of ${this.pipelines.length} selected — select all matching the current filters`;
       return `Select all ${this.pipelines.length} pipelines matching the current filters`;
-    },
-  },
-  watch: {
-    someSelected: {
-      immediate: true,
-      handler(value) {
-        this.$nextTick(() => {
-          if (this.$refs.selectAll) this.$refs.selectAll.indeterminate = value;
-        });
-      },
     },
   },
 };

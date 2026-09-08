@@ -1,17 +1,16 @@
 <template>
   <div class="dp-selection-bar" role="toolbar" :aria-label="`Bulk actions for ${itemLabelPlural}`">
     <label class="dp-selection-bar__select-all">
-      <input
-        ref="selectAllInput"
-        type="checkbox"
+      <material-checkbox
         :checked="allSelected"
+        :indeterminate="selectedCount > 0 && selectedCount < totalCount"
         :aria-label="selectAllLabel"
         @change="$emit(allSelected ? 'clear' : 'select-all')"
-      />
+      ></material-checkbox>
       <span>{{ selectAllLabel }}</span>
     </label>
-    <button type="button" class="dp-selection-bar__link" @click="$emit('invert')">Invert selection</button>
-    <button v-if="selectedCount > 0" type="button" class="dp-selection-bar__link" @click="$emit('clear')">Clear</button>
+    <material-button type="button" variant="text" class="dp-selection-bar__link" @click="$emit('invert')">Invert selection</material-button>
+    <material-button v-if="selectedCount > 0" type="button" variant="text" class="dp-selection-bar__link" @click="$emit('clear')">Clear</material-button>
     <span class="dp-selection-bar__spacer"></span>
     <div v-if="selectedCount > 0" class="dp-selection-bar__actions">
       <slot name="actions" />
@@ -20,8 +19,11 @@
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 export default {
   name: 'SelectionBar',
+  components: { MaterialButton, MaterialCheckbox },
   props: {
     selectedCount: { type: Number, required: true },
     totalCount: { type: Number, required: true },
@@ -34,23 +36,6 @@ export default {
     selectAllLabel() {
       if (this.selectedCount === 0) return `Select all ${this.totalCount} matching your search`;
       return `${this.selectedCount} of ${this.totalCount} matching your search selected`;
-    },
-  },
-  watch: {
-    selectedCount() {
-      this.syncIndeterminate();
-    },
-    totalCount() {
-      this.syncIndeterminate();
-    },
-  },
-  mounted() {
-    this.syncIndeterminate();
-  },
-  methods: {
-    syncIndeterminate() {
-      if (!this.$refs.selectAllInput) return;
-      this.$refs.selectAllInput.indeterminate = this.selectedCount > 0 && this.selectedCount < this.totalCount;
     },
   },
 };

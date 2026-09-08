@@ -1,9 +1,11 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'FileTreeRow',
-  components: { MIcon },
+  components: { MIcon, MaterialButton, MaterialCheckbox },
   props: {
     entry: {
       type: Object,
@@ -24,14 +26,14 @@ export default {
   <div class="tree-row" :class="{ 'is-selected': selected }">
     <label class="tree-row__select">
       <span class="visually-hidden">Select {{ entry.name }}</span>
-      <input type="checkbox" :checked="selected" @change="$emit('toggle-select', entry.name)" @click.stop />
+      <material-checkbox :checked="selected" :aria-label="`Select ${entry.name}`" @change="$emit('toggle-select', entry.name)" @click.stop></material-checkbox>
     </label>
-    <button type="button" class="tree-row__open" @click="$emit('open', entry)">
+    <material-button type="button" variant="text" class="tree-row__open" @click="$emit('open', entry)">
       <m-icon :name="icon" :size="19" class="tree-row__icon" :class="entry.kind === 'dir' ? 'is-dir' : 'is-file'" decorative />
       <span class="tree-row__name">{{ entry.name }}</span>
       <span class="tree-row__message">{{ entry.message }}</span>
       <span class="tree-row__when">{{ entry.when }}</span>
-    </button>
+    </material-button>
   </div>
 </template>
 
@@ -59,14 +61,14 @@ export default {
   padding-left: 14px;
   cursor: pointer;
 
-  input {
+  md-checkbox {
     width: 16px;
     height: 16px;
     accent-color: var(--prim);
     cursor: pointer;
   }
 
-  input:focus-visible {
+  md-checkbox:focus-visible {
     outline: 2px solid var(--prim);
     outline-offset: 2px;
   }
