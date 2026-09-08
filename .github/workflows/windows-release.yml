@@ -1,7 +1,14 @@
 name: Windows release
 
 on:
+  # Releases are cut from main only. This previously fired on every branch, so a
+  # single feature push started another multi-hour Windows build that could only
+  # ever produce a release nobody wanted; several such runs hit the job timeout
+  # and were cancelled. workflow_dispatch still allows a deliberate build of any
+  # ref when one is genuinely needed.
   push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:

@@ -1,7 +1,13 @@
 name: Publish Pages site
 
 on:
+  # The site is only ever published from main, so only main needs to run this.
+  # Firing on every branch queued a build per feature push behind a single
+  # serialised concurrency group, where a stale branch could fail and leave a red
+  # result for work that was never going to be published.
   push:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -51,6 +57,10 @@ jobs:
 
   deploy:
     needs: build
+    # Build validates every branch, but only main is ever published. Without this
+    # gate a push to any feature branch deployed that branch straight to the live
+    # site, which is how unreviewed work reached the published Pages destination.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     permissions:
       pages: write
