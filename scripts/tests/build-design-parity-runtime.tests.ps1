@@ -20,6 +20,21 @@ try {
   if (Test-Path -LiteralPath $taskOutput) { throw 'Dry run must not create an output directory.' }
   if ($arguments[-1] -ne '-') { throw 'The immutable archive must be Docker stdin, not an extracted directory.' }
 
+  New-Item -ItemType Directory -Path $taskOutput -Force | Out-Null
+  $normalizer = Join-Path $repositoryRoot 'qa/gdk/normalize-executable-shebangs.rb'
+  $crlfFixture = Join-Path $taskOutput 'crlf-shebang-fixture'
+  $binaryFixture = Join-Path $taskOutput 'binary-fixture'
+  [IO.File]::WriteAllText($crlfFixture, "#!/usr/bin/env ruby`r`nputs 'fixture'`r`n")
+  [byte[]]$binaryBytes = 0, 13, 10, 255, 128
+  [IO.File]::WriteAllBytes($binaryFixture, $binaryBytes)
+  $normalizerOutput = & ruby $normalizer $crlfFixture $binaryFixture 2>&1
+  if ($LASTEXITCODE -ne 0) { throw 'The CRLF shebang normalizer fixture exited non-zero.' }
+  if (($normalizerOutput | Out-String) -notmatch 'Normalized CRLF shebang files: 1') { throw 'The CRLF fixture did not exercise a normalizer transformation.' }
+  $fixtureBytes = [IO.File]::ReadAllBytes($crlfFixture)
+  if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -match "\r\n") { throw "CRLF shebang fixture remained CRLF after normalization: $normalizerOutput" }
+  if ([Text.Encoding]::ASCII.GetString($fixtureBytes) -notmatch '^#!/usr/bin/env ruby\n') { throw 'Shebang fixture did not preserve its executable interpreter line.' }
+  if ([Convert]::ToBase64String([IO.File]::ReadAllBytes($binaryFixture)) -ne [Convert]::ToBase64String($binaryBytes)) { throw 'The shebang normalizer changed a non-shebang binary fixture.' }
+
   $versionSource = git show "$commit`:.gitlab/ci/version.yml"
   $toolVersions = Get-Content -LiteralPath (Join-Path $repositoryRoot 'qa/gdk/.tool-versions')
   $expectedVersions = @(

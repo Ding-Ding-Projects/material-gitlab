@@ -25,6 +25,13 @@ Ruby, Node, and Go entries are derived from `.gitlab/ci/version.yml`; focused ch
 compare the two candidate-bound sources and confirm the derived manifest is present in
 the Git archive sent to Docker.
 
+Before each GDK source stage executes candidate scripts, the recipe runs
+`qa/gdk/normalize-executable-shebangs.rb`. It uses one Ruby process over only the
+candidate-owned `bin`, `scripts`, `config`, `lib`, and `ee` roots, skips symlinks and
+`node_modules`, and changes only files whose first bytes are a shebang. Binary files and
+ordinary text remain untouched while a committed
+`#!/usr/bin/env ruby\r\n` runnable in the Linux build context.
+
 Each successful build retains its archive and `receipt.json` under
 `<OutputRoot>/<commit-sha>/`. The receipt records the source SHA, archive SHA-256,
 composite recipe SHA-256, local image tag, image configuration ID, repository manifest

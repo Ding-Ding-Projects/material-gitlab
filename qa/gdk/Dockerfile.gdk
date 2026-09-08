@@ -155,6 +155,8 @@ WORKDIR ${GDK_DIR}/gitlab
 
 COPY --chown=gdk:gdk ./ ./
 COPY --from=frontend-islands --chown=gdk:gdk ${GDK_DIR}/gitlab/ee/frontend_islands/islands_dist/ ./ee/frontend_islands/apps
+COPY qa/gdk/normalize-executable-shebangs.rb /usr/local/lib/normalize-executable-shebangs.rb
+RUN ruby /usr/local/lib/normalize-executable-shebangs.rb ./bin ./scripts ./config ./lib ./ee
 
 RUN --mount=type=bind,target=node_modules,source=${GDK_DIR}/gitlab/node_modules,from=gitlab-node-modules \
     cp config/gitlab.yml.example config/gitlab.yml; \
@@ -198,6 +200,8 @@ COPY --chown=gdk:gdk \
   --exclude=node_modules \
   --exclude=ee/frontend_islands/apps \
   ./ ./gitlab/
+COPY qa/gdk/normalize-executable-shebangs.rb /usr/local/lib/normalize-executable-shebangs.rb
+RUN ruby /usr/local/lib/normalize-executable-shebangs.rb ./gitlab/bin ./gitlab/scripts ./gitlab/config ./gitlab/lib ./gitlab/ee
 COPY --chown=gdk:gdk qa/gdk/entrypoint ../
 
 # Create custom hook for E2E tests
