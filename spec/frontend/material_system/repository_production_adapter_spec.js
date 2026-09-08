@@ -28,7 +28,7 @@ describe('project REST repository adapter', () => {
     const repository = await adapter.load();
 
     expect(get).toHaveBeenCalledWith('/api/v4/projects/group%2Fproject/repository/tree', {
-      params: { ref: 'feature/foo', path: 'src', per_page: 100 },
+      params: { ref: 'feature/foo', path: 'src', per_page: 100, page: 1 },
     });
     expect(repository.branches).toEqual(['main', 'feature/foo']);
     expect(repository.tree.src).toEqual([expect.objectContaining({ name: 'index.js', path: 'src/index.js' })]);
@@ -49,9 +49,9 @@ describe('project REST repository adapter', () => {
     const navigate = jest.fn();
     const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', ref: 'feature/foo', client: { get: jest.fn(), post: jest.fn() }, navigate });
 
-    await adapter.download({});
+    await adapter.download({ entries: [{ path: 'src', kind: 'dir' }] });
 
-    expect(navigate).toHaveBeenCalledWith('/api/v4/projects/group%2Fproject/repository/archive?sha=feature%2Ffoo');
+    expect(navigate).toHaveBeenCalledWith('/api/v4/projects/group%2Fproject/repository/archive?sha=feature%2Ffoo&path=src');
   });
 
   it('loads a root tree after navigating away from an initial nested path', async () => {
@@ -66,17 +66,17 @@ describe('project REST repository adapter', () => {
     await adapter.load({ path: '' });
 
     expect(get).toHaveBeenCalledWith('/api/v4/projects/group%2Fproject/repository/tree', {
-      params: { ref: 'main', path: undefined, per_page: 100 },
+      params: { ref: 'main', path: undefined, per_page: 100, page: 1 },
     });
   });
 
   it('preserves UTF-8 blob text and rejects ambiguous multi-file downloads', async () => {
-    const content = btoa(unescape(encodeURIComponent('café')));
-    const get = jest.fn().mockResolvedValue({ data: { file_name: 'readme.txt', file_path: 'readme.txt', size: 5, content } });
+    const content = btoa(unescape(encodeURIComponent('cafÃ©')));
+    const get = jest.fn().mockResolvedValue({ data: { file_name: 'readme.txt', file_path: 'readme.txt', size: 5, encoding: 'base64', content } });
     const navigate = jest.fn();
     const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', ref: 'main', client: { get, post: jest.fn() }, navigate });
 
-    await expect(adapter.loadBlob({ path: 'readme.txt' })).resolves.toMatchObject({ rawText: 'café' });
-    await expect(adapter.download({ paths: ['a', 'b'] })).rejects.toThrow('one selected item');
+    await expect(adapter.loadBlob({ path: 'readme.txt' })).resolves.toMatchObject({ rawText: 'cafÃ©' });
+    await expect(adapter.download({ entries: [{ path: 'a', kind: 'file' }, { path: 'b', kind: 'file' }] })).rejects.toThrow('exactly one file or directory');
   });
 });
