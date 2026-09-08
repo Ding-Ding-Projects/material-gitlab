@@ -43,6 +43,7 @@ const routes = [
   ['app/assets/javascripts/pages/projects/blob/show/index.js', '~/material_system/surfaces/Repository', 'mountRepositorySurface', 'app/views/projects/blob/show.html.haml', '#js-material-repository-app'],
   ['ee/app/assets/javascripts/pages/projects/dependencies/index/index.js', '~/material_system/surfaces/Secure', 'mountSecureSurface', 'ee/app/views/projects/dependencies/index.html.haml', '#js-material-secure'],
   ['ee/app/assets/javascripts/pages/projects/security/dashboard/index/index.js', '~/material_system/surfaces/Security', 'mountSecurityDashboard', 'ee/app/views/projects/security/dashboard/index.html.haml', '#js-security-dashboard'],
+  ['app/assets/javascripts/pages/projects/edit/index.js', '~/material_system/surfaces/Settings', 'mountProjectSettings', 'app/views/projects/edit.html.haml', '#material-project-settings'],
   ['app/assets/javascripts/pages/dashboard/todos/index/index.js', '~/material_system/surfaces/Todos', 'initTodosSurface', 'app/views/dashboard/todos/index.html.haml', '#js-todos-app-root'],
   ['app/assets/javascripts/entrypoints/super_sidebar.js', '~/material_system/mounts', 'mountAuthenticatedShell', 'app/views/layouts/application.html.haml', 'm3-shell-topbar-host'],
   ['app/assets/javascripts/entrypoints/super_sidebar.js', '~/material_system/mounts', 'mountSidebar', 'app/views/layouts/_page.html.haml', 'm3-shell-sidebar-host'],

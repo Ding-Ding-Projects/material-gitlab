@@ -10,7 +10,7 @@ a component export.
 ## Source-wired routes
 
 Admin, Agent Memory, Analyze, Build, Code, Deploy, Epics, Issues, Manage, Merge Requests, Monitor,
-Operate, Pipelines, Plan, Repository, Secure, Security, and To-Dos each have a Rails host and a
+Operate, Pipelines, Plan, Repository, Secure, Security, Settings, and To-Dos each have a Rails host and a
 page entry that imports and calls the named surface initializer. Shell B and Sidebar
 and Shell A are mounted by `entrypoints/super_sidebar.js` from the authenticated application
 and page layouts. The inventory records one representative Code route; tags and
@@ -25,8 +25,8 @@ guard verifies those exact imports and template hosts.
 Analyze replaces the authenticated project value-stream page at
 `/:namespace/:project/-/value_stream_analytics`. Its Rails view supplies
 `#js-material-analyze` and endpoint metadata, while the page entry imports and calls
-`mountAnalyze`. Settings has checked-in initializer
-and component source only, without an activated production page-entry edge. Login is a Rails-rendered Devise
+`mountAnalyze`. Shell A is selected by the authenticated header preference rather
+than a dedicated route. Login is a Rails-rendered Devise
 authentication view, including `devise/sessions/new_base`; it is not recorded as a
 Vue replacement.
 
