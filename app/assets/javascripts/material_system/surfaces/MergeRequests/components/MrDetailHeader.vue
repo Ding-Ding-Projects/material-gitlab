@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="mr-detail__header">
-      <button type="button" class="mr-icon-btn" aria-label="Back to merge requests list" @click="$emit('back')">
+      <material-button variant="text" type="button" class="mr-icon-btn" aria-label="Back to merge requests list" @click="$emit('back')">
         <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
-      </button>
+      </material-button>
       <h1 class="mr-detail__title">{{ mr.title }}</h1>
       <span class="mr-detail__state-badge" :data-state="mr.state">{{ mr.state }}</span>
     </div>
@@ -18,7 +18,10 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'MrDetailHeader',
   props: {
     mr: { type: Object, required: true },

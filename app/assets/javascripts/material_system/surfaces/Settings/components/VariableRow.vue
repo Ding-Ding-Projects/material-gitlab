@@ -9,31 +9,31 @@
     />
     <span class="st-var-row__key">{{ variable.key }}</span>
     <span class="st-var-row__value">{{ shownValue }}</span>
-    <button
-      type="button"
+    <MaterialIconButton
       class="st-var-row__icon-btn"
       :aria-label="variable.revealed ? `Hide value for ${variable.key}` : `Reveal value for ${variable.key}`"
       :disabled="variable.hidden || !allowReveal"
       @click="$emit('toggle-reveal', variable.id)"
     >
       <StIcon :name="variable.revealed ? 'visibility_off' : 'visibility'" size="small" />
-    </button>
+    </MaterialIconButton>
     <span v-if="variable.protected" class="st-badge st-badge--warn">protected</span>
     <span v-if="variable.hidden" class="st-badge">hidden</span>
     <span class="st-badge">{{ variable.environmentScope || '*' }}</span>
-    <button type="button" class="st-var-row__icon-btn st-var-row__icon-btn--danger" :aria-label="`Delete ${variable.key}`" @click="$emit('remove', variable.id)">
+    <MaterialIconButton class="st-var-row__icon-btn st-var-row__icon-btn--danger" :aria-label="`Delete ${variable.key}`" @click="$emit('remove', variable.id)">
       <StIcon name="delete" size="small" />
-    </button>
+    </MaterialIconButton>
   </div>
 </template>
 
 <script>
 import StIcon from './StIcon.vue';
 import { maskedValue } from '../data';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
 
 export default {
   name: 'VariableRow',
-  components: { StIcon },
+  components: { StIcon, MaterialIconButton },
   props: {
     variable: { type: Object, required: true },
     selected: { type: Boolean, default: false },

@@ -17,21 +17,25 @@
       </ul>
       <label v-if="confirmationPhrase" :for="`${titleId}-phrase`">
         Type {{ confirmationPhrase }} to confirm
-        <input :id="`${titleId}-phrase`" v-model="typedPhrase" type="text" autocomplete="off" />
+        <MaterialTextField :id="`${titleId}-phrase`" v-model="typedPhrase" :aria-label="`Type ${confirmationPhrase} to confirm`" type="text" autocomplete="off" />
       </label>
       <div class="st-confirm__actions">
-        <button ref="cancelBtn" type="button" class="st-btn st-btn--text" :disabled="busy" @click="cancel">Cancel</button>
-        <button type="button" class="st-btn st-btn--danger" :disabled="busy || (confirmationPhrase && typedPhrase !== confirmationPhrase)" @click="confirm">{{ confirmLabel }}</button>
+        <MaterialButton ref="cancelBtn" variant="text" :disabled="busy" @click="cancel">Cancel</MaterialButton>
+        <MaterialButton variant="filled" :disabled="busy || (confirmationPhrase && typedPhrase !== confirmationPhrase)" @click="confirm">{{ confirmLabel }}</MaterialButton>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 let uid = 0;
 
 export default {
   name: 'ConfirmDialog',
+  components: { MaterialButton, MaterialTextField },
   props: {
     title: { type: String, required: true },
     description: { type: String, default: '' },
@@ -65,7 +69,7 @@ export default {
     },
     trapTab(event) {
       if (event.key !== 'Tab' || !this.$refs.dialog) return;
-      const focusable = this.$refs.dialog.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const focusable = this.$refs.dialog.querySelectorAll('button:not([disabled]), md-text-button:not([disabled]), md-filled-button:not([disabled]), md-filled-text-field:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])');
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

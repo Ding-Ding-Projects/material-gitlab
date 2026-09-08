@@ -8,17 +8,20 @@
         <span v-if="thread.resolved" class="mr-thread__resolved-badge">Resolved</span>
       </div>
       <div class="mr-thread__text">{{ thread.text }}</div>
-      <button type="button" class="mr-thread__resolve-btn" @click="$emit('toggle-resolve')">
+      <material-button variant="text" type="button" class="mr-thread__resolve-btn" @click="$emit('toggle-resolve')">
         {{ thread.resolved ? 'Unresolve' : 'Resolve thread' }}
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { avatarInitials } from '../data';
 
 export default {
+  components: { MaterialButton },
   name: 'MrThreadCard',
   props: {
     thread: { type: Object, required: true },

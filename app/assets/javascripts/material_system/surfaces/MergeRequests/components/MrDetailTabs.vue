@@ -1,6 +1,6 @@
 <template>
   <div class="mr-detail__tabs" role="tablist" aria-label="Merge request sections" @keydown="onKeydown">
-    <button
+    <material-button variant="text"
       v-for="tab in tabs"
       :id="`mr-tab-${tab.id}`"
       :key="tab.id"
@@ -14,14 +14,17 @@
       @click="select(tab.id)"
     >
       {{ tab.label }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { DETAIL_TABS } from '../data';
 
 export default {
+  components: { MaterialButton },
   name: 'MrDetailTabs',
   props: {
     activeTab: { type: String, required: true },

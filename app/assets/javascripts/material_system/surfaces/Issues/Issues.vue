@@ -62,13 +62,13 @@
     <div v-else-if="loadError" class="gl-mds-issues__error" role="alert">
       <strong>Issues could not be loaded.</strong>
       <span>{{ loadError }}</span>
-      <button type="button" @click="loadPage">Retry</button>
+      <material-button variant="text" type="button" @click="loadPage">Retry</material-button>
     </div>
 
     <nav v-if="!loading && !loadError && (page > 1 || hasNextPage)" class="gl-mds-issues__pagination" aria-label="Issue pages">
-      <button type="button" :disabled="page <= 1" @click="previousPage">Previous</button>
+      <material-button variant="text" type="button" :disabled="page <= 1" @click="previousPage">Previous</material-button>
       <span>Page {{ page }}<template v-if="totalPages"> of {{ totalPages }}</template></span>
-      <button type="button" :disabled="!hasNextPage" @click="nextPage">Next</button>
+      <material-button variant="text" type="button" :disabled="!hasNextPage" @click="nextPage">Next</material-button>
     </nav>
 
     <issue-drawer
@@ -123,6 +123,8 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { GlLink } from '@gitlab/ui';
 import { loadSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
@@ -149,7 +151,7 @@ import NotificationStack from './components/NotificationStack.vue';
 
 export default {
   name: 'IssuesSurface',
-  components: {
+  components: { MaterialButton,
     GlLink,
     SurfaceHeader,
     IssueSearchBar,

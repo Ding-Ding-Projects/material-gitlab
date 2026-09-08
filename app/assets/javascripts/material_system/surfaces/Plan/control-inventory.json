@@ -1,0 +1,114 @@
+{
+  "surface": "Plan",
+  "scope": "Source declarations are explicit inventory, not runtime or visual proof. Existing complex form components and selection controls remain open.",
+  "files": [
+    {
+      "file": "components/BulkActionBar.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/CommandPaletteOverlay.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/NotificationStack.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/PlanTabs.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/RecordList.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/RegexBuilderPopover.vue",
+      "buttons": 5,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/TopBar.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/WikiDocument.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/WikiPageList.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "Plan.vue",
+      "buttons": 4,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    }
+  ],
+  "remainingNativeControls": [
+    {
+      "file": "components/RecordList.vue",
+      "controls": {
+        "select": 1
+      }
+    },
+    {
+      "file": "components/RecordRow.vue",
+      "controls": {
+        "select": 1
+      }
+    },
+    {
+      "file": "components/SelectCheckbox.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    }
+  ]
+}

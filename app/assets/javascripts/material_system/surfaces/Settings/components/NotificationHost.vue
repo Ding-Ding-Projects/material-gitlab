@@ -1,22 +1,21 @@
 <template>
   <div class="st-notify-host">
-    <button
-      type="button"
+    <MaterialIconButton
       class="st-notify-bell"
       :aria-expanded="reviewOpen"
       aria-haspopup="dialog"
       title="Notifications"
       @click="reviewOpen = !reviewOpen"
-    >
+     aria-label="Notifications">
       <StIcon name="notifications" size="small" />
       <span v-if="unreadCount > 0" class="st-notify-bell__badge" aria-hidden="true">{{ unreadCount }}</span>
       <span class="st-visually-hidden">{{ unreadCount }} unread notifications</span>
-    </button>
+    </MaterialIconButton>
 
     <div v-if="reviewOpen" class="st-notify-review" role="dialog" aria-label="Notification history" @keydown.esc="reviewOpen = false">
       <div class="st-notify-review__header">
         <h2 class="st-notify-review__title">Notifications</h2>
-        <button type="button" class="st-notify-review__link" :disabled="items.length === 0" @click="clearAll">Clear all</button>
+        <MaterialTextButton class="st-notify-review__link" :disabled="items.length === 0" @click="clearAll">Clear all</MaterialTextButton>
       </div>
       <ul class="st-notify-review__list">
         <li v-for="item in items" :key="item.id" class="st-notify-review__item" :class="`st-notify-review__item--${item.severity}`">
@@ -24,9 +23,9 @@
             <p class="st-notify-review__item-title">{{ item.title }}</p>
             <p class="st-notify-review__item-message">{{ item.message }}</p>
           </div>
-          <button type="button" class="st-notify-review__dismiss" aria-label="Dismiss" @click="dismiss(item.id)">
+          <MaterialIconButton class="st-notify-review__dismiss" aria-label="Dismiss" @click="dismiss(item.id)">
             <StIcon name="close" size="small" />
-          </button>
+          </MaterialIconButton>
         </li>
         <li v-if="items.length === 0" class="st-notify-review__empty">No notifications yet.</li>
       </ul>
@@ -36,9 +35,9 @@
       <div v-for="item in liveToasts" :key="item.id" class="st-toast" :class="`st-toast--${item.severity}`">
         <p class="st-toast__title">{{ item.title }}</p>
         <p class="st-toast__message">{{ item.message }}</p>
-        <button type="button" class="st-toast__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
+        <MaterialIconButton class="st-toast__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
           <StIcon name="close" size="small" />
-        </button>
+        </MaterialIconButton>
       </div>
     </div>
   </div>
@@ -47,10 +46,12 @@
 <script>
 import StIcon from './StIcon.vue';
 import notificationCenter from '../../../notifications';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
+import MaterialTextButton from '~/material_system/components/material_text_button';
 
 export default {
   name: 'NotificationHost',
-  components: { StIcon },
+  components: { StIcon, MaterialIconButton, MaterialTextButton },
   props: {
     notifications: { type: Object, default: () => notificationCenter },
   },

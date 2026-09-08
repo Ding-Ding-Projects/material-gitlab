@@ -2,19 +2,20 @@
   <div class="mr-list-header">
     <h1 class="mr-list-header__title">Merge requests</h1>
     <span class="mr-list-header__count">{{ countLabel }}</span>
-    <gl-button v-if="canCreate && newPath" :href="newPath" variant="confirm">New merge request</gl-button>
-    <button v-else-if="canCreate" type="button" class="mr-list-header__new-btn" @click="$emit('create')">
+    <material-button v-if="canCreate && newPath" :href="newPath" variant="filled">New merge request</material-button>
+    <material-button variant="filled" v-else-if="canCreate" type="button" class="mr-list-header__new-btn" @click="$emit('create')">
       <span class="material-symbols-outlined" aria-hidden="true">add</span>
       New merge request
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
-import { GlButton } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
   name: 'MrListHeader',
-  components: { GlButton },
+  components: { MaterialButton },
   props: {
     count: { type: Number, required: true },
     canCreate: { type: Boolean, default: true },

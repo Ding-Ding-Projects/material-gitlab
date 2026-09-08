@@ -2,21 +2,23 @@
   <gl-form class="st-card" data-screen-label="Description and topics" @submit.prevent="save">
     <h2 class="st-card__title">Description and topics</h2>
     <gl-form-group label="Project description" label-for="st-project-description">
-      <gl-form-textarea id="st-project-description" v-model="draftDescription" :disabled="busy" :rows="4" />
+      <MaterialTextField id="st-project-description" v-model="draftDescription" type="textarea" aria-label="Project description" :disabled="busy" :rows="4" />
     </gl-form-group>
     <gl-form-group label="Topics" label-for="st-project-topics" description="Separate topic names with commas.">
-      <gl-form-input id="st-project-topics" v-model="draftTopics" :disabled="busy" />
+      <MaterialTextField id="st-project-topics" v-model="draftTopics" aria-label="Topics" :disabled="busy" />
     </gl-form-group>
-    <gl-button type="submit" variant="confirm" :disabled="busy">Save description and topics</gl-button>
+    <MaterialButton type="submit" variant="filled" :disabled="busy">Save description and topics</MaterialButton>
   </gl-form>
 </template>
 
 <script>
-import { GlButton, GlForm, GlFormGroup, GlFormInput, GlFormTextarea } from '@gitlab/ui';
+import { GlForm, GlFormGroup } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
 
 export default {
   name: 'DescriptionTopicsCard',
-  components: { GlButton, GlForm, GlFormGroup, GlFormInput, GlFormTextarea },
+  components: { GlForm, GlFormGroup, MaterialButton, MaterialTextField },
   props: {
     description: { type: String, default: '' },
     topics: { type: Array, default: () => [] },

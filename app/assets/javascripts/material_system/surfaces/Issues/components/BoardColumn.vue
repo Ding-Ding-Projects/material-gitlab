@@ -24,35 +24,38 @@
 
     <div v-if="isAdding" class="gl-mds-board-col__add-form">
       <label class="gl-mds-sr-only" :for="`gl-mds-quick-add-${column.key}`">New issue title for {{ column.name }}</label>
-      <input
+      <material-text-field
         :id="`gl-mds-quick-add-${column.key}`"
         class="gl-mds-board-col__add-input"
         type="text"
         :value="draft"
         placeholder="Issue title"
         autofocus
-        @input="$emit('update-draft', $event.target.value)"
+        @input="$emit('update-draft', $event)"
         @keydown.enter="$emit('confirm-add', column.key)"
         @keydown.esc="$emit('cancel-add')"
-      />
+      aria-label="Issue title" />
       <div class="gl-mds-board-col__add-actions">
-        <button type="button" class="gl-mds-board-col__cancel" @click="$emit('cancel-add')">Cancel</button>
-        <button type="button" class="gl-mds-board-col__confirm" @click="$emit('confirm-add', column.key)">Add</button>
+        <material-button variant="text" type="button" class="gl-mds-board-col__cancel" @click="$emit('cancel-add')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-board-col__confirm" @click="$emit('confirm-add', column.key)">Add</material-button>
       </div>
     </div>
-    <button v-else type="button" class="gl-mds-board-col__start-add" @click="$emit('start-add', column.key)">
+    <material-button variant="text" v-else type="button" class="gl-mds-board-col__start-add" @click="$emit('start-add', column.key)">
       <mds-icon name="add" size="sm" />Add issue
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MdsIcon from './MdsIcon.vue';
 import BoardCard from './BoardCard.vue';
 
 export default {
   name: 'BoardColumn',
-  components: { MdsIcon, BoardCard },
+  components: { MaterialButton, MaterialTextField, MdsIcon, BoardCard },
   props: {
     column: { type: Object, required: true },
     allColumns: { type: Array, required: true },

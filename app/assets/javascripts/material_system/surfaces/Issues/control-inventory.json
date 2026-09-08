@@ -1,0 +1,138 @@
+{
+  "surface": "Issues",
+  "scope": "Source declarations are explicit inventory, not runtime or visual proof. Existing complex form components and selection controls remain open.",
+  "files": [
+    {
+      "file": "components/BoardCard.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/BoardColumn.vue",
+      "buttons": 3,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/BulkActionBar.vue",
+      "buttons": 4,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/FilterBar.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/IssueDrawer.vue",
+      "buttons": 4,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/IssueRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/IssueSearchBar.vue",
+      "buttons": 2,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/NewIssueDialog.vue",
+      "buttons": 2,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/NotificationStack.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/RegexBuilderDialog.vue",
+      "buttons": 4,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/SurfaceHeader.vue",
+      "buttons": 3,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ViewSwitcher.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "Issues.vue",
+      "buttons": 3,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    }
+  ],
+  "remainingNativeControls": [
+    {
+      "file": "components/BoardCard.vue",
+      "controls": {
+        "select": 1
+      }
+    },
+    {
+      "file": "components/IssueListView.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/IssueRow.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    }
+  ]
+}

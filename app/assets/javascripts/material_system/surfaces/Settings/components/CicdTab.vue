@@ -19,27 +19,27 @@
     <div class="st-card">
       <div class="st-card__header">
         <div class="st-card__title">CI/CD variables</div>
-        <button type="button" class="st-btn st-btn--filled st-btn--compact" :disabled="busy" @click="variableFormOpen = !variableFormOpen">
+        <MaterialButton variant="filled" class="st-btn st-btn--compact" :disabled="busy" @click="variableFormOpen = !variableFormOpen">
           <StIcon name="add" size="small" />
           Add variable
-        </button>
+        </MaterialButton>
       </div>
       <p v-if="!allowReveal">Variable values are managed in the dedicated CI/CD variables editor.</p>
       <gl-button v-if="variablesEditorPath" :href="variablesEditorPath">Open CI/CD variables editor</gl-button>
       <gl-form v-if="variableFormOpen" @submit.prevent="submitVariable">
         <gl-form-group label="Key" label-for="st-variable-key">
-          <gl-form-input id="st-variable-key" v-model="newVariable.key" required autocomplete="off" />
+          <MaterialTextField id="st-variable-key" v-model="newVariable.key" aria-label="Key" required autocomplete="off" />
         </gl-form-group>
         <gl-form-group label="Value" label-for="st-variable-value">
-          <gl-form-input id="st-variable-value" v-model="newVariable.value" type="password" autocomplete="new-password" />
+          <MaterialTextField id="st-variable-value" v-model="newVariable.value" aria-label="Value" type="password" autocomplete="new-password" />
         </gl-form-group>
         <gl-form-group label="Environment scope" label-for="st-variable-scope">
-          <gl-form-input id="st-variable-scope" v-model="newVariable.environment_scope" required />
+          <MaterialTextField id="st-variable-scope" v-model="newVariable.environment_scope" aria-label="Environment scope" required />
         </gl-form-group>
         <gl-form-checkbox v-model="newVariable.protected">Protect variable</gl-form-checkbox>
         <gl-form-checkbox v-model="newVariable.masked">Mask variable in job logs</gl-form-checkbox>
-        <gl-button type="submit" variant="confirm" :disabled="busy">Save variable</gl-button>
-        <gl-button :disabled="busy" @click="cancelVariable">Cancel</gl-button>
+        <MaterialButton type="submit" variant="filled" :disabled="busy">Save variable</MaterialButton>
+        <MaterialButton variant="text" :disabled="busy" @click="cancelVariable">Cancel</MaterialButton>
       </gl-form>
 
       <SelectionToolbar
@@ -51,9 +51,9 @@
         @clear="selectedVariableIds = []"
         @invert="invertVariableSelection"
       >
-        <button type="button" class="st-btn st-btn--danger st-btn--compact" @click="confirmVariableRemoval(selectedVariableIds)">
+        <MaterialButton variant="filled" class="st-btn st-btn--danger st-btn--compact" @click="confirmVariableRemoval(selectedVariableIds)">
           Delete selected
-        </button>
+        </MaterialButton>
       </SelectionToolbar>
 
       <div class="st-list">
@@ -84,9 +84,9 @@
         @clear="selectedBranchIds = []"
         @invert="invertBranchSelection"
       >
-        <button type="button" class="st-btn st-btn--danger st-btn--compact" @click="confirmBranchUnprotect(selectedBranchIds)">
+        <MaterialButton variant="filled" class="st-btn st-btn--danger st-btn--compact" @click="confirmBranchUnprotect(selectedBranchIds)">
           Unprotect selected
-        </button>
+        </MaterialButton>
       </SelectionToolbar>
 
       <div class="st-list">
@@ -116,7 +116,9 @@
 </template>
 
 <script>
-import { GlForm, GlFormGroup, GlFormInput, GlFormCheckbox, GlButton } from '@gitlab/ui';
+import { GlForm, GlFormGroup, GlFormCheckbox, GlButton } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
 import StIcon from './StIcon.vue';
 import SearchField from './SearchField.vue';
 import SelectionToolbar from './SelectionToolbar.vue';
@@ -127,7 +129,7 @@ import { createMatcher } from '../data';
 
 export default {
   name: 'CicdTab',
-  components: { GlForm, GlFormGroup, GlFormInput, GlFormCheckbox, GlButton, StIcon, SearchField, SelectionToolbar, VariableRow, ProtectedBranchRow, ConfirmDialog },
+  components: { GlForm, GlFormGroup, GlFormCheckbox, GlButton, MaterialButton, MaterialTextField, StIcon, SearchField, SelectionToolbar, VariableRow, ProtectedBranchRow, ConfirmDialog },
   props: {
     variables: { type: Array, required: true },
     protectedBranches: { type: Array, required: true },

@@ -1,24 +1,22 @@
 <template>
   <header class="st-topbar" data-screen-label="Top bar">
     <div class="st-topbar__spacer"></div>
-    <button
-      type="button"
+    <MaterialIconButton
       class="st-topbar__icon-btn"
       title="Command palette (Ctrl+Shift+F)"
       aria-haspopup="dialog"
       @click="$emit('open-palette')"
-    >
+     aria-label="Command palette (Ctrl+Shift+F)">
       <StIcon name="command" />
-    </button>
-    <button
-      type="button"
+    </MaterialIconButton>
+    <MaterialIconButton
       class="st-topbar__icon-btn"
       :title="dark ? 'Switch to light theme' : 'Switch to dark theme'"
       :aria-pressed="dark"
       @click="$emit('toggle-theme')"
-    >
+     :aria-label="dark ? 'Switch to light theme' : 'Switch to dark theme'">
       <StIcon :name="dark ? 'sun' : 'moon'" />
-    </button>
+    </MaterialIconButton>
     <NotificationHost />
     <div class="st-topbar__avatar" :title="userName" aria-hidden="true">{{ userInitials }}</div>
   </header>
@@ -27,10 +25,11 @@
 <script>
 import StIcon from './StIcon.vue';
 import NotificationHost from './NotificationHost.vue';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
 
 export default {
   name: 'TopBar',
-  components: { StIcon, NotificationHost },
+  components: { StIcon, NotificationHost, MaterialIconButton },
   props: {
     dark: { type: Boolean, default: false },
     userName: { type: String, default: 'Jordan Diaz' },

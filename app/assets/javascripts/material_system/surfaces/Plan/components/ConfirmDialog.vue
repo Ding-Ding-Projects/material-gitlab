@@ -14,15 +14,18 @@
       <h2 id="gl-mds-plan-confirm-title" class="gl-mds-confirm__heading">{{ title }}</h2>
       <p id="gl-mds-plan-confirm-message" class="gl-mds-confirm__message">{{ message }}</p>
       <div class="gl-mds-confirm__actions">
-        <button ref="cancelButton" type="button" class="gl-mds-confirm__cancel" @click="$emit('cancel')">Cancel</button>
-        <button type="button" class="gl-mds-confirm__confirm" @click="$emit('confirm')">{{ confirmLabel }}</button>
+        <material-button variant="text" ref="cancelButton" type="button" class="gl-mds-confirm__cancel" @click="$emit('cancel')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-confirm__confirm" @click="$emit('confirm')">{{ confirmLabel }}</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'ConfirmDialog',
   props: {
     title: { type: String, required: true },
@@ -35,7 +38,7 @@ export default {
   },
   methods: {
     trapFocus(event) {
-      const focusable = this.$refs.panel.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const focusable = this.$refs.panel.querySelectorAll('button:not([disabled]), md-text-button:not([disabled]), md-filled-button:not([disabled]), md-filled-text-field:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

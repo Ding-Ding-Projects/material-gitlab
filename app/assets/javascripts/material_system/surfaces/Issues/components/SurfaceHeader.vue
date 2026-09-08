@@ -1,23 +1,24 @@
 <template>
   <div class="gl-mds-header">
     <h1 class="gl-mds-header__title">Issues</h1>
-    <gl-button v-if="boardPath" :href="boardPath">Open project board</gl-button>
+    <material-button variant="outlined" v-if="boardPath" :href="boardPath">Open project board</material-button>
     <view-switcher v-else :view="view" @update:view="$emit('update:view', $event)" />
-    <gl-button v-if="canCreate && newIssuePath" :href="newIssuePath" variant="confirm">New issue</gl-button>
-    <button v-else-if="canCreate" type="button" class="gl-mds-header__new" @click="$emit('open-new')">
+    <material-button v-if="canCreate && newIssuePath" :href="newIssuePath" variant="filled">New issue</material-button>
+    <material-button variant="filled" v-else-if="canCreate" type="button" class="gl-mds-header__new" @click="$emit('open-new')">
       <mds-icon name="add" size="sm" />New issue
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
-import { GlButton } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
+
 import MdsIcon from './MdsIcon.vue';
 import ViewSwitcher from './ViewSwitcher.vue';
 
 export default {
   name: 'SurfaceHeader',
-  components: { GlButton, MdsIcon, ViewSwitcher },
+  components: { MaterialButton, MdsIcon, ViewSwitcher },
   props: {
     view: { type: String, required: true },
     canCreate: { type: Boolean, default: true },

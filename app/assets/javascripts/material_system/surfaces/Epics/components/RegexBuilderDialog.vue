@@ -1,4 +1,7 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import { __, sprintf } from '~/locale';
 import { RegexBuilder } from '../../../regex-builder';
 
@@ -104,6 +107,7 @@ const MAX_HIGHLIGHT_MATCHES = 200;
 const MAX_CORPUS_PREVIEW = 5;
 
 export default {
+  components: { MaterialButton, MaterialTextField },
   name: 'RegexBuilderDialog',
   props: {
     initial: { type: String, default: '' },
@@ -242,7 +246,7 @@ export default {
         <h2 class="gl-mds-epics__dialog-title">{{ __('Regex builder') }}</h2>
         <span class="gl-mds-epics__validity-chip" :class="validityModifier">{{ validityLabel }}</span>
         <div class="gl-mds-epics__flags">
-          <button
+          <material-button variant="text"
             v-for="flag in flagChips"
             :key="flag.name"
             type="button"
@@ -252,11 +256,11 @@ export default {
             @click="toggleFlag(flag.name)"
           >
             {{ flag.name }}
-          </button>
+          </material-button>
         </div>
       </div>
       <label class="gl-mds-sr-only" for="epics-regex-draft">{{ __('Pattern') }}</label>
-      <input
+      <material-text-field
         id="epics-regex-draft"
         v-model="draft"
         class="gl-mds-epics__pattern-input"
@@ -264,12 +268,12 @@ export default {
         :placeholder="__('pattern, e.g. (auth|login).*fail')"
         autocomplete="off"
         spellcheck="false"
-      />
+      :aria-label="__('pattern, e.g. (auth|login).*fail')" />
       <p v-if="!isValid" class="gl-mds-epics__error-text" role="alert">{{ evaluated.syntax.message }}</p>
       <div class="gl-mds-epics__snippet-groups">
         <div v-for="group in snippetGroups" :key="group.name" class="gl-mds-epics__snippet-row">
           <span class="gl-mds-epics__snippet-label">{{ group.name }}</span>
-          <button
+          <material-button variant="text"
             v-for="item in group.items"
             :key="item[0]"
             type="button"
@@ -278,14 +282,14 @@ export default {
             @click="insertSnippet(item[0])"
           >
             {{ item[0] }}
-          </button>
+          </material-button>
         </div>
       </div>
       <div class="gl-mds-epics__two-col">
         <div class="gl-mds-epics__col">
           <span class="gl-mds-epics__col-label">{{ __('Test string') }}</span>
           <label class="gl-mds-sr-only" for="epics-regex-test">{{ __('Test string') }}</label>
-          <textarea id="epics-regex-test" v-model="testText" class="gl-mds-epics__textarea" rows="4"></textarea>
+          <material-text-field type="textarea" id="epics-regex-test" v-model="testText" class="gl-mds-epics__textarea" rows="4" :aria-label="__('Test string')" ></material-text-field>
           <div class="gl-mds-epics__preview-box">
             <template v-for="(segment, index) in highlightResult.segments">
               <mark v-if="segment.matched" :key="index">{{ segment.text }}</mark>
@@ -318,10 +322,10 @@ export default {
         </div>
       </div>
       <div class="gl-mds-epics__dialog-actions">
-        <button type="button" class="gl-mds-epics__btn" @click="$emit('close')">{{ __('Cancel') }}</button>
-        <button type="button" class="gl-mds-epics__btn gl-mds-epics__btn--filled" @click="apply">
+        <material-button variant="text" type="button" class="gl-mds-epics__btn" @click="$emit('close')">{{ __('Cancel') }}</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-epics__btn gl-mds-epics__btn--filled" @click="apply">
           {{ __('Apply to search') }}
-        </button>
+        </material-button>
       </div>
     </div>
   </div>

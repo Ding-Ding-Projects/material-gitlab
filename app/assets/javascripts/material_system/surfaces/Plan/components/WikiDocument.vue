@@ -2,30 +2,33 @@
   <div class="gl-mds-plan__wikidoc">
     <div class="gl-mds-plan__wikidoc-head">
       <h2 class="gl-mds-plan__wikidoc-title">{{ page.title }}</h2>
-      <button v-if="canEdit && page.id" type="button" class="gl-mds-plan__wikidoc-edit" :disabled="saving" @click="$emit('toggle-edit')">
+      <material-button variant="text" v-if="canEdit && page.id" type="button" class="gl-mds-plan__wikidoc-edit" :disabled="saving" @click="$emit('toggle-edit')">
         <mds-icon :name="editing ? 'check' : 'edit'" size="sm" />{{ editing ? 'Save' : 'Edit' }}
-      </button>
+      </material-button>
     </div>
-    <textarea
+    <material-text-field type="textarea"
       v-if="editing"
       class="gl-mds-plan__wikidoc-textarea"
       rows="10"
       :value="page.body"
       :disabled="saving"
       aria-label="Wiki page content"
-      @input="$emit('update-body', $event.target.value)"
-    ></textarea>
+      @input="$emit('update-body', $event)"
+    ></material-text-field>
     <div v-else class="gl-mds-plan__wikidoc-body">{{ page.body }}</div>
     <div class="gl-mds-plan__wikidoc-meta">{{ page.meta }}</div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'WikiDocument',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     page: { type: Object, required: true },
     editing: { type: Boolean, default: false },

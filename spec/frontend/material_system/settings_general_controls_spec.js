@@ -60,7 +60,9 @@ describe('design-owned general Settings capabilities', () => {
     wrapper = mount(ConfirmDialog, { propsData: { title: 'Change visibility', confirmationPhrase: 'group/project' } });
     wrapper.vm.confirm();
     expect(wrapper.emitted('confirm')).toBeUndefined();
-    await wrapper.find('input').setValue('group/project');
+    const phraseField = wrapper.find('md-filled-text-field');
+    phraseField.element.value = 'group/project';
+    await phraseField.trigger('input');
     wrapper.vm.confirm();
     expect(wrapper.emitted('confirm')).toHaveLength(1);
   });

@@ -15,18 +15,18 @@
       <div class="gl-mds-palette__field">
         <mds-icon name="search" />
         <label class="gl-mds-sr-only" for="gl-mds-plan-palette-query">Jump to a Plan section or action</label>
-        <input
+        <material-text-field
           id="gl-mds-plan-palette-query"
           ref="queryInput"
           v-model="query"
           class="gl-mds-palette__input"
           placeholder="Jump to a Plan section or action…"
           autocomplete="off"
-        />
+        aria-label="Jump to a Plan section or action" />
         <span class="gl-mds-palette__hint">Ctrl+Shift+F</span>
       </div>
       <div class="gl-mds-palette__results" role="listbox" aria-label="Command palette results">
-        <button
+        <material-button variant="text"
           v-for="(result, index) in results"
           :key="result.label"
           type="button"
@@ -40,7 +40,7 @@
           <mds-icon :name="result.icon" />
           <span class="gl-mds-palette__result-label">{{ result.label }}</span>
           <span class="gl-mds-palette__result-kind">{{ result.kind }}</span>
-        </button>
+        </material-button>
         <div v-if="results.length === 0" class="gl-mds-palette__empty">No matches.</div>
       </div>
     </div>
@@ -48,11 +48,14 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'CommandPaletteOverlay',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     actions: { type: Array, required: true },
   },
@@ -87,7 +90,7 @@ export default {
       this.$emit('close');
     },
     trapFocus(event) {
-      const focusable = this.$refs.panel.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const focusable = this.$refs.panel.querySelectorAll('button:not([disabled]), md-text-button:not([disabled]), md-filled-button:not([disabled]), md-filled-text-field:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

@@ -3,15 +3,15 @@
     <div class="mr-topbar__search">
       <span class="material-symbols-outlined mr-topbar__search-icon" aria-hidden="true">search</span>
       <label :for="searchInputId" class="mr-sr-only">{{ searchPlaceholder }}</label>
-      <input
+      <material-text-field
         :id="searchInputId"
         :value="search"
         type="text"
         class="mr-topbar__search-input"
         :placeholder="searchPlaceholder"
-        @input="$emit('update:search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update:search', $event)"
+      :aria-label="searchPlaceholder" />
+      <material-button variant="text"
         type="button"
         class="mr-topbar__regex-toggle"
         :data-active="regexMode"
@@ -20,8 +20,8 @@
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         ref="regexBuilderBtn"
         type="button"
         class="mr-icon-btn"
@@ -31,39 +31,42 @@
         @click="$emit(regexPopoverOpen ? 'close-regex-builder' : 'open-regex-builder')"
       >
         <span class="material-symbols-outlined" aria-hidden="true" style="font-size: 18px">construction</span>
-      </button>
+      </material-button>
       <mr-regex-popover
         v-if="regexPopoverOpen"
         :initial-pattern="regexMode ? search : ''"
         :corpus="corpus"
-        :trigger-el="$refs.regexBuilderBtn"
+        :trigger-el="$refs.regexBuilderBtn && $refs.regexBuilderBtn.$el"
         corpus-title="Matches in merge requests"
         @apply="$emit('apply-regex', $event)"
         @close="$emit('close-regex-builder')"
       />
     </div>
-    <button
+    <material-button variant="text"
       type="button"
       class="mr-icon-btn mr-icon-btn--lg"
       title="Command palette (Ctrl+Shift+F)"
       @click="$emit('open-palette')"
     >
       <span class="material-symbols-outlined" aria-hidden="true">keyboard_command_key</span>
-    </button>
-    <button type="button" class="mr-icon-btn mr-icon-btn--lg" title="Toggle theme" @click="$emit('toggle-theme')">
+    </material-button>
+    <material-button variant="text" type="button" class="mr-icon-btn mr-icon-btn--lg" title="Toggle theme" @click="$emit('toggle-theme')">
       <span class="material-symbols-outlined" aria-hidden="true">{{ dark ? 'light_mode' : 'dark_mode' }}</span>
-    </button>
+    </material-button>
     <div class="mr-topbar__avatar" :title="avatarLabel" aria-hidden="true">{{ avatarInitials }}</div>
     <span class="mr-sr-only">{{ avatarLabel }}</span>
   </header>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MrRegexPopover from './MrRegexPopover.vue';
 
 export default {
   name: 'MrTopBar',
-  components: { MrRegexPopover },
+  components: { MaterialButton, MaterialTextField, MrRegexPopover },
   props: {
     search: { type: String, required: true },
     regexMode: { type: Boolean, required: true },

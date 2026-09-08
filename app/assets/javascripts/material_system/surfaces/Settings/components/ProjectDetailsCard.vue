@@ -1,21 +1,22 @@
 <template>
   <div class="st-card" data-screen-label="Project details">
     <div class="st-card__title">Project</div>
-    <label v-if="projectId" class="st-field">Project ID<gl-form-input :value="projectId" readonly aria-label="Project ID" /></label>
+    <label v-if="projectId" class="st-field">Project ID<MaterialTextField :value="projectId" readonly aria-label="Project ID" /></label>
     <label class="st-field">
       Project name
-      <input
+      <MaterialTextField
         type="text"
         class="st-field__input"
         :value="draftName"
-        @input="draftName = $event.target.value"
+        aria-label="Project name"
+        @input="draftName = $event"
         @blur="$emit('update:project-name', draftName)"
       />
     </label>
     <div class="st-field">
       Visibility
       <div class="st-chip-row" role="radiogroup" aria-label="Project visibility">
-        <button
+        <MaterialButton variant="outlined"
           v-for="option in options"
           :key="option.value"
           type="button"
@@ -28,7 +29,7 @@
         >
           <StIcon :name="option.icon" size="small" />
           {{ option.value }}
-        </button>
+        </MaterialButton>
       </div>
     </div>
   </div>
@@ -36,12 +37,13 @@
 
 <script>
 import StIcon from './StIcon.vue';
-import { GlFormInput } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
 import { VISIBILITY_OPTIONS } from '../data';
 
 export default {
   name: 'ProjectDetailsCard',
-  components: { StIcon, GlFormInput },
+  components: { StIcon, MaterialButton, MaterialTextField },
   props: {
     projectName: { type: String, required: true },
     projectId: { type: [String, Number], default: null },

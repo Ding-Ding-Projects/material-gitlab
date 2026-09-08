@@ -16,22 +16,25 @@
       <h2 id="mr-confirm-dialog-title" class="mr-confirm-dialog__title">{{ title }}</h2>
       <p id="mr-confirm-dialog-message" class="mr-confirm-dialog__message">{{ message }}</p>
       <div class="mr-confirm-dialog__actions">
-        <button ref="cancelBtn" type="button" class="mr-btn" @click="cancel">{{ cancelLabel }}</button>
-        <button
+        <material-button variant="text" ref="cancelBtn" type="button" class="mr-btn" @click="cancel">{{ cancelLabel }}</material-button>
+        <material-button variant="filled"
           type="button"
           class="mr-btn"
           :class="danger ? 'mr-btn--danger' : 'mr-btn--primary'"
           @click="confirm"
         >
           {{ confirmLabel }}
-        </button>
+        </material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'MrConfirmDialog',
   props: {
     open: { type: Boolean, required: true },

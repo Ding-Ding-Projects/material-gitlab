@@ -2,7 +2,7 @@
   <div class="st-page-heading">
     <h1 class="st-page-heading__title">Settings</h1>
     <div class="st-tabs" role="tablist" aria-label="Settings sections" @keydown="onKeydown">
-      <button
+      <MaterialTextButton
         v-for="tab in tabs"
         :id="`st-tab-${tab.id}`"
         :key="tab.id"
@@ -17,14 +17,17 @@
         @click="$emit('select', tab.id)"
       >
         {{ tab.label }}
-      </button>
+      </MaterialTextButton>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialTextButton from '~/material_system/components/material_text_button';
+
 export default {
   name: 'TabStrip',
+  components: { MaterialTextButton },
   props: {
     tabs: { type: Array, required: true },
     active: { type: String, required: true },

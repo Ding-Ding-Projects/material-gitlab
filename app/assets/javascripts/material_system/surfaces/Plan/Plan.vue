@@ -35,20 +35,20 @@
       </div>
 
       <main class="gl-mds-plan__content">
-        <gl-button v-if="activeTab === 'Milestones' && newMilestonePath" :href="newMilestonePath">New milestone</gl-button>
-        <gl-button v-if="activeTab === 'Wiki' && wikiPath" :href="wikiPath">Open wiki editor and page history</gl-button>
+        <material-button variant="outlined" v-if="activeTab === 'Milestones' && newMilestonePath" :href="newMilestonePath">New milestone</material-button>
+        <material-button variant="outlined" v-if="activeTab === 'Wiki' && wikiPath" :href="wikiPath">Open wiki editor and page history</material-button>
         <p v-if="production && activeTab === 'Iterations'">Iteration scheduling is managed in the parent group's iteration editor. This view supports reading and export.</p>
         <div v-if="loading" class="gl-mds-plan__loading" role="status">Loading…</div>
         <div v-else-if="loadError" class="gl-mds-plan__error" role="alert">
           <strong>Plan data could not be loaded.</strong>
           <span>{{ loadError.message }}</span>
-          <button type="button" @click="loadAll">Retry</button>
+          <material-button variant="text" type="button" @click="loadAll">Retry</material-button>
         </div>
         <template v-else>
           <div v-if="activeResourceError" class="gl-mds-plan__error" role="alert">
             <strong>{{ activeTab }} are unavailable.</strong>
             <span>{{ activeResourceError.message }}</span>
-            <button type="button" @click="loadResource(activeTab)">Retry</button>
+            <material-button variant="text" type="button" @click="loadResource(activeTab)">Retry</material-button>
           </div>
           <wiki-panel
             v-else-if="activeTab === 'Wiki'"
@@ -91,7 +91,8 @@
 </template>
 
 <script>
-import { GlButton } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
+
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import TopBar from './components/TopBar.vue';
@@ -125,8 +126,7 @@ const BULK_VALUE_BY_ACTION = { close: 'closed', reopen: 'active', satisfied: 'sa
 
 export default {
   name: 'Plan',
-  components: {
-    GlButton,
+  components: { MaterialButton,
     TopBar,
     PlanTabs,
     RecordList,

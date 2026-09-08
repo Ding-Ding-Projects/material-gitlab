@@ -3,7 +3,7 @@
     <div class="gl-mds-plan__search" :class="{ 'gl-mds-plan__search--invalid': regexInvalid }">
       <mds-icon name="search" />
       <label class="gl-mds-sr-only" :for="searchId">{{ placeholder }}</label>
-      <input
+      <material-text-field
         :id="searchId"
         ref="searchInput"
         class="gl-mds-plan__search-input"
@@ -13,9 +13,9 @@
         :placeholder="placeholder"
         :aria-invalid="regexInvalid ? 'true' : null"
         :aria-describedby="regexInvalid ? `${searchId}-error` : null"
-        @input="$emit('update:search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update:search', $event)"
+      :aria-label="placeholder" />
+      <material-button variant="text"
         type="button"
         class="gl-mds-plan__regex-toggle"
         :class="{ 'gl-mds-plan__regex-toggle--on': regexMode }"
@@ -24,8 +24,8 @@
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         type="button"
         class="gl-mds-plan__icon-btn"
         title="Regex builder"
@@ -35,14 +35,14 @@
       >
         <mds-icon name="construction" size="sm" />
         <span class="gl-mds-sr-only">Open regex builder</span>
-      </button>
+      </material-button>
       <slot name="regex-popover" />
     </div>
     <span v-if="regexInvalid" :id="`${searchId}-error`" class="gl-mds-sr-only" role="alert">
       Invalid pattern — showing unfiltered results.
     </span>
 
-    <button
+    <material-button variant="text"
       type="button"
       class="gl-mds-plan__icon-btn"
       title="Command palette (Ctrl+Shift+F)"
@@ -51,21 +51,24 @@
     >
       <mds-icon name="command" />
       <span class="gl-mds-sr-only">Open command palette</span>
-    </button>
-    <button type="button" class="gl-mds-plan__icon-btn" :title="themeButtonTitle" @click="$emit('toggle-theme')">
+    </material-button>
+    <material-button variant="text" type="button" class="gl-mds-plan__icon-btn" :title="themeButtonTitle" @click="$emit('toggle-theme')">
       <mds-icon :name="dark ? 'light-mode' : 'dark-mode'" />
       <span class="gl-mds-sr-only">{{ themeButtonTitle }}</span>
-    </button>
+    </material-button>
     <div class="gl-mds-plan__avatar" aria-hidden="true">{{ avatarInitials }}</div>
   </header>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'TopBar',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     search: { type: String, default: '' },
     regexMode: { type: Boolean, default: false },

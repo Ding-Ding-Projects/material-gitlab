@@ -1,0 +1,100 @@
+{
+  "surface": "Epics",
+  "scope": "Source declarations are explicit inventory, not runtime or visual proof. Existing complex form components and selection controls remain open.",
+  "files": [
+    {
+      "file": "components/BulkActionBar.vue",
+      "buttons": 6,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/CommandPaletteOverlay.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/EpicsHeader.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/EpicsToolbar.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/EpicTree.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/EpicTreeRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/NotificationStack.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/RegexBuilderDialog.vue",
+      "buttons": 4,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "Epics.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    }
+  ],
+  "remainingNativeControls": [
+    {
+      "file": "components/EpicTree.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/EpicTreeRow.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    }
+  ]
+}

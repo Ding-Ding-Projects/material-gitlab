@@ -3,16 +3,16 @@
     <div class="gl-mds-search__field">
       <mds-icon name="search" />
       <label class="gl-mds-sr-only" for="gl-mds-issue-search">{{ placeholder }}</label>
-      <input
+      <material-text-field
         id="gl-mds-issue-search"
         class="gl-mds-search__input"
         type="search"
         :value="search"
         :placeholder="placeholder"
         autocomplete="off"
-        @input="$emit('update:search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update:search', $event)"
+      :aria-label="placeholder" />
+      <material-button variant="text"
         type="button"
         class="gl-mds-search__regex-toggle"
         :class="{ 'gl-mds-search__regex-toggle--on': regexMode }"
@@ -21,8 +21,8 @@
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         type="button"
         class="gl-mds-search__builder-trigger"
         title="Regex builder"
@@ -31,18 +31,21 @@
       >
         <mds-icon name="construction" size="sm" />
         <span class="gl-mds-sr-only">Open regex builder</span>
-      </button>
+      </material-button>
     </div>
     <span v-if="regexError" class="gl-mds-search__error" role="alert">invalid regex</span>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'IssueSearchBar',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     search: { type: String, default: '' },
     regexMode: { type: Boolean, default: false },

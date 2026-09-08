@@ -6,7 +6,7 @@
       <div v-else class="st-logo-preview" :style="{ background: logoColor }" aria-hidden="true">{{ logoLetter }}</div>
       <div class="st-logo-controls">
         <div v-if="!production" class="st-logo-presets" role="radiogroup" aria-label="Logo color presets">
-          <button
+          <MaterialIconButton
             v-for="color in presets"
             :key="color"
             type="button"
@@ -17,7 +17,7 @@
             :aria-label="`Preset color ${color}`"
             :style="{ background: color }"
             @click="$emit('update:logo-color', color)"
-          ></button>
+          ></MaterialIconButton>
         </div>
         <div class="st-logo-upload-row">
           <label class="st-upload">
@@ -44,10 +44,11 @@ import { GlButton, GlForm } from '@gitlab/ui';
 import csrf from '~/lib/utils/csrf';
 import ConfirmDialog from './ConfirmDialog.vue';
 import { LOGO_PRESET_COLORS } from '../data';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
 
 export default {
   name: 'ProjectLogoCard',
-  components: { StIcon, GlButton, GlForm, ConfirmDialog },
+  components: { StIcon, GlButton, GlForm, ConfirmDialog, MaterialIconButton },
   props: {
     logoColor: { type: String, required: true },
     logoLetter: { type: String, required: true },

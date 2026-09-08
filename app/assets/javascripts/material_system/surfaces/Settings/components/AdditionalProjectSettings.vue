@@ -5,7 +5,7 @@
       <p class="st-card__desc">Configure the available AI features for this project. A locked setting is controlled by an ancestor or the instance.</p>
       <gl-form :action="actionFor('duo')" method="post">
         <input type="hidden" name="_method" value="patch" /><input type="hidden" name="material_settings_section" value="advanced" /><input :value="csrfToken" type="hidden" name="authenticity_token" />
-        <div v-for="field in duoFields" :key="field.name" class="st-setting-row"><input v-if="!fieldDisabled(field)" type="hidden" :name="field.name" value="0" /><template v-if="field.requires_remediation_profile"><gl-form-checkbox :checked="field.value" :name="field.name" :disabled="fieldDisabled(field) || remediationField === field" @change="onDependencyBumpChange(field, $event)"><span>{{ field.label }}</span></gl-form-checkbox><button v-if="!field.value" type="button" class="st-btn st-btn--text" :disabled="fieldDisabled(field) || remediationLoading" @click="openRemediation(field)">Attach required remediation profile</button></template><gl-form-checkbox v-else v-model="field.value" :name="field.name" :disabled="fieldDisabled(field)">{{ field.label }} <span v-if="fieldDisabled(field)" class="st-lock">{{ field.locked ? 'Locked by policy' : 'Requires GitLab Duo' }}</span></gl-form-checkbox></div>
+        <div v-for="field in duoFields" :key="field.name" class="st-setting-row"><input v-if="!fieldDisabled(field)" type="hidden" :name="field.name" value="0" /><template v-if="field.requires_remediation_profile"><gl-form-checkbox :checked="field.value" :name="field.name" :disabled="fieldDisabled(field) || remediationField === field" @change="onDependencyBumpChange(field, $event)"><span>{{ field.label }}</span></gl-form-checkbox><MaterialButton v-if="!field.value" variant="text" class="st-btn" :disabled="fieldDisabled(field) || remediationLoading" @click="openRemediation(field)">Attach required remediation profile</MaterialButton></template><gl-form-checkbox v-else v-model="field.value" :name="field.name" :disabled="fieldDisabled(field)">{{ field.label }} <span v-if="fieldDisabled(field)" class="st-lock">{{ field.locked ? 'Locked by policy' : 'Requires GitLab Duo' }}</span></gl-form-checkbox></div>
         <gl-button type="submit" :disabled="duoFields.length === 0">Save Duo settings</gl-button>
       </gl-form>
     </div>
@@ -21,12 +21,13 @@ import { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlFormTexta
 import csrf from '~/lib/utils/csrf';
 import DuoRemediationDialog from './DuoRemediationDialog.vue';
 import { ensureDependencyBumpProfile } from '../duo_remediation_adapter';
+import MaterialButton from '~/material_system/components/material_button';
 
 const safeLocalAction = (action) => typeof action === 'string' && action.startsWith('/') && !action.startsWith('//') && !/[\u0000-\u0020\\]/.test(action);
 
 export default {
   name: 'AdditionalProjectSettings',
-  components: { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlFormTextarea, DuoRemediationDialog },
+  components: { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlFormTextarea, DuoRemediationDialog, MaterialButton },
   props: { metadata: { type: Object, default: () => ({}) } },
   data() { return { duoFields: (this.metadata.duo?.fields || []).map((field) => ({ ...field })), templateValue: this.metadata.default_work_item_template?.value || '', classificationValue: this.metadata.external_authorization?.value || '', repositorySizeValue: this.metadata.repository_size_limit?.value ?? '', remediationField: null, remediationLoading: false, remediationError: '' }; },
   computed: {

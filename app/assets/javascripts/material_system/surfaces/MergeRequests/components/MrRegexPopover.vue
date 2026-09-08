@@ -8,7 +8,7 @@
   >
     <div class="mr-regex-popover__row">
       <label class="mr-regex-popover__label" :for="ids.pattern">Pattern</label>
-      <input
+      <material-text-field
         :id="ids.pattern"
         ref="patternInput"
         v-model="pattern"
@@ -17,9 +17,9 @@
         placeholder="board.*virtual"
         autocomplete="off"
         spellcheck="false"
-      />
+      aria-label="board.*virtual" />
       <label class="mr-regex-popover__label" :for="ids.flags">Flags</label>
-      <input
+      <material-text-field
         :id="ids.flags"
         v-model="flags"
         type="text"
@@ -27,7 +27,7 @@
         placeholder="i"
         autocomplete="off"
         spellcheck="false"
-      />
+      aria-label="i" />
     </div>
     <p class="mr-regex-popover__status" :data-valid="snapshot.syntax.valid" role="status">
       {{ snapshot.syntax.valid ? 'Valid pattern' : `Invalid pattern: ${snapshot.syntax.message}` }}
@@ -39,26 +39,30 @@
       </div>
     </div>
     <div class="mr-regex-popover__actions">
-      <button type="button" class="mr-btn" @click="copyPattern">Copy pattern</button>
-      <button type="button" class="mr-btn" @click="close">Cancel</button>
-      <button
+      <material-button variant="text" type="button" class="mr-btn" @click="copyPattern">Copy pattern</material-button>
+      <material-button variant="text" type="button" class="mr-btn" @click="close">Cancel</material-button>
+      <material-button variant="filled"
         type="button"
         class="mr-btn mr-btn--primary"
         :disabled="!snapshot.syntax.valid || !pattern"
         @click="apply"
       >
         Apply to search
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import RegexBuilder from '~/material_system/regex-builder';
 
 let uid = 0;
 
 export default {
+  components: { MaterialButton, MaterialTextField },
   name: 'MrRegexPopover',
   props: {
     initialPattern: { type: String, default: '' },

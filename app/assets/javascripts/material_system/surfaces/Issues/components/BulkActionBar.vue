@@ -2,26 +2,28 @@
   <div class="gl-mds-bulkbar" role="toolbar" aria-label="Bulk issue actions">
     <span class="gl-mds-bulkbar__summary">{{ selectAllLabel }}</span>
     <div class="gl-mds-bulkbar__actions">
-      <button v-if="canUpdate" type="button" class="gl-mds-bulkbar__action" @click="$emit('close-selected')">
+      <material-button variant="text" v-if="canUpdate" type="button" class="gl-mds-bulkbar__action" @click="$emit('close-selected')">
         <mds-icon name="check-circle" size="sm" />Close
-      </button>
-      <button v-if="canUpdate" type="button" class="gl-mds-bulkbar__action" @click="$emit('reopen-selected')">
+      </material-button>
+      <material-button variant="text" v-if="canUpdate" type="button" class="gl-mds-bulkbar__action" @click="$emit('reopen-selected')">
         <mds-icon name="undo" size="sm" />Reopen
-      </button>
-      <button v-if="canDelete" type="button" class="gl-mds-bulkbar__action gl-mds-bulkbar__action--danger" @click="$emit('delete-selected')">
+      </material-button>
+      <material-button variant="text" v-if="canDelete" type="button" class="gl-mds-bulkbar__action gl-mds-bulkbar__action--danger" @click="$emit('delete-selected')">
         <mds-icon name="delete" size="sm" />Delete
-      </button>
-      <button type="button" class="gl-mds-bulkbar__clear" @click="$emit('clear')">Clear selection</button>
+      </material-button>
+      <material-button variant="text" type="button" class="gl-mds-bulkbar__clear" @click="$emit('clear')">Clear selection</material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'BulkActionBar',
-  components: { MdsIcon },
+  components: { MaterialButton, MdsIcon },
   props: {
     selectedCount: { type: Number, required: true },
     totalCount: { type: Number, required: true },

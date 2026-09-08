@@ -3,7 +3,7 @@
     <div class="mr-command-palette" role="dialog" aria-modal="true" aria-label="Command palette">
       <div class="mr-command-palette__search">
         <span class="material-symbols-outlined" aria-hidden="true">keyboard_command_key</span>
-        <input
+        <material-text-field
           ref="input"
           v-model="query"
           type="text"
@@ -22,7 +22,7 @@
         aria-label="Available commands"
       >
         <li v-for="(action, index) in filtered" :key="action.label" role="presentation">
-          <button
+          <material-button variant="text"
             type="button"
             class="mr-command-palette__item"
             role="option"
@@ -33,7 +33,7 @@
           >
             <span class="material-symbols-outlined" aria-hidden="true">{{ action.icon || 'chevron_right' }}</span>
             {{ action.label }}
-          </button>
+          </material-button>
         </li>
       </ul>
       <p v-else class="mr-command-palette__empty">No commands match "{{ query }}".</p>
@@ -42,7 +42,11 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 export default {
+  components: { MaterialButton, MaterialTextField },
   name: 'MrCommandPalette',
   props: {
     actions: { type: Array, required: true },

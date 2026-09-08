@@ -8,13 +8,13 @@
         @change="$emit('toggle-select', issue.id)"
       />
     </label>
-    <button type="button" class="gl-mds-issue-row__open" @click="$emit('open', issue.id)">
+    <material-button variant="text" type="button" class="gl-mds-issue-row__open" @click="$emit('open', issue.id)">
       <mds-icon :name="issue.state === 'Open' ? 'open-state' : 'check-circle'" :style="{ color: issue.stateColor }" />
       <span class="gl-mds-issue-row__text">
         <span class="gl-mds-issue-row__title">{{ issue.title }}</span>
         <span class="gl-mds-issue-row__meta">#{{ issue.iid }} · {{ issue.meta }}</span>
       </span>
-    </button>
+    </material-button>
     <div class="gl-mds-issue-row__labels">
       <label-chip v-for="label in issue.labels" :key="label" :label="label" />
     </div>
@@ -23,12 +23,14 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import MdsIcon from './MdsIcon.vue';
 import LabelChip from './LabelChip.vue';
 
 export default {
   name: 'IssueRow',
-  components: { MdsIcon, LabelChip },
+  components: { MaterialButton, MdsIcon, LabelChip },
   props: {
     issue: { type: Object, required: true },
     selected: { type: Boolean, default: false },

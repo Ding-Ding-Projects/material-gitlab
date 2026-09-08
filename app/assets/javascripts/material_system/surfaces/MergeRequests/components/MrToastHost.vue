@@ -12,22 +12,25 @@
         <div v-if="toast.title" class="mr-toast__title">{{ toast.title }}</div>
         <div class="mr-toast__message">{{ toast.message }}</div>
       </div>
-      <button
+      <material-button variant="text"
         type="button"
         class="mr-icon-btn mr-toast__dismiss"
         :aria-label="`Dismiss: ${toast.title || toast.message}`"
         @click="dismiss(toast.id)"
       >
         <span class="material-symbols-outlined" aria-hidden="true">close</span>
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import notificationCenter from '~/material_system/notifications';
 
 export default {
+  components: { MaterialButton },
   name: 'MrToastHost',
   data() {
     return {

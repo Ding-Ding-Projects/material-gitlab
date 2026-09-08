@@ -1,0 +1,156 @@
+{
+  "surface": "MergeRequests",
+  "scope": "Source declarations are explicit inventory, not runtime or visual proof. Existing complex form components and selection controls remain open.",
+  "files": [
+    {
+      "file": "components/MrBulkActionBar.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrCommandPalette.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrCommentComposer.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrDetailHeader.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrDetailTabs.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrDiffFileTree.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrFilterChips.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrList.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrListHeader.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrListItem.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrMergeWidget.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrRegexPopover.vue",
+      "buttons": 3,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrThreadCard.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrToastHost.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MrTopBar.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "MergeRequests.vue",
+      "buttons": 3,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    }
+  ],
+  "remainingNativeControls": [
+    {
+      "file": "components/MrList.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/MrListItem.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    }
+  ]
+}

@@ -1,4 +1,7 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import { __ } from '~/locale';
 import MdsIcon from './MdsIcon.vue';
 
@@ -10,7 +13,7 @@ import MdsIcon from './MdsIcon.vue';
  */
 export default {
   name: 'CommandPaletteOverlay',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     actions: { type: Array, required: true },
   },
@@ -71,7 +74,7 @@ export default {
         <label class="gl-mds-sr-only" for="epics-palette-input">{{
           __('Jump to an action')
         }}</label>
-        <input
+        <material-text-field
           id="epics-palette-input"
           ref="input"
           v-model="query"
@@ -82,11 +85,11 @@ export default {
           aria-expanded="true"
           aria-controls="epics-palette-list"
           @keydown="onKeydown"
-        />
+        :aria-label="__('Jump to an action…')" />
         <span class="gl-mds-epics__palette-kbd">Ctrl+Shift+F</span>
       </div>
       <div id="epics-palette-list" class="gl-mds-epics__palette-list" role="listbox">
-        <button
+        <material-button variant="text"
           v-for="(action, index) in results"
           :key="action.id"
           type="button"
@@ -99,7 +102,7 @@ export default {
         >
           <mds-icon :name="action.icon || 'check-circle'" size="sm" />
           {{ action.label }}
-        </button>
+        </material-button>
         <div v-if="!results.length" class="gl-mds-epics__palette-empty">{{ __('No matches.') }}</div>
       </div>
     </div>

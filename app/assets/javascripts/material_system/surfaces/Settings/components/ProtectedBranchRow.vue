@@ -9,13 +9,16 @@
     />
     <span class="st-branch-row__name">{{ branch.name }}</span>
     <span class="st-branch-row__rule">Merge: {{ branch.merge }} · Push: {{ branch.push }}</span>
-    <button type="button" class="st-branch-row__unprotect" @click="$emit('unprotect', branch.id)">Unprotect</button>
+    <MaterialTextButton class="st-branch-row__unprotect" @click="$emit('unprotect', branch.id)">Unprotect</MaterialTextButton>
   </div>
 </template>
 
 <script>
+import MaterialTextButton from '~/material_system/components/material_text_button';
+
 export default {
   name: 'ProtectedBranchRow',
+  components: { MaterialTextButton },
   props: {
     branch: { type: Object, required: true },
     selected: { type: Boolean, default: false },

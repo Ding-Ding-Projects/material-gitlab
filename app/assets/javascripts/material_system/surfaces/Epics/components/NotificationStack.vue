@@ -13,7 +13,7 @@
           <p v-if="item.title" class="gl-mds-toasts__title">{{ item.title }}</p>
           <p class="gl-mds-toasts__message">{{ item.message }}</p>
         </div>
-        <button
+        <material-button variant="text"
           v-for="action in item.actions"
           :key="action.id"
           type="button"
@@ -21,28 +21,30 @@
           @click="runAction(item.id, action.id)"
         >
           {{ action.label }}
-        </button>
-        <button
+        </material-button>
+        <material-button variant="text"
           type="button"
           class="gl-mds-toasts__dismiss"
           :aria-label="__('Dismiss notification')"
           @click="dismiss(item.id)"
         >
           <mds-icon name="close" size="sm" />
-        </button>
+        </material-button>
       </div>
     </transition-group>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { __ } from '~/locale';
 import notificationCenter from '../../../notifications';
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'NotificationStack',
-  components: { MdsIcon },
+  components: { MaterialButton, MdsIcon },
   data() {
     return { items: [] };
   },
