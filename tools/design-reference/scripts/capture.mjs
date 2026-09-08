@@ -22,14 +22,14 @@ function artifactFromManifest(manifestValue, artifactValue, sourceCommit) {
   const entry = manifest.artifacts.find((candidate) => candidate?.path === artifactPath);
   if (!entry || !/^[a-f0-9]{64}$/.test(entry.sha256 || '')) throw new Error('artifact manifest must contain the requested artifact path and SHA-256');
   const file = existingFile(ROOT, artifactPath, 'artifact path');
-  if (sha256(file) !== entry.sha256) throw new Error(`artifact hash does not match manifest: ${artifactPath}`);
+  if (hash(file) !== entry.sha256) throw new Error(`artifact hash does not match manifest: ${artifactPath}`);
   return { path: artifactPath, sha256: entry.sha256, manifest: { path: manifestValue, sha256: hash(manifestPath) } };
 }
 function captureSession(value, sourceCommit, id, kind) {
   const file = existingFile(ROOT, value, 'capture session provenance');
   const session = JSON.parse(fs.readFileSync(file, 'utf8'));
   if (session?.schemaVersion !== 1 || session.sourceCommit !== sourceCommit || session.id !== id || session.kind !== kind || typeof session.target !== 'string' || !session.target) throw new Error('capture session provenance must bind schema, source commit, row, kind, and launched target');
-  return { path: value, sha256: sha256(file) };
+  return { path: value, sha256: hash(file) };
 }
 function pngInfo(file) {
   const bytes = fs.readFileSync(file);
