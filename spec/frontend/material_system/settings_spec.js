@@ -22,6 +22,26 @@ const createStorage = () => {
 };
 
 describe('Material System settings', () => {
+  it('propagates saved preferences between stores in the same document exactly once', async () => {
+    localStorage.clear();
+    const first = createMaterialSettingsStore();
+    const second = createMaterialSettingsStore();
+    const firstListener = jest.fn();
+    const secondListener = jest.fn();
+    first.subscribe(firstListener);
+    second.subscribe(secondListener);
+    try {
+      expect(first.update({ shellVariant: 'a', theme: 'dark' }).ok).toBe(true);
+      await Promise.resolve();
+      expect(second.snapshot()).toMatchObject({ shellVariant: 'a', theme: 'dark' });
+      expect(firstListener).toHaveBeenCalledTimes(2);
+      expect(secondListener).toHaveBeenCalledTimes(2);
+    } finally {
+      first.dispose();
+      second.dispose();
+      localStorage.clear();
+    }
+  });
   it('migrates the legacy language and funny level without dropping current defaults', () => {
     expect(migrateSettings({ languageMode: 'bilingual', funnyLevel: 5 })).toEqual({
       ...DEFAULT_SETTINGS,
@@ -42,6 +62,7 @@ describe('Material System settings', () => {
     ['fontFamily', ''],
     ['fontScale', 2.1],
     ['motion', 'fast'],
+    ['shellVariant', 'other'],
   ])('rejects an invalid %s value', (key, value) => {
     expect(validateSettings({ ...DEFAULT_SETTINGS, [key]: value }).ok).toBe(false);
   });

@@ -3,6 +3,7 @@ import { createMaterialTokens } from './tokens';
 export const SETTINGS_SCHEMA_VERSION = 1;
 export const SETTINGS_STORAGE_KEY = 'material-system.settings.v1';
 export const SETTINGS_MAX_BYTES = 64 * 1024;
+export const SETTINGS_CHANGE_EVENT = 'material-system:settings-changed';
 
 const LANGUAGES = new Set(['en', 'yue', 'bilingual']);
 const THEMES = new Set(['light', 'dark', 'system']);
@@ -22,6 +23,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   fontFamily: 'system-ui',
   fontScale: 1,
   motion: 'full',
+  shellVariant: 'b',
 });
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -56,6 +58,8 @@ export function validateSettings(candidate) {
   )
     errors.push('fontScale must be between 0.8 and 2');
   if (!MOTIONS.has(candidate.motion)) errors.push('invalid motion preference');
+  if (candidate.shellVariant !== undefined && !['a', 'b'].includes(candidate.shellVariant))
+    errors.push('invalid shell variant');
   return errors.length ? { ok: false, errors } : { ok: true, value: clone(candidate) };
 }
 
@@ -94,6 +98,9 @@ export function saveSettings(settings, storage = globalThis.localStorage) {
     return { ok: false, errors: ['settings exceed storage limit'] };
   try {
     storage.setItem(SETTINGS_STORAGE_KEY, serialized);
+    if (storage === globalThis.localStorage && typeof globalThis.dispatchEvent === 'function') {
+      queueMicrotask(() => globalThis.dispatchEvent(new Event(SETTINGS_CHANGE_EVENT)));
+    }
     return { ok: true, value: checked.value };
   } catch (_error) {
     return { ok: false, errors: ['settings could not be persisted'] };
@@ -111,7 +118,12 @@ export function subscribeSettings(listener, target = globalThis) {
     if (event.key === SETTINGS_STORAGE_KEY) listener(loadSettings(target.localStorage));
   };
   target.addEventListener('storage', onStorage);
-  return () => target.removeEventListener('storage', onStorage);
+  const onLocalChange = () => listener(loadSettings(target.localStorage));
+  target.addEventListener(SETTINGS_CHANGE_EVENT, onLocalChange);
+  return () => {
+    target.removeEventListener('storage', onStorage);
+    target.removeEventListener(SETTINGS_CHANGE_EVENT, onLocalChange);
+  };
 }
 
 export function settingsTokens(settings = DEFAULT_SETTINGS) {
@@ -137,6 +149,7 @@ export function createMaterialSettingsStore({
     return snapshot;
   };
   const unsubscribeStorage = subscribeSettings((next) => {
+    if (JSON.stringify(next) === JSON.stringify(state)) return;
     state = next;
     emit();
   }, target);

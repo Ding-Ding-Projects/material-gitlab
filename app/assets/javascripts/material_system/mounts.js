@@ -1,8 +1,11 @@
 import Vue from 'vue';
 import Analyze, { createAnalyzeDataAdapter } from './surfaces/Analyze';
 import CommandPalette from './surfaces/CommandPalette';
+import ShellA from './surfaces/ShellA';
 import ShellB from './surfaces/ShellB';
 import Sidebar from './surfaces/Sidebar';
+import { loadSettings, updateSettings, subscribeSettings } from './settings';
+import { __ } from '~/locale';
 
 const parseJson = (value, fallback) => {
   if (!value) return fallback;
@@ -41,19 +44,26 @@ const toSections = (payload) => {
 const mount = (el, Component, props = {}) => {
   if (!el || el.__materialMount) return el?.__materialMount || null;
   const { listeners = {}, ...componentProps } = props;
-  const vm = new Vue({ name: `${Component.name || 'Material'}Mount`, render: (h) => h(Component, { props: componentProps, on: listeners }) }).$mount(el);
+  const vm = new Vue({ name: `${Component.name || 'Material'}Mount`, data: () => ({ surfaceProps: componentProps }), render(h) { return h(Component, { props: this.surfaceProps, on: listeners }); } }).$mount(el);
   el.__materialMount = vm;
   return vm;
 };
 
+const resolveTheme = (settings) => settings.theme === 'system'
+  ? (document.documentElement.classList.contains('gl-dark') || window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  : settings.theme;
+
 export function mountSidebar(el = document.querySelector('.m3-shell-sidebar-host'), options = {}) {
-  if (!el) return null;
+  if (!el || el.__materialMount) return el?.__materialMount || null;
   const payload = options.data || parseJson(el.dataset.sidebar, {});
-  return mount(el, Sidebar, { sections: options.sections || toSections(payload), active: options.active || payload.current_context_header || '', project: options.project || payload.current_context?.item || {} });
+  const vm = mount(el, Sidebar, { sections: options.sections || toSections(payload), active: options.active || payload.current_context_header || '', project: options.project || payload.current_context?.item || {}, theme: resolveTheme(loadSettings()) });
+  const unsubscribe = subscribeSettings((next) => { vm.surfaceProps.theme = resolveTheme(next); });
+  vm.$once('hook:beforeDestroy', unsubscribe);
+  return vm;
 }
 
 export function mountAuthenticatedShell(el = document.querySelector('.m3-shell-topbar-host'), options = {}) {
-  if (!el) return null;
+  if (!el || el.__materialMount) return el?.__materialMount || null;
   const payload = options.data || parseJson(document.querySelector('.m3-shell-sidebar-host')?.dataset.sidebar, {});
   const sections = options.sections || toSections(payload);
   const navigate = options.navigate || ((href) => window.location.assign(href));
@@ -66,7 +76,35 @@ export function mountAuthenticatedShell(el = document.querySelector('.m3-shell-t
       navigate(`${prefix}/search?search=${encodeURIComponent(query.trim())}`);
     }
   };
-  return mount(el, ShellB, { chromeOnly: true, brand: options.brand || 'GitLab M3', sections, paletteActions, listeners: { search: navigateSearch, 'regex-change': ({ pattern }) => navigateSearch(pattern) } });
+  const storage = options.storage || globalThis.localStorage;
+  const saved = loadSettings(storage);
+  let vm;
+  const savePreference = (patch) => {
+    const result = updateSettings(patch, storage);
+    if (!result.ok) { vm.preferenceError = __('The header preference could not be saved.'); return; }
+    vm.preferenceError = '';
+    vm.variant = result.value.shellVariant;
+    vm.currentTheme = resolveTheme(result.value);
+    vm.$nextTick(() => vm.$children[0]?.focusSearch());
+  };
+  vm = new Vue({
+    name: 'MaterialAuthenticatedShellMount',
+    data: () => ({ variant: saved.shellVariant, currentTheme: resolveTheme(saved), preferenceError: '' }),
+    render(h) {
+      const actions = [...paletteActions,
+        { id: 'header-full', label: __('Show the header theme control'), run: () => savePreference({ shellVariant: 'a' }) },
+        { id: 'header-minimal', label: __('Hide the header theme control'), run: () => savePreference({ shellVariant: 'b' }) },
+      ];
+      return h(this.variant === 'a' ? ShellA : ShellB, {
+        props: { chromeOnly: true, brand: options.brand || 'GitLab M3', sections, paletteActions: actions, initialTheme: this.currentTheme, managedTheme: true, preferenceError: this.preferenceError },
+        on: { search: navigateSearch, 'regex-change': ({ pattern }) => navigateSearch(pattern), 'theme-change': (theme) => savePreference({ theme }) },
+      });
+    },
+  }).$mount(el);
+  const unsubscribe = subscribeSettings((next) => { vm.variant = next.shellVariant; vm.currentTheme = resolveTheme(next); });
+  vm.$once('hook:beforeDestroy', unsubscribe);
+  el.__materialMount = vm;
+  return vm;
 }
 
 export function mountLoginShell(el = document.querySelector('.login-m3-surface'), options = {}) {

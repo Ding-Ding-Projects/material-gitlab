@@ -13,6 +13,7 @@
         <button type="button" class="material-shell__icon-button" aria-label="Open command palette (Ctrl+Shift+F)" @click="paletteOpen = true">⌘</button>
         <slot name="actions" />
       </header>
+      <p v-if="preferenceError" role="alert">{{ preferenceError }}</p>
       <main v-if="!chromeOnly" class="material-shell__main"><slot /></main>
     </div>
     <regex-builder v-if="regexOpen" :initial="query" :corpus="corpus" target-label="global search" @apply="applyRegex" @close="regexOpen = false" />
@@ -29,6 +30,8 @@ export default {
   name: 'MaterialShellB',
   components: { CommandPalette, RegexBuilder, MaterialSidebar: Sidebar },
   props: {
+    managedTheme: Boolean,
+    preferenceError: { type: String, default: '' },
     sections: { type: Array, default: () => [] },
     paletteActions: { type: Array, default: () => [] },
     active: { type: String, default: '' },
@@ -38,6 +41,7 @@ export default {
     initialTheme: { type: String, default: 'light' },
   },
   data() { return { query: '', regexOpen: false, paletteOpen: false, theme: this.initialTheme }; },
+  watch: { initialTheme(value) { this.theme = value; } },
   computed: { searchId() { return `material-shell-b-search-${this._uid}`; }, corpus() { return this.sections.flatMap((section) => section.items.map((item) => item.label)); } },
   mounted() {
     this.onKeydown = (event) => { if (event.ctrlKey && event.shiftKey && !event.altKey && event.key.toLocaleLowerCase() === 'f') { event.preventDefault(); this.paletteOpen = true; } if (event.key === 'Escape') { this.paletteOpen = false; this.regexOpen = false; } };

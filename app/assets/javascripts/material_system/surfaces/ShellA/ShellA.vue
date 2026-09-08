@@ -14,6 +14,7 @@
         <button type="button" class="material-shell__icon-button" aria-label="Toggle theme" @click="toggleTheme">{{ theme === 'dark' ? '☀' : '☾' }}</button>
         <slot name="actions" />
       </header>
+      <p v-if="preferenceError" role="alert">{{ preferenceError }}</p>
       <main v-if="!chromeOnly" class="material-shell__main"><slot /></main>
     </div>
     <regex-builder v-if="regexOpen" :initial="query" :corpus="corpus" target-label="global search" @apply="applyRegex" @close="regexOpen = false" />
@@ -30,6 +31,8 @@ export default {
   name: 'MaterialShellA',
   components: { CommandPalette, RegexBuilder, MaterialSidebar: Sidebar },
   props: {
+    managedTheme: Boolean,
+    preferenceError: { type: String, default: '' },
     sections: { type: Array, default: () => [] },
     paletteActions: { type: Array, default: () => [] },
     active: { type: String, default: '' },
@@ -45,6 +48,7 @@ export default {
     searchId() { return `material-shell-a-search-${this._uid}`; },
     corpus() { return this.sections.flatMap((section) => section.items.map((item) => item.label)); },
   },
+  watch: { initialTheme(value) { this.theme = value; } },
   mounted() {
     this.onKeydown = (event) => {
       if (event.ctrlKey && event.shiftKey && !event.altKey && event.key.toLocaleLowerCase() === 'f') {
@@ -62,7 +66,7 @@ export default {
   methods: {
     submitSearch(event) { this.$emit('search', this.query, event); },
     applyRegex({ pattern, flags }) { this.regexMode = true; this.regexPattern = pattern; this.regexFlags = flags; this.query = pattern; this.regexOpen = false; this.$emit('regex-change', { pattern, flags }); },
-    toggleTheme() { this.theme = this.theme === 'dark' ? 'light' : 'dark'; this.$emit('theme-change', this.theme); },
+    toggleTheme() { const next = this.theme === 'dark' ? 'light' : 'dark'; if (!this.managedTheme) this.theme = next; this.$emit('theme-change', next); },
     focusSearch() { this.$refs.search?.focus(); },
   },
 };

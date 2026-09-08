@@ -2,6 +2,7 @@
   <nav
     class="material-sidebar"
     data-screen-label="Sidebar"
+    :data-theme="theme"
     aria-label="Primary navigation"
     :class="{ 'material-sidebar--collapsed': collapsed }"
   >
@@ -80,6 +81,7 @@ export default {
   name: 'MaterialSidebar',
   components: { RegexBuilder },
   props: {
+    theme: { type: String, default: 'light' },
     sections: { type: Array, default: () => [] },
     active: { type: String, default: '' },
     project: { type: Object, default: () => DEFAULT_PROJECT },

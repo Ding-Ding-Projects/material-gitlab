@@ -12,7 +12,7 @@ a component export.
 Admin, Agent Memory, Build, Code, Deploy, Epics, Issues, Manage, Merge Requests, Monitor,
 Operate, Pipelines, Plan, Repository, Secure, Security, and To-Dos each have a Rails host and a
 page entry that imports and calls the named surface initializer. Shell B and Sidebar
-are mounted by `entrypoints/super_sidebar.js` from the authenticated application
+and Shell A are mounted by `entrypoints/super_sidebar.js` from the authenticated application
 and page layouts. The inventory records one representative Code route; tags and
 commits use the same `mountCodeSurface` import and host contract.
 
@@ -23,10 +23,17 @@ guard verifies those exact imports and template hosts.
 ## Honest unresolved boundaries
 
 Analyze preserves the existing authenticated Apollo host because no production page
-entry imports the Material adapter. Settings and Shell A have checked-in initializer
-or component source only, without a production page-entry edge. Login is a Rails-rendered Devise
+entry imports the Material adapter. Settings has checked-in initializer
+and component source only, without an activated production page-entry edge. Login is a Rails-rendered Devise
 authentication view, including `devise/sessions/new_base`; it is not recorded as a
 Vue replacement.
+
+The shared header command palette exposes actions to show or hide its theme
+control. These select Shell A or Shell B through persisted `shellVariant`
+preferences. Both variants use the real server navigation data; changing the
+variant does not create a separate preview route. Preference failures retain the
+current header and show an alert. Same-document settings changes notify other
+subscribers once so header and sidebar themes remain synchronized.
 
 Every row currently records `runtimeEvidence: 'not-captured'`. Source registration
 is evidence of a checked-in edge only. It is not built-artifact interaction or a
