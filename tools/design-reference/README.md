@@ -30,13 +30,20 @@ only from those retained raw inputs.
 ```powershell
 node scripts/parity-guard.mjs
 node scripts/parity-guard.mjs --negative
-node scripts/capture.mjs --id=surface.issues --kind=reference --png=artifacts/parity/surface.issues/reference.png --commit=<sha>
-node scripts/capture.mjs --id=surface.issues --kind=built --png=artifacts/parity/surface.issues/built.png --commit=<sha>
-node scripts/side-by-side.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --output=artifacts/parity/surface.issues/side-by-side.svg
-node scripts/diff.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --output=artifacts/parity/surface.issues/diff.json
+node scripts/parity-guard.mjs --strict
+node scripts/capture.mjs --id=surface.issues --kind=reference --png=artifacts/parity/surface.issues/reference.png --commit=<sha> --artifact-sha256=<reference-app-artifact-sha256> --font-proof='<document-fonts-proof-json>'
+node scripts/capture.mjs --id=surface.issues --kind=built --png=artifacts/parity/surface.issues/built.png --commit=<sha> --artifact-sha256=<built-app-artifact-sha256>
+node scripts/side-by-side.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --output=artifacts/parity/surface.issues/side-by-side.svg --tuple='<tuple-json>' --commit=<sha>
+node scripts/diff.mjs --id=surface.issues --reference=artifacts/parity/surface.issues/reference.png --built=artifacts/parity/surface.issues/built.png --output=artifacts/parity/surface.issues/diff.json --tuple='<tuple-json>' --commit=<sha>
 ```
 
 The inventory currently records explicit pending evidence because no capture was
-fabricated in this implementation lane. A row becomes verified only after both raw
-images, the labelled comparison, the diff record, and a reviewed Material Design 3
-audit are present and hash-bound to the same tuple and source commit.
+fabricated in this implementation lane. The structural command validates the
+hand-written inventory while preserving those honest pending rows. `--strict` is the
+completion command: it stays red until every row has known production routing,
+verified raw inputs, comparison and diff evidence, audited Material Design 3 controls,
+and hash-bound receipts for the exact route, tuple, source commit, and rendered
+application artifact. A receipt cannot be substituted for another row's input.
+Reference receipts also need a cheap-headless `document.fonts` proof for every named
+reference family. That proof blocks strict completion when a remote design font falls
+back locally. It records the problem without downloading or substituting a font asset.

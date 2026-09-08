@@ -18,6 +18,21 @@ export function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 }
 
+function hashJson(value) {
+  return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+}
+
+function sameJson(left, right) {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+function requiredReferenceFonts(row, root) {
+  const source = fs.readFileSync(path.join(root, row.referenceFile), 'utf8');
+  const fonts = new Set();
+  for (const match of source.matchAll(/['"](Google Sans(?: Text)?|Material Symbols Outlined)['"]/g)) fonts.add(match[1]);
+  return [...fonts].sort();
+}
+
 function issue(errors, message) { errors.push(message); }
 
 function checkEvidence(errors, row, key, root) {
@@ -32,6 +47,52 @@ function checkEvidence(errors, row, key, root) {
     const file = path.join(root, evidence.path);
     if (!fs.existsSync(file)) issue(errors, `${row.id}.evidence.${key} verified path is missing: ${evidence.path}`);
     else if (sha256(file) !== evidence.sha256) issue(errors, `${row.id}.evidence.${key} hash is stale`);
+  }
+}
+
+function checkReceipt(errors, row, key, root, sourceCommit) {
+  const evidence = row.evidence[key];
+  if (evidence.status !== 'verified') return issue(errors, `${row.id}.evidence.${key} is not verified`);
+  const evidencePath = path.join(root, evidence.path);
+  const receiptPath = `${evidencePath}.receipt.json`;
+  if (!fs.existsSync(receiptPath)) return issue(errors, `${row.id}.evidence.${key} receipt is missing: ${evidence.path}.receipt.json`);
+  let receipt;
+  try { receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8')); }
+  catch { return issue(errors, `${row.id}.evidence.${key} receipt is not valid JSON`); }
+  if (receipt.schemaVersion !== 2) issue(errors, `${row.id}.evidence.${key} receipt schemaVersion must be 2`);
+  const expectedKind = key === 'referenceRaw' ? 'reference' : key === 'builtRaw' ? 'built' : key === 'sideBySide' ? 'side-by-side' : key === 'diff' ? 'diff' : null;
+  if (expectedKind && receipt.kind !== expectedKind) issue(errors, `${row.id}.evidence.${key} receipt kind must be ${expectedKind}`);
+  if (receipt.id !== row.id) issue(errors, `${row.id}.evidence.${key} receipt id does not match row`);
+  if (receipt.status !== 'verified') issue(errors, `${row.id}.evidence.${key} receipt status must be verified`);
+  if ((expectedKind === 'reference' || expectedKind === 'built') && (receipt.referenceFile !== row.referenceFile || receipt.referenceHash !== row.referenceHash)) issue(errors, `${row.id}.evidence.${key} receipt reference input is stale`);
+  const expectedRoute = expectedKind === 'reference' ? row.referenceRoute : expectedKind === 'built' ? row.productionRoute : undefined;
+  if (expectedRoute && receipt.route !== expectedRoute) issue(errors, `${row.id}.evidence.${key} receipt route does not match tuple route`);
+  if (!sameJson(receipt.tuple, row.tuple) || receipt.tupleHash !== hashJson(row.tuple)) issue(errors, `${row.id}.evidence.${key} receipt tuple linkage is stale`);
+  if (receipt.sourceCommit !== sourceCommit) issue(errors, `${row.id}.evidence.${key} receipt source commit does not match inventory`);
+  if (!/^[a-f0-9]{64}$/.test(receipt?.artifact?.sha256 || '')) issue(errors, `${row.id}.evidence.${key} receipt artifact hash is required`);
+  else if ((key === 'sideBySide' || key === 'diff') && receipt.artifact.sha256 !== evidence.sha256) issue(errors, `${row.id}.evidence.${key} receipt artifact hash does not match evidence`);
+  if (key === 'referenceRaw' || key === 'builtRaw') {
+    if (receipt?.raw?.path !== evidence.path || receipt?.raw?.sha256 !== evidence.sha256) issue(errors, `${row.id}.evidence.${key} receipt raw input linkage is stale`);
+    const expectedWidth = Math.round(row.tuple.viewport.width * row.tuple.scale);
+    const expectedHeight = Math.round(row.tuple.viewport.height * row.tuple.scale);
+    if (receipt?.raw?.width !== expectedWidth || receipt?.raw?.height !== expectedHeight) issue(errors, `${row.id}.evidence.${key} receipt dimensions do not match tuple`);
+    if (key === 'referenceRaw') {
+      const proof = receipt.fontProof;
+      if (proof?.transport !== 'cheap Lowlevel headless route' || !proof?.availability || typeof proof.availability !== 'object') issue(errors, `${row.id}.evidence.referenceRaw receipt needs a cheap Lowlevel document.fonts proof`);
+      else for (const family of requiredReferenceFonts(row, root)) if (proof.availability[family] !== true) issue(errors, `${row.id}.evidence.referenceRaw required font is unavailable: ${family}`);
+    }
+  } else {
+    const reference = row.evidence.referenceRaw;
+    const built = row.evidence.builtRaw;
+    if (receipt?.inputs?.reference?.path !== reference.path || receipt?.inputs?.reference?.sha256 !== reference.sha256 || receipt?.inputs?.built?.path !== built.path || receipt?.inputs?.built?.sha256 !== built.sha256) issue(errors, `${row.id}.evidence.${key} receipt inputs do not link to the verified raw captures`);
+    if (key === 'diff') {
+      let diff;
+      try { diff = JSON.parse(fs.readFileSync(evidencePath, 'utf8')); }
+      catch { return issue(errors, `${row.id}.evidence.diff is not valid JSON`); }
+      if (diff.schemaVersion !== 2 || diff.id !== row.id || diff.sourceCommit !== sourceCommit || !sameJson(diff.tuple, row.tuple) || diff.tupleHash !== hashJson(row.tuple)) issue(errors, `${row.id}.evidence.diff record provenance is stale`);
+      if (diff.review?.verdict !== 'approved' || typeof diff.review?.reviewer !== 'string' || !diff.review.reviewer.trim()) issue(errors, `${row.id}.evidence.diff requires an approved human review`);
+      if (!sameJson(diff.inputs, receipt.inputs)) issue(errors, `${row.id}.evidence.diff record inputs do not match receipt`);
+    }
   }
 }
 
@@ -89,6 +150,23 @@ export function validateInventory(inventory, { root = ROOT, checkReferenceHashes
   return { valid: errors.length === 0, errors };
 }
 
+export function validateCompletion(inventory, { root = ROOT, checkReferenceHashes = true } = {}) {
+  const structural = validateInventory(inventory, { root, checkReferenceHashes });
+  const errors = [...structural.errors];
+  if (!/^[a-f0-9]{40}$/.test(inventory?.sourceCommit || '')) issue(errors, 'sourceCommit must be a full 40-character commit for completion');
+  if (inventory?.capturePolicy?.evidenceStatus !== 'verified') issue(errors, 'capturePolicy.evidenceStatus must be verified for completion');
+  for (const row of inventory?.contracts || []) {
+    if (row.productionRouteStatus !== 'known') issue(errors, `${row.id}.productionRouteStatus must be known for completion`);
+    if (row.materialAudit?.status !== 'verified') issue(errors, `${row.id}.materialAudit must be verified for completion`);
+    if (typeof row.materialAudit?.review !== 'string' || !row.materialAudit.review.trim() || /pending|placeholder/i.test(row.materialAudit.review)) issue(errors, `${row.id}.materialAudit.review requires a completed review record`);
+    for (const key of ['referenceRaw', 'builtRaw', 'sideBySide', 'diff']) checkReceipt(errors, row, key, root, inventory.sourceCommit);
+    for (const [index, deviation] of (row.intentionalDeviations || []).entries()) {
+      if (!deviation?.approval || /pending|placeholder/i.test(deviation.approval)) issue(errors, `${row.id}.intentionalDeviations[${index}].approval requires a completed approval record`);
+    }
+  }
+  return { valid: errors.length === 0, errors };
+}
+
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
 function removeAt(object, pathParts) {
   let current = object;
@@ -101,7 +179,7 @@ export function runNegativeRegression(inventory) {
     ['referenceFile'], ['referenceRoute'], ['productionRoute'], ['productionMount'], ['state'],
     ['tuple', 'screen'], ['tuple', 'state'], ['tuple', 'theme'], ['tuple', 'viewport', 'width'], ['tuple', 'viewport', 'height'], ['tuple', 'scale'], ['tuple', 'locale'],
     ['deterministic', 'fixture'], ['deterministic', 'time'], ['deterministic', 'randomSeed'], ['deterministic', 'motion'], ['deterministic', 'fonts'], ['deterministic', 'network'],
-    ['materialAudit'], ['materialAudit', 'primitives'], ['evidence', 'referenceRaw'], ['evidence', 'builtRaw'], ['evidence', 'sideBySide'], ['evidence', 'diff'],
+    ['materialAudit'], ['materialAudit', 'primitives'], ['evidence', 'referenceRaw'], ['evidence', 'builtRaw'], ['evidence', 'sideBySide'], ['evidence', 'diff'], ['captureProvenance', 'reference'], ['captureProvenance', 'built'], ['captureProvenance', 'diff'],
   ];
   const failures = [];
   for (const row of inventory.contracts) for (const boundary of boundaries) {
@@ -115,11 +193,13 @@ export function runNegativeRegression(inventory) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const inventory = JSON.parse(fs.readFileSync(INVENTORY_PATH, 'utf8'));
   const negative = process.argv.includes('--negative');
-  const verdict = validateInventory(inventory);
+  const strict = process.argv.includes('--strict');
+  const verdict = strict ? validateCompletion(inventory) : validateInventory(inventory);
   if (!verdict.valid) { console.error(verdict.errors.join('\n')); process.exitCode = 1; }
   else if (negative) {
     const regression = runNegativeRegression(inventory);
     if (!regression.valid) { console.error(`negative regression missed ${regression.failures.join(', ')}`); process.exitCode = 1; }
     else console.log(`design-parity: green; ${inventory.contracts.length} rows; ${regression.cases} exact red/green boundary cases`);
-  } else console.log(`design-parity: green; ${inventory.contracts.length} rows; captures remain pending by policy`);
+  } else if (strict) console.log(`design-parity: complete; ${inventory.contracts.length} rows; all receipts and audits are verified`);
+  else console.log(`design-parity: structural green; ${inventory.contracts.length} rows; captures remain pending by policy`);
 }

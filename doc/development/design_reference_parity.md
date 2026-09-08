@@ -34,7 +34,23 @@ result:
 ```powershell
 node tools/design-reference/scripts/parity-guard.mjs
 node tools/design-reference/scripts/parity-guard.mjs --negative
+node tools/design-reference/scripts/parity-guard.mjs --strict
 ```
+
+The default command is a structural inventory check. It remains green while rows
+honestly record pending capture evidence. `--strict` is the completion check and
+remains red until every row has known production routing, verified raw and derived
+evidence, a completed Material Design 3 audit, and an approved intentional-deviation
+record when one exists. Each raw receipt is bound to its exact route, capture tuple,
+source commit, raw input hash, and rendered artifact SHA-256. The current inventory
+contains 25 pending rows, so strict completion is expected to remain red until the
+real hidden-desktop capture program supplies that evidence.
+
+For the reference capture, the receipt also records cheap-headless `document.fonts`
+availability for every explicitly named family in the design source. A missing local
+font blocks strict completion, preventing a fallback-font capture from becoming parity
+evidence. The guard records the absence only. It neither downloads nor substitutes a
+font asset.
 
 The negative regression removes each required reference, route, tuple, deterministic
 input, audit, and evidence boundary from every row in memory. It must turn red for the

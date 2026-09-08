@@ -10,6 +10,7 @@ const args = Object.fromEntries(process.argv.slice(2).filter((arg) => arg.starts
 
 function fail(message) { console.error(`design-reference-capture: ${message}`); process.exitCode = 1; }
 function hash(file) { return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'); }
+function hashJson(value) { return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex'); }
 function rowFor(id) { const row = inventory.contracts.find((candidate) => candidate.id === id); if (!row) throw new Error(`unknown inventory row ${id}`); return row; }
 function currentCommit() { return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: ROOT, encoding: 'utf8' }).trim(); }
 function pngInfo(file) {
@@ -34,20 +35,31 @@ else {
       const sourceCommit = String(args.commit || '');
       if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error('capture receipt requires a full 40-character source commit');
       if (sourceCommit !== currentCommit()) throw new Error(`capture source commit ${sourceCommit} does not match current HEAD`);
+      const artifactHash = String(args['artifact-sha256'] || '');
+      if (!/^[0-9a-f]{64}$/.test(artifactHash)) throw new Error('capture receipt requires --artifact-sha256=<64-character SHA-256> for the exact rendered application artifact');
+      let fontProof = null;
+      if (kind === 'reference') {
+        if (!args['font-proof']) throw new Error('reference capture receipt requires --font-proof=<JSON from document.fonts checks>; fallback fonts cannot complete parity');
+        fontProof = JSON.parse(String(args['font-proof']));
+        if (fontProof?.transport !== 'cheap Lowlevel headless route' || !fontProof?.availability || typeof fontProof.availability !== 'object') throw new Error('reference font proof must record cheap Lowlevel document.fonts availability results');
+      }
       const info = pngInfo(output);
       const expectedWidth = Math.round(row.tuple.viewport.width * row.tuple.scale);
       const expectedHeight = Math.round(row.tuple.viewport.height * row.tuple.scale);
       if (info.width !== expectedWidth || info.height !== expectedHeight) fail(`capture dimensions ${info.width}x${info.height} do not match tuple ${expectedWidth}x${expectedHeight}`);
       const receipt = {
-        schemaVersion: 1,
+        schemaVersion: 2,
         id,
         kind,
         status: 'verified',
         referenceFile: row.referenceFile,
         referenceHash: hash(path.join(ROOT, row.referenceFile)),
-        route: row.referenceRoute,
+        route: kind === 'reference' ? row.referenceRoute : row.productionRoute,
         tuple: row.tuple,
+        tupleHash: hashJson(row.tuple),
         deterministic: row.deterministic,
+        artifact: { sha256: artifactHash },
+        ...(fontProof ? { fontProof } : {}),
         raw: { path: path.relative(ROOT, output).replaceAll('\\', '/'), sha256: hash(output), ...info },
         sourceCommit,
         transport: 'cheap Lowlevel headless route',
