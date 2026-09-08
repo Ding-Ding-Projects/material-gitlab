@@ -25,6 +25,7 @@ if (!contract.includes("runtimeEvidence: notCaptured")) throw new Error('Source 
 const routes = [
   ['app/assets/javascripts/pages/admin/dashboard/index.js', '~/material_system/surfaces/Admin', 'initAdminMaterial', 'app/views/admin/dashboard/index.html.haml', '#js-material-admin'],
   ['app/assets/javascripts/pages/agent_memory/index.js', '~/material_system/surfaces/AgentMemory', 'initAgentMemoryApp', 'app/views/agent_memory/index.html.haml', '#js-material-agent-memory'],
+  ['app/assets/javascripts/pages/projects/cycle_analytics/show/index.js', '~/material_system/surfaces/Analyze', 'mountAnalyze', 'app/views/projects/cycle_analytics/show.html.haml', '#js-material-analyze'],
   ['app/assets/javascripts/pages/projects/jobs/index/index.js', '~/material_system/surfaces/Build', 'mountBuildSurface', 'app/views/projects/jobs/index.html.haml', '#js-material-build'],
   ['app/assets/javascripts/pages/projects/branches/index/index.js', '~/material_system/surfaces/Code', 'mountCodeSurface', 'app/views/projects/branches/index.html.haml', '#js-material-code-app'],
   ['app/assets/javascripts/pages/projects/tags/index/index.js', '~/material_system/surfaces/Code', 'mountCodeSurface', 'app/views/projects/tags/index.html.haml', '#js-material-code-app'],

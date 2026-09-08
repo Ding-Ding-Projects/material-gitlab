@@ -9,7 +9,7 @@ a component export.
 
 ## Source-wired routes
 
-Admin, Agent Memory, Build, Code, Deploy, Epics, Issues, Manage, Merge Requests, Monitor,
+Admin, Agent Memory, Analyze, Build, Code, Deploy, Epics, Issues, Manage, Merge Requests, Monitor,
 Operate, Pipelines, Plan, Repository, Secure, Security, and To-Dos each have a Rails host and a
 page entry that imports and calls the named surface initializer. Shell B and Sidebar
 and Shell A are mounted by `entrypoints/super_sidebar.js` from the authenticated application
@@ -22,8 +22,10 @@ guard verifies those exact imports and template hosts.
 
 ## Honest unresolved boundaries
 
-Analyze preserves the existing authenticated Apollo host because no production page
-entry imports the Material adapter. Settings has checked-in initializer
+Analyze replaces the authenticated project value-stream page at
+`/:namespace/:project/-/value_stream_analytics`. Its Rails view supplies
+`#js-material-analyze` and endpoint metadata, while the page entry imports and calls
+`mountAnalyze`. Settings has checked-in initializer
 and component source only, without an activated production page-entry edge. Login is a Rails-rendered Devise
 authentication view, including `devise/sessions/new_base`; it is not recorded as a
 Vue replacement.

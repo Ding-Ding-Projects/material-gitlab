@@ -16,6 +16,7 @@ describe('Material design route integration inventory', () => {
   });
 
   it('keeps source registration distinct from runtime proof', () => {
+    expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.analyze')).toMatchObject({ status: 'wired', route: '/:namespace/:project/-/value_stream_analytics', entrypoint: 'app/assets/javascripts/pages/projects/cycle_analytics/show/index.js', initializer: 'mountAnalyze', host: '#js-material-analyze', runtimeEvidence: 'not-captured' });
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.shell-a')).toMatchObject({ status: 'wired', preference: { key: 'shellVariant', value: 'a' }, runtimeEvidence: 'not-captured' });
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.shell-b')).toMatchObject({ status: 'wired', runtimeEvidence: 'not-captured' });
     expect(DESIGN_ROUTE_INTEGRATION_CONTRACTS.find(({ id }) => id === 'surface.secure')).toMatchObject({ status: 'wired', runtimeEvidence: 'not-captured' });
