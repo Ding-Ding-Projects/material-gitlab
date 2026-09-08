@@ -25,7 +25,8 @@
         @select-tab="selectTab"
         @navigate-security-dashboard="$emit('navigate-security-dashboard')"
       />
-      <main class="secure-main">
+<main class="secure-main">
+        <a v-if="managementPath" :href="managementPath">Open {{ activeTab.label.toLowerCase() }} management</a>
         <secure-list-panel
           :active-tab-id="activeTabId"
           :tab-label="activeTab.label"
@@ -75,9 +76,7 @@ import {
   fetchAuditEvents,
   fetchScanPolicies,
   fetchOnDemandScans,
-  updateScanPolicyEnforcement,
   updateScanStatus,
-  createIssuesForDependencies,
   toDependencyRow,
   toAuditRow,
   toScanPolicyRow,
@@ -91,22 +90,6 @@ const ROW_MAPPERS = {
   [SECURE_TAB_IDS.AUDIT_EVENTS]: toAuditRow,
   [SECURE_TAB_IDS.SCAN_POLICIES]: toScanPolicyRow,
   [SECURE_TAB_IDS.ON_DEMAND_SCANS]: toOnDemandScanRow,
-};
-
-const BULK_ACTION_DEFINITIONS = {
-  [SECURE_TAB_IDS.DEPENDENCIES]: [
-    { id: 'export', label: 'Export selected', destructive: false },
-    { id: 'create-issue', label: 'Create issue for selected', destructive: false },
-  ],
-  [SECURE_TAB_IDS.AUDIT_EVENTS]: [{ id: 'export', label: 'Export selected', destructive: false }],
-  [SECURE_TAB_IDS.SCAN_POLICIES]: [
-    { id: 'enable', label: 'Enable selected', destructive: false },
-    { id: 'disable', label: 'Disable selected', destructive: true },
-  ],
-  [SECURE_TAB_IDS.ON_DEMAND_SCANS]: [
-    { id: 'run', label: 'Run selected', destructive: false },
-    { id: 'cancel', label: 'Cancel selected', destructive: true },
-  ],
 };
 
 function downloadCsv(filename, content) {
@@ -140,7 +123,7 @@ export default {
   },
   data() {
     return {
-      tabs: SECURE_TABS,
+      tabs: SECURE_TABS.filter((tab) => this.endpoints[{ dependencies: 'dependencies', 'audit-events': 'auditEvents', 'scan-policies': 'scanPolicies', 'on-demand-scans': 'onDemandScans' }[tab.id]]),
       activeTabId: SECURE_TAB_IDS.DEPENDENCIES,
       search: '',
       regexMode: false,
@@ -174,6 +157,7 @@ export default {
     };
   },
   computed: {
+    managementPath() { return this.endpoints[{ 'audit-events': 'auditEventsPath', 'scan-policies': 'scanPoliciesPath', 'on-demand-scans': 'onDemandScansPath' }[this.activeTabId]]; },
     activeTab() {
       return this.tabs.find((tab) => tab.id === this.activeTabId) || this.tabs[0];
     },
@@ -190,7 +174,7 @@ export default {
     },
     currentRows() {
       const mapper = ROW_MAPPERS[this.activeTabId];
-      return this.currentRawList.map(mapper).filter((row) => this.matcher.test(row.searchText));
+      return this.currentRawList.map(mapper).map((row) => this.activeTabId === SECURE_TAB_IDS.ON_DEMAND_SCANS && !this.endpoints.updateScan ? { ...row, actionLabel: null } : row).filter((row) => this.matcher.test(row.searchText));
     },
     currentLoading() {
       return this.loading[this.activeTabId];
@@ -199,7 +183,8 @@ export default {
       return this.error[this.activeTabId];
     },
     currentBulkActions() {
-      return BULK_ACTION_DEFINITIONS[this.activeTabId] || [];
+      if (this.activeTabId === SECURE_TAB_IDS.ON_DEMAND_SCANS && this.endpoints.updateScan) return [{ id: 'run', label: 'Retry selected' }, { id: 'cancel', label: 'Cancel selected', destructive: true }];
+      return [{ id: 'export', label: 'Export selected' }];
     },
     selectedIds() {
       return this.selection[this.activeTabId];
@@ -254,10 +239,11 @@ export default {
     loadAllTabs() {
       this.loadTab(SECURE_TAB_IDS.DEPENDENCIES, () => fetchDependencies({ endpoint: this.endpoints.dependencies, fetchImpl: this.fetchImpl }), 'dependencies');
       this.loadTab(SECURE_TAB_IDS.AUDIT_EVENTS, () => fetchAuditEvents({ endpoint: this.endpoints.auditEvents, fetchImpl: this.fetchImpl }), 'auditEvents');
-      this.loadTab(SECURE_TAB_IDS.SCAN_POLICIES, () => fetchScanPolicies({ endpoint: this.endpoints.scanPolicies, fetchImpl: this.fetchImpl }), 'scanPolicies');
-      this.loadTab(SECURE_TAB_IDS.ON_DEMAND_SCANS, () => fetchOnDemandScans({ endpoint: this.endpoints.onDemandScans, fetchImpl: this.fetchImpl }), 'onDemandScans');
+      this.loadTab(SECURE_TAB_IDS.SCAN_POLICIES, () => fetchScanPolicies({ endpoint: this.endpoints.scanPolicies, projectPath: this.endpoints.projectPath, fetchImpl: this.fetchImpl }), 'scanPolicies');
+      this.loadTab(SECURE_TAB_IDS.ON_DEMAND_SCANS, () => fetchOnDemandScans({ endpoint: this.endpoints.onDemandScans, projectPath: this.endpoints.projectPath, fetchImpl: this.fetchImpl }), 'onDemandScans');
     },
     loadTab(tabId, fetchFn, dataKey) {
+      if (!this.tabs.some((tab) => tab.id === tabId)) { this.$set(this.loading, tabId, false); return; }
       this.$set(this.loading, tabId, true);
       this.$set(this.error, tabId, null);
       fetchFn()
@@ -265,17 +251,17 @@ export default {
           this[dataKey] = result;
           this.$set(this.loading, tabId, false);
         })
-        .catch(() => {
+        .catch((error) => {
           this.$set(this.loading, tabId, false);
-          this.$set(this.error, tabId, 'Something went wrong loading this data.');
+          this.$set(this.error, tabId, error.message || 'Something went wrong loading this data.');
         });
     },
     retryCurrentTab() {
       const loaders = {
         [SECURE_TAB_IDS.DEPENDENCIES]: [() => fetchDependencies({ endpoint: this.endpoints.dependencies, fetchImpl: this.fetchImpl }), 'dependencies'],
         [SECURE_TAB_IDS.AUDIT_EVENTS]: [() => fetchAuditEvents({ endpoint: this.endpoints.auditEvents, fetchImpl: this.fetchImpl }), 'auditEvents'],
-        [SECURE_TAB_IDS.SCAN_POLICIES]: [() => fetchScanPolicies({ endpoint: this.endpoints.scanPolicies, fetchImpl: this.fetchImpl }), 'scanPolicies'],
-        [SECURE_TAB_IDS.ON_DEMAND_SCANS]: [() => fetchOnDemandScans({ endpoint: this.endpoints.onDemandScans, fetchImpl: this.fetchImpl }), 'onDemandScans'],
+        [SECURE_TAB_IDS.SCAN_POLICIES]: [() => fetchScanPolicies({ endpoint: this.endpoints.scanPolicies, projectPath: this.endpoints.projectPath, fetchImpl: this.fetchImpl }), 'scanPolicies'],
+        [SECURE_TAB_IDS.ON_DEMAND_SCANS]: [() => fetchOnDemandScans({ endpoint: this.endpoints.onDemandScans, projectPath: this.endpoints.projectPath, fetchImpl: this.fetchImpl }), 'onDemandScans'],
       }[this.activeTabId];
       this.loadTab(this.activeTabId, loaders[0], loaders[1]);
     },
@@ -371,20 +357,7 @@ export default {
       notificationCenter.notify(options);
     },
     onRowAction(row) {
-      if (this.activeTabId === SECURE_TAB_IDS.SCAN_POLICIES) {
-        const policy = this.scanPolicies.find((item) => item.id === row.id);
-        if (!policy) return;
-        if (policy.enforced) {
-          this.requestDestructive({
-            title: 'Disable this scan policy?',
-            description: `"${policy.name}" will stop being enforced on merge requests until it is re-enabled.`,
-            confirmLabel: 'Disable',
-            onConfirm: () => this.bulkSetPolicyEnforced([policy.id], false),
-          });
-        } else {
-          this.bulkSetPolicyEnforced([policy.id], true);
-        }
-      } else if (this.activeTabId === SECURE_TAB_IDS.ON_DEMAND_SCANS) {
+      if (this.activeTabId === SECURE_TAB_IDS.ON_DEMAND_SCANS && this.endpoints.updateScan) {
         const scan = this.onDemandScans.find((item) => item.id === row.id);
         if (!scan) return;
         if (scan.status === 'running') {
@@ -395,7 +368,7 @@ export default {
             onConfirm: () => this.bulkSetScanStatus([scan.id], 'ready'),
           });
         } else {
-          this.bulkSetScanStatus([scan.id], 'running');
+          this.requestDestructive({ title: 'Retry this scan?', description: `Run the pipeline again for ${scan.name}.`, confirmLabel: 'Retry', onConfirm: () => this.bulkSetScanStatus([scan.id], 'running') });
         }
       }
     },
@@ -410,22 +383,8 @@ export default {
         this.clearSelection();
         return undefined;
       }
-      if (actionId === 'create-issue') {
-        return this.createIssuesFor(ids).then(() => this.clearSelection());
-      }
-      if (actionId === 'enable') {
-        return this.bulkSetPolicyEnforced(ids, true).then(() => this.clearSelection());
-      }
-      if (actionId === 'disable') {
-        return this.requestDestructive({
-          title: `Disable ${ids.length} scan ${ids.length === 1 ? 'policy' : 'policies'}?`,
-          description: 'Merge requests will no longer be blocked by the selected policies until they are re-enabled.',
-          confirmLabel: 'Disable',
-          onConfirm: () => this.bulkSetPolicyEnforced(ids, false).then(() => this.clearSelection()),
-        });
-      }
       if (actionId === 'run') {
-        return this.bulkSetScanStatus(ids, 'running').then(() => this.clearSelection());
+        return this.requestDestructive({ title: 'Retry selected scans?', description: 'This reruns the selected live scan pipelines.', confirmLabel: 'Retry', onConfirm: () => this.bulkSetScanStatus(ids, 'running').then(() => this.clearSelection()) });
       }
       if (actionId === 'cancel') {
         return this.requestDestructive({
@@ -446,32 +405,13 @@ export default {
         message: `Downloaded ${rows.length} ${this.activeTab.label.toLowerCase()} as CSV.`,
       });
     },
-    createIssuesFor(ids) {
-      return createIssuesForDependencies(ids, { endpoint: this.endpoints.createIssues, fetchImpl: this.fetchImpl }).then((result) => {
-        this.notify({ severity: 'success', title: 'Issues created', message: `Drafted ${result.created} tracking issues.` });
-      });
-    },
-    bulkSetPolicyEnforced(ids, enforced) {
-      return Promise.all(ids.map((id) => updateScanPolicyEnforcement(id, enforced, { endpoint: this.endpoints.updatePolicy, fetchImpl: this.fetchImpl }))).then(() => {
-        this.scanPolicies = this.scanPolicies.map((policy) =>
-          ids.includes(policy.id) ? { ...policy, enforced } : policy,
-        );
-        this.notify({
-          severity: enforced ? 'success' : 'warning',
-          title: enforced ? 'Policy enforced' : 'Policy disabled',
-          message: `${ids.length} ${ids.length === 1 ? 'policy' : 'policies'} updated.`,
-        });
-      });
-    },
-    bulkSetScanStatus(ids, status) {
-      return Promise.all(ids.map((id) => updateScanStatus(id, status, { endpoint: this.endpoints.updateScan, fetchImpl: this.fetchImpl }))).then(() => {
-        this.onDemandScans = this.onDemandScans.map((scan) => (ids.includes(scan.id) ? { ...scan, status } : scan));
-        this.notify({
-          severity: status === 'running' ? 'info' : 'warning',
-          title: status === 'running' ? 'Scan started' : 'Scan cancelled',
-          message: `${ids.length} ${ids.length === 1 ? 'scan' : 'scans'} updated.`,
-        });
-      });
+    async bulkSetScanStatus(ids, status) {
+      if (!this.endpoints.updateScan) return;
+      try {
+        for (const id of ids) await updateScanStatus(id, status, { endpoint: this.endpoints.updateScan, fetchImpl: this.fetchImpl });
+        this.notify({ severity: 'success', title: 'Scan operations accepted', message: 'The server accepted the selected pipeline operations.' });
+      } catch (error) { this.notify({ severity: 'error', title: 'Scan update failed', message: error.message }); }
+      finally { this.loadAllTabs(); }
     },
   },
 };

@@ -34,7 +34,7 @@ export default {
     avatarInitials: {
       type: String,
       required: false,
-      default: 'JD',
+      default: '',
     },
   },
   computed: {
@@ -114,6 +114,6 @@ export default {
     >
       <material-icon :name="themeIcon" />
     </button>
-    <div class="sec-avatar" aria-hidden="true">{{ avatarInitials }}</div>
+    <div v-if="avatarInitials" class="sec-avatar" aria-hidden="true">{{ avatarInitials }}</div>
   </header>
 </template>

@@ -1,5 +1,3 @@
-import initEnvironments from '~/environments/index';
+import { mountOperate } from '~/material_system/surfaces/Operate';
 
-const el = document.getElementById('environments-table');
-
-initEnvironments(el);
+mountOperate();

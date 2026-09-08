@@ -6,7 +6,8 @@
  * client can replace the body without touching call sites in Secure.vue.
  */
 
-import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+import { requireEndpoint } from '../live-data';
+import { operationsCollection, operationsConnection, operationsGraphql } from '../Deploy/transport';
 
 export const SECURE_TAB_IDS = Object.freeze({
   DEPENDENCIES: 'dependencies',
@@ -84,49 +85,67 @@ const seedOnDemandScans = () => [
   { id: 'scan-3', name: 'Container scan â€” v17.2.0 image', sub: 'on-demand', status: 'ready' },
 ];
 
-async function fetchCollection(endpoint, label, fetchImpl) {
-  const payload = await requestJson(endpoint, { fetchImpl });
-  return assertCollection(payload, label);
+export const SECURE_POLICIES_QUERY = `query MaterialSecurePolicies($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { securityPolicies(first: 100, after: $after, includeUnscoped: false, relationship: INHERITED) {
+    nodes { id name type editPath enabled updatedAt }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+export const SECURE_SCANS_QUERY = `query MaterialSecureScans($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { pipelines(source: "ondemand_dast_scan", first: 100, after: $after) {
+    nodes { id path createdAt detailedStatus { text group } dastProfile { name dastSiteProfile { targetUrl } } }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+
+export async function fetchDependencies({ endpoint, fetchImpl } = {}) {
+  const rows = await operationsCollection(requireEndpoint({ value: endpoint }, 'value'), { fetchImpl, unwrap: (payload) => payload.dependencies });
+  return rows.map((dependency) => ({
+    id: String(dependency.occurrence_id), name: [dependency.name, dependency.version].filter(Boolean).join(' '),
+    packageManager: dependency.packager || '', origin: dependency.location?.path || '',
+    href: dependency.vulnerabilities?.[0]?.url || dependency.location?.blob_path,
+    vulnerability: dependency.vulnerabilities?.[0]?.name || null,
+    license: dependency.licenses?.map((license) => license.name).join(', ') || '',
+  }));
 }
 
-export function fetchDependencies({ endpoint, fetchImpl } = {}) {
-  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'dependencies', fetchImpl);
-}
-
-export function fetchAuditEvents({ endpoint, fetchImpl } = {}) {
-  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'audit events', fetchImpl);
-}
-
-export function fetchScanPolicies({ endpoint, fetchImpl } = {}) {
-  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'scan policies', fetchImpl);
-}
-
-export function fetchOnDemandScans({ endpoint, fetchImpl } = {}) {
-  return fetchCollection(requireEndpoint({ value: endpoint }, 'value'), 'on-demand scans', fetchImpl);
-}
-
-export function updateScanPolicyEnforcement(policyId, enforced, { endpoint, fetchImpl } = {}) {
-  return requestJson(requireEndpoint({ value: endpoint }, 'value').replace(':id', encodeURIComponent(policyId)), {
-    fetchImpl, method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enforced }),
+export async function fetchAuditEvents({ endpoint, fetchImpl } = {}) {
+  const rows = await operationsCollection(requireEndpoint({ value: endpoint }, 'value'), {
+    fetchImpl, unwrap: (payload) => payload.events,
+    nextPage: (payload, original) => {
+      if (!payload.next_page) return '';
+      const url = new URL(original, globalThis.location?.origin || 'http://localhost');
+      url.searchParams.set('page', payload.next_page);
+      return url.pathname + url.search;
+    },
   });
+  return rows.map((event) => ({ id: String(event.id), name: event.action, sub: [event.author?.name, event.target].filter(Boolean).join(' · '), when: event.date, href: event.object?.url }));
 }
 
-export function updateScanStatus(scanId, status, { endpoint, fetchImpl } = {}) {
-  return requestJson(requireEndpoint({ value: endpoint }, 'value').replace(':id', encodeURIComponent(scanId)), {
-    fetchImpl, method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }),
-  });
+export async function fetchScanPolicies({ endpoint, projectPath, fetchImpl } = {}) {
+  const rows = await operationsConnection(endpoint, SECURE_POLICIES_QUERY, { projectPath }, (data) => data.project?.securityPolicies, { fetchImpl });
+  return rows.map((policy) => ({ id: policy.id, name: policy.name, sub: policy.type, enforced: policy.enabled, href: policy.editPath }));
 }
 
-export function createIssuesForDependencies(dependencyIds, { endpoint, fetchImpl } = {}) {
-  return requestJson(requireEndpoint({ value: endpoint }, 'value'), {
-    fetchImpl, method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dependencyIds }),
-  });
+export async function fetchOnDemandScans({ endpoint, projectPath, fetchImpl } = {}) {
+  const rows = await operationsConnection(endpoint, SECURE_SCANS_QUERY, { projectPath }, (data) => data.project?.pipelines, { fetchImpl });
+  return rows.map((scan) => ({ id: scan.id, name: scan.dastProfile?.name || scan.id, sub: scan.dastProfile?.dastSiteProfile?.targetUrl || '', status: scan.detailedStatus?.group || '', href: scan.path }));
+}
+
+export async function updateScanStatus(scanId, status, { endpoint, fetchImpl } = {}) {
+  const operation = status === 'running' ? 'pipelineRetry' : 'pipelineCancel';
+  const data = await operationsGraphql(endpoint, `mutation MaterialSecurePipeline($id: CiPipelineID!) {
+    ${operation}(input: { id: $id }) { errors }
+  }`, { id: scanId }, { fetchImpl });
+  const result = data[operation];
+  if (!result || result.errors?.length) throw new Error(result?.errors?.join('; ') || 'The scan operation was not accepted.');
 }
 
 export function toDependencyRow(dependency) {
   const vulnerable = Boolean(dependency.vulnerability);
   return {
     id: dependency.id,
+    href: dependency.href,
     icon: 'git-branch',
     tone: vulnerable ? ROW_TONES.DANGER : ROW_TONES.PRIMARY,
     titleMonospace: true,
@@ -142,6 +161,7 @@ export function toDependencyRow(dependency) {
 export function toAuditRow(auditEvent) {
   return {
     id: auditEvent.id,
+    href: auditEvent.href,
     icon: 'receipt',
     tone: ROW_TONES.NEUTRAL,
     titleMonospace: false,
@@ -157,6 +177,7 @@ export function toAuditRow(auditEvent) {
 export function toScanPolicyRow(policy) {
   return {
     id: policy.id,
+    href: policy.href,
     icon: 'shield',
     tone: ROW_TONES.PRIMARY,
     titleMonospace: false,
@@ -165,7 +186,7 @@ export function toScanPolicyRow(policy) {
     badge: policy.enforced ? 'Enforced' : 'Disabled',
     badgeTone: policy.enforced ? ROW_TONES.SUCCESS : ROW_TONES.NEUTRAL,
     meta: '',
-    actionLabel: policy.enforced ? 'Disable' : 'Enforce',
+    actionLabel: null,
     actionDestructive: policy.enforced,
     searchText: policy.name,
   };
@@ -175,15 +196,16 @@ export function toOnDemandScanRow(scan) {
   const running = scan.status === 'running';
   return {
     id: scan.id,
+    href: scan.href,
     icon: 'radar',
     tone: ROW_TONES.PRIMARY,
     titleMonospace: false,
     title: scan.name,
     sub: scan.sub,
-    badge: running ? 'Running' : 'Ready',
+    badge: scan.status,
     badgeTone: running ? ROW_TONES.WARNING : ROW_TONES.SUCCESS,
     meta: '',
-    actionLabel: running ? 'Cancel' : 'Run scan',
+    actionLabel: running ? 'Cancel' : 'Retry',
     actionDestructive: running,
     searchText: scan.name,
   };

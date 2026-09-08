@@ -6,7 +6,7 @@
  * The test-only fixture factory is not used by the production mount.
  */
 
-import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+import { operationsConnection, operationsGraphql } from '../Deploy/transport';
 
 export const SEVERITIES = Object.freeze(['critical', 'high', 'medium', 'low']);
 
@@ -160,17 +160,57 @@ export function buildRegexCorpus(vulnerabilities) {
   return vulnerabilities.map((vuln) => `${vuln.severity}  ${vuln.title}  ${vuln.location}`);
 }
 
-/** Fetch the vulnerability connection from the host's real API/GraphQL adapter. */
-export async function fetchVulnerabilities({ endpoint, fetchImpl } = {}) {
-  const payload = await requestJson(requireEndpoint({ vulnerabilities: endpoint }, 'vulnerabilities'), { fetchImpl });
-  return assertCollection(payload, 'vulnerabilities');
+/** Normalize the project vulnerability REST/GraphQL fields into this surface's model. */
+export function normalizeVulnerability(vulnerability) {
+  const identifiers = vulnerability.identifiers || [];
+  const identifier = vulnerability.cve || identifiers.find((value) => value.name)?.name || identifiers[0]?.name || '';
+  const reportType = vulnerability.report_type || vulnerability.reportType || vulnerability.scanner?.name || '';
+  const state = String(vulnerability.state || vulnerability.status || '').toLowerCase();
+  const status = STATUSES.includes(state) ? state : state === 'detected' ? 'Needs triage' : state === 'confirmed' ? 'Confirmed' : state === 'resolved' ? 'Resolved' : state === 'dismissed' ? 'Dismissed' : 'Needs triage';
+  return {
+    id: String(vulnerability.id ?? vulnerability.uuid),
+    href: vulnerability.vulnerabilityPath || vulnerability.web_url || '',
+    severity: String(vulnerability.severity || 'low').toLowerCase(),
+    title: vulnerability.title || vulnerability.name || identifier || 'Untitled vulnerability',
+    scanner: reportType,
+    location: vulnerability.location?.file || vulnerability.location?.blob_path || vulnerability.location || '',
+    status,
+    cve: identifier,
+    detectedAt: vulnerability.detected_at || vulnerability.detectedAt || vulnerability.created_at || '',
+    description: vulnerability.description || vulnerability.solution || '',
+  };
+}
+
+export const VULNERABILITIES_QUERY = `query MaterialVulnerabilities($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { vulnerabilities(first: 100, after: $after) {
+    nodes { id title state severity detectedAt vulnerabilityPath description reportType identifiers { name } scanner { name } }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+
+export async function fetchVulnerabilities({ endpoint, projectPath, fetchImpl } = {}) {
+  const rows = await operationsConnection(endpoint, VULNERABILITIES_QUERY, { projectPath }, (data) => data.project?.vulnerabilities, { fetchImpl });
+  return rows.map(normalizeVulnerability);
 }
 
 export async function updateVulnerabilityStatus({ endpoint, id, status, fetchImpl } = {}) {
-  return requestJson(requireEndpoint({ vulnerability: endpoint }, 'vulnerability').replace(':id', encodeURIComponent(id)), {
-    fetchImpl,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ status }),
-  });
+  const operations = { Confirmed: 'vulnerabilityConfirm', Resolved: 'vulnerabilityResolve', Dismissed: 'vulnerabilityDismiss', 'Needs triage': 'vulnerabilityRevertToDetected' };
+  const operation = operations[status];
+  if (!operation) throw new Error('Unsupported vulnerability status.');
+  const data = await operationsGraphql(endpoint,
+    `mutation MaterialVulnerabilityStatus($id: VulnerabilityID!) { ${operation}(input: { id: $id }) { errors vulnerability { id state } } }`,
+    { id }, { fetchImpl });
+  const result = data[operation];
+  if (!result?.vulnerability || result.errors?.length) throw new Error(result?.errors?.join('; ') || 'The vulnerability update was not accepted.');
+  return result.vulnerability;
+}
+
+export async function createVulnerabilityIssue({ endpoint, id, projectId, fetchImpl } = {}) {
+  const data = await operationsGraphql(endpoint,
+    `mutation MaterialVulnerabilityIssue($project: ProjectID!, $vulnerabilityIds: [VulnerabilityID!]!) {
+      vulnerabilitiesCreateIssue(input: { project: $project, vulnerabilityIds: $vulnerabilityIds }) { issue { id webUrl } errors }
+    }`, { project: projectId, vulnerabilityIds: [id] }, { fetchImpl });
+  const result = data.vulnerabilitiesCreateIssue;
+  if (!result?.issue || result.errors?.length) throw new Error(result?.errors?.join('; ') || 'The issue was not created.');
+  return result.issue;
 }

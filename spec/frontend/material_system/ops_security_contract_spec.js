@@ -32,8 +32,8 @@ describe('operations and security design contracts', () => {
   it('requires live endpoint adapters and an explicit error state', () => {
     ['Deploy/data.js', 'Operate/data.js', 'Monitor/data.js', 'Secure/data.js', 'Security/data.js'].forEach((file) => {
       const text = source(file);
-      expect(text).toContain('requestJson');
-      expect(text).toContain('requireEndpoint');
+      expect(text).toMatch(/operations(?:Collection|Connection)/);
+      expect(text).toMatch(/(?:requireEndpoint|operationsGraphql)/);
     });
     expect(source('Deploy/Deploy.vue')).toContain('loadError');
     expect(source('Security/Security.vue')).toContain('loadError');

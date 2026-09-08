@@ -1,3 +1,3 @@
-import AlertManagementList from '~/alert_management/list';
+import { mountMonitor } from '~/material_system/surfaces/Monitor';
 
-AlertManagementList();
+mountMonitor();

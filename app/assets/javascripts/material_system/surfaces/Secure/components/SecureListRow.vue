@@ -12,7 +12,8 @@
       <secure-icon :name="row.icon" :size="19" />
     </span>
     <div class="secure-row__body">
-      <div class="secure-row__title" :class="{ 'secure-row__title--mono': row.titleMonospace }">{{ row.title }}</div>
+      <a v-if="row.href" :href="row.href" class="secure-row__title">{{ row.title }}</a>
+      <div v-else class="secure-row__title" :class="{ 'secure-row__title--mono': row.titleMonospace }">{{ row.title }}</div>
       <div class="secure-row__sub">{{ row.sub }}</div>
     </div>
     <span v-if="row.badge" class="secure-row__badge" :class="`secure-row__badge--tone-${row.badgeTone}`">

@@ -1,11 +1,30 @@
 # frozen_string_literal: true
 
 module ReleasesHelper
+  include ::API::Helpers::RelatedResourcesHelpers
   IMAGE_PATH = 'illustrations/rocket-launch-md.svg'
 
   # This needs to be kept in sync with the constant in
   # app/assets/javascripts/releases/constants.js
   DEFAULT_SORT = 'RELEASED_AT_DESC'
+
+  def material_deploy_endpoints
+    base = expose_path(api_v4_projects_path(id: @project.id))
+    {
+      releases: "#{base}/releases?per_page=100",
+      featureFlags: ("#{base}/feature_flags?per_page=100" if can?(current_user, :read_feature_flag, @project)),
+      packages: ("#{base}/packages?per_page=100" if can?(current_user, :read_package, @project)),
+      containers: ("#{base}/registry/repositories?per_page=100" if can?(current_user, :read_container_image, @project)),
+      updateFeatureFlag: ("#{base}/feature_flags/:id" if can?(current_user, :update_feature_flag, @project)),
+      deletePackage: ("#{base}/packages/:id" if can?(current_user, :destroy_package, @project)),
+      deleteContainer: ("#{base}/registry/repositories/:id" if can?(current_user, :admin_container_image, @project)),
+      projectPath: project_path(@project),
+      newRelease: (new_project_release_path(@project) if can?(current_user, :create_release, @project)),
+      featureFlagsPath: project_feature_flags_path(@project),
+      packagesPath: project_packages_path(@project),
+      containersPath: project_container_registry_index_path(@project)
+    }.compact
+  end
 
   def illustration
     image_path(IMAGE_PATH)

@@ -3,6 +3,20 @@
 module DependenciesHelper
   include API::Helpers::RelatedResourcesHelpers
 
+  def material_secure_endpoints(project)
+    {
+      dependencies: project_dependencies_path(project, format: :json, per_page: 100),
+      auditEvents: (project_audit_events_path(project, format: :json) if can?(current_user, :read_audit_event, project) && project.feature_available?(:audit_events)),
+      scanPolicies: (api_graphql_path if can?(current_user, :read_security_orchestration_policies, project)),
+      onDemandScans: (api_graphql_path if can?(current_user, :read_on_demand_dast_scan, project)),
+      projectPath: project.full_path,
+      auditEventsPath: (project_audit_events_path(project) if can?(current_user, :read_audit_event, project)),
+      scanPoliciesPath: (project_security_policies_path(project) if can?(current_user, :read_security_orchestration_policies, project)),
+      onDemandScansPath: (project_on_demand_scans_path(project) if can?(current_user, :read_on_demand_dast_scan, project)),
+      updateScan: (api_graphql_path if can?(current_user, :admin_security_testing, project))
+    }.compact
+  end
+
   def project_dependencies_data(project)
     pipeline = project.latest_ingested_sbom_pipeline
 

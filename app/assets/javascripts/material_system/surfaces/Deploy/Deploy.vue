@@ -1,7 +1,7 @@
 <template>
   <div class="dp-surface" data-surface-id="surface.deploy" :data-theme="themeAttr">
     <div class="dp-shell">
-      <DeploySidebar :items="sidebarItems" :sub-items="subNavItems" :active-tab-id="activeTabId" @select-tab="selectTab" />
+      <!-- The project layout owns the production navigation. -->
 
       <div class="dp-main">
         <DeployTopBar
@@ -25,6 +25,7 @@
 
         <div class="dp-heading-row">
           <h1 class="dp-heading">Deploy</h1>
+          <a v-if="activeManagementPath" :href="activeManagementPath">{{ activeTabId === 'releases' ? 'New release' : 'Manage ' + currentTabLabel.toLowerCase() }}</a>
           <DeployTabs :tabs="tabs" :active-id="activeTabId" :instance-id="instanceId" @select="selectTab" />
         </div>
 
@@ -48,7 +49,7 @@
                 <DpIcon name="copy" size="small" />Copy tag references
               </button>
             </template>
-            <template v-else-if="activeTabId === 'feature-flags'">
+            <template v-else-if="activeTabId === 'feature-flags' && endpoints.updateFeatureFlag">
               <button type="button" class="dp-bulk-btn" @click="enableSelectedFlags">
                 <DpIcon name="toggle-on" size="small" />Enable selected
               </button>
@@ -56,7 +57,7 @@
                 <DpIcon name="toggle-off" size="small" />Disable selected
               </button>
             </template>
-            <template v-else>
+            <template v-else-if="activeTabId === 'packages' ? endpoints.deletePackage : activeTabId === 'containers' && endpoints.deleteContainer">
               <button type="button" class="dp-bulk-btn dp-bulk-btn--danger" @click="requestBulkDelete(activeTabId)">
                 <DpIcon name="delete" size="small" />Delete selected
               </button>
@@ -112,7 +113,7 @@ const ITEM_LABELS = Object.freeze({
   releases: 'releases',
   'feature-flags': 'feature flags',
   packages: 'packages',
-  containers: 'container images',
+  containers: 'container repositories',
 });
 
 export default {
@@ -159,13 +160,17 @@ export default {
     };
   },
   computed: {
+    activeManagementPath() {
+      return this.endpoints[{ releases: 'newRelease', 'feature-flags': 'featureFlagsPath', packages: 'packagesPath', containers: 'containersPath' }[this.activeTabId]] || '';
+    },
     dark() {
       if (this.themeAttr === 'dark') return true;
       if (this.themeAttr === 'light') return false;
       return typeof window !== 'undefined' && !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     },
     tabs() {
-      return DEPLOY_TABS;
+      const keys = { releases: 'releases', 'feature-flags': 'featureFlags', packages: 'packages', containers: 'containers' };
+      return DEPLOY_TABS.filter((tab) => this.endpoints[keys[tab.id]]);
     },
     sidebarItems() {
       return DEPLOY_SIDEBAR_ITEMS;
@@ -197,6 +202,7 @@ export default {
           .filter((release) => matcher.test(releaseCorpus(release)))
           .map((release) => ({
             id: release.id,
+            href: release.href || `${this.endpoints.projectPath}/-/releases/${encodeURIComponent(release.tagRef)}`,
             icon: 'releases',
             iconColor: 'var(--dp-prim)',
             title: release.name,
@@ -222,7 +228,7 @@ export default {
             badgeBg: flag.on ? 'var(--dp-goodc)' : 'var(--dp-surfch)',
             badgeFg: flag.on ? 'var(--dp-good)' : 'var(--dp-onsurfv)',
             meta: '',
-            action: flag.on ? 'Disable' : 'Enable',
+            action: this.endpoints.updateFeatureFlag ? (flag.on ? 'Disable' : 'Enable') : null,
             actionColor: 'var(--dp-onprimc)',
           }));
       }
@@ -238,7 +244,7 @@ export default {
             sub: pkg.sub,
             badge: null,
             meta: `${formatBytes(pkg.sizeBytes)} · ${formatRelativeTime(pkg.createdAt)}`,
-            action: 'Delete',
+            action: this.endpoints.deletePackage ? 'Delete' : null,
             actionColor: 'var(--dp-err)',
           }));
       }
@@ -253,7 +259,7 @@ export default {
           sub: image.sub,
           badge: null,
           meta: `${formatBytes(image.sizeBytes)} · ${formatRelativeTime(image.createdAt)}`,
-          action: 'Delete',
+          action: this.endpoints.deleteContainer ? 'Delete repository' : null,
           actionColor: 'var(--dp-err)',
         }));
     },
@@ -377,36 +383,27 @@ export default {
       else if (this.activeTabId === 'containers') this.requestDeleteRow('containers', id);
     },
     toggleFlag(id) {
-      const flag = this.flags.find((f) => f.id === id);
-      if (!flag) return;
-      const next = !flag.on;
-      if (Object.keys(this.endpoints).length) {
-        updateFeatureFlag({ endpoints: this.endpoints, id, enabled: next, fetchImpl: this.fetchImpl })
-          .then(() => {
-            this.flags = this.flags.map((f) => (f.id === id ? { ...f, on: next } : f));
-            this.notify({ title: flag.name, message: `${flag.name} is now ${next ? 'enabled' : 'disabled'}.`, severity: 'success' });
-          })
-          .catch((error) => this.notify({ title: 'Update failed', message: error.message, severity: 'error' }));
-        return;
-      }
-      this.flags = this.flags.map((f) => (f.id === id ? { ...f, on: next } : f));
-      this.notify({ title: flag.name, message: `${flag.name} is now ${next ? 'enabled' : 'disabled'}.`, severity: 'success' });
+      const flag = this.flags.find((item) => item.id === id);
+      if (flag) this.requestFlagChange([id], !flag.on);
     },
-    enableSelectedFlags() {
-      this.setFlagsOn(true);
-    },
-    disableSelectedFlags() {
-      this.setFlagsOn(false);
-    },
-    setFlagsOn(on) {
-      const ids = new Set(this.selectedIds);
-      if (ids.size === 0) return;
-      this.flags = this.flags.map((f) => (ids.has(f.id) ? { ...f, on } : f));
-      this.notify({
-        title: on ? 'Flags enabled' : 'Flags disabled',
-        message: `${ids.size} feature flag${ids.size === 1 ? '' : 's'} ${on ? 'enabled' : 'disabled'}.`,
-        severity: 'success',
-      });
+    enableSelectedFlags() { this.setFlagsOn(true); },
+    disableSelectedFlags() { this.setFlagsOn(false); },
+    setFlagsOn(on) { this.requestFlagChange(this.selectedIds, on); },
+    requestFlagChange(ids, on) {
+      if (!ids.length || !this.endpoints.updateFeatureFlag) return;
+      this.confirm = {
+        title: `${on ? 'Enable' : 'Disable'} ${ids.length} feature flags?`,
+        message: 'This changes the live feature flag state for this project.',
+        confirmLabel: on ? 'Enable' : 'Disable',
+        run: async () => {
+          try {
+            for (const id of ids) await updateFeatureFlag({ endpoints: this.endpoints, id, enabled: on, fetchImpl: this.fetchImpl });
+            this.notify({ title: 'Flags updated', message: 'The server accepted the selected changes.', severity: 'success' });
+          } catch (error) {
+            this.notify({ title: 'Update failed', message: error.message, severity: 'error' });
+          } finally { await this.loadLiveData(); }
+        },
+      };
     },
     async copySelectedTags() {
       const ids = new Set(this.selectedIds);
@@ -447,7 +444,7 @@ export default {
       const list = kind === 'packages' ? this.packages : this.images;
       const item = list.find((entry) => entry.id === id);
       if (!item) return;
-      const noun = kind === 'packages' ? 'package' : 'container image';
+      const noun = kind === 'packages' ? 'package' : 'container repository';
       this.confirm = {
         title: `Delete this ${noun}?`,
         message: `${item.name} will be permanently deleted. This can't be undone.`,
@@ -458,8 +455,8 @@ export default {
     requestBulkDelete(kind) {
       const ids = this.selectedIds;
       if (ids.length === 0) return;
-      const nounPlural = kind === 'packages' ? 'packages' : 'container images';
-      const nounSingular = kind === 'packages' ? 'package' : 'container image';
+      const nounPlural = kind === 'packages' ? 'packages' : 'container repositories';
+      const nounSingular = kind === 'packages' ? 'package' : 'container repository';
       this.confirm = {
         title: `Delete ${ids.length} ${ids.length === 1 ? nounSingular : nounPlural}?`,
         message: `${ids.length} selected ${ids.length === 1 ? nounSingular : nounPlural} will be permanently deleted. This can't be undone.`,
@@ -468,17 +465,12 @@ export default {
       };
     },
     deleteRows(kind, ids) {
-      const idSet = new Set(ids);
-      const commit = Object.keys(this.endpoints).length
-        ? Promise.all(ids.map((id) => deleteDeployItem({ endpoints: this.endpoints, kind, id, fetchImpl: this.fetchImpl })))
-        : Promise.resolve();
+      const commit = Promise.all(ids.map((id) => deleteDeployItem({ endpoints: this.endpoints, kind, id, fetchImpl: this.fetchImpl })));
       commit.then(() => {
-        if (kind === 'packages') this.packages = this.packages.filter((p) => !idSet.has(p.id));
-        else this.images = this.images.filter((image) => !idSet.has(image.id));
-        this.setSelection(this.selectedIds.filter((id) => !idSet.has(id)));
-        const noun = kind === 'packages' ? 'package' : 'container image';
-        this.notify({ title: 'Deleted', message: `${ids.length} ${noun}${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
-      }).catch((error) => this.notify({ title: 'Delete failed', message: error.message, severity: 'error' }));
+        this.clearSelection();
+        const noun = kind === 'packages' ? 'package' : 'container repository';
+        this.notify({ title: 'Deletion requested', message: `The server accepted deletion of ${ids.length} ${noun}${ids.length === 1 ? '' : 's'}. Background removal may still be pending.`, severity: 'success' });
+      }).catch((error) => this.notify({ title: 'Delete failed', message: error.message, severity: 'error' })).finally(() => this.loadLiveData());
     },
     confirmAction() {
       if (this.confirm && typeof this.confirm.run === 'function') this.confirm.run();

@@ -4,4 +4,6 @@
 - add_page_specific_style 'page_bundles/reports'
 - add_page_specific_style 'page_bundles/security_dashboard'
 
-#js-project-security-dashboard{ data: project_security_dashboard_config(@project) }
+#js-security-dashboard{ data: { endpoints: material_security_endpoints(@project).to_json } }
+
+= link_to _("Open vulnerability report"), project_security_vulnerability_report_index_path(@project)

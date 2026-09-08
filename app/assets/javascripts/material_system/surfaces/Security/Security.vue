@@ -1,4 +1,5 @@
 <script>
+import ConfirmDialog from '../Deploy/components/ConfirmDialog.vue';
 import { loadSettings, subscribeSettings, updateSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import TopBar from './components/TopBar.vue';
@@ -18,6 +19,7 @@ import {
   vulnerabilitySearchText,
   fetchVulnerabilities,
   updateVulnerabilityStatus,
+  createVulnerabilityIssue,
 } from './data';
 
 /**
@@ -29,6 +31,7 @@ import {
 export default {
   name: 'SecurityDashboard',
   components: {
+    ConfirmDialog,
     TopBar,
     SeverityCards,
     VulnerabilityList,
@@ -56,6 +59,8 @@ export default {
       selectedMap: {},
       issueCreatedMap: {},
       vulnerabilities: this.initialVulnerabilities,
+      confirmation: null,
+      mutationPending: false,
       loading: Boolean(this.endpoints.vulnerabilities),
       loadError: null,
     };
@@ -181,7 +186,7 @@ export default {
       this.loading = true;
       this.loadError = null;
       try {
-        this.vulnerabilities = await fetchVulnerabilities({ endpoint: this.endpoints.vulnerabilities, fetchImpl: this.fetchImpl });
+        this.vulnerabilities = await fetchVulnerabilities({ endpoint: this.endpoints.vulnerabilities, projectPath: this.endpoints.projectPath, fetchImpl: this.fetchImpl });
       } catch (error) {
         this.loadError = error instanceof Error ? error.message : 'Live vulnerability data could not be loaded.';
       } finally {
@@ -225,22 +230,31 @@ export default {
       this.drawerId = null;
       this.restoreFocus();
     },
-    setStatus(id, status) {
-      const vuln = this.vulnerabilities.find((entry) => entry.id === id);
-      if (!vuln) return;
-      if (this.endpoints.vulnerability) {
-        updateVulnerabilityStatus({ endpoint: this.endpoints.vulnerability, id, status, fetchImpl: this.fetchImpl })
-          .then(() => { vuln.status = status; })
-          .catch((error) => notificationCenter.notify({ title: 'Status update failed', message: error.message, severity: 'error' }));
-      } else vuln.status = status;
+    setStatus(id, status) { this.requestStatuses([id], status); },
+    requestStatuses(ids, status) {
+      if (!ids.length || !this.endpoints.vulnerability || this.mutationPending) return;
+      this.drawerId = null;
+      this.confirmation = { title: `Set ${ids.length} vulnerabilities to ${status}?`, message: 'This changes the live vulnerability triage state.', ids, status };
     },
-    createIssue(id) {
-      this.$set(this.issueCreatedMap, id, true);
-      notificationCenter.notify({
-        title: 'Issue created',
-        message: 'Issue #4335 was created from this vulnerability.',
-        severity: 'success',
-      });
+    async confirmStatuses() {
+      const { ids, status } = this.confirmation;
+      this.confirmation = null; this.mutationPending = true;
+      try {
+        for (const id of ids) await updateVulnerabilityStatus({ endpoint: this.endpoints.vulnerability, id, status, fetchImpl: this.fetchImpl });
+        notificationCenter.notify({ title: 'Vulnerabilities updated', message: 'The server accepted all selected transitions.', severity: 'success' });
+        this.clearSelection();
+      } catch (error) { notificationCenter.notify({ title: 'Status update failed', message: error.message, severity: 'error' }); }
+      finally { this.mutationPending = false; await this.loadLiveVulnerabilities(); }
+    },
+    async createIssue(id) {
+      if (!this.endpoints.createIssue || this.mutationPending || this.issueCreatedMap[id]) return;
+      this.mutationPending = true;
+      try {
+        await createVulnerabilityIssue({ endpoint: this.endpoints.createIssue, id, projectId: this.endpoints.projectId, fetchImpl: this.fetchImpl });
+        this.$set(this.issueCreatedMap, id, true);
+        notificationCenter.notify({ title: 'Issue created', message: 'A tracking issue was created from this vulnerability.', severity: 'success' });
+      } catch (error) { notificationCenter.notify({ title: 'Issue creation failed', message: error.message, severity: 'error' }); }
+      finally { this.mutationPending = false; }
     },
     toggleSelected(id) {
       if (this.selectedMap[id]) this.$delete(this.selectedMap, id);
@@ -266,18 +280,9 @@ export default {
     clearSelection() {
       this.selectedMap = {};
     },
-    bulkSetStatus(status) {
-      const ids = Object.keys(this.selectedMap).map(Number);
-      ids.forEach((id) => this.setStatus(id, status));
-      notificationCenter.notify({
-        title: 'Bulk update applied',
-        message: `${ids.length} ${ids.length === 1 ? 'vulnerability' : 'vulnerabilities'} set to "${status}".`,
-        severity: 'success',
-      });
-      this.clearSelection();
-    },
+    bulkSetStatus(status) { this.requestStatuses(Object.keys(this.selectedMap), status); },
     bulkExportSelected() {
-      const ids = new Set(Object.keys(this.selectedMap).map(Number));
+      const ids = new Set(Object.keys(this.selectedMap));
       const rows = this.vulnerabilities.filter((vuln) => ids.has(vuln.id));
       const blob = new Blob([JSON.stringify(rows, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
@@ -347,6 +352,7 @@ export default {
 
     <main class="sec-main">
       <bulk-action-bar
+        :can-update="Boolean(endpoints.vulnerability) && !mutationPending"
         v-if="selectedCount > 0"
         :selected-count="selectedCount"
         @set-status="bulkSetStatus"
@@ -367,11 +373,14 @@ export default {
       v-if="drawerVulnerability"
       :vulnerability="drawerVulnerability"
       :issue-created="issueCreated(drawerVulnerability.id)"
+      :can-create-issue="Boolean(endpoints.createIssue) && !mutationPending"
+      :can-update="Boolean(endpoints.vulnerability) && !mutationPending"
       @close="closeDrawer"
       @set-status="(status) => setStatus(drawerVulnerability.id, status)"
       @create-issue="createIssue(drawerVulnerability.id)"
     />
 
+    <ConfirmDialog v-if="confirmation" :title="confirmation.title" :message="confirmation.message" confirm-label="Confirm" @confirm="confirmStatuses" @cancel="confirmation = null" />
     <command-palette v-if="paletteOpen" :actions="paletteActions" @close="closePalette" />
 
     <notification-stack />

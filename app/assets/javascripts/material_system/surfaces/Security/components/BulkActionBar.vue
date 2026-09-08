@@ -6,6 +6,7 @@ export default {
   name: 'BulkActionBar',
   components: { MaterialIcon },
   props: {
+    canUpdate: { type: Boolean, default: false },
     selectedCount: {
       type: Number,
       required: true,
@@ -18,11 +19,11 @@ export default {
   <div class="sec-bulk-bar" role="toolbar" :aria-label="`${selectedCount} vulnerabilities selected`">
     <span class="sec-bulk-bar__count">{{ selectedCount }} selected</span>
     <span class="sec-bulk-bar__divider" aria-hidden="true"></span>
-    <button type="button" class="sec-bulk-bar__action" @click="$emit('set-status', 'Confirmed')">
+    <button type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Confirmed')">
       Mark confirmed
     </button>
-    <button type="button" class="sec-bulk-bar__action" @click="$emit('set-status', 'Dismissed')">Dismiss</button>
-    <button type="button" class="sec-bulk-bar__action" @click="$emit('set-status', 'Resolved')">Resolve</button>
+    <button type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Dismissed')">Dismiss</button>
+    <button type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Resolved')">Resolve</button>
     <button type="button" class="sec-bulk-bar__action" @click="$emit('export')">
       <material-icon name="download" :size="16" />
       Export selected

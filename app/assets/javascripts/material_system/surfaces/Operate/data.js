@@ -5,7 +5,8 @@
  * replace these fixtures without changing how the components consume them.
  */
 
-import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+import { requireEndpoint } from '../live-data';
+import { operationsCollection, operationsConnection, operationsGraphql, operationsRequest } from '../Deploy/transport';
 
 export const OPERATE_TABS = Object.freeze([
   { id: 'environments', label: 'Environments', icon: 'cloud' },
@@ -161,17 +162,58 @@ export function buildTerraformRows(states) {
   }));
 }
 
+// Fields are the server subset of terraform/graphql/fragments/state.fragment.graphql
+// and clusters_list/graphql/fragments/cluster_agent.fragment.graphql.
+export const OPERATE_STATE_QUERY = `query MaterialOperateStates($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { terraformStates(first: 100, after: $after) {
+    nodes { id name lockedAt updatedAt lockedByUser { name } latestVersion { serial downloadPath } }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+export const OPERATE_AGENTS_QUERY = `query MaterialOperateAgents($projectPath: ID!, $after: String) {
+  project(fullPath: $projectPath) { clusterAgents(first: 100, after: $after) {
+    nodes { id name webPath }
+    pageInfo { hasNextPage endCursor }
+  } }
+}`;
+
 export async function fetchOperateData({ endpoints, fetchImpl } = {}) {
-  const [environments, clusters, terraform] = await Promise.all([
-    requestJson(requireEndpoint(endpoints, 'environments'), { fetchImpl }),
-    requestJson(requireEndpoint(endpoints, 'kubernetes'), { fetchImpl }),
-    requestJson(requireEndpoint(endpoints, 'terraform'), { fetchImpl }),
+  const options = { fetchImpl };
+  const environmentOptions = { fetchImpl, unwrap: (payload) => payload.environments };
+  const [active, stopped, clusters, terraform] = await Promise.all([
+    operationsCollection(requireEndpoint(endpoints, 'environments'), environmentOptions),
+    endpoints.stoppedEnvironments ? operationsCollection(endpoints.stoppedEnvironments, environmentOptions) : [],
+    endpoints.kubernetes ? operationsConnection(endpoints.graphql, OPERATE_AGENTS_QUERY, { projectPath: endpoints.projectPath }, (data) => data.project?.clusterAgents, options) : [],
+    endpoints.terraform ? operationsConnection(endpoints.graphql, OPERATE_STATE_QUERY, { projectPath: endpoints.projectPath }, (data) => data.project?.terraformStates, options) : [],
   ]);
   return {
-    environments: assertCollection(environments, 'environments'),
-    clusters: assertCollection(clusters, 'Kubernetes clusters'),
-    terraform: assertCollection(terraform, 'Terraform states'),
+    environments: [...active, ...stopped].map((env) => ({
+      id: String(env.id), name: env.name, kind: env.environment_type || '',
+      version: env.last_deployment?.sha || '', status: env.state,
+      updatedAt: env.updated_at || '', href: env.environment_path,
+      stopPath: env.can_stop ? env.stop_path : null,
+    })),
+    clusters: clusters.map((cluster) => ({ id: cluster.id, name: cluster.name, href: cluster.webPath, detail: '', status: '' })),
+    terraform: terraform.map((state) => ({
+      id: state.id, name: state.name, lockedBy: state.lockedByUser?.name,
+      version: state.latestVersion?.serial, status: state.lockedAt ? 'locked' : 'unlocked',
+      updatedAt: state.updatedAt, href: state.latestVersion?.downloadPath,
+    })),
   };
+}
+
+export function stopEnvironment(environment, options = {}) {
+  return operationsRequest(requireEndpoint({ stop: environment.stopPath }, 'stop'), { ...options, method: 'POST' });
+}
+
+export async function changeStateLock(endpoints, state, options = {}) {
+  if (!endpoints.terraformAdmin) throw new Error('You do not have permission to manage Terraform state.');
+  const operation = state.status === 'locked' ? 'terraformStateUnlock' : 'terraformStateLock';
+  const data = await operationsGraphql(endpoints.graphql,
+    `mutation MaterialOperateLock($id: TerraformStateID!) { ${operation}(input: { id: $id }) { errors } }`,
+    { id: state.id }, options);
+  const result = data[operation];
+  if (!result || result.errors?.length) throw new Error(result?.errors?.join('; ') || 'The state operation was not accepted.');
 }
 
 /** Placeholder routes — swap for real Rails paths once this surface is mounted in-app. */
