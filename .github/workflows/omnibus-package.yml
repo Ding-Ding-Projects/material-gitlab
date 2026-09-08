@@ -175,7 +175,23 @@ jobs:
 
               bundle config set --local path /omnibus/.bundle-vendor
               bundle install --jobs 4
-              bundle exec omnibus build gitlab --log-level=info
+
+              # Omnibus fetches every dependency source over the network, and a single
+              # upstream 502 kills the whole build: the first run past the ownership fix
+              # died on "NetFetcher: libffi ... 502 Bad Gateway". Omnibus caches software
+              # it has already built, so a retry resumes rather than starting over.
+              # Three attempts, and the exit status of the last one is what counts.
+              attempt=1
+              until bundle exec omnibus build gitlab --log-level=info; do
+                status=$?
+                if [ "$attempt" -ge 3 ]; then
+                  echo "::error::omnibus build failed $attempt times; last exit $status"
+                  exit "$status"
+                fi
+                echo "::warning::omnibus build attempt $attempt failed with exit $status; retrying after a pause"
+                attempt=$((attempt + 1))
+                sleep 60
+              done
             '
 
       - name: Verify a real package was produced
