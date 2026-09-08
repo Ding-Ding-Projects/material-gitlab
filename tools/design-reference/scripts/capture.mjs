@@ -3,7 +3,11 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { existingFile } from './evidence-paths.mjs';
+
+const require = createRequire(import.meta.url);
+const { PNG } = require('pngjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const inventory = JSON.parse(fs.readFileSync(path.join(ROOT, 'design', 'parity-inventory.json'), 'utf8'));
@@ -33,9 +37,8 @@ function captureSession(value, sourceCommit, id, kind) {
 }
 function pngInfo(file) {
   const bytes = fs.readFileSync(file);
-  const signature = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]);
-  if (bytes.length < 24 || !bytes.subarray(0, 8).equals(signature) || bytes.toString('ascii', 12, 16) !== 'IHDR') throw new Error('output is not a valid PNG');
-  return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20), bytes: bytes.length };
+  const decoded = PNG.sync.read(bytes, { checkCRC: true });
+  return { width: decoded.width, height: decoded.height, bytes: bytes.length };
 }
 
 const id = String(args.id || '');
