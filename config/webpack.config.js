@@ -24,6 +24,7 @@ const EXACT_VUE_VERSION = require('vue/package.json').version;
 
 const webpack = require('webpack');
 const webpackMemoryProfile = require('./helpers/webpack_memory_profile');
+const materialWebLoader = require('./helpers/material_web_loader');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const { StatsWriterPlugin } = require('webpack-stats-plugin');
 const WEBPACK_VERSION = require('webpack/package.json').version;
@@ -295,6 +296,7 @@ module.exports = {
   module: {
     strictExportPresence: true,
     rules: [
+      materialWebLoader,
       {
         type: 'javascript/auto',
         exclude: /pdfjs-dist-v[34]/,

@@ -124,3 +124,12 @@ regex dialog, palette rows, and other surfaces remain explicit migration work.
 They have no fabricated component registration. The npm package does not expose
 a general-purpose layout or shell element, so layout conformance needs a separate
 framework-appropriate design and verification decision.
+
+## Production bundler compatibility
+
+Webpack 4 cannot parse the modern syntax in Lit without transpilation. The
+production rule in `config/helpers/material_web_loader.js` routes only Material
+Web and Lit packages through the existing Babel configuration. A focused real
+webpack compilation of the actual registration module fails without this rule
+and succeeds with it. This verifies the dependency compilation boundary, not
+browser rendering or full Rails startup.

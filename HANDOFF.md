@@ -374,3 +374,15 @@ suite passed 39 suites and 278 tests after installing the locked dependencies.
 The pinned Google Sans font is delivered through the Rails asset pipeline and
 matches the already verified reference font hash. Actual browser font loading,
 form/IME behavior, visuals, and remaining component migrations are unverified.
+
+## Current control migration and build boundary
+
+The five project surfaces integrate 184 supported control declarations after
+independent semantic review. Standard verification now passes 41 suites and 327
+tests. The selection primitives retain their documented native-browser limits.
+
+The bounded build of `c89557006` was explicitly stopped as superseded after a
+focused webpack compilation proved a missing Lit transpilation rule. Only its
+exact task-owned build client was stopped. No product image or runtime screenshot
+was accepted from that attempt. The new production loader has a failing-without,
+passing-with compilation regression using the actual official registration module.
