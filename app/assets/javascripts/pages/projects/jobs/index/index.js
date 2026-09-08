@@ -1,3 +1,4 @@
-import { initJobsPage } from '~/ci/jobs_page';
+import Vue from 'vue';
+import { mountBuildSurface } from '~/material_system/surfaces/Build';
 
-initJobsPage();
+mountBuildSurface('#js-material-build', { Vue });
