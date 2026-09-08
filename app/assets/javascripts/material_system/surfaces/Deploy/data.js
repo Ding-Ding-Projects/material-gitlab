@@ -4,7 +4,8 @@
  * Releases, Feature Flags, Package Registry, and Container Registry API payloads.
  */
 
-import { assertCollection, requestJson, requireEndpoint } from '../live-data';
+import { assertCollection, requireEndpoint } from '../live-data';
+import { operationsCollection, operationsRequest } from './transport';
 
 export const DEPLOY_TABS = Object.freeze([
   { id: 'releases', label: 'Releases' },
@@ -165,6 +166,7 @@ export function normalizeRelease(release) {
   const assets = release.assets?.count ?? release.assets?.links?.length ?? release.assets_count;
   return {
     id: String(release.id ?? tag),
+    href: release._links?.self || release.web_url || '',
     name: release.name || tag,
     tagRef: tag,
     assetsCount: Number.isFinite(assets) ? assets : 0,
@@ -177,9 +179,9 @@ export function normalizeRelease(release) {
 export function normalizeDeployCollection(kind, items) {
   const normalizers = {
     releases: normalizeRelease,
-    featureFlags: (flag) => ({ id: String(flag.id ?? flag.name), name: flag.name, sub: flag.description || flag.scope || '', on: Boolean(flag.active ?? flag.enabled) }),
-    packages: (pkg) => ({ id: String(pkg.id), name: [pkg.name, pkg.version].filter(Boolean).join(' '), sub: pkg.package_type || pkg.package_manager || '', sizeBytes: Number(pkg.size ?? pkg.size_bytes) || 0, createdAt: pkg.created_at || '' }),
-    containers: (image) => ({ id: String(image.id ?? image.path), name: image.name || image.path, sub: image.location || image.path || '', sizeBytes: Number(image.size ?? image.size_bytes) || 0, createdAt: image.created_at || '' }),
+    featureFlags: (flag) => ({ id: String(flag.name), name: flag.name, sub: flag.description || flag.scope || '', on: Boolean(flag.active ?? flag.enabled) }),
+    packages: (pkg) => ({ id: String(pkg.id), name: [pkg.name, pkg.version].filter(Boolean).join(' '), sub: pkg.package_type || pkg.package_manager || '', sizeBytes: pkg.size ?? pkg.size_bytes, createdAt: pkg.created_at || '' }),
+    containers: (image) => ({ id: String(image.id ?? image.path), name: image.name || image.path, sub: image.location || image.path || '', sizeBytes: image.size ?? image.size_bytes, createdAt: image.created_at || '' }),
   };
   return collectionOrEmpty(items, kind).map(normalizers[kind]);
 }
@@ -188,7 +190,7 @@ export function normalizeDeployCollection(kind, items) {
 export async function fetchDeployData({ endpoints, fetchImpl } = {}) {
   const fetchCollection = async (key, label) => {
     if (!endpoints?.[key]) return [];
-    return requestJson(requireEndpoint(endpoints, key), { fetchImpl }).then((payload) => collectionOrEmpty(payload, label));
+    return operationsCollection(requireEndpoint(endpoints, key), { fetchImpl });
   };
   const [releases, flags, packages, containers] = await Promise.all([
     fetchCollection('releases', 'releases'), fetchCollection('featureFlags', 'feature flags'),
@@ -203,15 +205,14 @@ export async function fetchDeployData({ endpoints, fetchImpl } = {}) {
 }
 
 export function updateFeatureFlag({ endpoints, id, enabled, fetchImpl } = {}) {
-  return requestJson(requireEndpoint(endpoints, 'updateFeatureFlag').replace(':id', encodeURIComponent(id)), {
+  return operationsRequest(requireEndpoint(endpoints, 'updateFeatureFlag').replace(':id', encodeURIComponent(id)), {
     fetchImpl,
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ enabled }),
+    body: { active: enabled },
   });
 }
 
 export function deleteDeployItem({ endpoints, kind, id, fetchImpl } = {}) {
-  const endpoint = requireEndpoint(endpoints, kind).replace(':id', encodeURIComponent(id));
-  return requestJson(endpoint, { fetchImpl, method: 'DELETE' });
+  const endpoint = requireEndpoint(endpoints, kind === 'packages' ? 'deletePackage' : 'deleteContainer').replace(':id', encodeURIComponent(id));
+  return operationsRequest(endpoint, { fetchImpl, method: 'DELETE' });
 }

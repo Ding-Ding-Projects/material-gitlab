@@ -10,7 +10,8 @@
     </label>
     <DpIcon :name="row.icon" class="dp-row__icon" :style="{ color: row.iconColor }" />
     <div class="dp-row__text">
-      <div class="dp-row__title" :class="{ 'dp-row__title--mono': row.titleMono }">{{ row.title }}</div>
+      <a v-if="row.href" class="dp-row__title" :href="row.href">{{ row.title }}</a>
+      <div v-else class="dp-row__title" :class="{ 'dp-row__title--mono': row.titleMono }">{{ row.title }}</div>
       <div class="dp-row__sub">{{ row.sub }}</div>
     </div>
     <span v-if="row.badge" class="dp-row__badge" :style="{ background: row.badgeBg, color: row.badgeFg }">

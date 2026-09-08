@@ -1,3 +1,3 @@
-import initReleases from '~/releases/mount_index';
+import { mountDeploy } from '~/material_system/surfaces/Deploy';
 
-initReleases();
+mountDeploy();

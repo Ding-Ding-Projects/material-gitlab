@@ -3,7 +3,7 @@
     <div class="dp-palette" role="dialog" aria-modal="true" aria-label="Command palette" @keydown.esc="$emit('close')">
       <div class="dp-palette__search">
         <DpIcon name="search" />
-        <label class="dp-visually-hidden" for="dp-palette-input">Jump to a Deploy action</label>
+        <label class="dp-visually-hidden" for="dp-palette-input">Jump to an action</label>
         <input
           id="dp-palette-input"
           ref="input"

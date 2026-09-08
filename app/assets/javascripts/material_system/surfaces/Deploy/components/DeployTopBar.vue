@@ -67,7 +67,7 @@
     >
       <DpIcon :name="dark ? 'sun' : 'moon'" />
     </button>
-    <div class="dp-topbar__avatar" :title="userName" aria-hidden="true">{{ userInitials }}</div>
+    <div v-if="userInitials" class="dp-topbar__avatar" :title="userName" aria-hidden="true">{{ userInitials }}</div>
   </header>
 </template>
 
@@ -88,8 +88,8 @@ export default {
     regexInitialPattern: { type: String, default: '' },
     regexCorpus: { type: Array, default: () => [] },
     dark: { type: Boolean, default: false },
-    userName: { type: String, default: 'Jordan Diaz' },
-    userInitials: { type: String, default: 'JD' },
+    userName: { type: String, default: '' },
+    userInitials: { type: String, default: '' },
   },
   data() {
     return { searchInputId: `dp-search-${Math.random().toString(36).slice(2, 9)}` };
