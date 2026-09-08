@@ -122,11 +122,43 @@ export function decodeRepositoryContent(file) {
   } catch (_error) { return { binary: true, rawText: null }; }
 }
 
-export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '', initialStarred = false, client = axios, navigate = (url) => window.location.assign(url) } = {}) {
+// Select only the public metadata rendered by this surface. Do not retrieve the
+// REST Project entity, which includes privileged administration fields.
+export const REPOSITORY_PROJECT_QUERY = `query MaterialRepositoryProject($fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    id name visibility starCount forksCount httpUrlToRepo sshUrlToRepo
+    repository { empty rootRef }
+    statistics { commitCount repositorySize }
+  }
+}`;
+
+export const REPOSITORY_STAR_MUTATION = `mutation MaterialRepositoryStar($projectId: ProjectID!, $starred: Boolean!) {
+  starProject(input: { projectId: $projectId, starred: $starred }) { count errors }
+}`;
+
+export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '', initialStarred = false, forkPath = '', canStar = false, client = axios, navigate = (url) => window.location.assign(url) } = {}) {
   const base = projectApiPath(projectPath);
   let starred = initialStarred;
+  let projectId;
+  const graphqlEndpoint = `${globalThis.gon?.relative_url_root || ''}/api/graphql`;
   const request = (url, options = {}) => client.get(url, options).then((response) => response.data);
-  const loadProject = () => request(base, { params: { statistics: true } });
+  const graphql = async (query, variables) => {
+    const { data } = await client.post(graphqlEndpoint, { query, variables });
+    if (data?.errors?.length || !data?.data) throw new Error('The requested project fields are unavailable for your current access.');
+    return data.data;
+  };
+  const loadProject = async () => {
+    const { project } = await graphql(REPOSITORY_PROJECT_QUERY, { fullPath: projectPath });
+    if (!project?.id || typeof project.name !== 'string' || typeof project.repository?.empty !== 'boolean') throw new Error('Project metadata is unavailable for your current access.');
+    projectId = project.id;
+    return {
+      name: project.name, visibility: project.visibility,
+      star_count: project.starCount, forks_count: project.forksCount,
+      http_url_to_repo: project.httpUrlToRepo, ssh_url_to_repo: project.sshUrlToRepo,
+      empty_repo: project.repository.empty, default_branch: project.repository.rootRef,
+      statistics: project.statistics ? { commit_count: project.statistics.commitCount, repository_size: project.statistics.repositorySize } : null,
+    };
+  };
   const allPages = async (suffix, params = {}) => {
     const rows = []; let page = 1;
     do {
@@ -156,7 +188,7 @@ export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '
         request(`${base}/languages`),
       ]);
       return {
-        project: { name: project.name, visibility: project.visibility, stars: project.star_count, starred, forks: project.forks_count, commitCount: project.statistics?.commit_count, branchCount: branches.length, tagCount: tags.length, storage: Number.isFinite(project.statistics?.repository_size) ? `${project.statistics.repository_size.toLocaleString()} bytes` : '', cloneUrls: { https: project.http_url_to_repo, ssh: project.ssh_url_to_repo } },
+        project: { canStar, canFork: Boolean(forkPath), name: project.name, visibility: project.visibility, stars: project.star_count, starred, forks: project.forks_count, commitCount: project.statistics?.commit_count, branchCount: branches.length, tagCount: tags.length, storage: Number.isFinite(project.statistics?.repository_size) ? `${project.statistics.repository_size.toLocaleString()} bytes` : '', cloneUrls: { https: project.http_url_to_repo, ssh: project.ssh_url_to_repo } },
         emptyRepository: empty,
         branches: branches.map((item) => item.name),
         defaultBranch: selectedBranch || '',
@@ -173,11 +205,20 @@ export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '
     },
     async branches() { return (await loadBranches()).map((item) => item.name); },
     async toggleStar() {
-      const result = await client.post(`${base}/${starred ? 'unstar' : 'star'}`);
-      starred = !starred;
-      return { project: { starred, stars: result.data.star_count } };
+      if (!projectId) await loadProject();
+      const nextStarred = !starred;
+      const result = await graphql(REPOSITORY_STAR_MUTATION, { projectId, starred: nextStarred });
+      const count = Number(result.starProject?.count);
+      if (!result.starProject || result.starProject.errors?.length || !Number.isFinite(count)) throw new Error('The star preference was not updated.');
+      starred = nextStarred;
+      return { project: { starred, stars: count } };
     },
-    async fork() { return client.post(`${base}/fork`).then((response) => response.data); },
+    async fork() {
+      if (!forkPath || !forkPath.startsWith('/') || forkPath.startsWith('//')) throw new Error('A permitted project fork form is not available.');
+      const result = await navigate(forkPath);
+      if (result === false) throw new Error('The fork form navigation was not accepted.');
+      return { navigationRequested: true };
+    },
     async download({ branch, entries = [] } = {}) {
       if (entries.length !== 1) throw new Error('Select exactly one file or directory to download.');
       const entry = entries[0];

@@ -22,6 +22,8 @@ export function mountRepositorySurface(el, propsData = {}) {
     ref: initialRef,
     path: initialKind === 'blob' ? initialPath.split('/').slice(0, -1).join('/') : initialPath,
     initialStarred: mountEl.dataset.starred === 'true',
+    forkPath: mountEl.dataset.forkPath || '',
+    canStar: mountEl.dataset.canStar === 'true',
   });
   assertRepositoryAdapter(adapter);
   return new Vue({

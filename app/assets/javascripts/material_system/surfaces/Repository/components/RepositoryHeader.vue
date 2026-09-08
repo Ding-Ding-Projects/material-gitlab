@@ -42,12 +42,13 @@ export default {
           type="button"
           class="repo-header__pill"
           :aria-pressed="project.starred"
+          :disabled="!project.canStar"
           @click="toggleStar"
         >
           <m-icon name="star" :size="17" decorative />
           {{ project.starred ? 'Starred' : 'Star' }} &middot; {{ project.stars }}
         </button>
-        <button type="button" class="repo-header__pill" @click="fork">
+        <button v-if="project.canFork" type="button" class="repo-header__pill" @click="fork">
           <m-icon name="fork" :size="17" decorative />
           Fork &middot; {{ project.forks }}
         </button>

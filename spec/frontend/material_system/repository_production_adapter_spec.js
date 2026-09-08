@@ -15,6 +15,13 @@ describe('project REST repository adapter', () => {
     ssh_url_to_repo: 'git@example.test:group/project.git',
   };
 
+  const post = jest.fn().mockResolvedValue({ data: { data: { project: {
+    id: 'gid://gitlab/Project/1', name: project.name, visibility: project.visibility,
+    starCount: project.star_count, forksCount: project.forks_count,
+    httpUrlToRepo: project.http_url_to_repo, sshUrlToRepo: project.ssh_url_to_repo,
+    repository: { empty: false, rootRef: 'main' }, statistics: null,
+  } } } });
+
   it('uses the server-provided ref and path with same-origin REST responses', async () => {
     const get = jest.fn((url) => {
       if (url.endsWith('/repository/branches')) return Promise.resolve({ data: [{ name: 'main' }, { name: 'feature/foo' }] });
@@ -23,7 +30,7 @@ describe('project REST repository adapter', () => {
       if (url.endsWith('/repository/tags')) return Promise.resolve({ data: [] });
       return Promise.resolve({ data: project });
     });
-    const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', ref: 'feature/foo', path: 'src', client: { get, post: jest.fn() } });
+    const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', ref: 'feature/foo', path: 'src', client: { get, post } });
 
     const repository = await adapter.load();
 
@@ -61,7 +68,7 @@ describe('project REST repository adapter', () => {
       if (url.endsWith('/repository/commits') || url.endsWith('/repository/tags')) return Promise.resolve({ data: [] });
       return Promise.resolve({ data: project });
     });
-    const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', path: 'nested', client: { get, post: jest.fn() } });
+    const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', path: 'nested', client: { get, post } });
 
     await adapter.load({ path: '' });
 
@@ -74,7 +81,7 @@ describe('project REST repository adapter', () => {
     const content = btoa(unescape(encodeURIComponent('cafÃ©')));
     const get = jest.fn().mockResolvedValue({ data: { file_name: 'readme.txt', file_path: 'readme.txt', size: 5, encoding: 'base64', content } });
     const navigate = jest.fn();
-    const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', ref: 'main', client: { get, post: jest.fn() }, navigate });
+    const adapter = createProjectRepositoryAdapter({ projectPath: 'group/project', ref: 'main', client: { get, post }, navigate });
 
     await expect(adapter.loadBlob({ path: 'readme.txt' })).resolves.toMatchObject({ rawText: 'cafÃ©' });
     await expect(adapter.download({ entries: [{ path: 'a', kind: 'file' }, { path: 'b', kind: 'file' }] })).rejects.toThrow('exactly one file or directory');

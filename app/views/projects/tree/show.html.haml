@@ -5,7 +5,7 @@
 - if @gitaly_unavailable
   = render 'shared/errors/gitaly_unavailable', reason: _("Unable to load repository data")
 - else
-  #js-material-repository-app{ data: { project_path: @project.full_path, ref: current_ref, ref_type: @ref_type, path: @path, entry_type: 'tree', starred: (current_user && current_user.starred?(@project)).to_s } }
+  #js-material-repository-app{ data: { project_path: @project.full_path, ref: current_ref, ref_type: @ref_type, path: @path, entry_type: 'tree', starred: (current_user && current_user.starred?(@project)).to_s, can_star: current_user.present?.to_s, fork_path: (new_project_fork_path(@project) if can?(current_user, :fork_project, @project)) } }
   - if can?(current_user, :push_code, @project)
     = link_to _('Edit in Web IDE'), ide_edit_path(@project, current_ref, @path)
   #js-ambiguous-ref-modal{ data: { ambiguous: @is_ambiguous_ref.to_s, ref: current_ref } }

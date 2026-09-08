@@ -364,8 +364,7 @@ export default {
       await this.loadRepository();
     },
     async fork() {
-      await this.runAdapterAction(this.adapter.fork, { branch: this.currentBranch }, 'Fork request submitted.');
-      await this.loadRepository();
+      await this.runAdapterAction(this.adapter.fork, { branch: this.currentBranch });
     },
   },
 };

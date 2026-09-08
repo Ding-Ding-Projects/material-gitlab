@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const babel = require('@babel/core');
 const vueCompiler = require('vue-template-compiler');
+const { parse } = require('graphql');
 const root = path.resolve(__dirname, '../../..');
 const base = path.join(root, 'app/assets/javascripts/material_system/surfaces');
 const notifications = [];
@@ -30,6 +31,7 @@ const repositoryData = load('Repository/data.js');
 const Code = load('Code/Code.vue', true).default;
 const Repository = load('Repository/Repository.vue', true).default;
 const project = { name: 'Project', default_branch: 'main', visibility: 'private', star_count: 2, forks_count: 1, http_url_to_repo: 'https://gitlab.example/g/p.git' };
+const projectMetadata = { id: 'gid://gitlab/Project/1', name: project.name, visibility: project.visibility, starCount: project.star_count, forksCount: project.forks_count, httpUrlToRepo: project.http_url_to_repo, sshUrlToRepo: '', repository: { empty: false, rootRef: 'main' }, statistics: null };
 function repositoryClient(overrides = {}) {
   return { get: async (url, options) => {
     if (overrides.get) { const value = await overrides.get(url, options); if (value) return value; }
@@ -37,8 +39,12 @@ function repositoryClient(overrides = {}) {
     if (url.endsWith('/repository/tree')) return { data: [{ name: 'README.md', path: 'src/README.md', type: 'blob' }] };
     if (url.endsWith('/repository/commits') || url.endsWith('/repository/tags')) return { data: [] };
     if (url.endsWith('/languages')) return { data: { Ruby: 70, JavaScript: 30 } };
-    return { data: project };
-  }, post: async () => ({ data: { star_count: 3 } }) };
+    throw new Error('Unexpected broad repository GET: ' + url);
+  }, post: async (url, body) => {
+    if (overrides.post) return overrides.post(url, body);
+    assert.equal(url, '/api/graphql');
+    return { data: { data: { project: projectMetadata } } };
+  } };
 }
 
 test('Code deletion waits for the server and preserves protected/default branches', async () => {
@@ -115,9 +121,9 @@ test('Repository counts use complete refs and authoritative optional statistics'
 
 test('Repository empty state comes from the project response and never from a 404', async () => {
   let requests = 0;
-  const adapter = repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', client: { get: async () => { requests += 1; return { data: { ...project, default_branch: null, empty_repo: true } }; } } });
+  const adapter = repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', client: { post: async () => { requests += 1; return { data: { data: { project: { ...projectMetadata, repository: { empty: true, rootRef: null } } } } }; }, get: async () => { throw new Error('An empty repository must not trigger collection reads'); } } });
   const value = await adapter.load(); assert.equal(value.emptyRepository, true); assert.deepEqual(value.branches, []); assert.equal(requests, 1);
-  const missing = repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', client: { get: async () => { throw new Error('404'); } } });
+  const missing = repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', client: { post: async () => { throw new Error('404'); } } });
   await assert.rejects(missing.load(), /404/);
 });
 
@@ -140,13 +146,49 @@ test('Selected downloads target exactly one file or directory and reject zero/mu
   assert.equal(urls.length, 2); assert.equal(adapter.capabilities.deleteEntries, false);
 });
 
-test('Star toggles use the authenticated initial state and actual successful responses', async () => {
+test('Repository metadata request selects only rendered fields and never reads the REST Project entity', async () => {
+  const posts = []; const gets = [];
+  const client = repositoryClient({
+    get: async (url) => { gets.push(url); },
+    post: async (url, body) => { posts.push({ url, body }); return { data: { data: { project: projectMetadata } } }; },
+  });
+  await repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', client }).load();
+  assert.equal(posts.length, 1); assert.equal(posts[0].url, '/api/graphql');
+  assert.deepEqual(posts[0].body.variables, { fullPath: 'g/p' });
+  const document = parse(posts[0].body.query);
+  const selected = [];
+  function fields(selectionSet, prefix = '') {
+    for (const field of selectionSet.selections) {
+      assert.equal(field.kind, 'Field');
+      const name = prefix + field.name.value;
+      if (field.selectionSet) fields(field.selectionSet, name + '.'); else selected.push(name);
+    }
+  }
+  fields(document.definitions[0].selectionSet);
+  assert.deepEqual(selected.sort(), ['project.id', 'project.name', 'project.visibility', 'project.starCount', 'project.forksCount', 'project.httpUrlToRepo', 'project.sshUrlToRepo', 'project.repository.empty', 'project.repository.rootRef', 'project.statistics.commitCount', 'project.statistics.repositorySize'].sort());
+  assert.equal(gets.some((url) => /^\/api\/v4\/projects\/g%2Fp(?:\?|$)/.test(url)), false);
+});
+
+test('Star toggles select only the native mutation count and never consume a REST Project response', async () => {
   const calls = [];
-  const client = repositoryClient(); client.post = async (url) => { calls.push(url); return { data: { star_count: calls.length === 1 ? 1 : 2 } }; };
+  const client = repositoryClient({ post: async (url, body) => {
+    calls.push({ url, body });
+    if (body.query === repositoryData.REPOSITORY_PROJECT_QUERY) return { data: { data: { project: projectMetadata } } };
+    assert.equal(body.query, repositoryData.REPOSITORY_STAR_MUTATION);
+    return { data: { data: { starProject: { count: body.variables.starred ? '2' : '1', errors: [] } } } };
+  } });
   const adapter = repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', initialStarred: true, client });
   assert.equal((await adapter.toggleStar()).project.starred, false);
   assert.equal((await adapter.toggleStar()).project.starred, true);
-  assert.deepEqual(calls, ['/api/v4/projects/g%2Fp/unstar', '/api/v4/projects/g%2Fp/star']);
+  assert.equal(calls.every((call) => call.url === '/api/graphql'), true);
+  assert.deepEqual(calls.slice(1).map((call) => call.body.variables), [{ projectId: projectMetadata.id, starred: false }, { projectId: projectMetadata.id, starred: true }]);
+});
+
+test('Fork action opens its authorized Rails form without requesting a REST Project response', async () => {
+  const paths = [];
+  const adapter = repositoryData.createProjectRepositoryAdapter({ projectPath: 'g/p', forkPath: '/g/p/-/forks/new', navigate: (url) => paths.push(url), client: { get: () => { throw new Error('Unexpected request'); }, post: () => { throw new Error('Unexpected request'); } } });
+  assert.deepEqual(await adapter.fork(), { navigationRequested: true });
+  assert.deepEqual(paths, ['/g/p/-/forks/new']);
 });
 
 test('Every Code and Repository component template/script compiles', () => {
