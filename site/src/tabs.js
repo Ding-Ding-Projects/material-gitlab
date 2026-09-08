@@ -168,9 +168,9 @@ export function renderTabShell(root, state, onChange = () => {}) {
   if (!root) return;
   root.dataset.dock = state.dock;
   root.innerHTML = '';
-  const strip = document.createElement('div'); strip.className = 'tabs-strip'; strip.setAttribute('role', 'tablist');
+  const strip = document.createElement('div'); strip.className = 'tabs-strip'; strip.setAttribute('role', 'tablist'); strip.setAttribute('aria-label', root.getAttribute('aria-label') || 'Saved browser tabs'); strip.setAttribute('aria-orientation', state.dock === 'left' || state.dock === 'right' ? 'vertical' : 'horizontal');
   state.tabs.forEach((tab) => {
-    const button = document.createElement('button'); button.className = 'tabs-tab'; button.type = 'button'; button.dataset.tabId = tab.id; button.setAttribute('role', 'tab'); button.setAttribute('aria-selected', String(tab.id === state.activeTab)); button.textContent = `${tab.pinned ? '📌 ' : ''}${tab.label}`;
+    const button = document.createElement('button'); button.className = 'tabs-tab'; button.type = 'button'; button.id = `saved-tab-${tab.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`; button.dataset.tabId = tab.id; button.setAttribute('role', 'tab'); button.setAttribute('aria-selected', String(tab.id === state.activeTab)); button.tabIndex = tab.id === state.activeTab ? 0 : -1; button.textContent = `${tab.pinned ? '📌 ' : ''}${tab.label}`;
     button.addEventListener('click', () => onChange(activateTab(state, tab.id))); strip.append(button);
   });
   root.append(strip);

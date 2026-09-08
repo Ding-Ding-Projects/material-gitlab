@@ -141,6 +141,12 @@ export const TEXT_FIELD_SPECS = Object.freeze({
     placeholder: { en: 'Optional pattern', 'zh-Hant': '可選模式' },
     errors: { invalid: { en: 'This pattern is not valid JavaScript syntax.', 'zh-Hant': '此模式不是有效的 JavaScript 語法。' } },
   },
+  regexFlags: {
+    label: { en: 'Regular expression flags', 'zh-Hant': '正規表示式旗標' },
+    supporting: { en: 'Optional ECMAScript flags such as i, m, u, or s.', 'zh-Hant': '可選用 i、m、u 或 s 等 ECMAScript 旗標。' },
+    placeholder: { en: 'Optional flags', 'zh-Hant': '可選旗標' },
+    errors: { invalid: { en: 'Use only supported ECMAScript flags.', 'zh-Hant': '只可使用支援的 ECMAScript 旗標。' } },
+  },
   vocabularyUpload: {
     label: { en: 'Personal vocabulary file', 'zh-Hant': '個人詞彙檔案' },
     supporting: { en: 'Choose a local JSON file. Nothing is uploaded.', 'zh-Hant': '選擇本機 JSON 檔案；檔案不會上載。' },
@@ -225,7 +231,7 @@ export function initProductContent(root = document, language = DEFAULT_LANGUAGE)
     ['[data-tools-search]', 'siteSearch'],
     ['[data-offline-doc-search]', 'siteSearch'],
     ['[data-command-search]', 'siteSearch'],
-    ['[data-tab-regex-flags]', 'regexPattern'],
+    ['[data-tab-regex-flags]', 'regexFlags'],
     ['[data-vocabulary-upload]', 'vocabularyUpload'],
   ];
 
