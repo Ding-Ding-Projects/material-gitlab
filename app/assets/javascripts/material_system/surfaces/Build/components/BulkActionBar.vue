@@ -1,32 +1,34 @@
 <template>
   <div class="bulk-bar">
     <label class="bulk-bar__select-all">
-      <input
-        ref="selectAll"
-        type="checkbox"
+      <material-checkbox
         :checked="allSelected"
+        :indeterminate="indeterminate"
         :aria-label="selectAllLabel"
         @change="$emit('toggle-all')"
-      />
+      ></material-checkbox>
       <span>{{ selectedCount > 0 ? `${selectedCount} selected` : selectAllLabel }}</span>
     </label>
-    <button type="button" class="bulk-bar__link" @click="$emit('invert')">Invert selection</button>
-    <button v-if="selectedCount > 0" type="button" class="bulk-bar__link" @click="$emit('clear')">Clear selection</button>
+    <material-button type="button" variant="text" class="bulk-bar__link" @click="$emit('invert')">Invert selection</material-button>
+    <material-button v-if="selectedCount > 0" type="button" variant="text" class="bulk-bar__link" @click="$emit('clear')">Clear selection</material-button>
     <div class="bulk-bar__spacer"></div>
-    <button
+    <material-button
       v-for="action in actions"
       :key="action.id"
       type="button"
-      class="bulk-bar__action"
+      variant="text" class="bulk-bar__action"
       :class="{ 'bulk-bar__action--destructive': action.destructive }"
       @click="action.run"
-    >{{ action.label }}</button>
+    >{{ action.label }}</material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 export default {
   name: 'BuildBulkActionBar',
+  components: { MaterialButton, MaterialCheckbox },
   props: {
     totalVisible: { type: Number, required: true },
     totalAll: { type: Number, required: true },
@@ -44,19 +46,6 @@ export default {
         ? `Select all ${this.totalVisible} matching ${noun}`
         : `Select all ${this.totalAll} ${noun}`;
     },
-  },
-  watch: {
-    indeterminate: {
-      immediate: true,
-      handler(value) {
-        this.$nextTick(() => {
-          if (this.$refs.selectAll) this.$refs.selectAll.indeterminate = value;
-        });
-      },
-    },
-  },
-  updated() {
-    if (this.$refs.selectAll) this.$refs.selectAll.indeterminate = this.indeterminate;
   },
 };
 </script>

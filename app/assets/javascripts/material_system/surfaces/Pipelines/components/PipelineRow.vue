@@ -1,13 +1,12 @@
 <template>
   <li class="mgl-pl-row" :class="{ 'is-selected': selected }">
-    <input
-      type="checkbox"
+    <material-checkbox
       class="mgl-pl-row-check"
       :checked="selected"
       :aria-label="`Select pipeline #${pipeline.id}, ${pipeline.title}`"
       @change="$emit('toggle-select', pipeline.id)"
-    />
-    <button type="button" class="mgl-pl-row-open" @click="$emit('open', pipeline.id)">
+    ></material-checkbox>
+    <material-button type="button" variant="text" class="mgl-pl-row-open" @click="$emit('open', pipeline.id)">
       <span class="mgl-pl-badge" :style="{ background: badge.bg, color: badge.fg }">
         <span
           class="mgl-icon mgl-icon--sm"
@@ -26,17 +25,19 @@
       <span class="mgl-pl-row-duration">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">schedule</span>{{ pipeline.duration }}
       </span>
-    </button>
+    </material-button>
   </li>
 </template>
 
 <script>
 import { statusMeta } from '../data';
 import StageDots from './StageDots.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'PipelinesRow',
-  components: { StageDots },
+  components: { StageDots, MaterialButton, MaterialCheckbox },
   props: {
     pipeline: { type: Object, required: true },
     selected: { type: Boolean, default: false },

@@ -1,12 +1,11 @@
 <template>
   <div class="dp-row" :class="{ 'dp-row--selected': selected }">
     <label class="dp-row__select">
-      <input
-        type="checkbox"
+      <material-checkbox
         :checked="selected"
         :aria-label="`Select ${row.title}`"
         @change="$emit('toggle-select', row.id)"
-      />
+      ></material-checkbox>
     </label>
     <DpIcon :name="row.icon" class="dp-row__icon" :style="{ color: row.iconColor }" />
     <div class="dp-row__text">
@@ -18,24 +17,27 @@
       {{ row.badge }}
     </span>
     <span class="dp-row__meta">{{ row.meta }}</span>
-    <button
+    <material-button
       v-if="row.action"
       type="button"
+      variant="text"
       class="dp-row__action"
       :style="{ color: row.actionColor }"
       @click="$emit('act', row.id)"
     >
       {{ row.action }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
 import DpIcon from './DpIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'DeployRow',
-  components: { DpIcon },
+  components: { DpIcon, MaterialButton, MaterialCheckbox },
   props: {
     row: { type: Object, required: true },
     selected: { type: Boolean, default: false },
@@ -69,7 +71,7 @@ export default {
   align-items: center;
   flex-shrink: 0;
 
-  input {
+  md-checkbox {
     width: 18px;
     height: 18px;
     accent-color: var(--dp-prim);

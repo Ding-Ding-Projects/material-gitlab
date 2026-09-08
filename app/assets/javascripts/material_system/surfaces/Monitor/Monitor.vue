@@ -1,25 +1,25 @@
 <template>
   <section class="material-live-surface dp-surface" data-surface-id="surface.monitor" :data-theme="dark ? 'dark' : 'light'">
     <header class="material-live-surface__topbar">
-      <label class="material-live-surface__search">Search monitoring resources <input v-model="query" :aria-invalid="searchError ? 'true' : null" /></label>
-      <button type="button" :aria-pressed="regexMode" @click="regexMode = !regexMode">Regex</button>
-      <button type="button" :aria-expanded="regexOpen" @click="regexOpen = !regexOpen">Regex builder</button>
-      <button type="button" @click="paletteOpen = true">Command palette</button>
-      <button type="button" @click="toggleTheme">{{ dark ? 'Light theme' : 'Dark theme' }}</button>
+      <label class="material-live-surface__search">Search monitoring resources <material-text-field v-model="query" :aria-invalid="searchError ? 'true' : null" /></label>
+      <material-text-button type="button" :aria-pressed="regexMode" @click="regexMode = !regexMode">Regex</material-text-button>
+      <material-text-button type="button" :aria-expanded="regexOpen" @click="regexOpen = !regexOpen">Regex builder</material-text-button>
+      <material-text-button type="button" @click="paletteOpen = true">Command palette</material-text-button>
+      <material-text-button type="button" @click="toggleTheme">{{ dark ? 'Light theme' : 'Dark theme' }}</material-text-button>
       <a v-if="endpoints.settingsPath" :href="endpoints.settingsPath">Configure alerts</a>
       <RegexBuilderPopover v-if="regexOpen" :initial-pattern="query" :corpus="rows.map((row) => row.name)" @apply="applyRegex" @close="regexOpen = false" />
     </header>
     <div class="material-live-surface__heading">
       <h1>Monitor</h1>
       <nav class="material-live-surface__tabs" aria-label="Monitor sections">
-        <button v-for="tab in tabs" :key="tab" type="button" :aria-current="activeTab === tab ? 'page' : null" :aria-selected="activeTab === tab" @click="selectTab(tab)">{{ tab }}</button>
+        <material-text-button v-for="tab in tabs" :key="tab" type="button" :aria-current="activeTab === tab ? 'page' : null" :aria-selected="activeTab === tab" @click="selectTab(tab)">{{ tab }}</material-text-button>
       </nav>
       <a v-if="activeTab === 'Incidents' && endpoints.newIncident" :href="endpoints.newIncident">New incident</a>
       <a v-if="activeTab === 'On-call' && endpoints.oncallPath" :href="endpoints.oncallPath">Manage schedules and rotations</a>
     </div>
     <p v-if="searchError" role="alert">{{ searchError }}</p>
     <p v-if="loading" role="status">Loading live monitoring data…</p>
-    <p v-else-if="error" role="alert">{{ error }} <button type="button" @click="load">Retry</button></p>
+    <p v-else-if="error" role="alert">{{ error }} <material-text-button type="button" @click="load">Retry</material-text-button></p>
     <main v-else class="material-live-surface__main">
       <p v-if="notice" role="status">{{ notice }}</p>
       <div class="material-live-surface__card">
@@ -27,7 +27,7 @@
           <div class="material-live-surface__row-copy"><a v-if="row.href" :href="row.href">{{ row.name }}</a><strong v-else>{{ row.name }}</strong><small>{{ row.sub }}</small></div>
           <span class="material-live-surface__badge">{{ row.status }} {{ row.severity }}</span>
           <span class="material-live-surface__meta">{{ row.when }}</span>
-          <button v-if="actionLabel(row)" type="button" :disabled="busy" @click="confirmation = row">{{ actionLabel(row) }}</button>
+          <material-text-button v-if="actionLabel(row)" type="button" :disabled="busy" @click="confirmation = row">{{ actionLabel(row) }}</material-text-button>
         </div>
         <p v-if="!rows.length" class="material-live-surface__empty">No matching resources.</p>
       </div>
@@ -41,9 +41,11 @@ import CommandPalette from '../Deploy/components/CommandPalette.vue';
 import RegexBuilderPopover from '../Deploy/components/RegexBuilderPopover.vue';
 import ConfirmDialog from '../Deploy/components/ConfirmDialog.vue';
 import { loadSettings, updateSettings } from '../../settings';
+import MaterialTextButton from '../../components/material_text_button';
+import MaterialTextField from '../../components/material_text_field';
 import { TABS, TAB_COLLECTION_KEY, fetchMonitorTab, changeMonitorStatus } from './data';
 export default {
-  name: 'MonitorSurface', components: { ConfirmDialog, CommandPalette, RegexBuilderPopover },
+  name: 'MonitorSurface', components: { ConfirmDialog, CommandPalette, RegexBuilderPopover, MaterialTextButton, MaterialTextField },
   props: { endpoints: { type: Object, default: () => ({}) }, fetchImpl: { type: Function, default: undefined } },
   data() { return { live: [], activeTab: 'Alerts', loading: true, paletteOpen: false, regexOpen: false, error: '', query: '', regexMode: false, dark: loadSettings().theme === 'dark', notice: '', busy: false, confirmation: null, requestId: 0 }; },
   computed: {

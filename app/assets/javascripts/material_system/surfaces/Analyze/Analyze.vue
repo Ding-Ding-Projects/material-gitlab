@@ -3,24 +3,24 @@
     <header class="material-analyze__topbar">
       <div class="material-analyze__search-wrap">
         <label class="sr-only" :for="searchId">Filter analytics</label>
-        <input :id="searchId" ref="search" v-model="query" type="search" :aria-invalid="regexError ? 'true' : null" :placeholder="regexMode ? 'Regex filter: chart rows' : 'Filter chart rows'" />
-        <button type="button" :aria-pressed="regexMode" aria-label="Toggle regex filter" @click="regexMode = !regexMode">.*</button>
-        <button type="button" aria-label="Open regex builder for analytics filter" @click="regexOpen = true">Regex builder</button>
+        <material-text-field :id="searchId" ref="search" v-model="query" type="search" :aria-invalid="regexError ? 'true' : null" :placeholder="regexMode ? 'Regex filter: chart rows' : 'Filter chart rows'" />
+        <material-icon-button type="button" :aria-pressed="regexMode" aria-label="Toggle regex filter" @click="regexMode = !regexMode">.*</material-icon-button>
+        <material-text-button type="button" aria-label="Open regex builder for analytics filter" @click="regexOpen = true">Regex builder</material-text-button>
       </div>
-      <button type="button" aria-label="Open command palette (Ctrl+Shift+F)" @click="paletteOpen = true">⌘</button>
-      <button type="button" aria-label="Toggle theme" @click="toggleTheme">{{ theme === 'dark' ? '☀' : '☾' }}</button>
+      <material-icon-button type="button" aria-label="Open command palette (Ctrl+Shift+F)" @click="paletteOpen = true">⌘</material-icon-button>
+      <material-icon-button type="button" aria-label="Toggle theme" @click="toggleTheme">{{ theme === 'dark' ? '☀' : '☾' }}</material-icon-button>
     </header>
     <div class="material-analyze__heading">
       <h1>Analyze</h1>
       <span>{{ endpoints.projectName }}</span>
       <div class="material-analyze__tabs" role="tablist" aria-label="Analytics views">
-        <button v-for="tab in tabs" :key="tab.id || tab.label" type="button" role="tab" :aria-selected="tab.key === activeTab || tab.id === activeTab" :class="{ 'is-active': tab.key === activeTab || tab.id === activeTab }" @click="selectTab(tab.key || tab.id)">{{ tab.label }}</button>
+        <material-text-button v-for="tab in tabs" :key="tab.id || tab.label" type="button" role="tab" :aria-selected="tab.key === activeTab || tab.id === activeTab" :class="{ 'is-active': tab.key === activeTab || tab.id === activeTab }" @click="selectTab(tab.key || tab.id)">{{ tab.label }}</material-text-button>
       </div>
     </div>
     <form v-if="activeTab !== 'insights'" class="material-analyze__range" @submit.prevent="loadReport">
-      <label>From (UTC) <input v-model="startDate" type="date" required /></label>
-      <label>Through (UTC, inclusive) <input v-model="endDate" type="date" required /></label>
-      <button type="submit" :disabled="loading">Apply dates</button>
+      <label>From (UTC) <material-text-field v-model="startDate" type="date" required /></label>
+      <label>Through (UTC, inclusive) <material-text-field v-model="endDate" type="date" required /></label>
+      <material-text-button type="submit" :disabled="loading">Apply dates</material-text-button>
       <span v-if="endpoints.ref && ['repository', 'contributors'].includes(activeTab)">Ref: {{ endpoints.ref }}</span>
     </form>
     <nav class="material-analyze__links" aria-label="Advanced analytics reports">
@@ -33,7 +33,7 @@
     <main class="material-analyze__content">
       <p v-if="regexError" role="alert">{{ regexError }}</p>
       <p v-if="loading" role="status">Loading live project analytics...</p>
-      <p v-else-if="error" role="alert">{{ error }} <button type="button" @click="loadReport">Retry</button></p>
+      <p v-else-if="error" role="alert">{{ error }} <material-text-button type="button" @click="loadReport">Retry</material-text-button></p>
       <div v-else-if="!activeData" class="material-analyze__empty" role="status">Analytics data is unavailable for this view.</div>
       <template v-else>
         <p v-if="observedWindow">{{ observedWindow }}</p>
@@ -69,6 +69,9 @@
 import CommandPalette from '../CommandPalette/CommandPalette.vue';
 import RegexBuilder from '../RegexBuilder/RegexBuilder.vue';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
+import MaterialIconButton from '../../components/material_icon_button';
+import MaterialTextButton from '../../components/material_text_button';
+import MaterialTextField from '../../components/material_text_field';
 
 export function createAnalyzeDataAdapter(payload) {
   if (!payload || typeof payload !== 'object') return { tabs: [], views: {} };
@@ -79,7 +82,7 @@ export function createAnalyzeDataAdapter(payload) {
 
 export default {
   name: 'MaterialAnalyze',
-  components: { CommandPalette, RegexBuilder },
+  components: { CommandPalette, RegexBuilder, MaterialIconButton, MaterialTextButton, MaterialTextField },
   props: { dataAdapter: { type: Object, default: () => ({ tabs: [], views: {} }) }, endpoints: { type: Object, default: () => ({}) }, initialTab: { type: String, default: '' }, paletteActions: { type: Array, default: () => [] }, initialTheme: { type: String, default: '' } },
   data() { const tabs = this.dataAdapter.tabs || []; return { query: '', regexOpen: false, regexMode: false, regexFlags: 'i', paletteOpen: false, theme: this.initialTheme || this.resolveTheme(), activeTab: this.initialTab || tabs[0]?.key || tabs[0]?.id || '', report: null, loading: false, error: this.endpoints.initialError || '', startDate: this.endpoints.startDate || '', endDate: this.endpoints.endDate || '', observedWindow: '', chartId: '', requestId: 0 }; },
   computed: {

@@ -1,13 +1,12 @@
 <template>
   <li class="secure-row">
     <label class="secure-visually-hidden" :for="checkboxId">{{ `Select ${row.title}` }}</label>
-    <input
+    <material-checkbox
       :id="checkboxId"
-      type="checkbox"
       class="secure-row__checkbox"
       :checked="selected"
       @change="$emit('toggle-select', row.id)"
-    />
+    ></material-checkbox>
     <span class="secure-row__icon" :class="`secure-row__icon--tone-${row.tone}`">
       <secure-icon :name="row.icon" :size="19" />
     </span>
@@ -20,25 +19,28 @@
       {{ row.badge }}
     </span>
     <span v-if="row.meta" class="secure-row__meta">{{ row.meta }}</span>
-    <button
+    <material-button
       v-if="row.actionLabel"
       type="button"
+      variant="text"
       class="secure-row__action"
       :class="{ 'secure-row__action--destructive': row.actionDestructive }"
       @click="$emit('action', row)"
     >
       {{ row.actionLabel }}
-    </button>
+    </material-button>
   </li>
 </template>
 
 <script>
 import { uniqueId } from 'lodash';
 import SecureIcon from './SecureIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'SecureListRow',
-  components: { SecureIcon },
+  components: { SecureIcon, MaterialButton, MaterialCheckbox },
   props: {
     row: { type: Object, required: true },
     selected: { type: Boolean, default: false },
