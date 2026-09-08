@@ -21,6 +21,7 @@ import { loadChangelog, filterChangelog, renderChangelog } from './changelog.js'
 import { selectionFromCheckboxes } from './bulk-actions.js';
 import { detectFileType, buildAdapterCatalog, findAdapters } from './file-converter.js';
 import { bindSupportTickets, supportDisclosure, openRecoveryFolder } from './support-tickets.js';
+import { initUniversalRuntime } from './universal-runtime.js';
 (function () {
   'use strict';
 
@@ -216,6 +217,7 @@ import { bindSupportTickets, supportDisclosure, openRecoveryFolder } from './sup
     // while nothing connected them, so Ctrl+Shift+F did nothing at all. This
     // is the line that makes the shipped dialog real.
     initCommandPalette({ document, window });
+    initUniversalRuntime(document);
 
     const converterFile = $('[data-converter-file]');
     const converterStatus = $('[data-converter-status]');

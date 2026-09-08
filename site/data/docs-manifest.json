@@ -6,145 +6,145 @@
       "id": "language-modes",
       "title": "Language modes",
       "path": "docs/language-modes.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "funny-levels",
       "title": "Independent funny levels",
       "path": "docs/funny-levels.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "emoji-toggle",
       "title": "Emoji preference",
       "path": "docs/emoji-toggle.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "school-mode",
       "title": "Shared School mode",
       "path": "docs/school-mode.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "narration",
       "title": "Narration and voice selection",
       "path": "docs/narration.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "scheduled-settings",
       "title": "Scheduled and external settings",
       "path": "docs/scheduled-settings.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "dim-sum-surprise",
       "title": "Dim-sum startup surprise",
       "path": "docs/dim-sum-surprise.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "regex-builder",
       "title": "Anchored regex builder",
       "path": "docs/regex-builder.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "notifications",
       "title": "Notifications",
       "path": "docs/notifications.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "material-appearance",
       "title": "Material appearance",
       "path": "docs/material-appearance.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "tabs-groups-search",
       "title": "Tabs, groups and search",
       "path": "docs/tabs-groups-search.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "landing-and-offline-docs",
       "title": "Landing and offline docs",
       "path": "docs/landing-and-offline-docs.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "command-palette",
       "title": "Command palette",
       "path": "docs/command-palette.md",
-      "availability": "available"
+      "availability": "bundled"
     },
     {
       "id": "destructive-confirmation",
       "title": "Destructive confirmation",
       "path": "docs/destructive-confirmation.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "local-history",
       "title": "Local history",
       "path": "docs/local-history.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "changelog",
       "title": "Changelog viewer",
       "path": "docs/changelog.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "external-editor",
       "title": "External editor handoff",
       "path": "docs/external-editor.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "exports",
       "title": "Exports",
       "path": "docs/exports.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "bulk-actions",
       "title": "Bulk actions",
       "path": "docs/bulk-actions.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "accessibility-responsive",
       "title": "Accessibility and responsive sizing",
       "path": "docs/accessibility-responsive.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "personal-vocabulary",
       "title": "Personal vocabulary upload",
       "path": "docs/personal-vocabulary.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "logo-customization",
       "title": "Logo customization",
       "path": "docs/logo-customization.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "file-converter",
       "title": "Local file converter",
       "path": "docs/file-converter.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "ollama-manager",
       "title": "Local Ollama health and recovery",
       "path": "data/docs-catalog.json",
-      "availability": "catalog",
+      "availability": "bundled",
       "catalogIds": [
         "ollama-health",
         "ollama-models",
@@ -157,25 +157,25 @@
       "id": "toy-locks",
       "title": "Toy locks and Support Tickets",
       "path": "docs/toy-locks.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "authenticator",
       "title": "Built-in authenticator",
       "path": "docs/authenticator.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "browser-download-surfaces",
       "title": "Browser download surfaces",
       "path": "docs/browser-download-surfaces.md",
-      "availability": "declared"
+      "availability": "bundled"
     },
     {
       "id": "status-hub",
       "title": "Status Hub",
       "path": "docs/status-hub.md",
-      "availability": "declared"
+      "availability": "bundled"
     }
   ]
 }

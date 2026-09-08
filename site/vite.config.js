@@ -49,5 +49,9 @@ function copySiteContent() {
 }
 
 export default defineConfig({
+  // Relative, so a plain `vite build` produces a site that works under a
+  // subpath. Passing --base on the command line only helps the one caller
+  // that remembers to pass it, and this site is served from a subpath.
+  base: './',
   plugins: [copySiteContent()],
 });

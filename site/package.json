@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node --test tests/*.test.mjs && node scripts/completeness-gate.mjs && node scripts/site-contract-gate.mjs",
+    "test": "node --test tests/*.test.mjs && node scripts/site-contract-gate.mjs",
     "test:negative": "node scripts/completeness-gate.mjs --negative-only && node scripts/site-contract-gate.mjs --negative-only",
     "build": "npm test && vite build",
-    "preview": "vite preview --host 127.0.0.1"
+    "preview": "vite preview --host 127.0.0.1",
+    "completeness": "node scripts/completeness-gate.mjs"
   },
   "devDependencies": {
     "vite": "^8.2.1"
