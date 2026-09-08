@@ -22,6 +22,13 @@
         :logo-file-name="logoFileName"
         :logo-url="logoUrl"
         :production="production"
+        :description="description"
+        :topics="topics"
+        :busy="mutationPending"
+        :adapter="effectiveAdapter"
+        :avatar-removal="avatarRemoval"
+        :can-change-visibility="!production || permissions.visibility === true"
+        :allowed-visibility-levels="allowedVisibilityLevels"
         :vocabulary-status="vocabularyStatus"
         :vocabulary-ok="vocabularyOk"
         :converter-status="converterStatus"
@@ -31,6 +38,7 @@
         @upload-logo="onLogoUpload"
         @vocabulary-loaded="onVocabularyLoaded"
         @file-chosen="onFileConverted"
+        @save-description-topics="onSaveDescriptionTopics"
       />
 
       <MembersTab
@@ -67,6 +75,7 @@
     </main>
 
     <CommandPalette v-if="paletteOpen" :actions="paletteActions" @close="paletteOpen = false" />
+    <ConfirmDialog v-if="pendingVisibility" title="Change project visibility?" description="Changing visibility changes who can access this project. Existing forks keep their visibility level." confirm-label="Change visibility" :confirmation-phrase="visibilityConfirmationPhrase" @confirm="confirmVisibilityChange" @cancel="pendingVisibility = null" />
   </div>
 </template>
 
@@ -78,6 +87,7 @@ import MembersTab from './components/MembersTab.vue';
 import CicdTab from './components/CicdTab.vue';
 import IntegrationsTab from './components/IntegrationsTab.vue';
 import CommandPalette from './components/CommandPalette.vue';
+import ConfirmDialog from './components/ConfirmDialog.vue';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import {
@@ -94,13 +104,16 @@ import {
 
 export default {
   name: 'Settings',
-  components: { TopBar, TabStrip, GeneralTab, MembersTab, CicdTab, IntegrationsTab, CommandPalette },
+  components: { TopBar, TabStrip, GeneralTab, MembersTab, CicdTab, IntegrationsTab, CommandPalette, ConfirmDialog },
   props: {
     userName: { type: String, default: '' },
     userInitials: { type: String, default: '' },
     production: { type: Boolean, default: false },
     integrationSettingsPath: { type: String, default: '' },
     variablesEditorPath: { type: String, default: '' },
+    avatarRemoval: { type: Object, default: () => ({}) },
+    allowedVisibilityLevels: { type: Array, default: () => [] },
+    visibilityConfirmationPhrase: { type: String, default: '' },
     // Production state and mutations must come from a real host adapter.
     adapter: { type: Object, default: null },
     // Compatibility alias for callers that named this seam explicitly.
@@ -119,6 +132,7 @@ export default {
       adapterError: SETTINGS_ADAPTER_ERROR,
       adapterErrors: [],
       mutationPending: false,
+      pendingVisibility: null,
     };
   },
   computed: {
@@ -183,7 +197,7 @@ export default {
   methods: {
     applyAdapterState(snapshot) {
       const normalized = normalizeSettingsState(snapshot);
-      const fields = ['projectName', 'visibility', 'logoColor', 'logoFileName', 'logoUrl', 'members', 'variables', 'protectedBranches', 'integrations', 'permissions'];
+      const fields = ['projectName', 'description', 'topics', 'visibility', 'logoColor', 'logoFileName', 'logoUrl', 'members', 'variables', 'protectedBranches', 'integrations', 'permissions'];
       fields.forEach((field) => {
         if (Object.prototype.hasOwnProperty.call(snapshot || {}, field)
           || (field === 'projectName' && snapshot?.project?.name != null)
@@ -259,7 +273,23 @@ export default {
         else this.projectNameDraft = this.projectName;
       });
     },
+    async onSaveDescriptionTopics(payload) {
+      if (await this.runAdapter('updateProject', payload)) this.notifications.notify({ title: 'Project updated', message: 'Description and topics were saved.', severity: 'success' });
+    },
     onVisibilityChange(value) {
+      if (value === this.visibility || this.mutationPending) return;
+      if (this.production) {
+        if (this.permissions.visibility !== true || !this.visibilityConfirmationPhrase) return;
+        this.pendingVisibility = value;
+      } else this.saveVisibility(value);
+    },
+    confirmVisibilityChange() {
+      if (this.permissions.visibility !== true || !this.pendingVisibility || !this.visibilityConfirmationPhrase) return;
+      const value = this.pendingVisibility;
+      this.pendingVisibility = null;
+      this.saveVisibility(value);
+    },
+    saveVisibility(value) {
       this.runAdapter('updateProject', { visibility: value }).then((ok) => {
         if (ok) {
           this.visibility = value;

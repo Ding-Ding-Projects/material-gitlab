@@ -11,7 +11,7 @@ export const VARIABLE_METADATA_QUERY = `query MaterialSettingsVariables($fullPat
 }`;
 
 export const PROJECT_METADATA_QUERY = `query MaterialSettingsProject($fullPath: ID!) {
-  project(fullPath: $fullPath) { id name visibility avatarUrl }
+  project(fullPath: $fullPath) { id name description topics visibility avatarUrl }
 }`;
 
 const ACCESS_LEVELS = Object.freeze({ Guest: 10, Planner: 15, Reporter: 20, Developer: 30, Maintainer: 40 });
@@ -19,7 +19,7 @@ const roleName = (level) => Object.keys(ACCESS_LEVELS).find((name) => ACCESS_LEV
 const visibilityName = (value) => ({ private: 'Private', internal: 'Internal', public: 'Public' })[value] || '';
 
 /** Existing authenticated REST/GraphQL services remain the authority for every action. */
-export function createProjectSettingsAdapter({ projectId, fullPath, projectEndpoint, apiBase = '/api/v4', graphqlEndpoint = '/api/graphql', permissions = {}, root = document, fetchImpl = globalThis.fetch } = {}) {
+export function createProjectSettingsAdapter({ projectId, fullPath, projectEndpoint, apiBase = '/api/v4', graphqlEndpoint = '/api/graphql', permissions = {}, allowedVisibilityLevels = [], root = document, fetchImpl = globalThis.fetch } = {}) {
   if (!projectId || !fullPath) throw new Error('Settings requires the current project identity');
   const base = `${apiBase.replace(/\/$/, '')}/projects/${encodeURIComponent(projectId)}`;
   let variables = [];
@@ -75,13 +75,39 @@ export function createProjectSettingsAdapter({ projectId, fullPath, projectEndpo
   };
   const members = async () => (await list('members')).map((item) => ({ id: item.id, name: item.name, handle: item.username, role: roleName(item.access_level) }));
   const branches = async () => (await list('protected_branches')).map((item) => ({ id: item.name, name: item.name, merge: item.merge_access_levels.map((access) => access.access_level_description).join(', '), push: item.push_access_levels.map((access) => access.access_level_description).join(', ') }));
+  const loadBadges = async () => {
+    requirePermission('badges');
+    return (await list('badges')).map((item) => {
+      if (!Number.isInteger(item.id) || !['project', 'group'].includes(item.kind)) throw new Error('Badge metadata is invalid.');
+      return { id: item.id, name: item.name || '', imageUrl: item.image_url || '', linkUrl: item.link_url || '', renderedImageUrl: item.rendered_image_url || '', renderedLinkUrl: item.rendered_link_url || '', inherited: item.kind === 'group' };
+    });
+  };
   const loadProject = async () => {
     const body = await request(graphqlEndpoint, { method: 'POST', body: { query: PROJECT_METADATA_QUERY, variables: { fullPath } } });
     const item = body?.data?.project;
     if (body?.errors?.length || !item?.id || typeof item.name !== 'string') throw new Error('Project settings response is invalid');
-    return { projectName: item.name, visibility: visibilityName(item.visibility), logoUrl: item.avatarUrl || '' };
+    return { projectName: item.name, description: item.description || '', topics: item.topics || [], visibility: visibilityName(item.visibility), logoUrl: item.avatarUrl || '' };
   };
   const adapter = {
+    loadBadges,
+    async saveBadge({ id, name, imageUrl, linkUrl }) {
+      requirePermission('badges');
+      for (const value of [imageUrl, linkUrl]) {
+        let parsed;
+        try { parsed = new URL(value); } catch (_error) { throw new Error('Badge image and link must be valid HTTP or HTTPS URLs.'); }
+        if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error('Badge image and link must be HTTP or HTTPS URLs without embedded credentials.');
+      }
+      if (id !== undefined && (!Number.isInteger(id) || id < 1)) throw new Error('A valid project badge identity is required.');
+      const saved = await request(`${base}/badges${id === undefined ? '' : `/${id}`}`, { method: id === undefined ? 'POST' : 'PUT', body: { name: String(name || ''), image_url: imageUrl, link_url: linkUrl } });
+      if (!saved?.id || saved.kind !== 'project') throw new Error('The server did not confirm the project badge update.');
+      return loadBadges();
+    },
+    async removeBadge(id) {
+      requirePermission('badges');
+      if (!Number.isInteger(id) || id < 1) throw new Error('A valid project badge identity is required.');
+      await request(`${base}/badges/${id}`, { method: 'DELETE' });
+      return loadBadges();
+    },
     async load() {
       const project = await loadProject();
       const state = { ...project, permissions, members: [], variables: [], protectedBranches: [], integrations: [], errors: [] };
@@ -101,10 +127,17 @@ export function createProjectSettingsAdapter({ projectId, fullPath, projectEndpo
       requirePermission('project');
       const body = {};
       if (typeof changes.name === 'string' && changes.name.trim()) body.name = changes.name;
+      if (typeof changes.description === 'string') body.description = changes.description;
+      if (changes.topics !== undefined) {
+        if (!Array.isArray(changes.topics) || changes.topics.some((topic) => typeof topic !== 'string' || topic.includes(','))) throw new Error('Topics must be a list of individual topic names.');
+        body.topics = changes.topics.map((topic) => topic.trim()).filter(Boolean).join(', ');
+      }
       if (changes.visibility) {
+        requirePermission('visibility');
         const visibility = changes.visibility.toLowerCase();
         if (!['private', 'internal', 'public'].includes(visibility)) throw new Error('Choose a supported project visibility.');
         body.visibility_level = { private: 0, internal: 10, public: 20 }[visibility];
+        if (!allowedVisibilityLevels.includes(body.visibility_level)) throw new Error('This visibility level is unavailable under the current project rules.');
       }
       if (!Object.keys(body).length || 'logoColor' in changes) throw new Error('This project setting is not supported by the project API.');
       await request(projectEndpoint, { method: 'PUT', body: { project: body } });

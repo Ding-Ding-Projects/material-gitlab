@@ -64,6 +64,8 @@ export function normalizeSettingsState(snapshot = {}) {
   const source = snapshot && typeof snapshot === 'object' ? snapshot : {};
   return {
     projectName: String(source.projectName || source.project?.name || ''),
+    description: String(source.description || ''),
+    topics: arrayOrEmpty(source.topics).filter((topic) => typeof topic === 'string'),
     visibility: String(source.visibility || source.project?.visibility || ''),
     logoColor: String(source.logoColor || '#6750c4'),
     logoFileName: String(source.logoFileName || source.project?.avatarFileName || ''),

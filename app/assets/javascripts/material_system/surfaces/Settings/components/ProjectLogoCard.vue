@@ -29,27 +29,42 @@
         </div>
       </div>
     </div>
+    <gl-form v-if="canRemoveAvatar && logoUrl" ref="removeAvatarForm" :action="avatarRemoval.action" method="post" @submit.prevent="removeConfirmation = true">
+      <input type="hidden" name="authenticity_token" :value="csrfToken" />
+      <input type="hidden" name="_method" value="delete" />
+      <gl-button type="submit" variant="danger">Remove avatar</gl-button>
+    </gl-form>
+    <ConfirmDialog v-if="removeConfirmation" title="Remove project avatar?" description="The uploaded avatar will be removed. Are you sure?" confirm-label="Remove avatar" @confirm="removeAvatar" @cancel="removeConfirmation = false" />
   </div>
 </template>
 
 <script>
 import StIcon from './StIcon.vue';
+import { GlButton, GlForm } from '@gitlab/ui';
+import csrf from '~/lib/utils/csrf';
+import ConfirmDialog from './ConfirmDialog.vue';
 import { LOGO_PRESET_COLORS } from '../data';
 
 export default {
   name: 'ProjectLogoCard',
-  components: { StIcon },
+  components: { StIcon, GlButton, GlForm, ConfirmDialog },
   props: {
     logoColor: { type: String, required: true },
     logoLetter: { type: String, required: true },
     logoFileName: { type: String, default: '' },
     logoUrl: { type: String, default: '' },
     production: { type: Boolean, default: false },
+    avatarRemoval: { type: Object, default: () => ({}) },
   },
   data() {
-    return { presets: LOGO_PRESET_COLORS };
+    return { presets: LOGO_PRESET_COLORS, removeConfirmation: false };
   },
   computed: {
+    csrfToken() { return csrf.token; },
+    canRemoveAvatar() {
+      const { action, allowed } = this.avatarRemoval;
+      return allowed === true && typeof action === 'string' && action.startsWith('/') && !action.startsWith('//') && !/[\u0000-\u0020\\]/.test(action);
+    },
     logoNote() {
       return this.logoFileName
         ? `${this.logoFileName}: uploaded project avatar`
@@ -57,6 +72,12 @@ export default {
     },
   },
   methods: {
+    removeAvatar() {
+      if (!this.removeConfirmation || !this.canRemoveAvatar) return;
+      this.removeConfirmation = false;
+      const form = this.$refs.removeAvatarForm?.$el;
+      if (form) form.submit();
+    },
     onUpload(event) {
       const file = event.target.files && event.target.files[0];
       if (file) this.$emit('upload-logo', file);

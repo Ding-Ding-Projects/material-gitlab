@@ -39,6 +39,8 @@ export function createInitialState(overrides = {}) {
   return {
     tab: 'general',
     projectName: '',
+    description: '',
+    topics: [],
     visibility: '',
     logoColor: LOGO_PRESET_COLORS[0],
     logoFileName: '',

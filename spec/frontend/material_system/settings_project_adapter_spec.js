@@ -9,7 +9,7 @@ const variable = { id: 'gid://gitlab/Ci::Variable/9', key: 'RELEASE_KEY', enviro
 describe('project Settings API adapter', () => {
   let fetchImpl;
   let adapter;
-  const setup = (permissions = { project: true, members: true, variables: true, branches: true, integrations: true }) => {
+  const setup = (permissions = { project: true, visibility: true, members: true, variables: true, branches: true, integrations: true }) => {
     fetchImpl = jest.fn(async (url, options) => {
       if (url === '/group/project.json') return response({ name: project.name });
       if (url === '/gitlab/api/graphql') return response(JSON.parse(options.body).query.includes('MaterialSettingsProject') ? projectResponse : metadata([variable]));
@@ -18,7 +18,7 @@ describe('project Settings API adapter', () => {
       if (url.includes('/integrations?')) return response([{ id: 4, slug: 'jenkins', title: 'Jenkins', active: true }]);
       return response(null, 204);
     });
-    adapter = createProjectSettingsAdapter({ projectId: 7, fullPath: 'group/project', projectEndpoint: '/group/project.json', apiBase: '/gitlab/api/v4', graphqlEndpoint: '/gitlab/api/graphql', root: { querySelector: () => ({ content: 'csrf-value' }) }, permissions, fetchImpl });
+    adapter = createProjectSettingsAdapter({ projectId: 7, fullPath: 'group/project', projectEndpoint: '/group/project.json', apiBase: '/gitlab/api/v4', graphqlEndpoint: '/gitlab/api/graphql', root: { querySelector: () => ({ content: 'csrf-value' }) }, permissions, allowedVisibilityLevels: [0, 10, 20], fetchImpl });
   };
   beforeEach(() => setup());
 

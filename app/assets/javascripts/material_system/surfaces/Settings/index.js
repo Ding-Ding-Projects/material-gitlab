@@ -14,7 +14,7 @@ export function mountProjectSettings(el = document.querySelector('[data-material
   const adapter = createProjectSettingsAdapter({ ...config, root: document });
   return new Vue({
     name: 'ProjectSettingsRoot',
-    render: (h) => h(Settings, { props: { adapter, production: true, integrationSettingsPath: config.integrationSettingsPath, variablesEditorPath: config.variablesEditorPath, userName: config.userName, userInitials: config.userInitials } }),
+    render: (h) => h(Settings, { props: { adapter, production: true, integrationSettingsPath: config.integrationSettingsPath, variablesEditorPath: config.variablesEditorPath, userName: config.userName, userInitials: config.userInitials, avatarRemoval: config.avatarRemoval, allowedVisibilityLevels: config.allowedVisibilityLevels, visibilityConfirmationPhrase: config.visibilityConfirmationPhrase } }),
   }).$mount(el);
 }
 

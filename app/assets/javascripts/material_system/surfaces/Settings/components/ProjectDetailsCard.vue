@@ -22,6 +22,7 @@
           class="st-chip"
           :class="{ 'st-chip--active': option.value === visibility }"
           :aria-checked="option.value === visibility"
+          :disabled="!canChangeVisibility || !allowedVisibilityLevels.includes({ Private: 0, Internal: 10, Public: 20 }[option.value])"
           @click="$emit('update:visibility', option.value)"
         >
           <StIcon :name="option.icon" size="small" />
@@ -42,6 +43,8 @@ export default {
   props: {
     projectName: { type: String, required: true },
     visibility: { type: String, required: true },
+    canChangeVisibility: { type: Boolean, default: true },
+    allowedVisibilityLevels: { type: Array, default: () => [0, 10, 20] },
   },
   data() {
     return { options: VISIBILITY_OPTIONS, draftName: this.projectName };
