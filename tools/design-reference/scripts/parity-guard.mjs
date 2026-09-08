@@ -2,7 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { existingFile } from './evidence-paths.mjs';
+
+const require = createRequire(import.meta.url);
+const { PNG } = require('pngjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const INVENTORY_PATH = path.join(ROOT, 'design', 'parity-inventory.json');
@@ -47,8 +51,8 @@ function checkEvidence(errors, row, key, root) {
   if (evidence.status === 'pending' && evidence.sha256 !== null) issue(errors, `${row.id}.evidence.${key} pending evidence must not claim a hash`);
   if (evidence.status === 'verified') {
     if (!/^[a-f0-9]{64}$/.test(evidence.sha256 || '')) issue(errors, `${row.id}.evidence.${key} verified evidence needs a SHA-256`);
-    const file = path.join(root, evidence.path);
-    if (!fs.existsSync(file)) issue(errors, `${row.id}.evidence.${key} verified path is missing: ${evidence.path}`);
+    const file = rootFile(root, evidence.path);
+    if (!file) issue(errors, `${row.id}.evidence.${key} verified path is missing or escapes root: ${evidence.path}`);
     else if (sha256(file) !== evidence.sha256) issue(errors, `${row.id}.evidence.${key} hash is stale`);
   }
 }
@@ -56,7 +60,8 @@ function checkEvidence(errors, row, key, root) {
 function checkReceipt(errors, row, key, root, sourceCommit) {
   const evidence = row.evidence[key];
   if (evidence.status !== 'verified') return issue(errors, `${row.id}.evidence.${key} is not verified`);
-  const evidencePath = path.join(root, evidence.path);
+  const evidencePath = rootFile(root, evidence.path);
+  if (!evidencePath) return issue(errors, `${row.id}.evidence.${key} evidence path escapes root`);
   const receiptPath = `${evidencePath}.receipt.json`;
   if (!fs.existsSync(receiptPath)) return issue(errors, `${row.id}.evidence.${key} receipt is missing: ${evidence.path}.receipt.json`);
   let receipt;
@@ -79,6 +84,9 @@ function checkReceipt(errors, row, key, root, sourceCommit) {
     const expectedWidth = Math.round(row.tuple.viewport.width * row.tuple.scale);
     const expectedHeight = Math.round(row.tuple.viewport.height * row.tuple.scale);
     if (receipt?.raw?.width !== expectedWidth || receipt?.raw?.height !== expectedHeight) issue(errors, `${row.id}.evidence.${key} receipt dimensions do not match tuple`);
+    const rawPath = rootFile(root, evidence.path);
+    try { const decoded = PNG.sync.read(fs.readFileSync(rawPath), { checkCRC: true }); if (decoded.width !== expectedWidth || decoded.height !== expectedHeight) issue(errors, `${row.id}.evidence.${key} decoded PNG dimensions do not match tuple`); }
+    catch { issue(errors, `${row.id}.evidence.${key} raw PNG cannot be decoded with CRC validation`); }
     const manifestPath = rootFile(root, receipt?.artifact?.manifest?.path);
     if (!manifestPath || !fs.existsSync(manifestPath) || sha256(manifestPath) !== receipt.artifact.manifest.sha256) issue(errors, `${row.id}.evidence.${key} receipt artifact manifest is missing or stale`);
     else {

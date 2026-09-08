@@ -4,12 +4,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { runNegativeRegression, sha256, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const inventoryPath = path.join(root, 'design', 'parity-inventory.json');
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
+const require = createRequire(import.meta.url);
+const { PNG } = require('pngjs');
 
 test('resolves design contracts from the repository root', () => {
   const mainSource = fs.readFileSync(new URL('../src/main.cjs', import.meta.url), 'utf8');
@@ -67,9 +70,9 @@ test('a valid manifest fixture turns a wrong-size capture red without writing a 
   const manifest = path.join(fixture, 'manifest.json');
   const session = path.join(fixture, 'session.json');
   fs.mkdirSync(fixture, { recursive: true });
-  const pngHeader = (width, height) => { const bytes = Buffer.alloc(24); Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(bytes); bytes.write('IHDR', 12, 'ascii'); bytes.writeUInt32BE(width, 16); bytes.writeUInt32BE(height, 20); return bytes; };
-  fs.writeFileSync(raw, pngHeader(1280, 800));
-  fs.writeFileSync(wrong, pngHeader(1, 1));
+  const pngImage = (width, height) => PNG.sync.write(new PNG({ width, height }));
+  fs.writeFileSync(raw, pngImage(1280, 800));
+  fs.writeFileSync(wrong, pngImage(1, 1));
   fs.writeFileSync(artifact, 'artifact');
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
   const relative = (file) => path.relative(root, file).replaceAll('\\', '/');
@@ -125,7 +128,7 @@ test('strict completion rejects a forged verified row without a receipt and arti
   const verdict = validateCompletion(broken, { root });
   assert.equal(verdict.valid, false);
   assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw verified path is missing')));
-  assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw receipt is missing')));
+  assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw evidence path escapes root')));
 });
 
 test('strict completion makes local font availability a reference-evidence boundary', () => {
@@ -144,7 +147,7 @@ test('strict completion accepts a complete 25-row fixture and rejects every prov
   const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
   const rel = (file) => path.relative(fixture, file).replaceAll('\\', '/');
   const jsonHash = (value) => crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
-  const png = (width, height) => { const bytes = Buffer.alloc(24); Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(bytes); bytes.write('IHDR', 12, 'ascii'); bytes.writeUInt32BE(width, 16); bytes.writeUInt32BE(height, 20); return bytes; };
+  const png = (width, height) => PNG.sync.write(new PNG({ width, height }));
   fs.mkdirSync(fixture, { recursive: true }); fs.cpSync(path.join(root, 'design'), fixtureDesign, { recursive: true });
   const complete = structuredClone(inventory);
   complete.sourceCommit = commit; complete.capturePolicy.evidenceStatus = 'verified';
@@ -185,6 +188,9 @@ test('strict completion accepts a complete 25-row fixture and rejects every prov
     red('tuple', (value) => { value.contracts[0].tuple.theme = 'dark'; });
     red('hash', (value) => { value.contracts[0].evidence.referenceRaw.sha256 = '0'.repeat(64); });
     red('status', (value) => { value.contracts[0].evidence.referenceRaw.status = 'pending'; value.contracts[0].evidence.referenceRaw.sha256 = null; });
+    const raw = path.join(fixture, complete.contracts[0].evidence.referenceRaw.path); const rawOriginal = fs.readFileSync(raw); fs.writeFileSync(raw, rawOriginal.subarray(0, 24));
+    assert.equal(validateCompletion(complete, { root: fixture }).valid, false, 'truncated PNG stayed green'); fs.writeFileSync(raw, rawOriginal);
+    assert.equal(validateCompletion(complete, { root: fixture }).valid, true, 'restored PNG should turn green');
     const review = path.join(fixture, `${complete.contracts[0].evidence.diff.path}.review.json`); const reviewOriginal = fs.readFileSync(review, 'utf8');
     fs.writeFileSync(review, '{'); assert.equal(validateCompletion(complete, { root: fixture }).valid, false, 'malformed review fixture should turn red'); fs.writeFileSync(review, reviewOriginal);
     assert.equal(validateCompletion(complete, { root: fixture }).valid, true, 'restored review fixture should turn green');
