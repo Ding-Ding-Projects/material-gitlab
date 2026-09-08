@@ -18,7 +18,8 @@ const EPICS_QUERY = `query materialPlanningEpics($fullPath: ID!, $after: String)
   group(fullPath: $fullPath) {
     epics(first: 50, after: $after) {
       nodes {
-        id iid title state startDate dueDate
+        id iid title state startDate dueDate webUrl confidential
+        parent { id }
         descendantCounts { closedIssues openedIssues }
         group { id fullPath fullName }
       }
@@ -31,22 +32,52 @@ const config = () => {
   if (typeof window === 'undefined') return {};
   if (window.__MATERIAL_EPICS_CONFIG__) return window.__MATERIAL_EPICS_CONFIG__;
   const root = document.querySelector('[data-material-epics]');
-  return root ? { ...root.dataset } : {};
+  if (!root) return {};
+  const encoded = root.dataset.materialEpicsConfig;
+  if (!encoded) return { ...root.dataset };
+  try {
+    return JSON.parse(encoded);
+  } catch (_error) {
+    throw new Error('Epics route configuration is invalid. Reload the group Epics page.');
+  }
+};
+
+const localPath = (value, label) => {
+  if (!value || typeof value !== 'string' || !value.startsWith('/') || value.startsWith('//') || /[\u0000-\u0020\\]/.test(value)) {
+    throw new Error(`${label} must be a local route`);
+  }
+  return value;
+};
+
+const csrfHeaders = () => {
+  const csrf = typeof document === 'undefined' ? null : document.querySelector('meta[name="csrf-token"]')?.content;
+  return csrf ? { 'X-CSRF-Token': csrf } : {};
+};
+
+const requirePermission = (settings, permission) => {
+  if (settings.permissions?.[permission] !== true) {
+    throw new Error('This Epic action is unavailable for your current group access.');
+  }
 };
 
 async function graphqlRequest({ endpoint, fullPath, after = null, fetcher }) {
   const request = fetcher || (typeof fetch === 'function' ? fetch : null);
   if (!request) throw new Error('Epics data transport is unavailable');
-  const response = await request(endpoint, {
+  const response = await request(localPath(endpoint, 'Epics GraphQL endpoint'), {
     method: 'POST',
     credentials: 'same-origin',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    redirect: 'error',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...csrfHeaders() },
     body: JSON.stringify({ query: EPICS_QUERY, variables: { fullPath, after } }),
   });
   if (!response.ok) throw new Error(`Epics request failed (${response.status})`);
   const payload = await response.json();
   if (payload.errors?.length) throw new Error(payload.errors.map((error) => error.message).join('; '));
-  return payload.data?.group?.epics || { nodes: [], pageInfo: {} };
+  const connection = payload.data?.group?.epics;
+  if (!connection || !Array.isArray(connection.nodes) || typeof connection.pageInfo?.hasNextPage !== 'boolean') {
+    throw new Error('Epics response is unavailable or invalid for this group.');
+  }
+  return connection;
 }
 
 export async function loadEpics(options = {}) {
@@ -56,29 +87,58 @@ export async function loadEpics(options = {}) {
   if (!fullPath) throw new Error('Epics group path is not configured by the server mount');
   const nodes = [];
   let after = null;
-  do {
+  for (let pageNumber = 0; pageNumber < 100; pageNumber += 1) {
     const page = await graphqlRequest({ endpoint, fullPath, after, fetcher: settings.fetcher });
-    nodes.push(...(page.nodes || []).map((item) => ({
-      ...clone(item),
-      reference: item.reference || `&${item.iid}`,
-      children: item.children || [],
-      confidential: Boolean(item.confidential),
-    })));
-    after = page.pageInfo?.hasNextPage ? page.pageInfo.endCursor : null;
-  } while (after);
-  return nodes;
+    nodes.push(...page.nodes.map((item) => {
+      if (!item || typeof item.id !== 'string' || !item.id || !Number.isInteger(Number(item.iid)) || Number(item.iid) <= 0 || typeof item.title !== 'string' || !['opened', 'closed'].includes(item.state)) {
+        throw new Error('Epics response contains an invalid Epic identity.');
+      }
+      return {
+        ...clone(item),
+        routeIid: String(item.iid),
+        reference: item.reference || `&${item.iid}`,
+        children: item.children || [],
+        confidential: Boolean(item.confidential),
+      };
+    }));
+    if (!page.pageInfo?.hasNextPage) return buildEpicTree(nodes);
+    if (!page.pageInfo.endCursor || page.pageInfo.endCursor === after) throw new Error('Epics pagination did not advance');
+    after = page.pageInfo.endCursor;
+  }
+  throw new Error('Epic list exceeds the supported page limit. Refine the group scope and retry.');
+}
+
+export function buildEpicTree(nodes) {
+  const byId = new Map(nodes.map((node) => [node.id, { ...node, children: [] }]));
+  if (byId.size !== nodes.length) throw new Error('Epics response contains duplicate global identities.');
+  const roots = [];
+  byId.forEach((node) => {
+    const seen = new Set([node.id]);
+    let parent = byId.get(node.parent?.id);
+    while (parent) {
+      if (seen.has(parent.id)) throw new Error('Epics response contains a cyclic hierarchy.');
+      seen.add(parent.id);
+      parent = byId.get(parent.parent?.id);
+    }
+    const directParent = byId.get(node.parent?.id);
+    if (directParent) directParent.children.push(node);
+    else roots.push(node);
+  });
+  return roots;
 }
 
 export async function mutateEpic({ id, changes, options = {} }) {
   const settings = { ...config(), ...options };
+  requirePermission(settings, 'update');
   const endpoint = settings.updateEndpoint || settings.epicUpdateEndpoint;
   if (!endpoint) throw new Error('Epic update route is not configured by the server mount');
   const request = settings.fetcher || (typeof fetch === 'function' ? fetch : null);
   if (!request) throw new Error('Epic mutation transport is unavailable');
-  const response = await request(endpoint.replace(/\/$/, '') + `/${encodeURIComponent(id)}`, {
+  const response = await request(localPath(endpoint, 'Epic update endpoint').replace(/\/$/, '') + `/${encodeURIComponent(id)}`, {
     method: 'PATCH',
     credentials: 'same-origin',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    redirect: 'error',
+    headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...csrfHeaders() },
     body: JSON.stringify(changes),
   });
   if (!response.ok) throw new Error(`Epic update failed (${response.status})`);
@@ -87,14 +147,16 @@ export async function mutateEpic({ id, changes, options = {} }) {
 
 export async function deleteEpic({ id, options = {} }) {
   const settings = { ...config(), ...options };
+  requirePermission(settings, 'delete');
   const endpoint = settings.deleteEndpoint || settings.epicDeleteEndpoint;
   if (!endpoint) throw new Error('Epic delete route is not configured by the server mount');
   const request = settings.fetcher || (typeof fetch === 'function' ? fetch : null);
   if (!request) throw new Error('Epic mutation transport is unavailable');
-  const response = await request(endpoint.replace(/\/$/, '') + `/${encodeURIComponent(id)}`, {
+  const response = await request(localPath(endpoint, 'Epic delete endpoint').replace(/\/$/, '') + `/${encodeURIComponent(id)}`, {
     method: 'DELETE',
     credentials: 'same-origin',
-    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+    redirect: 'error',
+    headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest', ...csrfHeaders() },
   });
   if (!response.ok) throw new Error(`Epic delete failed (${response.status})`);
   return response.json();
@@ -142,10 +204,9 @@ export function monthIndexInWindow(dateString) {
 }
 
 export function formatMonthRange(startDate, dueDate) {
-  const startIndex = monthIndexInWindow(startDate);
-  const endIndex = monthIndexInWindow(dueDate);
-  if (startIndex === null || endIndex === null) return '';
-  return `${ROADMAP_MONTHS[startIndex]} → ${ROADMAP_MONTHS[endIndex]} ${ROADMAP_YEAR}`;
+  const validDate = (value) => typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00Z`).getTime());
+  if (!validDate(startDate) || !validDate(dueDate)) return '';
+  return `${startDate} → ${dueDate}`;
 }
 
 /** Immutably applies `updater(item)` to every epic (at any depth) whose id is in `ids`. */

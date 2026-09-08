@@ -70,13 +70,14 @@ function errorFor(error, fallback) {
   return wrapped;
 }
 
-function paginationFrom(response) {
+function paginationFrom(response, { page = 1, perPage = 20 } = {}) {
   const headers = response?.headers || {};
   return {
-    page: Number(headers['x-page'] || 1),
-    perPage: Number(headers['x-per-page'] || 20),
-    total: Number(headers['x-total'] || response?.data?.length || 0),
-    totalPages: Number(headers['x-total-pages'] || 1),
+    page: Number(headers['x-page'] || page),
+    perPage: Number(headers['x-per-page'] || perPage),
+    total: headers['x-total'] ? Number(headers['x-total']) : null,
+    totalPages: headers['x-total-pages'] ? Number(headers['x-total-pages']) : null,
+    hasNextPage: headers['x-next-page'] !== undefined ? Boolean(headers['x-next-page']) : headers['x-total-pages'] ? page < Number(headers['x-total-pages']) : response?.data?.length === perPage,
   };
 }
 
@@ -90,6 +91,7 @@ function updatePayload(patch = {}) {
   delete payload.assigneeId;
   delete payload.col;
   delete payload.boardListId;
+  delete payload.state;
   if (Array.isArray(patch.labels)) payload.labels = patch.labels.join(',');
   if (patch.assigneeId !== undefined) payload.assignee_ids = patch.assigneeId == null ? [] : [patch.assigneeId];
   if (patch.state) payload.state_event = patch.state === 'Closed' ? 'close' : 'reopen';
@@ -97,23 +99,29 @@ function updatePayload(patch = {}) {
   return payload;
 }
 
-export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http = axios } = {}) {
+export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http = axios, permissions = {} } = {}) {
   if (projectId === null || projectId === undefined || projectId === '') {
     throw new Error('Issues surface requires a real project adapter and project id');
   }
 
   const byId = new Map();
+  const requirePermission = (name) => {
+    if (permissions?.[name] !== true) throw new Error('This issue action is unavailable for your current project access.');
+  };
+  const acceptIssue = (raw) => {
+    if (!raw?.id || !raw?.iid || typeof raw.title !== 'string' || !['opened', 'closed'].includes(raw.state)) throw new Error('The server returned an invalid issue.');
+    const issue = normalizeIssue(raw);
+    byId.set(issue.id, issue.iid);
+    return issue;
+  };
   const listPage = async ({ page = 1, perPage = 20, state = 'all', scope = 'all', search = '' } = {}) => {
     try {
       const response = await http.get(apiUrl('/api/:version/projects/:id/issues', projectId), {
         params: { page, per_page: perPage, state, scope, ...(search ? { search } : {}) },
       });
-      const issues = (Array.isArray(response.data) ? response.data : []).map((raw) => {
-        const issue = normalizeIssue(raw);
-        byId.set(issue.id, issue.iid);
-        return issue;
-      });
-      return { issues, pagination: paginationFrom(response) };
+      if (!Array.isArray(response.data)) throw new Error('The server returned an invalid issues list.');
+      const issues = response.data.map(acceptIssue);
+      return { issues, pagination: paginationFrom(response, { page, perPage }) };
     } catch (error) {
       throw errorFor(error, 'Unable to load issues');
     }
@@ -125,6 +133,7 @@ export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http
     },
     listPage,
     async create({ title, body = '', labels = [], assigneeId = null, state = 'Open' } = {}) {
+      requirePermission('create');
       if (!String(title || '').trim()) throw new Error('Issue title is required');
       try {
         const response = await http.post(apiUrl('/api/:version/projects/:id/issues', projectId), {
@@ -133,19 +142,18 @@ export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http
           ...(assigneeId == null ? {} : { assignee_ids: [assigneeId] }),
           ...(state === 'Closed' ? { state_event: 'close' } : {}),
         });
-        const issue = normalizeIssue(response.data);
-        byId.set(issue.id, issue.iid);
-        return issue;
+        return acceptIssue(response.data);
       } catch (error) {
         throw errorFor(error, 'Unable to create issue');
       }
     },
     async update(id, patch = {}) {
+      requirePermission('update');
       const iid = byId.get(id) || id;
       try {
         const response = await http.put(issuePath(projectId, iid), updatePayload(patch));
-        const issue = normalizeIssue(response.data);
-        byId.set(issue.id, issue.iid);
+        const issue = acceptIssue(response.data);
+        if (patch.state && issue.state !== patch.state) throw new Error('The server did not confirm the requested issue state.');
         return issue;
       } catch (error) {
         throw errorFor(error, 'Unable to update issue');
@@ -158,9 +166,10 @@ export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http
       if (!/^\d+$/.test(String(boardListId))) {
         throw new Error('Issue board move needs a real board-list id from GitLab');
       }
-      return this.update(id, { boardListId: Number(boardListId) });
+      throw new Error('Use the project board to move issues between its configured lists.');
     },
     async remove(ids) {
+      requirePermission('delete');
       const values = Array.isArray(ids) ? ids : [ids];
       try {
         await Promise.all(values.map((id) => http.delete(issuePath(projectId, byId.get(id) || id))));
@@ -173,9 +182,9 @@ export function createGitLabIssuesAdapter({ projectId = currentProjectId(), http
 }
 
 /** Production factory: no seeded or in-memory fallback is permitted. */
-export function createIssuesApi({ projectId = currentProjectId(), adapter = null, http = axios } = {}) {
+export function createIssuesApi({ projectId = currentProjectId(), adapter = null, http = axios, permissions = {} } = {}) {
   if (adapter) return adapter;
-  return createGitLabIssuesAdapter({ projectId, http });
+  return createGitLabIssuesAdapter({ projectId, http, permissions });
 }
 
 export function currentUser() {

@@ -5,6 +5,9 @@ import EmptyState from './EmptyState.vue';
 import { ROADMAP_MONTHS, ROADMAP_YEAR } from '../data';
 
 export default {
+  methods: {
+    __,
+  },
   name: 'RoadmapView',
   components: { RoadmapRow, EmptyState },
   props: {

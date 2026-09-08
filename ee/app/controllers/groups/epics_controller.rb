@@ -50,7 +50,8 @@ class Groups::EpicsController < Groups::ApplicationController
   end
 
   def index
-    redirect_epics_to_work_items
+    # Detail and creation remain on their established native routes, supplied
+    # to the material list through server-generated paths.
   end
 
   private

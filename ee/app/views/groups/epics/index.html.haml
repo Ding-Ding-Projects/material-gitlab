@@ -1,0 +1,6 @@
+- page_title _('Epics')
+- initials = current_user&.name.to_s.split.map { |part| part[0] }.join.first(2).upcase
+- can_create_epic = can?(current_user, :create_epic, @group)
+- material_epics_config = { fullPath: @group.full_path, graphqlEndpoint: "#{Gitlab.config.gitlab.relative_url_root}/api/graphql", createPath: can_create_epic ? new_group_epic_path(@group) : nil, roadmapPath: group_roadmap_path(@group), currentUser: { name: current_user&.name.to_s, initials: initials }, permissions: { create: can_create_epic, update: false, delete: false } }.to_json
+
+#js-material-epics{ data: { material_epics: true, material_topbar_owner: 'surface.epics', material_epics_config: material_epics_config } }

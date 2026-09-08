@@ -2,13 +2,13 @@
   <div class="gl-mds-bulkbar" role="toolbar" aria-label="Bulk issue actions">
     <span class="gl-mds-bulkbar__summary">{{ selectAllLabel }}</span>
     <div class="gl-mds-bulkbar__actions">
-      <button type="button" class="gl-mds-bulkbar__action" @click="$emit('close-selected')">
+      <button v-if="canUpdate" type="button" class="gl-mds-bulkbar__action" @click="$emit('close-selected')">
         <mds-icon name="check-circle" size="sm" />Close
       </button>
-      <button type="button" class="gl-mds-bulkbar__action" @click="$emit('reopen-selected')">
+      <button v-if="canUpdate" type="button" class="gl-mds-bulkbar__action" @click="$emit('reopen-selected')">
         <mds-icon name="undo" size="sm" />Reopen
       </button>
-      <button type="button" class="gl-mds-bulkbar__action gl-mds-bulkbar__action--danger" @click="$emit('delete-selected')">
+      <button v-if="canDelete" type="button" class="gl-mds-bulkbar__action gl-mds-bulkbar__action--danger" @click="$emit('delete-selected')">
         <mds-icon name="delete" size="sm" />Delete
       </button>
       <button type="button" class="gl-mds-bulkbar__clear" @click="$emit('clear')">Clear selection</button>
@@ -25,6 +25,8 @@ export default {
   props: {
     selectedCount: { type: Number, required: true },
     totalCount: { type: Number, required: true },
+    canUpdate: { type: Boolean, default: true },
+    canDelete: { type: Boolean, default: true },
   },
   computed: {
     selectAllLabel() {

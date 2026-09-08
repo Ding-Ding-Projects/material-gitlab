@@ -1,6 +1,7 @@
 <template>
-  <section class="gl-mds-issues" :data-theme="resolvedTheme">
-    <surface-header :view="view" @update:view="setView" @open-new="openNew" />
+  <section class="gl-mds-issues" :data-theme="resolvedTheme" data-material-topbar-owner="surface.issues">
+    <surface-header :view="view" :can-create="!production || permissions.create === true" :new-issue-path="newIssuePath" :board-path="boardPath" @update:view="setView" @open-new="openNew" />
+    <gl-link v-if="workItemsPath" :href="workItemsPath" class="gl-mds-issues__row">Open all work item types and advanced filters</gl-link>
 
     <div class="gl-mds-issues__row gl-mds-issues__row--search">
       <issue-search-bar
@@ -15,6 +16,7 @@
 
     <div class="gl-mds-issues__row gl-mds-issues__row--filter">
       <filter-bar :filters="filters" :count="filteredIssues.length" @toggle-filter="toggleFilter" />
+      <p v-if="regexMode">Regular expressions filter the current page.</p>
     </div>
 
     <bulk-action-bar
@@ -22,6 +24,8 @@
       class="gl-mds-issues__bulkbar"
       :selected-count="selectedIds.length"
       :total-count="filteredIssues.length"
+      :can-update="!production || permissions.update === true"
+      :can-delete="!production || permissions.delete === true"
       @close-selected="bulkClose"
       @reopen-selected="bulkReopen"
       @delete-selected="requestBulkDelete"
@@ -61,10 +65,10 @@
       <button type="button" @click="loadPage">Retry</button>
     </div>
 
-    <nav v-if="!loading && !loadError && totalPages > 1" class="gl-mds-issues__pagination" aria-label="Issue pages">
+    <nav v-if="!loading && !loadError && (page > 1 || hasNextPage)" class="gl-mds-issues__pagination" aria-label="Issue pages">
       <button type="button" :disabled="page <= 1" @click="previousPage">Previous</button>
-      <span>Page {{ page }} of {{ totalPages }}</span>
-      <button type="button" :disabled="page >= totalPages" @click="nextPage">Next</button>
+      <span>Page {{ page }}<template v-if="totalPages"> of {{ totalPages }}</template></span>
+      <button type="button" :disabled="!hasNextPage" @click="nextPage">Next</button>
     </nav>
 
     <issue-drawer
@@ -72,6 +76,7 @@
       :issue="drawerIssue"
       :all-labels="allLabelChips"
       :assignees="assigneeChips"
+      :can-update="!production || permissions.update === true"
       @close="closeDrawer"
       @toggle-label="toggleDrawerLabel"
       @pick-assignee="pickAssignee"
@@ -118,6 +123,7 @@
 </template>
 
 <script>
+import { GlLink } from '@gitlab/ui';
 import { loadSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import {
@@ -144,6 +150,7 @@ import NotificationStack from './components/NotificationStack.vue';
 export default {
   name: 'IssuesSurface',
   components: {
+    GlLink,
     SurfaceHeader,
     IssueSearchBar,
     FilterBar,
@@ -156,6 +163,16 @@ export default {
     ConfirmDialog,
     NotificationStack,
   },
+  props: {
+    projectId: { type: [String, Number], default: null },
+    apiAdapter: { type: Object, default: null },
+    production: { type: Boolean, default: false },
+    permissions: { type: Object, default: () => ({}) },
+    user: { type: Object, default: null },
+    newIssuePath: { type: String, default: '' },
+    boardPath: { type: String, default: '' },
+    workItemsPath: { type: String, default: '' },
+  },
   data() {
     return {
       loading: true,
@@ -164,13 +181,14 @@ export default {
       view: 'list',
       page: 1,
       totalPages: 1,
+      hasNextPage: false,
       perPage: 20,
       search: '',
       regexMode: false,
       regexOpen: false,
       regexDraft: '',
       regexFlags: { i: true, g: true, m: false, s: false },
-      regexTestText: 'auth: login failed for user 42\npipeline #8812 passed in 04:31\nERROR TokenRefresh retry_count=3',
+      regexTestText: '',
       newOpen: false,
       newTitle: '',
       newBody: '',
@@ -203,8 +221,8 @@ export default {
       const { open, closed, mine } = this.filters;
       return this.issues.filter((issue) => {
         const stateOk = (open && issue.state === 'Open') || (closed && issue.state === 'Closed') || (!open && !closed);
-        const user = currentUser();
-        const mineOk = !mine || !user || issue.assigneeId === user.id || issue.assignee === user.name || issue.assignee === user.username;
+        const user = this.user || currentUser();
+        const mineOk = !mine || (user && (issue.assigneeId === user.id || issue.assignee === user.name || issue.assignee === user.username));
         return stateOk && mineOk && this.searchMatcher.test(issueSearchText(issue));
       });
     },
@@ -264,7 +282,7 @@ export default {
   },
   async created() {
     try {
-      this._api = createIssuesApi();
+      this._api = createIssuesApi({ projectId: this.projectId, adapter: this.apiAdapter, permissions: this.permissions });
       await this.loadPage();
     } catch (error) {
       this.loadError = error.message;
@@ -294,6 +312,8 @@ export default {
     window.addEventListener('keydown', this._onKeydown);
   },
   beforeDestroy() {
+    clearTimeout(this.searchTimer);
+    this.loadGeneration = (this.loadGeneration || 0) + 1;
     if (this._unsubscribeSettings) this._unsubscribeSettings();
     if (this._mq) {
       if (this._mq.removeEventListener) this._mq.removeEventListener('change', this._mqListener);
@@ -304,9 +324,14 @@ export default {
   methods: {
     setSearch(value) {
       this.search = value;
+      this.page = 1;
+      clearTimeout(this.searchTimer);
+      this.searchTimer = setTimeout(() => this.loadPage(), 250);
     },
     toggleRegexMode() {
       this.regexMode = !this.regexMode;
+      this.page = 1;
+      this.loadPage();
     },
     openRegexBuilder() {
       this.regexDraft = this.regexMode ? this.search : '';
@@ -351,7 +376,7 @@ export default {
       if (!this.newTitle.trim()) return;
       try {
         const issue = await this._api.create({ title: this.newTitle, body: this.newBody });
-        this.issues = [issue, ...this.issues];
+        await this.loadPage();
         this.newOpen = false;
         this.newTitle = '';
         this.newBody = '';
@@ -398,8 +423,8 @@ export default {
       const issue = this.drawerIssue;
       if (!issue) return;
       const nextState = issue.state === 'Open' ? 'Closed' : 'Open';
-      await this.applyPatch(issue.id, { state: nextState, col: nextState === 'Closed' ? 'done' : 'todo' });
-      notificationCenter.notify({ message: `Issue #${issue.iid} ${nextState === 'Closed' ? 'closed' : 'reopened'}.`, severity: 'success' });
+      const updated = await this.applyPatch(issue.id, { state: nextState, col: nextState === 'Closed' ? 'done' : 'todo' });
+      if (updated) notificationCenter.notify({ message: `Issue #${issue.iid} ${nextState === 'Closed' ? 'closed' : 'reopened'}.`, severity: 'success' });
     },
     startAdd(colKey) {
       this.addingCol = colKey;
@@ -459,13 +484,15 @@ export default {
     },
     async bulkClose() {
       const ids = [...this.selectedIds];
-      await Promise.all(ids.map((id) => this.applyPatch(id, { state: 'Closed', col: 'done' })));
-      notificationCenter.notify({ message: `${ids.length} issue${ids.length === 1 ? '' : 's'} closed.`, severity: 'success' });
+      const results = await Promise.all(ids.map((id) => this.applyPatch(id, { state: 'Closed', col: 'done' })));
+      const count = results.filter(Boolean).length;
+      if (count) notificationCenter.notify({ message: `${count} issue${count === 1 ? '' : 's'} closed.`, severity: 'success' });
     },
     async bulkReopen() {
       const ids = [...this.selectedIds];
-      await Promise.all(ids.map((id) => this.applyPatch(id, { state: 'Open', col: 'todo' })));
-      notificationCenter.notify({ message: `${ids.length} issue${ids.length === 1 ? '' : 's'} reopened.`, severity: 'success' });
+      const results = await Promise.all(ids.map((id) => this.applyPatch(id, { state: 'Open', col: 'todo' })));
+      const count = results.filter(Boolean).length;
+      if (count) notificationCenter.notify({ message: `${count} issue${count === 1 ? '' : 's'} reopened.`, severity: 'success' });
     },
     requestBulkDelete() {
       this.confirmDelete = true;
@@ -482,6 +509,7 @@ export default {
         this.confirmDelete = false;
         notificationCenter.notify({ message: `${ids.length} issue${ids.length === 1 ? '' : 's'} deleted.`, severity: 'success' });
       } catch (error) {
+        await this.loadPage();
         this.notifyApiError(error, 'delete the selected issues');
       }
     },
@@ -491,6 +519,8 @@ export default {
       return 'all';
     },
     async loadPage() {
+      const generation = (this.loadGeneration || 0) + 1;
+      this.loadGeneration = generation;
       this.loading = true;
       this.loadError = '';
       try {
@@ -503,14 +533,18 @@ export default {
             perPage: this.perPage,
             state: this.serverState(),
             scope: this.filters.mine ? 'assigned_to_me' : 'all',
+            search: this.regexMode ? '' : this.search,
           });
+          if (generation !== this.loadGeneration) return;
           this.issues = result.issues;
           this.totalPages = result.pagination.totalPages;
+          this.hasNextPage = result.pagination.hasNextPage;
+          this.selectedIds = this.selectedIds.filter((id) => this.issues.some((issue) => issue.id === id));
         }
       } catch (error) {
-        this.loadError = error.message;
+        if (generation === this.loadGeneration) this.loadError = error.message;
       } finally {
-        this.loading = false;
+        if (generation === this.loadGeneration) this.loading = false;
       }
     },
     previousPage() {
@@ -520,7 +554,7 @@ export default {
       }
     },
     nextPage() {
-      if (this.page < this.totalPages) {
+      if (this.hasNextPage) {
         this.page += 1;
         this.loadPage();
       }

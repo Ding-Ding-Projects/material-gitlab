@@ -129,8 +129,8 @@ describe('planning design-contract data adapters', () => {
 
   it('follows every GraphQL epic page and never falls back to an inline list', async () => {
     const fetcher = jest.fn()
-      .mockResolvedValueOnce(response({ data: { group: { epics: { nodes: [{ id: 'e1', iid: 1, title: 'One' },], pageInfo: { hasNextPage: true, endCursor: 'cursor-1' } } } } }))
-      .mockResolvedValueOnce(response({ data: { group: { epics: { nodes: [{ id: 'e2', iid: 2, title: 'Two' }], pageInfo: { hasNextPage: false, endCursor: null } } } } }));
+      .mockResolvedValueOnce(response({ data: { group: { epics: { nodes: [{ id: 'e1', iid: 1, title: 'One', state: 'opened' },], pageInfo: { hasNextPage: true, endCursor: 'cursor-1' } } } } }))
+      .mockResolvedValueOnce(response({ data: { group: { epics: { nodes: [{ id: 'e2', iid: 2, title: 'Two', state: 'opened' }], pageInfo: { hasNextPage: false, endCursor: null } } } } }));
     await expect(loadEpics({ fullPath: 'group/project', fetcher })).resolves.toEqual([
       expect.objectContaining({ id: 'e1', reference: '&1' }),
       expect.objectContaining({ id: 'e2', reference: '&2' }),

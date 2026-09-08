@@ -211,6 +211,8 @@ export default {
     },
   },
   methods: {
+    __,
+    sprintf,
     toggleFlag(name) {
       this.flags = { ...this.flags, [name]: !this.flags[name] };
     },

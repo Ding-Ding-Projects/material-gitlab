@@ -3,6 +3,9 @@ import { __ } from '~/locale';
 import MdsIcon from './MdsIcon.vue';
 
 export default {
+  methods: {
+    __,
+  },
   name: 'EpicsToolbar',
   components: { MdsIcon },
   props: {

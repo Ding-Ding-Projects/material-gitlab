@@ -40,7 +40,6 @@ class Projects::IssuesController < Projects::ApplicationController
   }
 
   before_action :redirect_if_work_item
-  before_action :redirect_index_to_work_items, only: :index
 
   # Allow write(create) issue
   before_action :authorize_create_issue!, only: [:new, :create]

@@ -26,8 +26,11 @@ export default {
       return progressPercent(this.epicItem.descendantCounts);
     },
     countsLabel() {
-      const { closedIssues } = this.epicItem.descendantCounts;
+      const { closedIssues } = this.epicItem.descendantCounts || {};
       return `${closedIssues}/${progressTotal(this.epicItem.descendantCounts)}`;
+    },
+    hasCounts() {
+      return Number.isInteger(this.epicItem.descendantCounts?.closedIssues) && Number.isInteger(this.epicItem.descendantCounts?.openedIssues);
     },
     dateRange() {
       return formatMonthRange(this.epicItem.startDate, this.epicItem.dueDate);
@@ -45,6 +48,8 @@ export default {
     },
   },
   methods: {
+    __,
+    sprintf,
     focusRow() {
       this.$refs.row.focus();
     },
@@ -86,15 +91,17 @@ export default {
       <mds-icon :name="stateIcon" size="md" />
     </span>
     <div class="gl-mds-epics__row-body">
-      <div class="gl-mds-epics__row-title">{{ epicItem.title }}</div>
+      <a v-if="epicItem.webUrl" class="gl-mds-epics__row-title" :href="epicItem.webUrl">{{ epicItem.title }}</a>
+      <div v-else class="gl-mds-epics__row-title">{{ epicItem.title }}</div>
       <div class="gl-mds-epics__row-meta">{{ epicItem.reference }} · {{ dateRange }}</div>
     </div>
-    <div class="gl-mds-epics__row-progress">
+    <div v-if="hasCounts" class="gl-mds-epics__row-progress">
       <div class="gl-mds-epics__progress-track">
         <div class="gl-mds-epics__progress-fill" :style="{ width: `${percent}%` }"></div>
       </div>
       <span class="gl-mds-epics__row-progress-label">{{ percent }}% · {{ countsLabel }}</span>
     </div>
+    <span v-else>{{ __('Progress unavailable') }}</span>
     <span
       class="gl-mds-epics__chip"
       :class="isOpen ? 'gl-mds-epics__chip--open' : 'gl-mds-epics__chip--closed'"

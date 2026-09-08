@@ -20,6 +20,7 @@ export default {
     window.removeEventListener('keydown', this._onKeydown);
   },
   methods: {
+    __,
     stop(event) {
       event.stopPropagation();
     },
