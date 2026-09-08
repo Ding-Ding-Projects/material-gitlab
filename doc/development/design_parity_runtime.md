@@ -3,7 +3,9 @@
 `scripts/build-design-parity-runtime.ps1` prepares the local GDK runtime used for
 design-parity verification. It accepts an exact Git commit and a task-owned output
 directory. The helper streams a tar archive from `git archive` directly to Docker's
-standard-input context. It therefore preserves archive metadata such as executable
+standard-input context with command-local `core.autocrlf=false` and `core.eol=lf`.
+Without those overrides, Git applies the host line-ending configuration during archive
+creation, even though the committed blobs use LF. The helper therefore preserves archive metadata such as executable
 bits, avoids Windows extraction path limits, includes every tracked source file even
 when the invoking checkout is sparse, and does not build a moving source directory.
 
@@ -29,7 +31,7 @@ Before each GDK source stage executes candidate scripts, the recipe runs
 `qa/gdk/normalize-executable-shebangs.py`. It uses one Python process over only the
 candidate-owned `bin`, `scripts`, `config`, `lib`, and `ee` roots, skips symlinks and
 `node_modules`, and changes only files whose first bytes are a shebang. Binary files and
-ordinary text remain untouched, while committed CRLF interpreter lines become
+ordinary text remain untouched, while any CRLF interpreter lines become
 runnable in the Linux build context. The pinned base already includes Python.
 Ruby's directory walker raised an internal `NotImplementedError` on the real
 candidate tree, so normalization uses the independent standard-library walker.
@@ -107,3 +109,8 @@ checked before the application bundle is installed.
 This changes the toolchain inside the task image only. It does not alter a host's
 installed Ruby or other workloads. Real build and runtime results are still
 required; reconstructing the toolchain is not itself a parity verdict.
+
+The archive byte regression extracts the tool-version manifest, RubyGems version, and
+`bin/rake` from the exact dry-run archive command under an explicit hostile CRLF host
+setting. It compares all three against `git show` bytes and checks executable mode.
+Removing the archive configuration overrides must reproduce all three byte mismatches.

@@ -86,13 +86,14 @@ $candidateRoot = Join-Path $safeOutputRoot $sourceSha
 $archivePath = Join-Path $candidateRoot 'source.tar'
 $receiptPath = Join-Path $candidateRoot 'receipt.json'
 $recipeHash = Get-RecipeHash -SourceSha $sourceSha -GitCommand $GitExecutable
+$archiveArguments = @('-c', 'core.autocrlf=false', '-c', 'core.eol=lf', 'archive', '--format=tar', $sourceSha)
 $dockerArguments = @('buildx', 'build', '--load', '--platform', 'linux/amd64')
 if ($Builder) { $dockerArguments += @('--builder', $Builder) }
 $dockerArguments += @('--file', 'qa/gdk/Dockerfile.gdk', '--tag', $tag, '--build-arg', 'RAILS_ENV=test', '--build-arg', 'NODE_ENV=production', '--build-arg', 'BABEL_ENV=production', '--build-arg', 'NODE_OPTIONS=--max-old-space-size=10240', '--build-arg', 'GLCI_GITLAB_ASSETS_HASH_FILE=/nonexistent/gitlab-assets-hash', '-')
 
 if (Test-Path -LiteralPath $candidateRoot) { throw "Candidate output already exists and will not be replaced: $candidateRoot" }
 if ($DryRun) {
-  [pscustomobject]@{ sourceSha = $sourceSha; outputRoot = $safeOutputRoot; candidateRoot = $candidateRoot; recipeHash = $recipeHash; tag = $tag; timeoutSeconds = $TimeoutSeconds; builder = $Builder; dockerArguments = $dockerArguments } | ConvertTo-Json -Depth 4
+  [pscustomobject]@{ sourceSha = $sourceSha; outputRoot = $safeOutputRoot; candidateRoot = $candidateRoot; recipeHash = $recipeHash; tag = $tag; timeoutSeconds = $TimeoutSeconds; builder = $Builder; archiveArguments = $archiveArguments; dockerArguments = $dockerArguments } | ConvertTo-Json -Depth 4
   exit 0
 }
 
@@ -100,7 +101,7 @@ New-Item -ItemType Directory -Path $candidateRoot -Force | Out-Null
 $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 $archive = $null; $docker = $null; $archiveFile = $null; $archiveErrorFile = $null; $dockerOutputFile = $null; $dockerErrorFile = $null
 try {
-  $archive = Start-RedirectedProcess $GitExecutable @('archive', '--format=tar', $sourceSha)
+  $archive = Start-RedirectedProcess $GitExecutable $archiveArguments
   $docker = Start-RedirectedProcess $DockerExecutable $dockerArguments -RedirectInput
   $archiveFile = [IO.File]::Open($archivePath, [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::None)
   $archiveErrorFile = [IO.File]::Open((Join-Path $candidateRoot 'git-archive.log'), [IO.FileMode]::CreateNew, [IO.FileAccess]::Write, [IO.FileShare]::Read)

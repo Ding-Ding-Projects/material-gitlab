@@ -46,8 +46,8 @@ try {
     ('golang ' + (($versionSource | Select-String 'GO_VERSION:').Line -replace '.*"([^"]+)".*', '$1'))
   )
   if (@(Compare-Object $expectedVersions $toolVersions).Count -ne 0) { throw 'qa/gdk/.tool-versions does not match the candidate version source.' }
-  $archivedToolVersions = git archive --format=tar $commit qa/gdk/.tool-versions | tar -tf -
-  if ($LASTEXITCODE -ne 0 -or $archivedToolVersions -notcontains 'qa/gdk/.tool-versions') { throw 'The candidate archive omits the GDK derived tool-version manifest.' }
+  $dryRun | ConvertTo-Json -Depth 4 | & py -3 (Join-Path $PSScriptRoot 'verify-parity-archive-bytes.py')
+  if ($LASTEXITCODE -ne 0) { throw 'Archive byte regression failed.' }
 
   $rejectedRepositoryOutput = $false
   try {
@@ -70,7 +70,7 @@ try {
   New-Item -ItemType Directory -Path $fakeBin -Force | Out-Null
   $fakeGit = Join-Path $fakeBin 'fake-git.cmd'
   $fakeDocker = Join-Path $fakeBin 'fake-docker.cmd'
-  [IO.File]::WriteAllText($fakeGit, "@echo off`r`nif `"%1`"==`"rev-parse`" if `"%2`"==`"--show-toplevel`" ( echo $repositoryRoot & exit /b 0 )`r`nif `"%1`"==`"rev-parse`" ( echo $fakeCommit & exit /b 0 )`r`nif `"%1`"==`"archive`" ( <nul set /p `"=fake-tar`" & exit /b 0 )`r`nexit /b 19`r`n")
+  [IO.File]::WriteAllText($fakeGit, "@echo off`r`n:dispatch`r`nif `"%1`"==`"rev-parse`" if `"%2`"==`"--show-toplevel`" ( echo $repositoryRoot & exit /b 0 )`r`nif `"%1`"==`"rev-parse`" ( echo $fakeCommit & exit /b 0 )`r`nif `"%1`"==`"archive`" ( <nul set /p `"=fake-tar`" & exit /b 0 )`r`nif `"%1`"==`"`" exit /b 19`r`nshift`r`ngoto dispatch`r`n")
   [IO.File]::WriteAllText($fakeDocker, "@echo off`r`nif `"%1`"==`"buildx`" goto buildx`r`nif `"%1`"==`"image`" goto image`r`nexit /b 19`r`n:buildx`r`nmore >nul`r`nif `"%FAKE_DOCKER_MODE%`"==`"timeout`" powershell -NoProfile -Command `"Start-Sleep -Seconds 3`"`r`nif `"%FAKE_DOCKER_MODE%`"==`"success`" exit /b 0`r`nexit /b 17`r`n:image`r`necho %* | findstr /C:`"RepoDigests`" >nul`r`nif not errorlevel 1 ( echo [] & exit /b 0 )`r`necho sha256:fake-image-id`r`nexit /b 0`r`n")
 
   $env:FAKE_DOCKER_MODE = 'nonzero'

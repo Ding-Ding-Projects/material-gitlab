@@ -28,7 +28,9 @@ The task remains in progress. No complete production parity verdict exists.
   recipe hashes, image configuration identity, real logs, and bounded process
   outcomes. Use the task-owned builder and retain previous attempt directories.
 - The real build exposed two repaired prerequisites: the ignored root
-  `.tool-versions` input and committed CRLF shebangs. A tracked tool manifest and
+  `.tool-versions` input and host-converted CRLF archive entries. The committed blobs
+  contain LF; `git archive` was applying this host's `core.autocrlf=true`. Command-local
+  LF archive settings now prevent that conversion. A tracked tool manifest and
   source-only normalization now address them while preserving cached service
   layers. A later build also lost its connection during a builder restart;
   that transport failure does not establish a source defect.
