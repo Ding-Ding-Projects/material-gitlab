@@ -137,7 +137,7 @@ Last updated: 2026-08-19. Branch `feature/design-contract-foundation-20260819`, 
 merged `origin/design-surface-replacement` source.
 
 An important correction from the session that produced this file: a **token and override layer
-applied over the existing Pajamas components was explicitly rejected** — "not the work i wanted".
+applied over the existing Pajamas components was explicitly rejected**, in the words "not the work i wanted".
 The requirement is that the surfaces are **replaced** with the design, not restyled underneath.
 Restyling `GlButton` so it looks Material is not the deliverable; the surface being the design is.
 
@@ -185,7 +185,7 @@ Merge Requests, Monitor, Operate, Pipelines, Plan, Regex Builder, Repository, Se
 Settings, Shell A, Shell B, Sidebar, Todos.
 
 `Issues.dc.html` is the largest and most complete (44 KB, 480 lines) and is the best model for how
-a surface is meant to be structured — list view, board view with drag and drop, a detail drawer,
+a surface is meant to be structured: list view, board view with drag and drop, a detail drawer,
 a new-issue dialog, regex search with live match preview, and the command palette.
 
 Scale of the replacement target, measured on this tree:
@@ -234,14 +234,43 @@ Verified locally during the 2026-08-19 pass:
 
 Still unverified:
 
-- Production-side visual parity for the Rails GitLab routes. This Windows host has no runnable GitLab
-  Rails server, and the packaged desktop applications are configuration shells rather than the Rails
-  product. No mock capture was substituted.
-- Full side-by-side and pixel-diff evidence for all 25 rows remains pending until a real built Rails
-  instance is available at the recorded commit.
+- Production-side visual parity for the Rails routes. A real instance now exists and serves, so the
+  old blocker is gone. What replaces it is a harder fact rather than an easier one: the application
+  renders stock, so a side-by-side against the design references would be comparing two unrelated
+  interfaces rather than measuring a gap. No mock capture was substituted, and none should be.
+- Full side-by-side and pixel-diff evidence for all 25 rows remains pending, now on the design
+  replacement decision rather than on the absence of a running server.
+- A distributable package. Seven build attempts, six distinct causes, all recorded below. No package
+  has been produced and nothing claims one has.
+
+## The package build, and what each attempt actually cost
+
+Recorded because not one of these causes was visible from the error it produced.
+
+| # | Reached | Cause |
+| --- | --- | --- |
+| 1 | 4 min | A container running as root cannot read a runner-owned checkout, so the version could not be derived. The error names git, not ownership. |
+| 2 | Into compilation | One upstream `502` on a single dependency tarball. |
+| 3 | 22 min | The same host failing persistently across three dependencies. |
+| 4 | Seconds | A fallback step that treated its own success as a failure: `grep` exits non-zero on zero matches, and finding zero was the objective. |
+| 5 | Seconds | A mirror swap that flattened two different URL shapes into one, producing a doubled path segment and a guaranteed 404. |
+| 6 | **25 min of real compilation** | OpenSSL 1.1.1 was built because nothing set the variable that selects 3.x, and curl at this ref rejects anything below 3.0.0. |
+| 7 | running | not yet known |
+
+Two of those were self-inflicted, and both had one root: the logic was tested locally, but in an
+ordinary shell rather than one running with the same strict options as the real step. That is the
+whole distance between a green local check and a red run, and it was paid for twice.
+
+Every check added since was watched going red against the real broken input before being trusted,
+and green after the fix.
 
 ## Next owner action
 
-Launch a real built GitLab Rails instance at the recorded commit, drive every production route with
-the same tuples as `design/parity-inventory.json`, and complete the raw built captures, Material
-audits, labelled comparisons, and machine-readable diffs without changing the reference inputs.
+The instance is installed and reachable at `http://localhost:8929` on the WSL2 host. **Note the
+port.** Probing port 80 returns nothing and reads exactly like the instance being down while it is
+in fact running normally.
+
+The next decision is the repository owner's rather than a technical one: whether to begin replacing
+the Rails surfaces so they *are* the design, rather than restyling them underneath, which the design
+notes explicitly reject. Until that is answered, capturing built routes only produces evidence of
+stock GitLab, which is already measured and recorded above.

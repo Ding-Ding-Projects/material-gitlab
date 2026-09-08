@@ -49,6 +49,11 @@
         `19.3.1-ce.0`.
       - Build an Omnibus package from this tree and publish it, which is what would make
         `apt-get install` reach this fork the same way it reaches upstream today.
+        A workflow for this is committed and has been run seven times. Six distinct causes are
+        fixed and recorded in `HANDOFF.md`; the network and toolchain-version problems are
+        solved and the build now reaches real compilation. No package exists yet, and a full
+        build may still exceed the job time ceiling, which would be a real outcome rather than
+        a defect.
 - Run the production Rails application at the same commit and finish built-route captures,
   side-by-side comparisons, Material audits, and visual diffs for all 25 parity rows.
   Design folder parity itself is currently intact and independently verified: all 25 reference

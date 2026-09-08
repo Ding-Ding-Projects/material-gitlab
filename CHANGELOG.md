@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+### Packaging: the build now reaches real compilation
+
+- A package workflow is committed and has been run seven times. Every failure had a cause that was
+  invisible from the error it produced, and all six are recorded in `HANDOFF.md`.
+- Dependency downloads no longer depend on a redirector that was returning `502` from two separate
+  networks. The substitution is safe because every download is still verified against the checksum in
+  its own definition, so a mirror serving different bytes fails the build rather than poisoning the
+  package.
+- The build is now told which OpenSSL it is meant to produce. The definition chooses between 1.1.1
+  and 3.x purely on an environment variable, nothing was setting it, and curl at the same ref rejects
+  anything below 3.0.0. The value is read from the upstream ref's own CI variables so it follows the
+  ref rather than going stale behind a hardcoded number.
+- **No package has been produced.** A full build may still exceed the job time ceiling.
+
+
 ### The application does not render the design, measured rather than assumed
 
 - Stood up a real instance (Omnibus 19.3.1 on WSL2) serving this fork's own compiled frontend,
