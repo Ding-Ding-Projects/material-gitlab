@@ -1,6 +1,6 @@
 <template>
   <div class="mr-diff-tree" role="listbox" aria-label="Changed files" @keydown="onKeydown">
-    <button
+    <material-button variant="text"
       v-for="(file, index) in files"
       :key="file.name"
       ref="files"
@@ -15,12 +15,15 @@
       <span class="mr-diff-tree__file-name">{{ file.name }}</span>
       <span class="mr-diff-tree__stat-add">+{{ file.add }}</span>
       <span class="mr-diff-tree__stat-del">−{{ file.del }}</span>
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'MrDiffFileTree',
   props: {
     files: { type: Array, required: true },

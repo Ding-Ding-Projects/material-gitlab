@@ -16,7 +16,7 @@
           {{ validLabel }}
         </span>
         <div class="gl-mds-regexpop__flags">
-          <button
+          <material-button variant="text"
             v-for="flag in flagInfo"
             :key="flag.name"
             type="button"
@@ -27,28 +27,28 @@
             @click="toggleFlag(flag.name)"
           >
             {{ flag.name }}
-          </button>
+          </material-button>
         </div>
-        <button type="button" class="gl-mds-plan__icon-btn" aria-label="Close regex builder" @click="$emit('close')">
+        <material-button variant="text" type="button" class="gl-mds-plan__icon-btn" aria-label="Close regex builder" @click="$emit('close')">
           <mds-icon name="close" size="sm" />
-        </button>
+        </material-button>
       </div>
 
       <label class="gl-mds-sr-only" for="gl-mds-regexpop-pattern">Pattern</label>
-      <input
+      <material-text-field
         id="gl-mds-regexpop-pattern"
         ref="patternInput"
         v-model="pattern"
         class="gl-mds-regexpop__input"
         placeholder="pattern, e.g. (17\.\d|Sprint \d+)"
         spellcheck="false"
-      />
+      aria-label="Pattern" />
       <div v-if="!draft.valid" class="gl-mds-regexpop__error" role="alert">{{ draft.errorMessage }}</div>
 
       <div class="gl-mds-regexpop__snippets">
         <div v-for="group in snippetGroups" :key="group.name" class="gl-mds-regexpop__snippet-row">
           <span class="gl-mds-regexpop__snippet-label">{{ group.name }}</span>
-          <button
+          <material-button variant="text"
             v-for="snippet in group.items"
             :key="snippet.text"
             type="button"
@@ -57,14 +57,14 @@
             @click="insertSnippet(snippet.text)"
           >
             {{ snippet.text }}
-          </button>
+          </material-button>
         </div>
       </div>
 
       <div class="gl-mds-regexpop__grid">
         <div class="gl-mds-regexpop__col">
           <span class="gl-mds-regexpop__label">Test string</span>
-          <textarea v-model="testText" class="gl-mds-regexpop__textarea" rows="3"></textarea>
+          <material-text-field type="textarea" aria-label="Test string" v-model="testText" class="gl-mds-regexpop__textarea" rows="3"></material-text-field>
           <div class="gl-mds-regexpop__highlight">
             <template v-for="(segment, index) in draft.segments">
               <mark v-if="segment.matched" :key="index" class="gl-mds-regexpop__mark">{{ segment.text }}</mark>
@@ -90,20 +90,23 @@
       </div>
 
       <div class="gl-mds-regexpop__actions">
-        <button type="button" class="gl-mds-regexpop__cancel" @click="$emit('close')">Cancel</button>
-        <button type="button" class="gl-mds-regexpop__apply" :disabled="!pattern || !draft.valid" @click="apply">Apply to search</button>
+        <material-button variant="text" type="button" class="gl-mds-regexpop__cancel" @click="$emit('close')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-regexpop__apply" :disabled="!pattern || !draft.valid" @click="apply">Apply to search</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import MdsIcon from './MdsIcon.vue';
 import { REGEX_FLAG_INFO, SNIPPET_GROUPS, evaluateRegexDraft } from '../regexPlanSearch';
 
 export default {
   name: 'RegexBuilderPopover',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     initial: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },
@@ -154,7 +157,7 @@ export default {
       this.$emit('apply', this.pattern);
     },
     trapFocus(event) {
-      const focusable = this.$refs.panel.querySelectorAll('button:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      const focusable = this.$refs.panel.querySelectorAll('button:not([disabled]), md-text-button:not([disabled]), md-filled-button:not([disabled]), md-filled-text-field:not([disabled]), [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];

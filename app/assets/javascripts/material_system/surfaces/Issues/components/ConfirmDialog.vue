@@ -13,15 +13,18 @@
       <h2 id="gl-mds-confirm-title" class="gl-mds-confirm__heading">{{ title }}</h2>
       <p id="gl-mds-confirm-message" class="gl-mds-confirm__message">{{ message }}</p>
       <div class="gl-mds-confirm__actions">
-        <button ref="cancelButton" type="button" class="gl-mds-confirm__cancel" @click="$emit('cancel')">Cancel</button>
-        <button type="button" class="gl-mds-confirm__confirm" @click="$emit('confirm')">{{ confirmLabel }}</button>
+        <material-button variant="text" ref="cancelButton" type="button" class="gl-mds-confirm__cancel" @click="$emit('cancel')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-confirm__confirm" @click="$emit('confirm')">{{ confirmLabel }}</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'ConfirmDialog',
   props: {
     title: { type: String, required: true },

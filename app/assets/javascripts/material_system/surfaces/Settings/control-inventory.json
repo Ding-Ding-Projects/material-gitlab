@@ -1,0 +1,340 @@
+{
+  "surface": "Settings",
+  "scope": "Source declarations are explicit inventory, not runtime or visual proof. Existing complex form components and selection controls remain open.",
+  "files": [
+    {
+      "file": "components/AdditionalProjectSettings.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/AdvancedSettings.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/BadgesCard.vue",
+      "buttons": 5,
+      "textFields": 3,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/CicdTab.vue",
+      "buttons": 5,
+      "textFields": 3,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/DescriptionTopicsCard.vue",
+      "buttons": 1,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/IntegrationRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/IntegrationsTab.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MemberRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 1,
+      "textButtons": 0
+    },
+    {
+      "file": "components/MembersTab.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/NotificationHost.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 3,
+      "textButtons": 1
+    },
+    {
+      "file": "components/ProjectDetailsCard.vue",
+      "buttons": 1,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ProjectLogoCard.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 1,
+      "textButtons": 0
+    },
+    {
+      "file": "components/ProtectedBranchRow.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 1
+    },
+    {
+      "file": "components/RegexBuilderPopover.vue",
+      "buttons": 2,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 1,
+      "textButtons": 0
+    },
+    {
+      "file": "components/SearchField.vue",
+      "buttons": 0,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 1,
+      "textButtons": 1
+    },
+    {
+      "file": "components/SelectionToolbar.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 2
+    },
+    {
+      "file": "components/SpecialCapabilitiesSettings.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0
+    },
+    {
+      "file": "components/TabStrip.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 1
+    },
+    {
+      "file": "components/TopBar.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 2,
+      "textButtons": 0
+    },
+    {
+      "file": "components/VariableRow.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 2,
+      "textButtons": 0
+    }
+  ],
+  "remainingNativeControls": [
+    {
+      "file": "components/AdditionalProjectSettings.vue",
+      "controls": {
+        "input[hidden]": 13,
+        "gl-form-checkbox": 2,
+        "gl-button[submit]": 4,
+        "gl-form-group": 3,
+        "gl-form-textarea": 1,
+        "gl-form-input": 1,
+        "gl-form-input[number]": 1
+      }
+    },
+    {
+      "file": "components/AdvancedSettings.vue",
+      "controls": {
+        "input[hidden]": 18,
+        "gl-button[submit]": 12,
+        "gl-form-checkbox": 1,
+        "gl-form-group": 4,
+        "gl-form-input": 4,
+        "gl-button[button]": 1
+      }
+    },
+    {
+      "file": "components/BadgesCard.vue",
+      "controls": {
+        "gl-form-group": 3
+      }
+    },
+    {
+      "file": "components/CicdTab.vue",
+      "controls": {
+        "gl-button": 1,
+        "gl-form-group": 3,
+        "gl-form-checkbox": 2
+      }
+    },
+    {
+      "file": "components/DescriptionTopicsCard.vue",
+      "controls": {
+        "gl-form-group": 2
+      }
+    },
+    {
+      "file": "components/DuoContextSettings.vue",
+      "controls": {
+        "input[hidden]": 6,
+        "gl-form-group": 1,
+        "gl-form-input": 1,
+        "gl-button[button]": 2,
+        "gl-button[submit]": 1,
+        "gl-button": 1
+      }
+    },
+    {
+      "file": "components/FileConverterCard.vue",
+      "controls": {
+        "input[file]": 1
+      }
+    },
+    {
+      "file": "components/IntegrationRow.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/IntegrationsTab.vue",
+      "controls": {
+        "gl-button": 1
+      }
+    },
+    {
+      "file": "components/MemberRow.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/ProjectLogoCard.vue",
+      "controls": {
+        "input[file]": 1,
+        "input[hidden]": 2,
+        "gl-button[submit]": 1
+      }
+    },
+    {
+      "file": "components/ProjectPermissionsCard.vue",
+      "controls": {
+        "input[hidden]": 5,
+        "gl-form-group": 1,
+        "gl-form-select": 1,
+        "gl-form-checkbox": 1,
+        "gl-button[submit]": 1
+      }
+    },
+    {
+      "file": "components/ProtectedBranchRow.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/RegexBuilderPopover.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/SecretsManagerSettingsCard.vue",
+      "controls": {
+        "gl-button": 3,
+        "gl-form-group": 4,
+        "gl-form-select": 2,
+        "gl-form-input": 2,
+        "gl-button[button]": 2,
+        "gl-form-checkbox": 4,
+        "gl-button[submit]": 1
+      }
+    },
+    {
+      "file": "components/SelectionToolbar.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/ServiceDeskSettings.vue",
+      "controls": {
+        "gl-form-checkbox": 5,
+        "gl-form-group": 10,
+        "gl-form-input": 5,
+        "gl-form-select": 2,
+        "gl-button[submit]": 2,
+        "gl-button": 3,
+        "gl-form-input[email]": 1,
+        "gl-form-input[number]": 1,
+        "gl-form-input[password]": 1
+      }
+    },
+    {
+      "file": "components/SpecialCapabilitiesSettings.vue",
+      "controls": {
+        "gl-form-checkbox": 3,
+        "gl-button": 2,
+        "input[hidden]": 8,
+        "gl-form-group": 2,
+        "gl-form-input": 2,
+        "gl-button[button]": 1,
+        "gl-button[submit]": 1
+      }
+    },
+    {
+      "file": "components/VariableRow.vue",
+      "controls": {
+        "input[checkbox]": 1
+      }
+    },
+    {
+      "file": "components/VocabularyCard.vue",
+      "controls": {
+        "input[file]": 1
+      }
+    }
+  ]
+}

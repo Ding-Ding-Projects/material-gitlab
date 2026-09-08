@@ -1,6 +1,6 @@
 <template>
   <div class="mr-filter-chips" role="group" aria-label="Filter merge requests">
-    <button
+    <material-button variant="text"
       v-for="def in filterDefs"
       :key="def.key"
       type="button"
@@ -13,14 +13,17 @@
         check
       </span>
       {{ def.label }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { FILTER_DEFS } from '../data';
 
 export default {
+  components: { MaterialButton },
   name: 'MrFilterChips',
   props: {
     filters: { type: Object, required: true },

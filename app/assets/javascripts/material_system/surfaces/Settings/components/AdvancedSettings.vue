@@ -47,7 +47,7 @@
       <p v-if="transferLoading" class="st-card__desc" role="status">Loading permitted destination namespaces.</p>
       <p v-else-if="transferError" class="st-card__warning" role="status">Destination namespaces are unavailable. Refresh and try again.</p>
       <ul v-else class="st-destination-list" aria-label="Permitted destination namespaces">
-        <li v-for="destination in filteredTransferDestinations" :key="destination.id"><button type="button" class="st-destination" :class="{ 'st-destination--selected': transferNamespaceId === destination.id }" :aria-pressed="transferNamespaceId === destination.id" @click="selectTransferDestination(destination)"><span>{{ destination.humanName }}</span><small>{{ destination.fullPath }}</small></button></li>
+        <li v-for="destination in filteredTransferDestinations" :key="destination.id"><MaterialButton variant="outlined" class="st-destination" :class="{ 'st-destination--selected': transferNamespaceId === destination.id }" :aria-pressed="transferNamespaceId === destination.id" @click="selectTransferDestination(destination)"><span>{{ destination.humanName }}</span><small>{{ destination.fullPath }}</small></MaterialButton></li>
         <li v-if="transferDestinations.length === 0" class="st-card__desc">No permitted destination namespaces are available.</li>
       </ul>
       <gl-button v-if="transferPage < transferTotalPages" type="button" :disabled="transferLoading" @click="loadMoreTransferDestinations">Load more namespaces</gl-button>
@@ -92,12 +92,13 @@ import ConfirmDialog from './ConfirmDialog.vue';
 import SearchField from './SearchField.vue';
 import { createMatcher } from '../data';
 import { loadTransferDestinations } from '../advanced_destinations';
+import MaterialButton from '~/material_system/components/material_button';
 
 const safeLocalAction = (action) => typeof action === 'string' && action.startsWith('/') && !action.startsWith('//') && !/[\u0000-\u0020\\]/.test(action);
 
 export default {
   name: 'AdvancedSettings',
-  components: { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlInputGroup, ConfirmDialog, SearchField },
+  components: { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlInputGroup, ConfirmDialog, SearchField, MaterialButton },
   props: { metadata: { type: Object, default: () => ({}) } },
   data() { return { pruneAcknowledged: false, transferNamespaceId: '', transferConfirmation: '', transferQuery: '', transferRegexMode: false, transferRegexOpen: false, transferDestinations: [], transferPage: 1, transferTotalPages: 1, transferLoading: false, transferError: false, removeForkConfirmation: '', deleteConfirmation: '', pendingAction: null }; },
   computed: {

@@ -5,18 +5,18 @@
     <p v-if="error" role="alert">{{ error }}</p>
     <p v-if="busy" role="status">Updating badges…</p>
     <gl-form @submit.prevent="save">
-      <gl-form-group label="Badge name" label-for="st-badge-name"><gl-form-input id="st-badge-name" v-model="draft.name" :disabled="busy" /></gl-form-group>
-      <gl-form-group label="Image URL" label-for="st-badge-image"><gl-form-input id="st-badge-image" v-model="draft.imageUrl" :disabled="busy" required /></gl-form-group>
-      <gl-form-group label="Link URL" label-for="st-badge-link"><gl-form-input id="st-badge-link" v-model="draft.linkUrl" :disabled="busy" required /></gl-form-group>
-      <gl-button type="submit" variant="confirm" :disabled="busy">{{ draft.id ? 'Save badge' : 'Add badge' }}</gl-button>
-      <gl-button v-if="draft.id" :disabled="busy" @click="resetDraft">Cancel edit</gl-button>
+      <gl-form-group label="Badge name" label-for="st-badge-name"><MaterialTextField id="st-badge-name" v-model="draft.name" aria-label="Badge name" :disabled="busy" /></gl-form-group>
+      <gl-form-group label="Image URL" label-for="st-badge-image"><MaterialTextField id="st-badge-image" v-model="draft.imageUrl" aria-label="Image URL" :disabled="busy" required /></gl-form-group>
+      <gl-form-group label="Link URL" label-for="st-badge-link"><MaterialTextField id="st-badge-link" v-model="draft.linkUrl" aria-label="Link URL" :disabled="busy" required /></gl-form-group>
+      <MaterialButton type="submit" variant="filled" :disabled="busy">{{ draft.id ? 'Save badge' : 'Add badge' }}</MaterialButton>
+      <MaterialButton v-if="draft.id" variant="text" :disabled="busy" @click="resetDraft">Cancel edit</MaterialButton>
     </gl-form>
     <article v-for="badge in badges" :key="`${badge.inherited ? 'group' : 'project'}-${badge.id}`" class="st-badge-entry">
       <h3>{{ badge.name || 'Unnamed badge' }}</h3>
       <p v-if="badge.inherited">Inherited from a group. Manage this badge in its group settings.</p>
-      <gl-button v-if="!badge.inherited" :disabled="busy" @click="edit(badge)">Edit</gl-button>
-      <gl-button v-if="!badge.inherited" variant="danger" :disabled="busy" @click="pendingDelete = badge">Delete</gl-button>
-      <gl-button :disabled="!previewUrl(badge)" @click="previewId = badge.id">Preview badge</gl-button>
+      <MaterialButton v-if="!badge.inherited" variant="text" :disabled="busy" @click="edit(badge)">Edit</MaterialButton>
+      <MaterialButton v-if="!badge.inherited" variant="filled" :disabled="busy" @click="pendingDelete = badge">Delete</MaterialButton>
+      <MaterialButton variant="outlined" :disabled="!previewUrl(badge)" @click="previewId = badge.id">Preview badge</MaterialButton>
       <img v-if="previewId === badge.id && previewUrl(badge)" :src="previewUrl(badge)" :alt="badge.name || 'Badge preview'" />
     </article>
     <p v-if="!busy && !error && !badges.length">No project or inherited badges.</p>
@@ -25,14 +25,16 @@
 </template>
 
 <script>
-import { GlButton, GlForm, GlFormGroup, GlFormInput } from '@gitlab/ui';
+import { GlForm, GlFormGroup } from '@gitlab/ui';
 import ConfirmDialog from './ConfirmDialog.vue';
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
 
 const emptyDraft = () => ({ name: '', imageUrl: '', linkUrl: '' });
 
 export default {
   name: 'BadgesCard',
-  components: { GlButton, GlForm, GlFormGroup, GlFormInput, ConfirmDialog },
+  components: { GlForm, GlFormGroup, ConfirmDialog, MaterialButton, MaterialTextField },
   props: { adapter: { type: Object, required: true } },
   data() { return { badges: [], draft: emptyDraft(), busy: false, error: '', pendingDelete: null, previewId: null }; },
   created() { this.run(() => this.adapter.loadBadges()); },

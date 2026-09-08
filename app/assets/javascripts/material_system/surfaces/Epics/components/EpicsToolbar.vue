@@ -1,4 +1,7 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 import { __ } from '~/locale';
 import MdsIcon from './MdsIcon.vue';
 
@@ -7,7 +10,7 @@ export default {
     __,
   },
   name: 'EpicsToolbar',
-  components: { MdsIcon },
+  components: { MaterialButton, MaterialTextField, MdsIcon },
   props: {
     search: { type: String, default: '' },
     regexMode: { type: Boolean, default: false },
@@ -31,7 +34,7 @@ export default {
     <div class="gl-mds-epics__search">
       <span class="gl-mds-epics__search-icon"><mds-icon name="search" /></span>
       <label class="gl-mds-sr-only" for="epics-search-input">{{ __('Search epics') }}</label>
-      <input
+      <material-text-field
         id="epics-search-input"
         class="gl-mds-epics__search-input"
         type="text"
@@ -40,9 +43,9 @@ export default {
         :aria-invalid="Boolean(invalidMessage)"
         :aria-describedby="invalidMessage ? 'epics-search-invalid' : null"
         autocomplete="off"
-        @input="$emit('update-search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update-search', $event)"
+      :aria-label="placeholder" />
+      <material-button variant="text"
         type="button"
         class="gl-mds-epics__regex-pill"
         :aria-pressed="regexMode"
@@ -51,8 +54,8 @@ export default {
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         type="button"
         class="gl-mds-epics__icon-btn"
         :aria-label="__('Open regex builder')"
@@ -60,7 +63,7 @@ export default {
         @click="$emit('open-regex-builder')"
       >
         <mds-icon name="tune" size="sm" />
-      </button>
+      </material-button>
       <p
         v-if="invalidMessage"
         id="epics-search-invalid"
@@ -70,7 +73,7 @@ export default {
         {{ invalidMessage }}
       </p>
     </div>
-    <button
+    <material-button variant="text"
       type="button"
       class="gl-mds-epics__topbar-btn"
       :aria-label="__('Command palette (Ctrl+Shift+F)')"
@@ -78,8 +81,8 @@ export default {
       @click="$emit('open-palette')"
     >
       <mds-icon name="command" />
-    </button>
-    <button
+    </material-button>
+    <material-button variant="text"
       type="button"
       class="gl-mds-epics__topbar-btn"
       :aria-label="themeLabel"
@@ -87,7 +90,7 @@ export default {
       @click="$emit('toggle-theme')"
     >
       <mds-icon :name="isDark ? 'sun' : 'moon'" />
-    </button>
+    </material-button>
     <div class="gl-mds-epics__avatar" aria-hidden="true">{{ userInitials }}</div>
   </header>
 </template>

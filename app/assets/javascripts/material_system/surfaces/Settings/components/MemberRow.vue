@@ -13,8 +13,8 @@
       <div class="st-row__handle">@{{ member.handle }}</div>
     </div>
     <div class="st-role-menu">
-      <button
-        type="button"
+      <MaterialButton
+        variant="tonal"
         class="st-role-menu__trigger"
         :aria-expanded="menuOpen"
         aria-haspopup="listbox"
@@ -22,7 +22,7 @@
       >
         {{ member.role }}
         <StIcon name="chevron_down" size="small" />
-      </button>
+      </MaterialButton>
       <ul v-if="menuOpen" class="st-role-menu__list" role="listbox" :aria-label="`Role for ${member.name}`">
         <li
           v-for="role in roles"
@@ -40,19 +40,21 @@
         </li>
       </ul>
     </div>
-    <button type="button" class="st-row__remove" :aria-label="`Remove ${member.name}`" @click="$emit('remove', member.id)">
+    <MaterialIconButton class="st-row__remove" :aria-label="`Remove ${member.name}`" @click="$emit('remove', member.id)">
       <StIcon name="delete" size="small" />
-    </button>
+    </MaterialIconButton>
   </div>
 </template>
 
 <script>
 import StIcon from './StIcon.vue';
 import { ROLE_OPTIONS, initialsFor } from '../data';
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
 
 export default {
   name: 'MemberRow',
-  components: { StIcon },
+  components: { StIcon, MaterialButton, MaterialIconButton },
   props: {
     member: { type: Object, required: true },
     selected: { type: Boolean, default: false },

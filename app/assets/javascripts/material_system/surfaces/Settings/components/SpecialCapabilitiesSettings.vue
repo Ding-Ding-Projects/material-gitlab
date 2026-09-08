@@ -154,14 +154,14 @@
           />
           <ul v-if="bot.groups.length" class="st-group-options" aria-label="Allowed groups">
             <li v-for="group in bot.groups" :key="group.id">
-              <button
-                type="button"
+              <MaterialButton
+                variant="outlined"
                 class="st-group-option"
                 :aria-pressed="bot.groupId === group.id"
                 @click="selectBotGroup(group)"
               >
                 {{ group.name }}<small>{{ group.fullPath }}</small>
-              </button>
+              </MaterialButton>
             </li>
           </ul>
           <p v-if="bot.groupId" class="st-card__desc">
@@ -203,6 +203,7 @@ import { GlAlert, GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput } f
 import csrf from '~/lib/utils/csrf';
 import ConfirmDialog from './ConfirmDialog.vue';
 import { createSpecialCapabilitiesAdapter } from '../special_capabilities_adapter';
+import MaterialButton from '~/material_system/components/material_button';
 
 const patternsText = (patterns) => (Array.isArray(patterns) ? patterns.join(', ') : '');
 const splitPatterns = (value) =>
@@ -226,6 +227,7 @@ export default {
     GlFormCheckbox,
     GlFormGroup,
     GlFormInput,
+    MaterialButton,
   },
   props: { metadata: { type: Object, required: true } },
   data() {

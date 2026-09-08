@@ -1,6 +1,6 @@
 <template>
   <nav class="gl-mds-plan__wikinav" aria-label="Wiki pages">
-    <button
+    <material-button variant="text"
       v-for="page in pages"
       :key="page.id"
       type="button"
@@ -10,13 +10,16 @@
       @click="$emit('select', page.id)"
     >
       {{ page.title }}
-    </button>
+    </material-button>
     <div v-if="pages.length === 0" class="gl-mds-plan__empty gl-mds-plan__empty--compact">Nothing matches.</div>
   </nav>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'WikiPageList',
   props: {
     pages: { type: Array, required: true },

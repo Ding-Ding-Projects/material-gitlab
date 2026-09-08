@@ -7,7 +7,7 @@
       :aria-label="`Select merge request: ${mr.title}`"
       @change="$emit('toggle-select', mr.id)"
     />
-    <button type="button" class="mr-list-item__open" @click="$emit('open', mr.id)">
+    <material-button variant="text" type="button" class="mr-list-item__open" @click="$emit('open', mr.id)">
       <span
         class="material-symbols-outlined mr-list-item__state-icon"
         :style="{ color: `var(${state.colorVar})` }"
@@ -41,18 +41,20 @@
       </span>
       <span class="mr-list-item__avatar" :title="mr.author" aria-hidden="true">{{ avatar }}</span>
       <span class="mr-sr-only">Author: {{ mr.author }}.</span>
-    </button>
+    </material-button>
     <gl-link v-if="mr.webUrl" :href="mr.webUrl">Open full review</gl-link>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { GlLink } from '@gitlab/ui';
 import { avatarInitials, stateVisuals, PIPELINE_STATUS_META } from '../data';
 
 export default {
   name: 'MrListItem',
-  components: { GlLink },
+  components: { MaterialButton, GlLink },
   props: {
     mr: { type: Object, required: true },
     selected: { type: Boolean, default: false },

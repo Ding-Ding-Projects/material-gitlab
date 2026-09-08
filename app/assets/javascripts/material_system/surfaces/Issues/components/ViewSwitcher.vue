@@ -1,6 +1,6 @@
 <template>
   <div class="gl-mds-view-switch" role="tablist" aria-label="Issues view">
-    <button
+    <material-button variant="text"
       type="button"
       role="tab"
       class="gl-mds-view-switch__option"
@@ -9,8 +9,8 @@
       @click="$emit('update:view', 'list')"
     >
       List
-    </button>
-    <button
+    </material-button>
+    <material-button variant="text"
       type="button"
       role="tab"
       class="gl-mds-view-switch__option"
@@ -19,12 +19,15 @@
       @click="$emit('update:view', 'board')"
     >
       Board
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'ViewSwitcher',
   props: {
     view: { type: String, required: true },

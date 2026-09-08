@@ -28,12 +28,12 @@
         @clear="selectedIds = []"
         @invert="invertSelection"
       >
-        <button type="button" class="st-btn st-btn--text st-btn--compact" @click="$emit('bulk-toggle', { ids: selectedIds, on: true })">
+        <MaterialButton variant="text" class="st-btn st-btn--compact" @click="$emit('bulk-toggle', { ids: selectedIds, on: true })">
           Enable selected
-        </button>
-        <button type="button" class="st-btn st-btn--text st-btn--compact" @click="$emit('bulk-toggle', { ids: selectedIds, on: false })">
+        </MaterialButton>
+        <MaterialButton variant="text" class="st-btn st-btn--compact" @click="$emit('bulk-toggle', { ids: selectedIds, on: false })">
           Disable selected
-        </button>
+        </MaterialButton>
       </SelectionToolbar>
 
       <IntegrationRow
@@ -54,6 +54,7 @@
 
 <script>
 import { GlButton } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
 import SearchField from './SearchField.vue';
 import SelectionToolbar from './SelectionToolbar.vue';
 import IntegrationRow from './IntegrationRow.vue';
@@ -61,7 +62,7 @@ import { createMatcher } from '../data';
 
 export default {
   name: 'IntegrationsTab',
-  components: { GlButton, SearchField, SelectionToolbar, IntegrationRow },
+  components: { GlButton, MaterialButton, SearchField, SelectionToolbar, IntegrationRow },
   props: {
     integrations: { type: Array, required: true },
     readOnly: { type: Boolean, default: false },

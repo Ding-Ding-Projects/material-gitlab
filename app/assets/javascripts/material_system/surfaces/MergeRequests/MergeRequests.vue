@@ -35,7 +35,7 @@
         </div>
         <div v-else-if="loadError" role="alert">
           <p>Merge requests could not be loaded: {{ loadError.message }}</p>
-          <gl-button @click="loadListPage">Retry</gl-button>
+          <material-button variant="outlined" @click="loadListPage">Retry</material-button>
         </div>
         <mr-list
           v-else
@@ -48,9 +48,9 @@
           @invert-selection="invertSelection"
         />
         <nav v-if="production && !loading && !loadError" aria-label="Merge request pages">
-          <gl-button :disabled="page <= 1" @click="changePage(page - 1)">Previous</gl-button>
+          <material-button variant="outlined" :disabled="page <= 1" @click="changePage(page - 1)">Previous</material-button>
           <span>Page {{ page }}<template v-if="totalPages"> of {{ totalPages }}</template></span>
-          <gl-button :disabled="!hasNextPage" @click="changePage(page + 1)">Next</gl-button>
+          <material-button variant="outlined" :disabled="!hasNextPage" @click="changePage(page + 1)">Next</material-button>
         </nav>
       </main>
     </template>
@@ -80,7 +80,7 @@
 </template>
 
 <script>
-import { GlButton } from '@gitlab/ui';
+import MaterialButton from '~/material_system/components/material_button';
 import MrTopBar from './components/MrTopBar.vue';
 import MrListHeader from './components/MrListHeader.vue';
 import MrFilterChips from './components/MrFilterChips.vue';
@@ -110,8 +110,7 @@ import { loadSettings, updateSettings } from '~/material_system/settings';
 
 export default {
   name: 'MergeRequestsSurface',
-  components: {
-    GlButton,
+  components: { MaterialButton,
     MrTopBar,
     MrListHeader,
     MrFilterChips,

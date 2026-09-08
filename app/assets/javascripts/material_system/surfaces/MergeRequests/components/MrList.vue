@@ -12,9 +12,9 @@
           />
           {{ scopeLabel }}
         </label>
-        <button type="button" class="mr-list__invert-btn" @click="$emit('invert-selection')">
+        <material-button variant="text" type="button" class="mr-list__invert-btn" @click="$emit('invert-selection')">
           Invert selection
-        </button>
+        </material-button>
       </div>
       <mr-list-item
         v-for="mr in mrs"
@@ -30,11 +30,13 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import MrListItem from './MrListItem.vue';
 
 export default {
   name: 'MrList',
-  components: { MrListItem },
+  components: { MaterialButton, MrListItem },
   props: {
     mrs: { type: Array, required: true },
     selectedIds: { type: Array, required: true },

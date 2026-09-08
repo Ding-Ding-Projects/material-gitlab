@@ -1,7 +1,10 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { __ } from '~/locale';
 
 export default {
+  components: { MaterialButton },
   name: 'ConfirmDialog',
   props: {
     title: { type: String, required: true },
@@ -41,17 +44,17 @@ export default {
       <h2 class="gl-mds-epics__dialog-title">{{ title }}</h2>
       <p id="epics-confirm-message" class="gl-mds-epics__confirm-body">{{ message }}</p>
       <div class="gl-mds-epics__dialog-actions">
-        <button ref="cancelBtn" type="button" class="gl-mds-epics__btn" @click="$emit('cancel')">
+        <material-button variant="text" ref="cancelBtn" type="button" class="gl-mds-epics__btn" @click="$emit('cancel')">
           {{ __('Cancel') }}
-        </button>
-        <button
+        </material-button>
+        <material-button variant="filled"
           type="button"
           class="gl-mds-epics__btn"
           :class="danger ? 'gl-mds-epics__btn--danger' : 'gl-mds-epics__btn--filled'"
           @click="$emit('confirm')"
         >
           {{ confirmLabel }}
-        </button>
+        </material-button>
       </div>
     </div>
   </div>

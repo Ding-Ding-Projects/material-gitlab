@@ -12,9 +12,9 @@
       <div class="gl-mds-drawer__top">
         <span class="gl-mds-drawer__iid">#{{ issue.iid }}</span>
         <span class="gl-mds-drawer__state" :class="`gl-mds-drawer__state--${issue.state.toLowerCase()}`">{{ issue.state }}</span>
-        <button type="button" class="gl-mds-drawer__close" aria-label="Close issue details" @click="$emit('close')">
+        <material-button variant="text" type="button" class="gl-mds-drawer__close" aria-label="Close issue details" @click="$emit('close')">
           <mds-icon name="close" />
-        </button>
+        </material-button>
       </div>
 
       <h2 :id="titleId" class="gl-mds-drawer__title">{{ issue.title }}</h2>
@@ -24,7 +24,7 @@
       <section class="gl-mds-drawer__section">
         <h3 class="gl-mds-drawer__label">Labels</h3>
         <div class="gl-mds-drawer__chips">
-          <button
+          <material-button variant="text"
             v-for="label in allLabels"
             :key="label.name"
             type="button"
@@ -36,14 +36,14 @@
             @click="$emit('toggle-label', label.name)"
           >
             {{ label.name }}
-          </button>
+          </material-button>
         </div>
       </section>
 
       <section class="gl-mds-drawer__section">
         <h3 class="gl-mds-drawer__label">Assignee</h3>
         <div class="gl-mds-drawer__chips">
-          <button
+          <material-button variant="text"
             v-for="person in assignees"
             :key="person.name"
             type="button"
@@ -54,24 +54,26 @@
             @click="$emit('pick-assignee', person)"
           >
             <span class="gl-mds-drawer__assignee-avatar">{{ person.avatar }}</span>{{ person.name }}
-          </button>
+          </material-button>
         </div>
       </section>
 
-      <button v-if="canUpdate" type="button" class="gl-mds-drawer__toggle-state" @click="$emit('toggle-state')">
+      <material-button variant="text" v-if="canUpdate" type="button" class="gl-mds-drawer__toggle-state" @click="$emit('toggle-state')">
         {{ issue.state === 'Open' ? 'Close issue' : 'Reopen issue' }}
-      </button>
+      </material-button>
     </aside>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { GlLink } from '@gitlab/ui';
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'IssueDrawer',
-  components: { GlLink, MdsIcon },
+  components: { MaterialButton, GlLink, MdsIcon },
   props: {
     issue: { type: Object, required: true },
     allLabels: { type: Array, required: true },

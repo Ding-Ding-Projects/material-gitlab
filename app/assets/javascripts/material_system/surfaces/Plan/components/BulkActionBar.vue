@@ -2,7 +2,7 @@
   <div class="gl-mds-plan__bulkbar" role="toolbar" :aria-label="`Bulk ${tabLabel.toLowerCase()} actions`">
     <span class="gl-mds-plan__bulkbar-summary">{{ summary }}</span>
     <div class="gl-mds-plan__bulkbar-actions">
-      <button
+      <material-button variant="text"
         v-for="action in actions"
         :key="action.id"
         type="button"
@@ -11,18 +11,20 @@
         @click="$emit('run', action.id)"
       >
         <mds-icon :name="action.icon" size="sm" />{{ action.label }}
-      </button>
-      <button type="button" class="gl-mds-plan__bulkbar-clear" @click="$emit('clear')">Clear selection</button>
+      </material-button>
+      <material-button variant="text" type="button" class="gl-mds-plan__bulkbar-clear" @click="$emit('clear')">Clear selection</material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'BulkActionBar',
-  components: { MdsIcon },
+  components: { MaterialButton, MdsIcon },
   props: {
     selectedCount: { type: Number, required: true },
     totalCount: { type: Number, required: true },

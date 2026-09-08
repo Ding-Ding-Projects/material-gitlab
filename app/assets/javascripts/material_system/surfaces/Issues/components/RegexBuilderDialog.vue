@@ -15,7 +15,7 @@
           {{ validLabel }}
         </span>
         <div class="gl-mds-regex__flags" role="group" aria-label="Regex flags">
-          <button
+          <material-button variant="text"
             v-for="flag in flagInfo"
             :key="flag.name"
             type="button"
@@ -27,26 +27,26 @@
             @click="$emit('toggle-flag', flag.name)"
           >
             {{ flag.name }}
-          </button>
+          </material-button>
         </div>
       </div>
 
       <label class="gl-mds-sr-only" for="gl-mds-regex-pattern">Regex pattern</label>
-      <input
+      <material-text-field
         id="gl-mds-regex-pattern"
         ref="patternInput"
         class="gl-mds-regex__pattern"
         type="text"
         :value="draft"
         placeholder="pattern, e.g. (auth|login).*fail"
-        @input="$emit('update:draft', $event.target.value)"
-      />
+        @input="$emit('update:draft', $event)"
+      aria-label="Regex pattern" />
       <div v-if="!evaluation.valid" class="gl-mds-regex__error" role="alert">{{ evaluation.errorMessage }}</div>
 
       <div class="gl-mds-regex__snippets">
         <div v-for="group in snippetGroups" :key="group.name" class="gl-mds-regex__snippet-row">
           <span class="gl-mds-regex__snippet-label">{{ group.name }}</span>
-          <button
+          <material-button variant="text"
             v-for="snippet in group.items"
             :key="snippet.text"
             type="button"
@@ -55,7 +55,7 @@
             @click="$emit('insert-snippet', snippet.text)"
           >
             {{ snippet.text }}
-          </button>
+          </material-button>
         </div>
       </div>
 
@@ -63,13 +63,13 @@
         <div class="gl-mds-regex__column">
           <span class="gl-mds-regex__column-label">Test string</span>
           <label class="gl-mds-sr-only" for="gl-mds-regex-test-text">Test string</label>
-          <textarea
+          <material-text-field type="textarea"
             id="gl-mds-regex-test-text"
             class="gl-mds-regex__test-input"
             :value="testText"
             rows="4"
-            @input="$emit('update:test-text', $event.target.value)"
-          ></textarea>
+            @input="$emit('update:test-text', $event)"
+           aria-label="Test string"></material-text-field>
           <div class="gl-mds-regex__highlight">
             <template v-for="(segment, index) in evaluation.segments">
               <mark v-if="segment.matched" :key="`m-${index}`">{{ segment.text }}</mark>
@@ -102,15 +102,19 @@
       </div>
 
       <div class="gl-mds-regex__actions">
-        <button type="button" class="gl-mds-regex__cancel" @click="$emit('close')">Cancel</button>
-        <button type="button" class="gl-mds-regex__apply" :disabled="!evaluation.valid || !draft" @click="$emit('apply')">Apply to search</button>
+        <material-button variant="text" type="button" class="gl-mds-regex__cancel" @click="$emit('close')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-regex__apply" :disabled="!evaluation.valid || !draft" @click="$emit('apply')">Apply to search</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 export default {
+  components: { MaterialButton, MaterialTextField },
   name: 'RegexBuilderDialog',
   props: {
     draft: { type: String, default: '' },

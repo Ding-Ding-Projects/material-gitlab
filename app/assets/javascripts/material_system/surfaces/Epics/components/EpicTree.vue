@@ -1,11 +1,13 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { __, sprintf, n__ } from '~/locale';
 import EpicTreeRow from './EpicTreeRow.vue';
 import EmptyState from './EmptyState.vue';
 
 export default {
   name: 'EpicTree',
-  components: { EpicTreeRow, EmptyState },
+  components: { MaterialButton, EpicTreeRow, EmptyState },
   props: {
     rows: { type: Array, required: true },
     totalCount: { type: Number, required: true },
@@ -129,14 +131,14 @@ export default {
       <span v-if="visibleSelectedCount" class="gl-mds-epics__bulkbar-count">{{
         sprintf(__('%{count} selected'), { count: visibleSelectedCount })
       }}</span>
-      <button
+      <material-button variant="text"
         v-if="rows.length"
         type="button"
         class="gl-mds-epics__tree-head-action"
         @click="$emit('invert-selection')"
       >
         {{ __('Invert selection') }}
-      </button>
+      </material-button>
     </div>
     <div
       v-if="rows.length"

@@ -126,3 +126,37 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+// Official controls inherit the current surface theme through public Material Web tokens.
+.gl-mds-plan {
+  --md-sys-color-primary: var(--gl-mds-prim);
+  --md-sys-color-on-primary: var(--gl-mds-onprim);
+  --md-sys-color-primary-container: var(--gl-mds-primc);
+  --md-sys-color-on-primary-container: var(--gl-mds-onprimc);
+  --md-sys-color-surface: var(--gl-mds-surf);
+  --md-sys-color-surface-container-highest: var(--gl-mds-surfch);
+  --md-sys-color-on-surface: var(--gl-mds-onsurf);
+  --md-sys-color-on-surface-variant: var(--gl-mds-onsurfv);
+  --md-sys-color-outline: var(--gl-mds-outl);
+  --md-sys-color-error: var(--gl-mds-err);
+
+  md-filled-text-field {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    --md-filled-text-field-container-shape: 12px;
+  }
+
+  md-text-button,
+  md-filled-button,
+  md-outlined-button,
+  md-filled-tonal-button,
+  md-elevated-button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    --md-text-button-label-text-color: currentColor;
+  }
+}

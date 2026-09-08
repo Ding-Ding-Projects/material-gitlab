@@ -10,36 +10,40 @@
     >
       <h2 id="gl-mds-new-issue-title" class="gl-mds-dialog__heading">New issue</h2>
       <label class="gl-mds-sr-only" for="gl-mds-new-issue-title-input">Title</label>
-      <input
+      <material-text-field
         id="gl-mds-new-issue-title-input"
         ref="titleInput"
         class="gl-mds-dialog__input"
         type="text"
         :value="titleValue"
         placeholder="Title"
-        @input="$emit('update:title', $event.target.value)"
+        @input="$emit('update:title', $event)"
         @keydown.esc="$emit('cancel')"
-      />
+      aria-label="Title" />
       <label class="gl-mds-sr-only" for="gl-mds-new-issue-body-input">Description (optional)</label>
-      <textarea
+      <material-text-field type="textarea"
         id="gl-mds-new-issue-body-input"
         class="gl-mds-dialog__textarea"
         :value="bodyValue"
         placeholder="Description (optional)"
         rows="4"
-        @input="$emit('update:body', $event.target.value)"
+        @input="$emit('update:body', $event)"
         @keydown.esc="$emit('cancel')"
-      ></textarea>
+       aria-label="Description (optional)"></material-text-field>
       <div class="gl-mds-dialog__actions">
-        <button type="button" class="gl-mds-dialog__cancel" @click="$emit('cancel')">Cancel</button>
-        <button type="button" class="gl-mds-dialog__confirm" :disabled="!titleValue.trim()" @click="$emit('create')">Create issue</button>
+        <material-button variant="text" type="button" class="gl-mds-dialog__cancel" @click="$emit('cancel')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="gl-mds-dialog__confirm" :disabled="!titleValue.trim()" @click="$emit('create')">Create issue</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
+
 export default {
+  components: { MaterialButton, MaterialTextField },
   name: 'NewIssueDialog',
   props: {
     titleValue: { type: String, default: '' },

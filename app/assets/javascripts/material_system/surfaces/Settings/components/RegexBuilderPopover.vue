@@ -9,19 +9,20 @@
   >
     <div class="st-regex-popover__header">
       <h2 class="st-regex-popover__title">Regex builder</h2>
-      <button type="button" class="st-regex-popover__close" aria-label="Close regex builder" @click="close">
+      <MaterialIconButton class="st-regex-popover__close" aria-label="Close regex builder" @click="close">
         <StIcon name="close" size="small" />
-      </button>
+      </MaterialIconButton>
     </div>
 
     <label class="st-regex-popover__label" :for="patternId">Pattern</label>
-    <input
+    <MaterialTextField
       :id="patternId"
       ref="patternInput"
       type="text"
       class="st-regex-popover__input"
       :value="pattern"
       placeholder="e.g. ^DEPLOY|main"
+      aria-label="Pattern"
       :aria-invalid="!syntax.valid"
       @input="onPatternInput"
     />
@@ -56,10 +57,10 @@
     </div>
 
     <div class="st-regex-popover__actions">
-      <button type="button" class="st-btn st-btn--text" @click="close">Cancel</button>
-      <button type="button" class="st-btn st-btn--filled" :disabled="!pattern || !syntax.valid" @click="apply">
+      <MaterialButton variant="text" @click="close">Cancel</MaterialButton>
+      <MaterialButton variant="filled" :disabled="!pattern || !syntax.valid" @click="apply">
         Apply
-      </button>
+      </MaterialButton>
     </div>
   </div>
 </template>
@@ -67,6 +68,9 @@
 <script>
 import StIcon from './StIcon.vue';
 import { RegexBuilder } from '../../../regex-builder';
+import MaterialButton from '~/material_system/components/material_button';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
 
 const AVAILABLE_FLAGS = [
   { value: 'i', label: 'Ignore case (i)' },
@@ -76,7 +80,7 @@ const AVAILABLE_FLAGS = [
 
 export default {
   name: 'RegexBuilderPopover',
-  components: { StIcon },
+  components: { StIcon, MaterialButton, MaterialIconButton, MaterialTextField },
   props: {
     initialPattern: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },
@@ -123,8 +127,8 @@ export default {
     document.removeEventListener('mousedown', this.onOutsideClick, true);
   },
   methods: {
-    onPatternInput(event) {
-      const snapshot = this.builder.update({ pattern: event.target.value });
+    onPatternInput(value) {
+      const snapshot = this.builder.update({ pattern: value });
       this.pattern = snapshot.pattern;
       this.syntax = snapshot.syntax;
     },

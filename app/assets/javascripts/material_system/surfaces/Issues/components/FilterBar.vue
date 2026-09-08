@@ -1,6 +1,6 @@
 <template>
   <div class="gl-mds-filterbar" role="group" aria-label="Issue filters">
-    <button
+    <material-button variant="text"
       v-for="chip in chips"
       :key="chip.key"
       type="button"
@@ -11,17 +11,19 @@
     >
       <mds-icon v-if="chip.on" name="check" size="sm" />
       {{ chip.label }}
-    </button>
+    </material-button>
     <span class="gl-mds-filterbar__count">{{ countLabel }}</span>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import MdsIcon from './MdsIcon.vue';
 
 export default {
   name: 'FilterBar',
-  components: { MdsIcon },
+  components: { MaterialButton, MdsIcon },
   props: {
     filters: { type: Object, required: true },
     count: { type: Number, required: true },

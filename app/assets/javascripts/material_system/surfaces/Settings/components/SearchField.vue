@@ -3,19 +3,19 @@
     <div class="st-search" :class="{ 'st-search--invalid': regexMode && !valid }">
       <StIcon name="search" class="st-search__icon" />
       <label :for="inputId" class="st-visually-hidden">{{ label }}</label>
-      <input
+      <MaterialTextField
         :id="inputId"
         ref="input"
         type="text"
         class="st-search__input"
         :value="value"
         :placeholder="placeholder"
+        :aria-label="label"
         :aria-invalid="regexMode && !valid"
         :aria-describedby="regexMode && !valid ? `${inputId}-error` : null"
-        @input="$emit('input', $event.target.value)"
+        @input="$emit('input', $event)"
       />
-      <button
-        type="button"
+      <MaterialTextButton
         class="st-search__pill"
         :class="{ 'st-search__pill--active': regexMode }"
         :aria-pressed="regexMode"
@@ -23,17 +23,16 @@
         @click="$emit('toggle-regex')"
       >
         .*
-      </button>
-      <button
-        type="button"
+      </MaterialTextButton>
+      <MaterialIconButton
         class="st-search__icon-btn"
         title="Regex builder"
         aria-haspopup="dialog"
         :aria-expanded="regexOpen"
         @click="$emit('toggle-builder')"
-      >
+       aria-label="Regex builder">
         <StIcon name="wrench" size="small" />
-      </button>
+      </MaterialIconButton>
       <RegexBuilderPopover
         v-if="regexOpen"
         :initial-pattern="regexMode ? value : ''"
@@ -52,10 +51,13 @@
 <script>
 import StIcon from './StIcon.vue';
 import RegexBuilderPopover from './RegexBuilderPopover.vue';
+import MaterialIconButton from '~/material_system/components/material_icon_button';
+import MaterialTextButton from '~/material_system/components/material_text_button';
+import MaterialTextField from '~/material_system/components/material_text_field';
 
 export default {
   name: 'SearchField',
-  components: { StIcon, RegexBuilderPopover },
+  components: { StIcon, RegexBuilderPopover, MaterialIconButton, MaterialTextButton, MaterialTextField },
   props: {
     value: { type: String, default: '' },
     placeholder: { type: String, default: 'Search' },

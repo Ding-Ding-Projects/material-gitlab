@@ -1,4 +1,6 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { __, sprintf, n__ } from '~/locale';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import notificationCenter from '../../notifications';
@@ -41,7 +43,7 @@ const downloadTextFile = (filename, contents, mimeType) => {
 
 export default {
   name: 'Epics',
-  components: {
+  components: { MaterialButton,
     EpicsToolbar,
     EpicsHeader,
     BulkActionBar,
@@ -408,7 +410,7 @@ export default {
       <div v-if="fetchError" class="gl-mds-epics__empty" role="alert">
         <h2 class="gl-mds-epics__empty-title">Epics could not be loaded</h2>
         <p class="gl-mds-epics__empty-text">{{ fetchError.message }}</p>
-        <button type="button" class="gl-mds-epics__btn gl-mds-epics__btn--filled" @click="fetchEpics">Retry</button>
+        <material-button variant="filled" type="button" class="gl-mds-epics__btn gl-mds-epics__btn--filled" @click="fetchEpics">Retry</material-button>
       </div>
       <epic-tree
         v-else-if="view === 'tree'"

@@ -201,3 +201,37 @@
     }
   }
 }
+
+// Official controls inherit the current surface theme through public Material Web tokens.
+.st-surface {
+  --md-sys-color-primary: var(--st-prim);
+  --md-sys-color-on-primary: var(--st-onprim);
+  --md-sys-color-primary-container: var(--st-primc);
+  --md-sys-color-on-primary-container: var(--st-onprimc);
+  --md-sys-color-surface: var(--st-surf);
+  --md-sys-color-surface-container-highest: var(--st-surfch);
+  --md-sys-color-on-surface: var(--st-onsurf);
+  --md-sys-color-on-surface-variant: var(--st-onsurfv);
+  --md-sys-color-outline: var(--st-outl);
+  --md-sys-color-error: var(--st-err);
+
+  md-filled-text-field {
+    min-width: 0;
+    max-width: 100%;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    --md-filled-text-field-container-shape: 12px;
+  }
+
+  md-text-button,
+  md-filled-button,
+  md-outlined-button,
+  md-filled-tonal-button,
+  md-elevated-button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    --md-text-button-label-text-color: currentColor;
+  }
+}

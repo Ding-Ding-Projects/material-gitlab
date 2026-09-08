@@ -26,9 +26,9 @@
         @clear="selectedIds = []"
         @invert="invertSelection"
       >
-        <button type="button" class="st-btn st-btn--danger st-btn--compact" @click="confirmRemove(selectedIds)">
+        <MaterialButton variant="filled" class="st-btn st-btn--danger st-btn--compact" @click="confirmRemove(selectedIds)">
           Remove selected
-        </button>
+        </MaterialButton>
       </SelectionToolbar>
 
       <MemberRow
@@ -65,10 +65,11 @@ import SelectionToolbar from './SelectionToolbar.vue';
 import MemberRow from './MemberRow.vue';
 import ConfirmDialog from './ConfirmDialog.vue';
 import { createMatcher } from '../data';
+import MaterialButton from '~/material_system/components/material_button';
 
 export default {
   name: 'MembersTab',
-  components: { SearchField, SelectionToolbar, MemberRow, ConfirmDialog },
+  components: { SearchField, SelectionToolbar, MemberRow, ConfirmDialog, MaterialButton },
   props: {
     members: { type: Array, required: true },
   },

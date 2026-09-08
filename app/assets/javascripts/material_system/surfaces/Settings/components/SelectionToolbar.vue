@@ -12,20 +12,23 @@
       <span v-else>{{ selectedCount }} selected of {{ visibleCount }} shown</span>
     </label>
 
-    <button v-if="visibleCount > 0" type="button" class="st-selection-toolbar__link" @click="$emit('invert')">
+    <MaterialTextButton v-if="visibleCount > 0" class="st-selection-toolbar__link" @click="$emit('invert')">
       Invert selection
-    </button>
+    </MaterialTextButton>
 
     <div v-if="selectedCount > 0" class="st-selection-toolbar__actions">
       <slot />
-      <button type="button" class="st-selection-toolbar__link" @click="$emit('clear')">Clear</button>
+      <MaterialTextButton class="st-selection-toolbar__link" @click="$emit('clear')">Clear</MaterialTextButton>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialTextButton from '~/material_system/components/material_text_button';
+
 export default {
   name: 'SelectionToolbar',
+  components: { MaterialTextButton },
   props: {
     visibleCount: { type: Number, required: true },
     selectedCount: { type: Number, required: true },

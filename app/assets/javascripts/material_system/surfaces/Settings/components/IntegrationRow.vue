@@ -13,9 +13,9 @@
       <div class="st-row__name">{{ integration.name }}</div>
       <div class="st-row__desc">{{ integration.desc }}</div>
     </div>
-    <button
+    <MaterialButton
       v-if="!readOnly"
-      type="button"
+      variant="tonal"
       role="switch"
       class="st-switch"
       :class="{ 'st-switch--on': integration.on }"
@@ -24,17 +24,18 @@
       @click="$emit('toggle', integration.id)"
     >
       <span class="st-switch__knob"></span>
-    </button>
+    </MaterialButton>
     <span v-else>{{ integration.on ? 'Enabled' : 'Disabled' }}</span>
   </div>
 </template>
 
 <script>
 import StIcon from './StIcon.vue';
+import MaterialButton from '~/material_system/components/material_button';
 
 export default {
   name: 'IntegrationRow',
-  components: { StIcon },
+  components: { StIcon, MaterialButton },
   props: {
     integration: { type: Object, required: true },
     selected: { type: Boolean, default: false },

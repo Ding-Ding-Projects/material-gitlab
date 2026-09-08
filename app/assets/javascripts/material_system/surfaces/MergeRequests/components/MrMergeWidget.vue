@@ -12,7 +12,7 @@
       <span class="mr-merge-widget__check-note">{{ check.note }}</span>
     </div>
     <div class="mr-merge-widget__actions">
-      <button
+      <material-button variant="filled"
         type="button"
         class="mr-merge-widget__merge-btn"
         :disabled="mergeDisabled"
@@ -20,9 +20,9 @@
       >
         <span class="material-symbols-outlined" aria-hidden="true">call_merge</span>
         {{ mergeLabel }}
-      </button>
+      </material-button>
       <span v-if="mergingPhrase" class="mr-merge-widget__phrase" role="status">{{ mergingPhrase }}</span>
-      <button
+      <material-button variant="text"
         type="button"
         class="mr-merge-widget__approve-btn"
         :aria-pressed="mr.approvedByMe ? 'true' : 'false'"
@@ -30,15 +30,18 @@
       >
         <span class="material-symbols-outlined" style="font-size: 18px" aria-hidden="true">verified</span>
         {{ mr.approvedByMe ? 'Approved' : 'Approve' }}
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { PIPELINE_STATUS_META, unresolvedThreadCount } from '../data';
 
 export default {
+  components: { MaterialButton },
   name: 'MrMergeWidget',
   props: {
     mr: { type: Object, required: true },

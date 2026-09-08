@@ -13,9 +13,9 @@
       <div v-if="rows.length > 0" class="gl-mds-plan__select-all">
         <select-checkbox :checked="allSelected" :indeterminate="someSelected" :label="selectAllLabel" @change="onSelectAllChange" />
         <span class="gl-mds-plan__select-all-label">{{ selectAllLabel }}</span>
-        <button v-if="selectedIds.length > 0" type="button" class="gl-mds-plan__invert" @click="$emit('invert-selection')">
+        <material-button variant="text" v-if="selectedIds.length > 0" type="button" class="gl-mds-plan__invert" @click="$emit('invert-selection')">
           Invert selection
-        </button>
+        </material-button>
       </div>
       <div role="list" :aria-label="`${tabLabel} list`">
         <record-row
@@ -32,13 +32,15 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import RecordRow from './RecordRow.vue';
 import SelectCheckbox from './SelectCheckbox.vue';
 import BulkActionBar from './BulkActionBar.vue';
 
 export default {
   name: 'RecordList',
-  components: { RecordRow, SelectCheckbox, BulkActionBar },
+  components: { MaterialButton, RecordRow, SelectCheckbox, BulkActionBar },
   props: {
     rows: { type: Array, required: true },
     selectedIds: { type: Array, required: true },

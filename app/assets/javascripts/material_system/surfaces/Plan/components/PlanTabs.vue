@@ -1,6 +1,6 @@
 <template>
   <div class="gl-mds-plan__tabs" role="tablist" aria-label="Plan sections" @keydown="onKeydown">
-    <button
+    <material-button variant="text"
       v-for="tab in tabs"
       :id="`gl-mds-plan-tab-${tab}`"
       :key="tab"
@@ -14,12 +14,15 @@
       @click="$emit('select', tab)"
     >
       {{ tab }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 export default {
+  components: { MaterialButton },
   name: 'PlanTabs',
   props: {
     tabs: { type: Array, required: true },

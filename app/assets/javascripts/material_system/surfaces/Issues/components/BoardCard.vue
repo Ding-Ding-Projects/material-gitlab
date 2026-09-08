@@ -4,9 +4,9 @@
     draggable="true"
     @dragstart="$emit('drag-start', card.id)"
   >
-    <button type="button" class="gl-mds-board-card__open" @click="$emit('open', card.id)">
+    <material-button variant="text" type="button" class="gl-mds-board-card__open" @click="$emit('open', card.id)">
       {{ card.title }}
-    </button>
+    </material-button>
     <div class="gl-mds-board-card__footer">
       <label-chip v-for="label in card.labels.slice(0, 1)" :key="label" :label="label" size="sm" />
       <span class="gl-mds-board-card__iid">#{{ card.iid }}</span>
@@ -22,11 +22,13 @@
 </template>
 
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import LabelChip from './LabelChip.vue';
 
 export default {
   name: 'BoardCard',
-  components: { LabelChip },
+  components: { MaterialButton, LabelChip },
   props: {
     card: { type: Object, required: true },
     columns: { type: Array, required: true },

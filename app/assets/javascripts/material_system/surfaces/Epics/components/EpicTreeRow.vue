@@ -1,11 +1,13 @@
 <script>
+import MaterialButton from '~/material_system/components/material_button';
+
 import { __, sprintf } from '~/locale';
 import MdsIcon from './MdsIcon.vue';
 import { EPIC_STATE, progressPercent, progressTotal, formatMonthRange } from '../data';
 
 export default {
   name: 'EpicTreeRow',
-  components: { MdsIcon },
+  components: { MaterialButton, MdsIcon },
   props: {
     epicItem: { type: Object, required: true },
     selected: { type: Boolean, default: false },
@@ -77,7 +79,7 @@ export default {
       @click.stop
       @change="$emit('toggle-select', epicItem.id)"
     />
-    <button
+    <material-button variant="text"
       v-if="epicItem.hasChildren"
       type="button"
       class="gl-mds-epics__chevron"
@@ -85,7 +87,7 @@ export default {
       @click.stop="$emit('toggle-collapse', epicItem.id)"
     >
       <mds-icon :name="collapsed ? 'chevron-right' : 'expand-more'" size="sm" />
-    </button>
+    </material-button>
     <span v-else class="gl-mds-epics__chevron gl-mds-epics__chevron--placeholder" aria-hidden="true"></span>
     <span class="gl-mds-epics__row-icon" :class="isOpen ? 'gl-mds-epics__row-icon--open' : ''">
       <mds-icon :name="stateIcon" size="md" />
