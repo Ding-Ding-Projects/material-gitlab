@@ -133,3 +133,4 @@ describe('Issues and Merge Requests production routes', () => {
     await expect(createProjectMergeRequestsAdapter({ projectPath: 'team/project', http }).listPage()).rejects.toThrow('invalid merge requests list');
   });
 });
+jest.mock('~/material_system/surfaces/MergeRequests/mergerequests.scss', () => ({}));

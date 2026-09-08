@@ -30,3 +30,4 @@ describe('production Epics component mount', () => {
     expect(vm.$children[0].view).toBe('tree');
   });
 });
+jest.mock('~/material_system/surfaces/Epics/epics.scss', () => ({}));
