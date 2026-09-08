@@ -16,12 +16,12 @@
     <div class="am-sidebar__search">
       <MaterialIcon name="search" :size="17" />
       <label for="am-nav-search" class="am-visually-hidden">Search or go to…</label>
-      <input
+      <MaterialTextField
         id="am-nav-search"
         type="text"
         placeholder="Search or go to…"
         :value="navQuery"
-        @input="navQuery = $event.target.value"
+        @input="navQuery = $event"
       />
       <kbd>/</kbd>
     </div>
@@ -47,10 +47,11 @@
 <script>
 import { NAV_SECTIONS } from './sidebarNav';
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'AgentMemorySidebar',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialTextField },
   props: {
     activeTab: {
       type: String,
@@ -80,7 +81,8 @@ export default {
       if (!item.tabId) return;
       // A real hash link stays clickable (new tab, copy link); a plain click
       // switches this surface's own tab in place instead of navigating away.
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
+        return;
       event.preventDefault();
       this.$emit('select-tab', item.tabId);
     },

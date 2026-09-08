@@ -32,23 +32,23 @@
       <label :for="`am-reply-${session.id}`" class="am-visually-hidden"
         >Reply to {{ session.agent }} inbox</label
       >
-      <input
+      <MaterialTextField
         :id="`am-reply-${session.id}`"
         type="text"
         class="am-session-card__reply-input"
         placeholder="Reply to session inbox…"
         :value="draft"
         :disabled="!canSend"
-        @input="$emit('draft', $event.target.value)"
+        @input="$emit('draft', $event)"
       />
-      <button
+      <MaterialIconButton
         type="submit"
         class="am-session-card__send"
         aria-label="Send reply"
         :disabled="!canSend"
       >
         <MaterialIcon name="send" :size="17" />
-      </button>
+      </MaterialIconButton>
     </form>
     <div v-if="lastReply" class="am-session-card__delivered">
       Delivered to inbox: "{{ lastReply }}"
@@ -59,10 +59,12 @@
 <script>
 import { formatRelativeTime } from '../data';
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'SessionCard',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialIconButton, MaterialTextField },
   props: {
     session: {
       type: Object,

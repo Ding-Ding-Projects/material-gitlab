@@ -12,7 +12,7 @@
       <div class="am-palette__search">
         <MaterialIcon name="command" :size="18" />
         <label for="am-palette-input" class="am-visually-hidden">Command palette search</label>
-        <input
+        <MaterialTextField
           id="am-palette-input"
           ref="filterInput"
           type="text"
@@ -31,7 +31,12 @@
         />
         <kbd class="am-palette__hint">Esc</kbd>
       </div>
-      <ul id="am-palette-listbox" class="am-palette__list" role="listbox" aria-label="Command palette results">
+      <ul
+        id="am-palette-listbox"
+        class="am-palette__list"
+        role="listbox"
+        aria-label="Command palette results"
+      >
         <li v-if="filtered.length === 0" class="am-palette__empty">No matching commands.</li>
         <li
           v-for="(action, index) in filtered"
@@ -55,10 +60,11 @@
 
 <script>
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'CommandPalette',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialTextField },
   props: {
     open: {
       type: Boolean,
@@ -99,8 +105,8 @@ export default {
     },
   },
   methods: {
-    onQuery(event) {
-      this.query = event.target.value;
+    onQuery(value) {
+      this.query = value;
       this.highlighted = 0;
     },
     move(delta) {

@@ -13,15 +13,20 @@
       <div class="am-regex-popover__header">
         <MaterialIcon name="tune" :size="18" />
         <span>Regex builder</span>
-        <button type="button" class="am-icon-btn am-icon-btn--small" aria-label="Close regex builder" @click="close">
+        <MaterialIconButton
+          type="button"
+          class="am-icon-btn am-icon-btn--small"
+          aria-label="Close regex builder"
+          @click="close"
+        >
           <MaterialIcon name="close" :size="16" />
-        </button>
+        </MaterialIconButton>
       </div>
 
       <div class="am-regex-popover__body">
         <label class="am-field">
           <span class="am-field__label">Pattern</span>
-          <input
+          <MaterialTextField
             ref="patternInput"
             type="text"
             class="am-field__input am-field__input--mono"
@@ -38,11 +43,19 @@
           </label>
         </div>
 
-        <p v-if="!state.syntax.valid" class="am-field__error" role="alert">{{ state.syntax.message }}</p>
+        <p v-if="!state.syntax.valid" class="am-field__error" role="alert">
+          {{ state.syntax.message }}
+        </p>
 
         <label class="am-field">
           <span class="am-field__label">Sample text ({{ corpusTitle }})</span>
-          <textarea class="am-field__input am-field__input--mono am-field__input--textarea" :value="state.sample" @input="onSampleInput" rows="4"></textarea>
+          <MaterialTextField
+            type="textarea"
+            class="am-field__input am-field__input--mono am-field__input--textarea"
+            :value="state.sample"
+            @input="onSampleInput"
+            rows="4"
+          />
         </label>
 
         <div class="am-regex-popover__matches">
@@ -59,11 +72,13 @@
       </div>
 
       <div class="am-regex-popover__footer">
-        <button type="button" class="am-btn am-btn--text am-btn--small" @click="copy">
+        <MaterialTextButton type="button" class="am-btn am-btn--text am-btn--small" @click="copy">
           <MaterialIcon name="clipboard" :size="15" /> {{ copied ? 'Copied' : 'Copy pattern' }}
-        </button>
+        </MaterialTextButton>
         <span class="am-regex-popover__spacer"></span>
-        <button type="button" class="am-btn am-btn--text am-btn--small" @click="close">Cancel</button>
+        <MaterialTextButton type="button" class="am-btn am-btn--text am-btn--small" @click="close"
+          >Cancel</MaterialTextButton
+        >
         <button
           type="button"
           class="am-btn am-btn--filled am-btn--small"
@@ -80,6 +95,9 @@
 <script>
 import { RegexBuilder } from '../../../regex-builder';
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextButton from '../../../components/material_text_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const FLAG_OPTIONS = [
   { key: 'g', label: 'Global (g)' },
@@ -90,7 +108,7 @@ const FLAG_OPTIONS = [
 
 export default {
   name: 'RegexBuilderPopover',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialIconButton, MaterialTextButton, MaterialTextField },
   props: {
     open: {
       type: Boolean,
@@ -130,7 +148,8 @@ export default {
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
       let left = this.anchor.left;
-      if (left + width + margin > viewportWidth) left = Math.max(margin, viewportWidth - width - margin);
+      if (left + width + margin > viewportWidth)
+        left = Math.max(margin, viewportWidth - width - margin);
       const top = Math.min(this.anchor.bottom + margin, viewportHeight - 200);
       const maxHeight = Math.max(viewportHeight - top - margin, 220);
       return {
@@ -169,11 +188,11 @@ export default {
         : `${this.state.flags}${flag}`;
       this.state = this.builder.update({ flags });
     },
-    onPatternInput(event) {
-      this.state = this.builder.update({ pattern: event.target.value });
+    onPatternInput(value) {
+      this.state = this.builder.update({ pattern: value });
     },
-    onSampleInput(event) {
-      this.state = this.builder.update({ sample: event.target.value });
+    onSampleInput(value) {
+      this.state = this.builder.update({ sample: value });
     },
     copy() {
       const text = this.builder.copy();
