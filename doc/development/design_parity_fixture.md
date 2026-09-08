@@ -17,7 +17,9 @@ exist without that marker, the script stops rather than adopting or changing exi
 data. Within its marked project it idempotently provisions a real repository commit,
 label, milestone, issue, and merge request through the product's native models and
 services. Its model timestamps and visible fixture text are fixed for deterministic
-captures. Output contains only fixture IDs and relative product URLs.
+captures. Repository commits are created through the native repository service and
+retain its normal commit timestamp. Output contains only fixture IDs and relative
+product URLs.
 
 The script requires an existing GDK admin account for normal sign-in. It neither reads
 nor emits credentials, and it is not an authentication bypass.

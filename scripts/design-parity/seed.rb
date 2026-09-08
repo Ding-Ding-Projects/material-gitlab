@@ -58,15 +58,15 @@ else
     organization_id: organization.id,
     visibility_level: Gitlab::VisibilityLevel::PUBLIC,
     default_branch: DEFAULT_BRANCH,
-    initialize_with_readme: true,
-    skip_disk_validation: true
+    initialize_with_readme: true
   }).execute
   abort "Project creation failed: #{project.errors.full_messages.join(', ')}" unless project.persisted?
 end
 fix_timestamp!(project)
 
-unless project.repository.branch_names.include?(SOURCE_BRANCH)
-  project.repository.create_branch(SOURCE_BRANCH, project.default_branch)
+unless project.repository.branch_exists?(SOURCE_BRANCH)
+  branch = project.repository.add_branch(user, SOURCE_BRANCH, project.default_branch, raise_on_invalid_ref: true)
+  abort 'Fixture source branch creation failed.' unless branch
 end
 unless project.repository.blob_at_branch(SOURCE_BRANCH, 'fixture.txt')
   project.repository.create_file(
@@ -84,6 +84,7 @@ label = project.labels.find_by(title: 'design-parity') || Labels::CreateService.
   color: '#1F75CB',
   description: 'Design parity fixture label'
 ).execute(project: project)
+abort "Label creation failed: #{label&.errors&.full_messages&.join(', ')}" unless label&.persisted?
 fix_timestamp!(label)
 
 milestone = project.milestones.find_by(title: 'Design Parity Milestone') || Milestones::CreateService.new(
@@ -93,6 +94,7 @@ milestone = project.milestones.find_by(title: 'Design Parity Milestone') || Mile
   description: 'Fixed isolated design parity milestone',
   due_date: Date.new(2024, 2, 1)
 ).execute
+abort "Milestone creation failed: #{milestone&.errors&.full_messages&.join(', ')}" unless milestone&.persisted?
 fix_timestamp!(milestone)
 
 issue = project.issues.find_by(title: 'Design parity fixture issue')
@@ -123,7 +125,7 @@ unless merge_request
       target_branch: project.default_branch,
       title: 'Design parity fixture merge request',
       description: 'Fixed isolated merge request for product verification.',
-      milestone: milestone,
+      milestone_id: milestone.id,
       label_ids: [label.id]
     }
   ).execute
