@@ -32,7 +32,9 @@ export default {
         <m-icon name="close" :size="18" decorative />
       </button>
     </div>
-    <div class="blob-viewer__code" role="group" :aria-label="`Contents of ${blob.name}`">
+    <a v-if="blob.rawPath" :href="blob.rawPath">Download raw file</a>
+    <p v-if="blob.binary" role="status">This file contains binary or non-UTF-8 content. Download it to inspect its original bytes.</p>
+    <div v-else class="blob-viewer__code" role="group" :aria-label="`Contents of ${blob.name}`">
       <div v-for="line in numberedLines" :key="line.no" class="blob-viewer__line">
         <span class="blob-viewer__lineno" aria-hidden="true">{{ line.no }}</span>
         <span class="blob-viewer__code-text">{{ line.code }}</span>

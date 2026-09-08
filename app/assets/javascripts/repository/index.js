@@ -13,7 +13,6 @@ import RepositoryApp from './components/app.vue';
 import RepositoryBreadcrumbs from './components/header_area/breadcrumbs.vue';
 import ForkInfo from './components/fork_info.vue';
 import LastCommit from './components/last_commit.vue';
-import { mountRepositorySurface } from '~/material_system/surfaces/Repository';
 
 import apolloProvider from './graphql';
 import commitsQuery from './queries/commits.query.graphql';
@@ -44,13 +43,6 @@ export default function setupVueRepositoryList() {
     hasRevsFile,
   } = dataset;
   const router = createRouter(projectPath, escapedRef, fullName);
-
-  // Material Repository is opt-in per host page and uses the existing
-  // same-origin project REST API with server-extracted ref and path data.
-  const materialRepositoryEl = document.getElementById('js-material-repository-app');
-  if (materialRepositoryEl) {
-    mountRepositorySurface(materialRepositoryEl);
-  }
 
   initFileTreeBrowser(router, { projectPath, ref, refType });
 

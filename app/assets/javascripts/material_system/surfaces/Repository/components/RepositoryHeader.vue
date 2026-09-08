@@ -73,10 +73,10 @@ export default {
       </div>
     </div>
     <div class="repo-header__stats">
-      <span><b>{{ project.commitCount.toLocaleString() }}</b> commits</span>
+      <span v-if="project.commitCount !== null"><b>{{ project.commitCount.toLocaleString() }}</b> commits</span>
       <span><b>{{ project.branchCount }}</b> branches</span>
-      <span><b>{{ project.tagCount }}</b> tags</span>
-      <span><b>{{ project.storage }}</b> storage</span>
+      <span v-if="project.tagCount !== null"><b>{{ project.tagCount }}</b> tags</span>
+      <span v-if="project.storage"><b>{{ project.storage }}</b> repository size</span>
     </div>
   </div>
 </template>

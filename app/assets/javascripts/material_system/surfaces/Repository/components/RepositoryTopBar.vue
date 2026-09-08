@@ -11,7 +11,7 @@ export default {
     regexOpen: { type: Boolean, required: true },
     paletteOpen: { type: Boolean, required: true },
     dark: { type: Boolean, required: true },
-    userInitials: { type: String, default: 'JD' },
+    userInitials: { type: String, default: '' },
   },
   computed: {
     placeholder() {
@@ -90,7 +90,7 @@ export default {
     >
       <m-icon :name="dark ? 'sun' : 'moon'" :size="20" decorative />
     </button>
-    <div class="topbar__avatar" aria-hidden="true">{{ userInitials }}</div>
+    <div v-if="userInitials" class="topbar__avatar" aria-hidden="true">{{ userInitials }}</div>
   </header>
 </template>
 

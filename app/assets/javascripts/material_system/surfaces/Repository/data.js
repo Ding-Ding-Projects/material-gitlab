@@ -21,7 +21,8 @@ const normalizeEntry = (entry) => {
   if (!object(entry)) throw new Error('Repository adapter returned an invalid tree entry');
   return {
     name: requiredString(entry.name, 'tree entry name'),
-    kind: entry.kind === 'dir' ? 'dir' : 'file',
+    kind: ['dir', 'submodule'].includes(entry.kind) ? entry.kind : 'file',
+    sha: entry.sha || '',
     message: typeof entry.message === 'string' ? entry.message : '',
     when: typeof entry.when === 'string' ? entry.when : '',
     path: typeof entry.path === 'string' ? entry.path : entry.name,
@@ -38,7 +39,9 @@ const normalizeBlob = (blob, fallbackName = '') => {
     size: typeof blob.size === 'string' ? blob.size : `${blob.bytes || 0} bytes`,
     lines,
     path: typeof blob.path === 'string' ? blob.path : fallbackName,
-    rawText: typeof blob.rawText === 'string' ? blob.rawText : lines.join('\n'),
+    rawText: blob.binary ? null : typeof blob.rawText === 'string' ? blob.rawText : lines.join('\n'),
+    binary: Boolean(blob.binary),
+    rawPath: blob.rawPath || '',
   };
 };
 
@@ -56,7 +59,7 @@ export function normalizeRepositoryData(value) {
   if (!object(value) || !object(value.project)) throw new Error('Repository adapter returned no project metadata');
   const project = value.project;
   const branches = Array.isArray(value.branches) ? value.branches.map((branch) => requiredString(branch, 'branch name')) : [];
-  if (!branches.length) throw new Error('Repository adapter returned no branches');
+  if (!branches.length && !value.emptyRepository && !value.defaultBranch) throw new Error('Repository adapter returned no branches');
   const tree = Object.fromEntries(Object.entries(value.tree || {}).map(([path, entries]) => [path, Array.isArray(entries) ? entries.map(normalizeEntry) : []]));
   const blobs = Object.fromEntries(Object.entries(value.blobs || {}).map(([name, blob]) => [name, normalizeBlob(blob, name)]));
   return {
@@ -67,15 +70,16 @@ export function normalizeRepositoryData(value) {
       stars: Number.isFinite(project.stars) ? project.stars : 0,
       starred: Boolean(project.starred),
       forks: Number.isFinite(project.forks) ? project.forks : 0,
-      commitCount: Number.isFinite(project.commitCount) ? project.commitCount : 0,
+      commitCount: Number.isFinite(project.commitCount) ? project.commitCount : null,
       branchCount: Number.isFinite(project.branchCount) ? project.branchCount : branches.length,
-      tagCount: Number.isFinite(project.tagCount) ? project.tagCount : 0,
+      tagCount: Number.isFinite(project.tagCount) ? project.tagCount : null,
       storage: typeof project.storage === 'string' ? project.storage : '',
       cloneUrls: object(project.cloneUrls) ? project.cloneUrls : {},
     },
     languages: Array.isArray(value.languages) ? value.languages : [],
     branches,
-    defaultBranch: requiredString(value.defaultBranch || branches[0], 'default branch'),
+    defaultBranch: value.emptyRepository ? '' : requiredString(value.defaultBranch || branches[0], 'default branch'),
+    emptyRepository: Boolean(value.emptyRepository),
     tree,
     blobs,
     commits: Array.isArray(value.commits) ? value.commits.map(normalizeCommit) : [],
@@ -91,6 +95,7 @@ export function assertRepositoryAdapter(adapter) {
 export function createRepositoryAdapter(implementation) {
   assertRepositoryAdapter(implementation);
   return Object.freeze({
+    capabilities: { deleteEntries: implementation.capabilities?.deleteEntries === true },
     async load(context) { return normalizeRepositoryData(await implementation.load(context)); },
     async loadBlob(context) { return normalizeBlob(await implementation.loadBlob(context), context?.path || ''); },
     async branches(context) {
@@ -105,55 +110,88 @@ export function createRepositoryAdapter(implementation) {
   });
 }
 
-const projectApiPath = (projectPath, suffix = '') => `/api/v4/projects/${encodeURIComponent(requiredString(projectPath, 'project path'))}${suffix}`;
-const responseData = (response) => response.data;
-const decodeContent = (content) => {
-  if (typeof content !== 'string' || typeof atob !== 'function') return content || '';
-  const binary = atob(content.replace(/\s/g, ''));
-  if (typeof TextDecoder === 'undefined') return binary;
-  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-  return new TextDecoder('utf-8').decode(bytes);
-};
+const projectApiPath = (projectPath, suffix = '') => `${globalThis.gon?.relative_url_root || ''}/api/v4/projects/${encodeURIComponent(requiredString(projectPath, 'project path'))}${suffix}`;
 
-export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '', client = axios, navigate = window.location.assign.bind(window.location) } = {}) {
+export function decodeRepositoryContent(file) {
+  if (file.encoding !== 'base64' || typeof file.content !== 'string') return { binary: true, rawText: null };
+  const binary = atob(file.content.replace(/\s/g, ''));
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  try {
+    const rawText = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    return rawText.includes('\0') ? { binary: true, rawText: null } : { binary: false, rawText };
+  } catch (_error) { return { binary: true, rawText: null }; }
+}
+
+export function createProjectRepositoryAdapter({ projectPath, ref = '', path = '', initialStarred = false, client = axios, navigate = (url) => window.location.assign(url) } = {}) {
   const base = projectApiPath(projectPath);
-  const request = (url, options = {}) => client.get(url, options).then(responseData);
-  const loadProject = () => request(base);
-  const loadBranches = () => request(`${base}/repository/branches`, { params: { per_page: 100 } });
+  let starred = initialStarred;
+  const request = (url, options = {}) => client.get(url, options).then((response) => response.data);
+  const loadProject = () => request(base, { params: { statistics: true } });
+  const allPages = async (suffix, params = {}) => {
+    const rows = []; let page = 1;
+    do {
+      const response = await client.get(base + suffix, { params: { ...params, per_page: 100, page } });
+      if (!Array.isArray(response.data)) throw new Error('The repository response was not a collection.');
+      rows.push(...response.data);
+      const next = Number(response.headers?.['x-next-page']);
+      if (!next) return rows;
+      if (next <= page || next > 100) throw new Error('The repository collection exceeds its pagination limit. Narrow the request.');
+      page = next;
+    } while (page <= 100);
+    return rows;
+  };
+  const loadBranches = () => allPages('/repository/branches');
   return createRepositoryAdapter({
+    capabilities: { deleteEntries: false },
     async load({ branch, path: currentPath } = {}) {
       const project = await loadProject();
+      const empty = project.empty_repo === true;
       const selectedBranch = branch || ref || project.default_branch;
       const treePath = currentPath !== undefined ? currentPath : path || '';
-      const [branches, entries, commits, tags] = await Promise.all([
+      const [branches, entries, commits, tags, languages] = empty ? [[], [], [], [], {}] : await Promise.all([
         loadBranches(),
-        request(`${base}/repository/tree`, { params: { ref: selectedBranch, path: treePath || undefined, per_page: 100 } }),
+        allPages('/repository/tree', { ref: selectedBranch, path: treePath || undefined }),
         request(`${base}/repository/commits`, { params: { ref_name: selectedBranch, per_page: 20 } }),
-        request(`${base}/repository/tags`, { params: { per_page: 20 } }),
+        allPages('/repository/tags'),
+        request(`${base}/languages`),
       ]);
       return {
-        project: { name: project.name, visibility: project.visibility, stars: project.star_count, starred: project.starred, forks: project.forks_count, commitCount: project.commit_count, branchCount: branches.length, tagCount: tags.length, storage: project.repository_storage, cloneUrls: { https: project.http_url_to_repo, ssh: project.ssh_url_to_repo } },
+        project: { name: project.name, visibility: project.visibility, stars: project.star_count, starred, forks: project.forks_count, commitCount: project.statistics?.commit_count, branchCount: branches.length, tagCount: tags.length, storage: Number.isFinite(project.statistics?.repository_size) ? `${project.statistics.repository_size.toLocaleString()} bytes` : '', cloneUrls: { https: project.http_url_to_repo, ssh: project.ssh_url_to_repo } },
+        emptyRepository: empty,
         branches: branches.map((item) => item.name),
-        defaultBranch: project.default_branch,
-        tree: { [treePath]: entries.map((entry) => ({ name: entry.name, kind: entry.type === 'tree' ? 'dir' : 'file', path: entry.path })) },
+        defaultBranch: selectedBranch || '',
+        tree: { [treePath]: entries.map((entry) => ({ name: entry.name, kind: entry.type === 'tree' ? 'dir' : entry.type === 'commit' ? 'submodule' : 'file', path: entry.path, sha: entry.id })) },
         commits: commits.map((commit) => ({ sha: commit.short_id || commit.id, message: commit.title || commit.message, author: commit.author_name || commit.author_email, when: commit.committed_date || commit.created_at })),
+        languages: Object.entries(languages || {}).filter(([, percent]) => Number.isFinite(percent)).map(([name, percent], index) => ({ name, percent, token: ['prim', 'good', 'warn', 'outl'][index % 4] })),
       };
     },
     async loadBlob({ path: filePath, branch } = {}) {
-      const file = await request(`${base}/repository/files/${encodeURIComponent(requiredString(filePath, 'file path'))}`, { params: { ref: branch || ref } });
-      return { name: file.file_name, path: file.file_path, bytes: file.size, rawText: decodeContent(file.content) };
+      const fileEndpoint = `${base}/repository/files/${encodeURIComponent(requiredString(filePath, 'file path'))}`;
+      const selectedRef = branch || ref;
+      const file = await request(fileEndpoint, { params: { ref: selectedRef } });
+      return { name: file.file_name, path: file.file_path, bytes: file.size, ...decodeRepositoryContent(file), rawPath: `${fileEndpoint}/raw?${new URLSearchParams({ ref: selectedRef })}` };
     },
     async branches() { return (await loadBranches()).map((item) => item.name); },
-    async toggleStar() { const project = await loadProject(); return client.post(`${base}/${project.starred ? 'unstar' : 'star'}`).then(responseData); },
-    async fork() { return client.post(`${base}/fork`).then(responseData); },
-    async download({ branch, paths = [] } = {}) {
-      if (paths.length > 1) throw new Error('Download one selected item at a time.');
-      const search = new URLSearchParams({ sha: branch || ref });
-      if (paths.length === 1) search.set('path', paths[0]);
-      navigate(`${base}/repository/archive?${search.toString()}`);
-      return {};
+    async toggleStar() {
+      const result = await client.post(`${base}/${starred ? 'unstar' : 'star'}`);
+      starred = !starred;
+      return { project: { starred, stars: result.data.star_count } };
     },
-    async deleteEntries() { throw new Error('Delete files from their dedicated repository route.'); },
+    async fork() { return client.post(`${base}/fork`).then((response) => response.data); },
+    async download({ branch, entries = [] } = {}) {
+      if (entries.length !== 1) throw new Error('Select exactly one file or directory to download.');
+      const entry = entries[0];
+      const selectedRef = requiredString(branch || ref, 'download ref');
+      const selectedPath = requiredString(entry.path, 'download path');
+      let url;
+      if (entry.kind === 'file') url = `${base}/repository/files/${encodeURIComponent(selectedPath)}/raw?${new URLSearchParams({ ref: selectedRef })}`;
+      else if (entry.kind === 'dir') url = `${base}/repository/archive?${new URLSearchParams({ sha: selectedRef, path: selectedPath })}`;
+      else throw new Error('Submodules must be downloaded from their source repository.');
+      const navigationResult = await navigate(url);
+      if (navigationResult === false) throw new Error('The download navigation was not accepted.');
+      return { requested: true, path: selectedPath };
+    },
+    async deleteEntries() { throw new Error('Use the file edit workflow to commit a deletion.'); },
   });
 }
 

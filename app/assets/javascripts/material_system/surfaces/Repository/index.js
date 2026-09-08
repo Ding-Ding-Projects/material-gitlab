@@ -13,15 +13,20 @@ export { assertRepositoryAdapter, normalizeRepositoryData, createRepositoryAdapt
  */
 export function mountRepositorySurface(el, propsData = {}) {
   const mountEl = typeof el === 'string' ? document.querySelector(el) : el;
+  if (!mountEl) return null;
+  const initialRef = propsData.initialRef ?? mountEl.dataset.ref ?? '';
+  const initialPath = propsData.initialPath ?? mountEl.dataset.path ?? '';
+  const initialKind = propsData.initialKind ?? mountEl.dataset.entryType ?? 'tree';
   const adapter = propsData.adapter || createProjectRepositoryAdapter({
     projectPath: propsData.projectPath || mountEl?.dataset?.projectPath,
-    ref: propsData.ref || mountEl?.dataset?.ref,
-    path: propsData.path || mountEl?.dataset?.path,
+    ref: initialRef,
+    path: initialKind === 'blob' ? initialPath.split('/').slice(0, -1).join('/') : initialPath,
+    initialStarred: mountEl.dataset.starred === 'true',
   });
   assertRepositoryAdapter(adapter);
   return new Vue({
     el: mountEl,
-    render: (h) => h(Repository, { props: { ...propsData, adapter } }),
+    render: (h) => h(Repository, { props: { ...propsData, adapter, initialRef, initialPath, initialKind } }),
   });
 }
 
