@@ -1,3 +1,22 @@
+// The production surfaces and reference renderer use the same pinned OFL font.
+@font-face {
+  font-family: 'Google Sans';
+  font-weight: 400 700;
+  font-display: swap;
+  font-style: normal;
+  font-variation-settings: 'opsz' 18;
+  src: url('google-sans/GoogleSans-v14.000-opsz17-18.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Google Sans Text';
+  font-weight: 400 700;
+  font-display: swap;
+  font-style: normal;
+  font-variation-settings: 'opsz' 17;
+  src: url('google-sans/GoogleSans-v14.000-opsz17-18.ttf') format('truetype');
+}
+
 /* -------------------------------------------------------
 Inter variable font.
 

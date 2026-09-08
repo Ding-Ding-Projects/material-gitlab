@@ -28,8 +28,7 @@
       </div>
       <SyncStepRow v-for="step in steps" :key="step.key" :step="step" />
       <div class="am-sync-card__footnote">
-        Timestamped backup created before every replacement · noncanonical checkouts fail closed
-        without the authorization word.
+        This provider is read-only. No synchronization, backup, or replacement has run.
       </div>
     </div>
   </div>

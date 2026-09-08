@@ -447,6 +447,7 @@ module Gitlab
     config.assets.paths << "#{config.root}/node_modules/@gitlab/fonts/"
     config.assets.precompile << "gitlab-sans/*.woff2"
     config.assets.precompile << "gitlab-mono/*.woff2"
+    config.assets.precompile << "google-sans/*.ttf"
 
     # Import gitlab-svgs directly from vendored directory
     config.assets.paths << "#{config.root}/node_modules/@gitlab/svgs/dist"

@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "upstream": "googlefonts/googlesans",
+  "release": "v14.000",
+  "asset": "GoogleSans-v14.000.zip",
+  "assetSha256": "d338f0e74f5eabead86a85b87edf4cc50cd6561196dbe173d1db4139e95b3ca7",
+  "sourcePath": "build/GoogleSans/android/variable/GoogleSans[GRAD,opsz,wght].ttf",
+  "fontFile": "GoogleSans-v14.000-opsz17-18.ttf",
+  "fontSha256": "7dd96f5c236defe6e611530762c03e1e2c22e74a83dba92d89269b0b129a699c",
+  "axes": {
+    "opsz": {
+      "min": 17,
+      "max": 18,
+      "Google Sans": 18,
+      "Google Sans Text": 17
+    },
+    "wght": {
+      "min": 400,
+      "max": 700
+    },
+    "GRAD": {
+      "min": -50,
+      "max": 200,
+      "default": 0
+    }
+  },
+  "license": "SIL Open Font License 1.1, no Reserved Font Names",
+  "licenseFile": "OFL.txt",
+  "retrievedVia": "gh release download and gh api",
+  "purpose": "Pinned local typography shared by production Material surfaces and the unchanged design-reference renderer."
+}
