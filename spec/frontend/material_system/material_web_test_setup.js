@@ -3,6 +3,20 @@
 // These results are DOM contract tests, not native-browser or visual evidence.
 import 'element-internals-polyfill';
 
+// The polyfill checks undefined dictionary members as invalid rather than doing
+// WebIDL's Boolean conversion. Material's radio validator supplies partial flags.
+// Normalize that API boundary only; true invalid flags and messages still flow
+// through the polyfill's actual validation implementation.
+if (globalThis.ElementInternals?.isPolyfilled) {
+  const setValidity = ElementInternals.prototype.setValidity;
+  ElementInternals.prototype.setValidity = function normalizedValidity(flags, ...args) {
+    const normalized =
+      flags &&
+      Object.fromEntries(Object.entries(flags).map(([key, value]) => [key, Boolean(value)]));
+    return setValidity.call(this, normalized, ...args);
+  };
+}
+
 // jsdom lacks PointerEvent. This supplies event shape only; no pointer layout,
 // animation timing, or visual interaction is claimed by these DOM tests.
 if (!globalThis.PointerEvent) {
