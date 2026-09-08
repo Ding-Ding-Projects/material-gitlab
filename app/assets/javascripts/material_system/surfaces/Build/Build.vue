@@ -33,7 +33,7 @@
           <div v-if="loading[activeTab]" class="build-surface__status">Loading {{ activeTabMeta.label.toLowerCase() }}…</div>
           <div v-else-if="loadError[activeTab]" class="build-surface__status build-surface__status--error">
             <p>{{ loadError[activeTab] }}</p>
-            <button type="button" class="btn btn--text" @click="reload(activeTab)">Retry</button>
+            <material-button type="button" variant="text" class="btn btn--text" @click="reload(activeTab)">Retry</material-button>
           </div>
           <row-list
             v-else
@@ -81,6 +81,7 @@ import RowList from './components/RowList.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import CommandPaletteOverlay from './components/CommandPaletteOverlay.vue';
 import NotificationHost from './components/NotificationHost.vue';
+import MaterialButton from '../../components/material_button';
 import {
   BUILD_TABS,
   STATUS_META,
@@ -112,6 +113,7 @@ export default {
     ConfirmDialog,
     CommandPaletteOverlay,
     NotificationHost,
+    MaterialButton,
   },
   props: {
     projectPath: { type: String, required: true },

@@ -2,27 +2,29 @@
   <div class="mgl-pl-bulkbar" role="toolbar" aria-label="Bulk pipeline actions">
     <span>{{ selectedCount }} of {{ totalVisible }} selected</span>
     <div class="mgl-pl-bulk-actions">
-      <button type="button" class="mgl-pl-bulk-btn" @click="$emit('invert')">
+      <material-button variant="text" type="button" class="mgl-pl-bulk-btn" @click="$emit('invert')">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">swap_horiz</span>Invert selection
-      </button>
-      <button type="button" class="mgl-pl-bulk-btn" @click="$emit('retry')">
+      </material-button>
+      <material-button variant="text" type="button" class="mgl-pl-bulk-btn" @click="$emit('retry')">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">replay</span>Retry selected
-      </button>
-      <button type="button" class="mgl-pl-bulk-btn mgl-pl-bulk-btn--danger" @click="$emit('cancel')">
+      </material-button>
+      <material-button variant="text" type="button" class="mgl-pl-bulk-btn mgl-pl-bulk-btn--danger" @click="$emit('cancel')">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">cancel</span>Cancel selected
-      </button>
-      <button type="button" class="mgl-pl-bulk-btn mgl-pl-bulk-btn--danger" @click="$emit('delete')">
+      </material-button>
+      <material-button variant="text" type="button" class="mgl-pl-bulk-btn mgl-pl-bulk-btn--danger" @click="$emit('delete')">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">delete</span>Delete selected
-      </button>
-      <button type="button" class="mgl-pl-bulk-btn" @click="$emit('clear')">
+      </material-button>
+      <material-button variant="text" type="button" class="mgl-pl-bulk-btn" @click="$emit('clear')">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">close</span>Clear
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 export default {
+  components: { MaterialButton },
   name: 'PipelinesBulkActionsBar',
   props: {
     selectedCount: { type: Number, required: true },

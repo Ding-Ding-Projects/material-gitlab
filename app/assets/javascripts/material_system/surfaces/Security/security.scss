@@ -30,6 +30,19 @@
   // both themes stay correct.
   --sec-high: #8f4a0e;
   --sec-high-c: #ffe0c2;
+  // Surface-scoped Material Web mapping, so adapter controls retain this
+  // dashboard's public theme rather than falling back to document defaults.
+  --md-sys-color-primary: var(--sec-prim);
+  --md-sys-color-on-primary: var(--sec-onprim);
+  --md-sys-color-primary-container: var(--sec-prim-c);
+  --md-sys-color-on-primary-container: var(--sec-onprim-c);
+  --md-sys-color-surface: var(--sec-surf);
+  --md-sys-color-surface-container: var(--sec-surf-c);
+  --md-sys-color-on-surface: var(--sec-onsurf);
+  --md-sys-color-on-surface-variant: var(--sec-onsurf-v);
+  --md-sys-color-outline: var(--sec-outl);
+  --md-sys-color-error: var(--sec-err);
+  --md-sys-color-on-error: var(--sec-onprim);
 
   &[data-theme='dark'] {
     --sec-surf: #141218;
@@ -92,6 +105,13 @@
   *:focus-visible {
     outline: 2px solid var(--sec-prim);
     outline-offset: 2px;
+  }
+
+  // Material Web hosts retain an accessible target when they receive legacy
+  // compact-control classes from this ported surface.
+  :is(md-filled-button, md-outlined-button, md-filled-tonal-button, md-elevated-button, md-text-button, md-checkbox) {
+    min-width: 40px;
+    min-height: 40px;
   }
 }
 
@@ -972,3 +992,30 @@
     flex-wrap: wrap;
   }
 }
+
+// Public component roles preserve the local light and dark palettes.
+.security-dashboard {
+  --md-sys-color-primary: var(--sec-prim);
+  --md-sys-color-on-primary: var(--sec-onprim);
+  --md-sys-color-primary-container: var(--sec-prim-c);
+  --md-sys-color-on-primary-container: var(--sec-onprim-c);
+  --md-sys-color-secondary-container: var(--sec-sec);
+  --md-sys-color-on-secondary-container: var(--sec-onsurf);
+  --md-sys-color-surface: var(--sec-surf);
+  --md-sys-color-on-surface: var(--sec-onsurf);
+  --md-sys-color-on-surface-variant: var(--sec-onsurf-v);
+  --md-sys-color-surface-container: var(--sec-surf-c);
+  --md-sys-color-surface-container-high: var(--sec-surf-ch);
+  --md-sys-color-surface-container-highest: var(--sec-surf-ch);
+  --md-sys-color-outline: var(--sec-outl);
+  --md-sys-color-outline-variant: var(--sec-outl-v);
+  --md-sys-color-error: var(--sec-err);
+  --md-sys-color-on-error: var(--sec-onprim);
+  --md-sys-color-error-container: var(--sec-err-c);
+  --md-sys-color-on-error-container: var(--sec-onsurf);
+  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
+  md-filled-text-field { min-width: 0; max-width: 100%; }
+}
+.security-dashboard { .security-confirm--danger { --md-filled-button-container-color: var(--sec-err); --md-filled-button-label-text-color: var(--sec-onprim); --md-text-button-label-text-color: var(--sec-err); } }

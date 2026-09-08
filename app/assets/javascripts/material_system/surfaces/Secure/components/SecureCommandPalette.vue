@@ -14,19 +14,22 @@
       <div class="secure-palette__search">
         <secure-icon name="search" />
         <label :for="queryId" class="secure-visually-hidden">Search actions</label>
-        <input
+        <material-text-field
           :id="queryId"
           ref="input"
-          v-model="query"
+          :value="query"
           class="secure-palette__input"
           type="text"
           placeholder="Jump to a Secure action…"
+          aria-label="Search Secure actions"
           autocomplete="off"
-        />
+          @input="query = $event"
+        ></material-text-field>
         <span class="secure-palette__hint">Ctrl+Shift+F</span>
       </div>
       <div class="secure-palette__results" role="listbox" aria-label="Secure actions">
-        <button
+        <material-button
+          variant="text"
           v-for="(result, index) in results"
           :key="result.id"
           type="button"
@@ -40,7 +43,7 @@
           <secure-icon :name="result.icon" />
           <span>{{ result.label }}</span>
           <span class="secure-palette__result-kind">Action</span>
-        </button>
+        </material-button>
         <p v-if="results.length === 0" class="secure-palette__empty">No matches.</p>
       </div>
     </div>
@@ -50,10 +53,12 @@
 <script>
 import { uniqueId } from 'lodash';
 import SecureIcon from './SecureIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'SecureCommandPalette',
-  components: { SecureIcon },
+  components: { SecureIcon, MaterialButton, MaterialTextField },
   props: {
     actions: { type: Array, required: true },
   },

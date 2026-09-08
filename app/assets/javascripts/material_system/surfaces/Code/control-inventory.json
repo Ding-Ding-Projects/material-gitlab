@@ -1,0 +1,139 @@
+{
+  "surface": "Code",
+  "files": [
+    {
+      "file": "Code.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/BulkActionBar.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CodeRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 1,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CodeRowList.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 1,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CodeTabs.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CodeTopBar.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CommandPalette.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CompareCard.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": [
+        {
+          "tag": "select",
+          "type": "",
+          "reason": "No registered Material select adapter.",
+          "purpose": "compare from"
+        },
+        {
+          "tag": "select",
+          "type": "",
+          "reason": "No registered Material select adapter.",
+          "purpose": "compare to"
+        }
+      ]
+    },
+    {
+      "file": "components/ConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/MaterialIcon.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/RegexBuilderPopover.vue",
+      "buttons": 4,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    }
+  ]
+}

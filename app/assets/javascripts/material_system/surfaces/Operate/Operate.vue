@@ -1,7 +1,7 @@
 <template>
   <section class="material-live-surface dp-surface" data-surface-id="surface.operate" :data-theme="dark ? 'dark' : 'light'">
     <header class="material-live-surface__topbar">
-      <label class="material-live-surface__search">Search environments, agents and states <material-text-field v-model="query" :aria-invalid="searchError ? 'true' : null" /></label>
+      <label class="material-live-surface__search">Search environments, agents and states <material-text-field aria-label="Search environments, agents and states" v-model="query" :aria-invalid="searchError ? 'true' : null" /></label>
       <material-text-button type="button" :aria-pressed="regexMode" @click="regexMode = !regexMode">Regex</material-text-button>
       <material-text-button type="button" :aria-expanded="regexOpen" @click="regexOpen = !regexOpen">Regex builder</material-text-button>
       <material-text-button type="button" @click="paletteOpen = true">Command palette</material-text-button>

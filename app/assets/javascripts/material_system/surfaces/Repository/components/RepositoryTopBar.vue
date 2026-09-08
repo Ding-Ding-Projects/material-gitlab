@@ -1,9 +1,11 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'RepositoryTopBar',
-  components: { MIcon },
+  components: { MIcon, MaterialButton, MaterialTextField },
   props: {
     search: { type: String, required: true },
     regexMode: { type: Boolean, required: true },
@@ -19,8 +21,8 @@ export default {
     },
   },
   methods: {
-    onInput(event) {
-      this.$emit('update-search', event.target.value);
+    onInput(value) {
+      this.$emit('update-search', value);
     },
   },
 };
@@ -31,8 +33,8 @@ export default {
     <div class="topbar__search" role="search">
       <m-icon name="search" :size="20" decorative class="topbar__search-icon" />
       <label class="visually-hidden" for="repo-file-search">{{ placeholder }}</label>
-      <input
-        id="repo-file-search"
+      <material-text-field
+        id="repo-file-search" aria-label="Filter files"
         type="text"
         :value="search"
         :placeholder="placeholder"
@@ -40,11 +42,11 @@ export default {
         :aria-invalid="searchInvalid"
         aria-describedby="repo-search-help"
         @input="onInput"
-      />
+      ></material-text-field>
       <span id="repo-search-help" class="visually-hidden">
         {{ regexMode ? 'Filtering file and folder names as a regular expression.' : 'Filtering file and folder names as plain text.' }}
       </span>
-      <button
+      <material-button variant="text"
         type="button"
         role="switch"
         :aria-checked="regexMode"
@@ -55,8 +57,8 @@ export default {
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         type="button"
         class="topbar__icon-btn"
         title="Regex builder"
@@ -66,9 +68,9 @@ export default {
         @click="$emit('open-regex-builder')"
       >
         <m-icon name="tool" :size="18" decorative />
-      </button>
+      </material-button>
     </div>
-    <button
+    <material-button variant="text"
       type="button"
       class="topbar__icon-btn"
       title="Command palette (Ctrl+Shift+F)"
@@ -79,8 +81,8 @@ export default {
       @click="$emit('open-palette')"
     >
       <m-icon name="command" :size="20" decorative />
-    </button>
-    <button
+    </material-button>
+    <material-button variant="text"
       type="button"
       class="topbar__icon-btn"
       title="Toggle theme"
@@ -89,7 +91,7 @@ export default {
       @click="$emit('toggle-theme')"
     >
       <m-icon :name="dark ? 'sun' : 'moon'" :size="20" decorative />
-    </button>
+    </material-button>
     <div v-if="userInitials" class="topbar__avatar" aria-hidden="true">{{ userInitials }}</div>
   </header>
 </template>

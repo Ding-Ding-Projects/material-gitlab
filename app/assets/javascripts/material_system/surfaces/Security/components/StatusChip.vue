@@ -1,6 +1,8 @@
 <script>
+import MaterialButton from '../../../components/material_button';
 export default {
   name: 'StatusChip',
+  components: { MaterialButton },
   props: {
     label: {
       type: String,
@@ -33,7 +35,8 @@ export default {
 </script>
 
 <template>
-  <button
+  <material-button
+    variant="text"
     type="button"
     class="sec-chip"
     :style="style"
@@ -41,5 +44,5 @@ export default {
     @click="$emit('pick')"
   >
     {{ label }}
-  </button>
+  </material-button>
 </template>

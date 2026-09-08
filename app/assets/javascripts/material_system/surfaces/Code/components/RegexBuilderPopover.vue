@@ -14,7 +14,7 @@
           :style="{ background: valid ? 'var(--goodc)' : 'var(--errc)', color: valid ? 'var(--good)' : 'var(--err)' }"
         >{{ validLabel }}</span>
         <div class="gl-code-flagchips">
-          <button
+          <material-button variant="text"
             v-for="chip in flagChips"
             :key="chip.name"
             type="button"
@@ -23,31 +23,31 @@
             :title="chip.tip"
             :aria-pressed="flags[chip.name] ? 'true' : 'false'"
             @click="toggleFlag(chip.name)"
-          >{{ chip.name }}</button>
+          >{{ chip.name }}</material-button>
         </div>
       </div>
 
       <label class="gl-code-visually-hidden" for="gl-code-regex-draft">Regex pattern</label>
-      <input
-        id="gl-code-regex-draft"
+      <material-text-field
+        id="gl-code-regex-draft" aria-label="Regex pattern"
         class="gl-code-mono-input"
         :value="draft"
         placeholder="pattern, e.g. (auth|login).*fail"
-        @input="setDraft($event.target.value)"
-      >
+        @input="setDraft($event)"
+      ></material-text-field>
       <div v-if="errorMsg" class="gl-code-error">{{ errorMsg }}</div>
 
       <div class="gl-code-snippet-groups">
         <div v-for="group in snippetGroups" :key="group.name" class="gl-code-snippet-group">
           <span class="gl-code-snippet-group__label">{{ group.name }}</span>
-          <button
+          <material-button variant="text"
             v-for="item in group.items"
             :key="item.text"
             type="button"
             class="gl-code-snippet-chip"
             :title="item.tip"
             @click="insertSnippet(item.text)"
-          >{{ item.text }}</button>
+          >{{ item.text }}</material-button>
         </div>
       </div>
 
@@ -55,13 +55,13 @@
         <div>
           <div class="gl-code-field-label">Test string</div>
           <label class="gl-code-visually-hidden" for="gl-code-regex-test">Test string</label>
-          <textarea
-            id="gl-code-regex-test"
+          <material-text-field type="textarea"
+            id="gl-code-regex-test" aria-label="Test string"
             class="gl-code-textarea"
             rows="4"
             :value="testText"
-            @input="setTestText($event.target.value)"
-          />
+            @input="setTestText($event)"
+          ></material-text-field>
           <div class="gl-code-panel gl-code-highlight" style="margin-top:8px">
             <span
               v-for="(part, idx) in highlightedParts"
@@ -93,8 +93,8 @@
       </div>
 
       <div class="gl-code-dialog__actions">
-        <button type="button" class="gl-code-btn gl-code-btn--text" @click="$emit('close')">Cancel</button>
-        <button type="button" class="gl-code-btn" :disabled="!draft || !valid" @click="apply">Apply to search</button>
+        <material-button type="button" variant="text" class="gl-code-btn gl-code-btn--text" @click="$emit('close')">Cancel</material-button>
+        <material-button variant="text" type="button" class="gl-code-btn" :disabled="!draft || !valid" @click="apply">Apply to search</material-button>
       </div>
     </div>
   </div>
@@ -102,6 +102,8 @@
 
 <script>
 import RegexBuilder from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const EXPLAIN_DICTIONARY = [
   ['(?:', 'non-capturing group'], ['(?=', 'lookahead'], ['(?!', 'negative lookahead'],
@@ -148,6 +150,7 @@ function explainPattern(pattern) {
 
 export default {
   name: 'RegexBuilderPopover',
+  components: { MaterialButton, MaterialTextField },
   props: {
     initial: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },

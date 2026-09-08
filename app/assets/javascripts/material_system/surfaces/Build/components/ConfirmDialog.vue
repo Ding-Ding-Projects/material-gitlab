@@ -14,13 +14,13 @@
       </div>
       <p :id="messageId" class="confirm-dialog__message">{{ message }}</p>
       <div class="confirm-dialog__actions">
-        <button ref="cancelBtn" type="button" class="btn btn--text" @click="cancel">{{ cancelLabel }}</button>
-        <button
+        <material-button ref="cancelBtn" type="button" variant="text" class="btn btn--text" @click="cancel">{{ cancelLabel }}</material-button>
+        <material-button
           type="button"
           class="btn"
           :class="destructive ? 'btn--destructive' : 'btn--filled'"
           @click="confirm"
-        >{{ confirmLabel }}</button>
+        >{{ confirmLabel }}</material-button>
       </div>
     </div>
   </div>
@@ -28,12 +28,13 @@
 
 <script>
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
 
 let uid = 0;
 
 export default {
   name: 'BuildConfirmDialog',
-  components: { Icon },
+  components: { Icon, MaterialButton },
   props: {
     title: { type: String, required: true },
     message: { type: String, required: true },

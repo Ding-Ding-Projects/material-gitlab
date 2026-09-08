@@ -1,10 +1,12 @@
 <script>
 import MIcon from './MIcon.vue';
 import FileTreeRow from './FileTreeRow.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'FileTree',
-  components: { MIcon, FileTreeRow },
+  components: { MIcon, FileTreeRow, MaterialButton, MaterialCheckbox },
   props: {
     canDelete: { type: Boolean, default: false },
     entries: { type: Array, required: true },
@@ -33,7 +35,7 @@ export default {
   },
   methods: {
     syncIndeterminate() {
-      if (this.$refs.selectAll) this.$refs.selectAll.indeterminate = this.someSelected;
+      if (this.$refs.selectAll?.$el) this.$refs.selectAll.$el.indeterminate = this.someSelected;
     },
     isSelected(name) {
       return this.selected.includes(name);
@@ -46,27 +48,27 @@ export default {
   <div class="file-tree">
     <div class="file-tree__toolbar">
       <label class="file-tree__select-all">
-        <input ref="selectAll" type="checkbox" :checked="allSelected" :disabled="!entries.length" @change="$emit('toggle-select-all')" />
+        <material-checkbox ref="selectAll" :checked="allSelected" :disabled="!entries.length" :aria-label="selectAllLabel" @change="$emit('toggle-select-all')"></material-checkbox>
         <span>{{ selectAllLabel }}</span>
       </label>
       <span v-if="selected.length" class="file-tree__count">{{ selected.length }} selected</span>
       <div class="file-tree__bulk-actions">
-        <button type="button" class="file-tree__action" :disabled="!entries.length" @click="$emit('invert-selection')">
+        <material-button type="button" variant="text" class="file-tree__action" :disabled="!entries.length" @click="$emit('invert-selection')">
           Invert selection
-        </button>
-        <button type="button" class="file-tree__action" :disabled="!selected.length" @click="$emit('clear-selection')">Clear</button>
-        <button type="button" class="file-tree__action" :disabled="!selected.length" @click="$emit('copy-paths')">
+        </material-button>
+        <material-button type="button" variant="text" class="file-tree__action" :disabled="!selected.length" @click="$emit('clear-selection')">Clear</material-button>
+        <material-button type="button" variant="text" class="file-tree__action" :disabled="!selected.length" @click="$emit('copy-paths')">
           <m-icon name="copy" :size="15" decorative />
           Copy paths
-        </button>
-        <button type="button" class="file-tree__action" :disabled="selected.length !== 1" title="Select exactly one file or directory" @click="$emit('download-selected')">
+        </material-button>
+        <material-button type="button" variant="text" class="file-tree__action" :disabled="selected.length !== 1" title="Select exactly one file or directory" @click="$emit('download-selected')">
           <m-icon name="download" :size="15" decorative />
           Download
-        </button>
-        <button v-if="canDelete" type="button" class="file-tree__action file-tree__action--danger" :disabled="!selected.length" @click="$emit('request-delete')">
+        </material-button>
+        <material-button v-if="canDelete" type="button" variant="text" class="file-tree__action file-tree__action--danger" :disabled="!selected.length" @click="$emit('request-delete')">
           <m-icon name="trash" :size="15" decorative />
           Delete
-        </button>
+        </material-button>
       </div>
     </div>
 
@@ -74,7 +76,7 @@ export default {
     <div v-if="!entries.length" class="file-tree__empty">
       <template v-if="searchQuery">
         <p>No files match &ldquo;{{ searchQuery }}&rdquo;.</p>
-        <button type="button" class="file-tree__action" @click="$emit('clear-search')">Clear filter</button>
+        <material-button type="button" variant="text" class="file-tree__action" @click="$emit('clear-search')">Clear filter</material-button>
       </template>
       <template v-else>
         <p>This folder is empty.</p>

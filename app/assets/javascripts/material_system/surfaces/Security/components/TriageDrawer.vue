@@ -4,11 +4,12 @@ import StatusChip from './StatusChip.vue';
 import MaterialIcon from './icons/MaterialIcon.vue';
 import { STATUSES, statusColorVars } from '../data';
 import trapFocus from '../focus_trap';
+import MaterialButton from '../../../components/material_button';
 
 /** The anchored triage drawer, ported from the design's `sc-if value="{{ drawer }}"` block. */
 export default {
   name: 'TriageDrawer',
-  components: { SeverityBadge, StatusChip, MaterialIcon },
+  components: { SeverityBadge, StatusChip, MaterialIcon, MaterialButton },
   props: {
     vulnerability: {
       type: Object,
@@ -62,9 +63,9 @@ export default {
       <div class="sec-drawer__header">
         <severity-badge :severity="vulnerability.severity" />
         <span class="sec-drawer__cve">{{ vulnerability.cve }}</span>
-        <button type="button" class="sec-icon-button sec-drawer__close" aria-label="Close triage drawer" @click="$emit('close')">
+        <material-button variant="text" type="button" class="sec-icon-button sec-drawer__close" aria-label="Close triage drawer" @click="$emit('close')">
           <material-icon name="close" />
-        </button>
+        </material-button>
       </div>
       <h2 class="sec-drawer__title">{{ vulnerability.title }}</h2>
       <p class="sec-drawer__description">{{ vulnerability.description }}</p>
@@ -88,10 +89,10 @@ export default {
           />
         </div>
       </div>
-      <button type="button" class="sec-button sec-drawer__create-issue" :disabled="!canCreateIssue || issueCreated" @click="$emit('create-issue')">
+      <material-button variant="filled" type="button" class="sec-button sec-drawer__create-issue" :disabled="!canCreateIssue || issueCreated" @click="$emit('create-issue')">
         <material-icon name="addTask" />
         {{ createIssueLabel }}
-      </button>
+      </material-button>
     </aside>
   </div>
 </template>

@@ -8,23 +8,25 @@
   >
     <div v-if="rows.length > 0" class="secure-panel__toolbar">
       <label class="secure-panel__select-all">
-        <input
+        <material-checkbox
           ref="selectAll"
           type="checkbox"
           class="secure-row__checkbox"
           :checked="selectAllState === 'all'"
+          :indeterminate="selectAllState === 'some'"
+          :aria-label="selectAllLabel"
           @change="$emit('toggle-select-all')"
-        />
+        ></material-checkbox>
         {{ selectAllLabel }}
       </label>
-      <button v-if="selectedIds.length > 0" type="button" class="secure-panel__bulk-action" @click="$emit('invert-selection')">
+      <material-button v-if="selectedIds.length > 0" variant="text" type="button" class="secure-panel__bulk-action" @click="$emit('invert-selection')">
         Invert selection
-      </button>
-      <button v-if="selectedIds.length > 0" type="button" class="secure-panel__bulk-action" @click="$emit('clear-selection')">
+      </material-button>
+      <material-button v-if="selectedIds.length > 0" variant="text" type="button" class="secure-panel__bulk-action" @click="$emit('clear-selection')">
         Clear selection
-      </button>
+      </material-button>
       <div v-if="selectedIds.length > 0" class="secure-panel__bulk-actions">
-        <button
+        <material-button
           v-for="action in bulkActions"
           :key="action.id"
           type="button"
@@ -33,14 +35,14 @@
           @click="$emit('bulk-action', action.id)"
         >
           {{ action.label }} ({{ selectedIds.length }})
-        </button>
+        </material-button>
       </div>
     </div>
     <div v-if="loading" class="secure-loading" role="status" aria-live="polite">Loading {{ tabLabel.toLowerCase() }}…</div>
     <div v-else-if="error" class="secure-error" role="alert">
       {{ error }}
       <div>
-        <button type="button" class="secure-error__retry" @click="$emit('retry')">Retry</button>
+        <material-button variant="text" type="button" class="secure-error__retry" @click="$emit('retry')">Retry</material-button>
       </div>
     </div>
     <ul v-else-if="rows.length > 0" class="secure-panel__list">
@@ -58,7 +60,7 @@
       <div v-if="searchActive" class="secure-empty__hint">
         No {{ tabLabel.toLowerCase() }} match your search.
         <div>
-          <button type="button" class="secure-empty__clear" @click="$emit('clear-search')">Clear search</button>
+          <material-button variant="text" type="button" class="secure-empty__clear" @click="$emit('clear-search')">Clear search</material-button>
         </div>
       </div>
     </div>
@@ -67,10 +69,12 @@
 
 <script>
 import SecureListRow from './SecureListRow.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'SecureListPanel',
-  components: { SecureListRow },
+  components: { SecureListRow, MaterialButton, MaterialCheckbox },
   props: {
     activeTabId: { type: String, required: true },
     tabLabel: { type: String, required: true },
@@ -91,16 +95,6 @@ export default {
     selectAllLabel() {
       if (this.selectedIds.length === 0) return `Select all ${this.rows.length} shown`;
       return `${this.selectedIds.length} of ${this.rows.length} shown selected`;
-    },
-  },
-  watch: {
-    selectAllState: {
-      immediate: true,
-      handler(state) {
-        this.$nextTick(() => {
-          if (this.$refs.selectAll) this.$refs.selectAll.indeterminate = state === 'some';
-        });
-      },
     },
   },
 };

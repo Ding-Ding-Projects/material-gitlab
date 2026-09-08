@@ -30,7 +30,7 @@
         </div>
 
         <p v-if="loading" class="dp-live-state" role="status">Loading live Deploy data…</p>
-        <p v-else-if="loadError" class="dp-live-state dp-live-state--error" role="alert">{{ loadError }} <button type="button" @click="loadLiveData">Retry</button></p>
+        <p v-else-if="loadError" class="dp-live-state dp-live-state--error" role="alert">{{ loadError }} <material-button type="button" variant="text" @click="loadLiveData">Retry</material-button></p>
         <DeployRowList v-else
           :key="activeTabId"
           :instance-id="instanceId"
@@ -45,22 +45,22 @@
         >
           <template #bulk-actions>
             <template v-if="activeTabId === 'releases'">
-              <button type="button" class="dp-bulk-btn" @click="copySelectedTags">
+              <material-button type="button" variant="text" class="dp-bulk-btn" @click="copySelectedTags">
                 <DpIcon name="copy" size="small" />Copy tag references
-              </button>
+              </material-button>
             </template>
             <template v-else-if="activeTabId === 'feature-flags' && endpoints.updateFeatureFlag">
-              <button type="button" class="dp-bulk-btn" @click="enableSelectedFlags">
+              <material-button type="button" variant="text" class="dp-bulk-btn" @click="enableSelectedFlags">
                 <DpIcon name="toggle-on" size="small" />Enable selected
-              </button>
-              <button type="button" class="dp-bulk-btn" @click="disableSelectedFlags">
+              </material-button>
+              <material-button type="button" variant="text" class="dp-bulk-btn" @click="disableSelectedFlags">
                 <DpIcon name="toggle-off" size="small" />Disable selected
-              </button>
+              </material-button>
             </template>
             <template v-else-if="activeTabId === 'packages' ? endpoints.deletePackage : activeTabId === 'containers' && endpoints.deleteContainer">
-              <button type="button" class="dp-bulk-btn dp-bulk-btn--danger" @click="requestBulkDelete(activeTabId)">
+              <material-button type="button" variant="text" class="dp-bulk-btn dp-bulk-btn--danger" @click="requestBulkDelete(activeTabId)">
                 <DpIcon name="delete" size="small" />Delete selected
-              </button>
+              </material-button>
             </template>
           </template>
         </DeployRowList>
@@ -91,6 +91,7 @@ import DpIcon from './components/DpIcon.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
 import NotificationHost from './components/NotificationHost.vue';
+import MaterialButton from '../../components/material_button';
 import { loadSettings, subscribeSettings, updateSettings } from '../../settings';
 import notificationCenter from '../../notifications';
 import {
@@ -127,6 +128,7 @@ export default {
     CommandPalette,
     ConfirmDialog,
     NotificationHost,
+    MaterialButton,
   },
   props: {
     // Arrays are accepted for isolated tests only. Production mounts pass

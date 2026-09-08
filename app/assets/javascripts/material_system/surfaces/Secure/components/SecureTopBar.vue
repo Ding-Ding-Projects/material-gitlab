@@ -3,17 +3,19 @@
     <form class="secure-topbar__search" role="search" :aria-label="`Search ${tabLabel}`" @submit.prevent>
       <span class="secure-topbar__search-icon"><secure-icon name="search" /></span>
       <label :for="searchInputId" class="secure-visually-hidden">{{ `Search ${tabLabel}` }}</label>
-      <input
+      <material-text-field
         :id="searchInputId"
         ref="searchInput"
         class="secure-topbar__search-input"
         type="text"
         :value="search"
         :placeholder="placeholder"
+        :aria-label="`Search ${tabLabel}`"
         autocomplete="off"
-        @input="$emit('update:search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update:search', $event)"
+      ></material-text-field>
+      <material-button
+        variant="text"
         type="button"
         class="secure-topbar__regex-toggle"
         :class="{ 'secure-topbar__regex-toggle--active': regexMode }"
@@ -23,8 +25,9 @@
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button
+        variant="text"
         ref="builderTrigger"
         type="button"
         class="secure-topbar__icon-btn"
@@ -36,7 +39,7 @@
         @click="onToggleBuilder"
       >
         <secure-icon name="tune" :size="18" />
-      </button>
+      </material-button>
       <secure-regex-builder
         v-if="regexBuilderOpen"
         :initial="regexInitial"
@@ -45,7 +48,8 @@
         @close="onCloseBuilder"
       />
     </form>
-    <button
+    <material-button
+      variant="text"
       type="button"
       class="secure-topbar__icon-btn secure-topbar__icon-btn--large"
       aria-haspopup="dialog"
@@ -54,8 +58,9 @@
       @click="$emit('open-palette')"
     >
       <secure-icon name="command" />
-    </button>
-    <button
+    </material-button>
+    <material-button
+      variant="text"
       type="button"
       class="secure-topbar__icon-btn secure-topbar__icon-btn--large"
       :aria-pressed="isDark"
@@ -64,7 +69,7 @@
       @click="$emit('toggle-theme')"
     >
       <secure-icon :name="isDark ? 'sun' : 'moon'" />
-    </button>
+    </material-button>
   </header>
 </template>
 
@@ -72,10 +77,12 @@
 import { uniqueId } from 'lodash';
 import SecureIcon from './SecureIcon.vue';
 import SecureRegexBuilder from './SecureRegexBuilder.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'SecureTopBar',
-  components: { SecureIcon, SecureRegexBuilder },
+  components: { SecureIcon, SecureRegexBuilder, MaterialButton, MaterialTextField },
   props: {
     search: { type: String, default: '' },
     tabLabel: { type: String, required: true },

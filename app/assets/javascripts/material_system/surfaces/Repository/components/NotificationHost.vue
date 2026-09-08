@@ -1,12 +1,13 @@
 <script>
 import notificationCenter from '../../../notifications';
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 const SEVERITY_ICON = { info: 'info', success: 'check', warning: 'warning', error: 'warning' };
 
 export default {
   name: 'NotificationHost',
-  components: { MIcon },
+  components: { MIcon, MaterialButton },
   data() {
     return { items: notificationCenter.snapshot() };
   },
@@ -51,7 +52,7 @@ export default {
           <p v-if="item.title" class="toast__title">{{ item.title }}</p>
           <p class="toast__message">{{ item.message }}</p>
           <div v-if="item.actions.length" class="toast__actions">
-            <button
+            <material-button variant="text"
               v-for="action in item.actions"
               :key="action.id"
               type="button"
@@ -59,12 +60,12 @@ export default {
               @click="runAction(item.id, action.id)"
             >
               {{ action.label }}
-            </button>
+            </material-button>
           </div>
         </div>
-        <button type="button" class="toast__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
+        <material-button type="button" variant="text" class="toast__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
           <m-icon name="close" :size="16" decorative />
-        </button>
+        </material-button>
       </div>
     </transition-group>
   </div>

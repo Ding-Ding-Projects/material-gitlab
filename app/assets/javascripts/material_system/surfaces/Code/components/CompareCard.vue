@@ -20,7 +20,7 @@
       >
         <option v-for="ref in refs" :key="`to-${ref}`" :value="ref">{{ ref }}</option>
       </select>
-      <button type="button" class="gl-code-btn" @click="$emit('compare')">Compare</button>
+      <material-button variant="text" type="button" class="gl-code-btn" @click="$emit('compare')">Compare</material-button>
     </div>
     <div v-if="result" class="gl-code-compare__result" role="status">{{ result }}</div>
   </div>
@@ -28,10 +28,11 @@
 
 <script>
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'CompareCard',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialButton },
   props: {
     refs: { type: Array, required: true },
     fromRef: { type: String, required: true },

@@ -2,7 +2,7 @@
   <div class="gl-code-heading-row">
     <h1 class="gl-code-heading">Code</h1>
     <div class="gl-code-tablist" role="tablist" aria-label="Code sections" @keydown="onKeydown">
-      <button
+      <material-button variant="text"
         v-for="tab in tabs"
         :id="`gl-code-tab-${tab}`"
         :key="tab"
@@ -14,15 +14,18 @@
         aria-controls="gl-code-tabpanel"
         :tabindex="tab === activeTab ? 0 : -1"
         @click="$emit('select', tab)"
-      >{{ tab }}</button>
+      >{{ tab }}</material-button>
     </div>
     <span class="gl-code-count">{{ countLabel }}</span>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
+
 export default {
   name: 'CodeTabs',
+  components: { MaterialButton },
   props: {
     tabs: { type: Array, required: true },
     activeTab: { type: String, required: true },

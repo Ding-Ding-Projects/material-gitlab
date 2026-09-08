@@ -1,0 +1,16 @@
+{
+  "surface": "Security",
+  "files": [
+    { "file": "Security.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/BulkActionBar.vue", "buttons": 5, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/CommandPalette.vue", "buttons": 0, "textFields": 1, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/NotificationStack.vue", "buttons": 2, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/RegexBuilderPopover.vue", "buttons": 7, "textFields": 1, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SeverityCards.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/StatusChip.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/TopBar.vue", "buttons": 4, "textFields": 1, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/TriageDrawer.vue", "buttons": 2, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/VulnerabilityList.vue", "buttons": 1, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/VulnerabilityRow.vue", "buttons": 0, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] }
+  ]
+}

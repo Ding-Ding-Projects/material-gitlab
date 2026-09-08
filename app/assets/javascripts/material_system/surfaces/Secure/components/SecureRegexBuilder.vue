@@ -13,7 +13,8 @@
         {{ validityLabel }}
       </span>
       <div class="secure-regex__flags" role="group" aria-label="Regex flags">
-        <button
+        <material-button
+          variant="text"
           v-for="flag in flagList"
           :key="flag.key"
           type="button"
@@ -24,25 +25,28 @@
           @click="toggleFlag(flag.key)"
         >
           {{ flag.key }}
-        </button>
+        </material-button>
       </div>
     </div>
     <label :for="patternId" class="secure-visually-hidden">Regex pattern</label>
-    <input
+    <material-text-field
       :id="patternId"
       ref="patternInput"
-      v-model="draft"
+      :value="draft"
       class="secure-regex__pattern"
       type="text"
       placeholder="pattern, e.g. (auth|login).*fail"
+      aria-label="Regex pattern"
       autocomplete="off"
       spellcheck="false"
-    />
+      @input="draft = $event"
+    ></material-text-field>
     <p v-if="!isValid" class="secure-regex__error" role="alert">{{ errorMessage }}</p>
     <div class="secure-regex__snippets">
       <div v-for="group in snippetGroups" :key="group.name" class="secure-regex__snippet-group">
         <span class="secure-regex__snippet-name">{{ group.name }}</span>
-        <button
+        <material-button
+          variant="text"
           v-for="snippet in group.items"
           :key="snippet.text"
           type="button"
@@ -51,13 +55,13 @@
           @click="insertSnippet(snippet.text)"
         >
           {{ snippet.text }}
-        </button>
+        </material-button>
       </div>
     </div>
     <div class="secure-regex__grid">
       <div class="secure-regex__column">
         <label :for="testTextId" class="secure-regex__label">Test string</label>
-        <textarea :id="testTextId" v-model="testText" class="secure-regex__textarea" rows="4"></textarea>
+        <material-text-field :id="testTextId" type="textarea" :value="testText" class="secure-regex__textarea" rows="4" aria-label="Test string" @input="testText = $event"></material-text-field>
         <p class="secure-regex__highlight" aria-live="polite">
           <template v-for="(segment, index) in highlightSegments">
             <mark v-if="segment.match" :key="'m-' + index" class="secure-regex__mark">{{ segment.text }}</mark>
@@ -81,10 +85,10 @@
       <div v-for="(item, index) in previewItems" :key="index" class="secure-regex__preview-item">{{ item }}</div>
     </div>
     <div class="secure-regex__actions">
-      <button type="button" class="secure-regex__button" @click="close">Cancel</button>
-      <button type="button" class="secure-regex__button secure-regex__button--primary" @click="apply">
+      <material-button variant="text" type="button" class="secure-regex__button" @click="close">Cancel</material-button>
+      <material-button variant="filled" type="button" class="secure-regex__button secure-regex__button--primary" @click="apply">
         Apply to search
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
@@ -92,6 +96,8 @@
 <script>
 import { uniqueId } from 'lodash';
 import RegexBuilder from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const FLAG_TITLES = { i: 'case-insensitive', g: 'global', m: 'multiline', s: 'dotall' };
 const SNIPPET_GROUPS = [
@@ -106,6 +112,7 @@ const SNIPPET_GROUPS = [
 
 export default {
   name: 'SecureRegexBuilder',
+  components: { MaterialButton, MaterialTextField },
   props: {
     initial: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },

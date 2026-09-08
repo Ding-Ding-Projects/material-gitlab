@@ -3,7 +3,7 @@
     <header class="material-analyze__topbar">
       <div class="material-analyze__search-wrap">
         <label class="sr-only" :for="searchId">Filter analytics</label>
-        <material-text-field :id="searchId" ref="search" v-model="query" type="search" :aria-invalid="regexError ? 'true' : null" :placeholder="regexMode ? 'Regex filter: chart rows' : 'Filter chart rows'" />
+        <material-text-field aria-label="Filter analytics" :id="searchId" ref="search" v-model="query" type="search" :aria-invalid="regexError ? 'true' : null" :placeholder="regexMode ? 'Regex filter: chart rows' : 'Filter chart rows'" />
         <material-icon-button type="button" :aria-pressed="regexMode" aria-label="Toggle regex filter" @click="regexMode = !regexMode">.*</material-icon-button>
         <material-text-button type="button" aria-label="Open regex builder for analytics filter" @click="regexOpen = true">Regex builder</material-text-button>
       </div>
@@ -18,8 +18,8 @@
       </div>
     </div>
     <form v-if="activeTab !== 'insights'" class="material-analyze__range" @submit.prevent="loadReport">
-      <label>From (UTC) <material-text-field v-model="startDate" type="date" required /></label>
-      <label>Through (UTC, inclusive) <material-text-field v-model="endDate" type="date" required /></label>
+      <label>From (UTC) <material-text-field aria-label="From (UTC)" v-model="startDate" type="date" required /></label>
+      <label>Through (UTC, inclusive) <material-text-field aria-label="Through (UTC, inclusive)" v-model="endDate" type="date" required /></label>
       <material-text-button type="submit" :disabled="loading">Apply dates</material-text-button>
       <span v-if="endpoints.ref && ['repository', 'contributors'].includes(activeTab)">Ref: {{ endpoints.ref }}</span>
     </form>

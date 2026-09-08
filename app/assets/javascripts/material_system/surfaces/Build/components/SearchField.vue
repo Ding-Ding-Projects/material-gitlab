@@ -1,24 +1,24 @@
 <template>
   <div class="search-field">
     <icon name="search" class="search-field__icon" />
-    <input
+    <material-text-field
       :id="inputId"
       type="text"
       class="search-field__input"
       :value="value"
       :placeholder="placeholder"
       :aria-label="label"
-      @input="$emit('update:value', $event.target.value)"
+      @input="$emit('update:value', $event)"
     />
-    <button
+    <material-text-button
       type="button"
       class="search-field__chip"
       :class="{ 'search-field__chip--on': regexMode }"
       :aria-pressed="regexMode"
       title="Match search as a regular expression"
       @click="$emit('update:regex-mode', !regexMode)"
-    >.*</button>
-    <button
+    >.*</material-text-button>
+    <material-icon-button
       type="button"
       class="search-field__builder"
       aria-haspopup="dialog"
@@ -26,7 +26,7 @@
       @click="builderOpen = true"
     >
       <icon name="construction" />
-    </button>
+    </material-icon-button>
     <regex-builder-overlay
       v-if="builderOpen"
       :initial-pattern="value"
@@ -41,12 +41,15 @@
 <script>
 import Icon from './Icon.vue';
 import RegexBuilderOverlay from './RegexBuilderOverlay.vue';
+import MaterialTextField from '../../../components/material_text_field';
+import MaterialTextButton from '../../../components/material_text_button';
+import MaterialIconButton from '../../../components/material_icon_button';
 
 let uid = 0;
 
 export default {
   name: 'BuildSearchField',
-  components: { Icon, RegexBuilderOverlay },
+  components: { Icon, RegexBuilderOverlay, MaterialTextField, MaterialTextButton, MaterialIconButton },
   props: {
     value: { type: String, default: '' },
     regexMode: { type: Boolean, default: false },

@@ -27,7 +27,7 @@
       <p v-if="loading" class="mgl-pl-state" role="status">Loading pipelines…</p>
       <div v-else-if="loadError" class="mgl-pl-state mgl-pl-state--error" role="alert">
         <span>{{ loadError.message || 'Pipelines could not be loaded.' }}</span>
-        <button type="button" @click="loadPipelines">Retry</button>
+        <material-button variant="text" type="button" @click="loadPipelines">Retry</material-button>
       </div>
       <main v-else class="mgl-pl-main">
         <pipeline-list
@@ -76,6 +76,7 @@
 </template>
 
 <script>
+import MaterialButton from '../../components/material_button';
 import { loadSettings, updateSettings, subscribeSettings } from '../../settings';
 import { notificationCenter } from '../../notifications';
 import {
@@ -102,7 +103,7 @@ import ToastStack from './components/ToastStack.vue';
 
 export default {
   name: 'PipelinesSurface',
-  components: {
+  components: { MaterialButton,
     TopBar,
     ListHeader,
     FilterBar,

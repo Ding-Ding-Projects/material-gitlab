@@ -1,6 +1,6 @@
 <template>
   <div class="mgl-pl-filterbar" role="group" aria-label="Filter pipelines">
-    <button
+    <material-button variant="text"
       v-for="chip in chips"
       :key="chip.key"
       type="button"
@@ -11,14 +11,16 @@
     >
       <span v-if="chip.on" class="mgl-icon mgl-icon--sm" aria-hidden="true">check</span>
       {{ chip.label }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 import { FILTER_DEFINITIONS } from '../data';
 
 export default {
+  components: { MaterialButton },
   name: 'PipelinesFilterBar',
   props: {
     filters: { type: Object, required: true },

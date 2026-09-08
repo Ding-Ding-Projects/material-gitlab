@@ -13,12 +13,12 @@
       <h2 :id="titleId" class="secure-confirm__title">{{ title }}</h2>
       <p :id="descriptionId" class="secure-confirm__description">{{ description }}</p>
       <div class="secure-confirm__actions">
-        <button ref="cancelButton" type="button" class="secure-confirm__button" @click="cancel">
+        <material-button ref="cancelButton" variant="text" type="button" class="secure-confirm__button" @click="cancel">
           {{ cancelLabel }}
-        </button>
-        <button type="button" class="secure-confirm__button secure-confirm__button--danger" @click="confirm">
+        </material-button>
+        <material-button variant="filled" type="button" class="secure-confirm__button secure-confirm__button--danger" @click="confirm">
           {{ confirmLabel }}
-        </button>
+        </material-button>
       </div>
     </div>
   </div>
@@ -26,9 +26,11 @@
 
 <script>
 import { uniqueId } from 'lodash';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'SecureConfirmDialog',
+  components: { MaterialButton },
   props: {
     title: { type: String, required: true },
     description: { type: String, required: true },
@@ -46,7 +48,7 @@ export default {
   },
   methods: {
     focusable() {
-      return Array.from(this.$refs.root.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'));
+      return Array.from(this.$refs.root.querySelectorAll('a[href], button, input, select, textarea, md-filled-button, md-outlined-button, md-filled-tonal-button, md-elevated-button, md-text-button, md-filled-text-field, [tabindex]:not([tabindex="-1"])'));
     },
     trapFocus(event) {
       const elements = this.focusable();

@@ -4,6 +4,8 @@
 // lives inside the Repository surface only and reuses the shared RegexBuilder
 // evaluation primitive rather than reimplementing pattern matching.
 import RegexBuilder from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const FLAG_TIPS = { i: 'case-insensitive', g: 'global', m: 'multiline', s: 'dotall' };
 
@@ -28,6 +30,7 @@ const DEFAULT_TEST_TEXT = 'auth: login failed for user 42\npipeline #8812 passed
 
 export default {
   name: 'RegexBuilderDialog',
+  components: { MaterialButton, MaterialTextField },
   props: {
     initialPattern: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },
@@ -171,7 +174,7 @@ export default {
         <h2 id="regex-builder-title" class="regex-dialog__title">Regex builder</h2>
         <span class="regex-dialog__badge" :class="valid ? 'is-valid' : 'is-invalid'">{{ validLabel }}</span>
         <div class="regex-dialog__flags" role="group" aria-label="Regex flags">
-          <button
+          <material-button variant="text"
             v-for="chip in flagChips"
             :key="chip.flag"
             type="button"
@@ -182,13 +185,13 @@ export default {
             @click="toggleFlag(chip.flag)"
           >
             {{ chip.flag }}
-          </button>
+          </material-button>
         </div>
       </div>
 
       <label class="visually-hidden" for="regex-pattern-input">Regular expression pattern</label>
-      <input
-        id="regex-pattern-input"
+      <material-text-field
+        id="regex-pattern-input" aria-label="Regex pattern"
         ref="patternInput"
         v-model="draft"
         type="text"
@@ -196,13 +199,13 @@ export default {
         placeholder="pattern, e.g. (auth|login).*fail"
         :aria-invalid="!valid"
         aria-describedby="regex-error"
-      />
+      ></material-text-field>
       <div v-if="errorMessage" id="regex-error" class="regex-dialog__error" role="alert">{{ errorMessage }}</div>
 
       <div class="snippet-groups">
         <div v-for="group in snippetGroups" :key="group.name" class="snippet-group">
           <span class="snippet-group__name">{{ group.name }}</span>
-          <button
+          <material-button variant="text"
             v-for="item in group.items"
             :key="item.text"
             type="button"
@@ -211,14 +214,14 @@ export default {
             @click="insertSnippet(item.text)"
           >
             {{ item.text }}
-          </button>
+          </material-button>
         </div>
       </div>
 
       <div class="regex-dialog__grid">
         <div class="regex-panel">
           <span class="regex-panel__label">Test string</span>
-          <textarea v-model="testText" rows="4" class="regex-dialog__test-text" aria-label="Test string"></textarea>
+          <material-text-field type="textarea" v-model="testText" rows="4" class="regex-dialog__test-text" aria-label="Test string"></material-text-field>
           <div class="highlight-box" aria-live="polite">
             <template v-for="(segment, index) in highlightSegments">
               <mark v-if="segment.mark" :key="`m-${index}`">{{ segment.text }}</mark>
@@ -254,8 +257,8 @@ export default {
       </div>
 
       <div class="regex-dialog__actions">
-        <button type="button" class="btn-text" @click="close">Cancel</button>
-        <button type="button" class="btn-filled" :disabled="!valid || !draft" @click="apply">Apply to search</button>
+        <material-button type="button" variant="text" class="btn-text" @click="close">Cancel</material-button>
+        <material-button variant="text" type="button" class="btn-filled" :disabled="!valid || !draft" @click="apply">Apply to search</material-button>
       </div>
     </div>
   </div>

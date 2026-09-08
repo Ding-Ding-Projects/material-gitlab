@@ -1,9 +1,10 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'BranchSwitcher',
-  components: { MIcon },
+  components: { MIcon, MaterialButton },
   props: {
     branches: { type: Array, required: true },
     activeBranch: { type: String, required: true },
@@ -37,7 +38,7 @@ export default {
 
 <template>
   <div class="branch-switcher">
-    <button
+    <material-button variant="text"
       ref="trigger"
       type="button"
       class="branch-switcher__trigger"
@@ -49,9 +50,9 @@ export default {
       <m-icon name="branch" :size="17" decorative class="branch-switcher__icon" />
       {{ activeBranch }}
       <m-icon name="chevron-down" :size="17" decorative class="branch-switcher__icon" />
-    </button>
+    </material-button>
     <div v-if="open" ref="menu" class="branch-switcher__menu" role="menu" :style="{ maxHeight }">
-      <button
+      <material-button variant="text"
         v-for="branch in branches"
         :key="branch"
         type="button"
@@ -62,7 +63,7 @@ export default {
         @click="pick(branch)"
       >
         {{ branch }}
-      </button>
+      </material-button>
     </div>
   </div>
 </template>

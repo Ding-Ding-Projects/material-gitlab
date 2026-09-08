@@ -1,0 +1,16 @@
+{
+  "surface": "Build",
+  "files": [
+    { "file": "Build.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/BulkActionBar.vue", "buttons": 3, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/ConfirmDialog.vue", "buttons": 2, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/EmptyState.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/NotificationHost.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 3, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/PipelineEditor.vue", "buttons": 1, "textFields": 1, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/RegexBuilderOverlay.vue", "buttons": 2, "textFields": 2, "checkboxes": 0, "iconButtons": 1, "textButtons": 2, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/RowItem.vue", "buttons": 1, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SearchField.vue", "buttons": 0, "textFields": 1, "checkboxes": 0, "iconButtons": 1, "textButtons": 1, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/TabsNav.vue", "buttons": 0, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 1, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/TopBar.vue", "buttons": 0, "textFields": 0, "checkboxes": 0, "iconButtons": 2, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] }
+  ]
+}
