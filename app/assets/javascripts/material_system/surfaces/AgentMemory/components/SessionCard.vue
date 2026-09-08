@@ -1,5 +1,10 @@
 <template>
-  <div :id="`am-anchor-session-${session.id}`" class="am-card am-session-card" :data-am-anchor="`session-${session.id}`" tabindex="-1">
+  <div
+    :id="`am-anchor-session-${session.id}`"
+    class="am-card am-session-card"
+    :data-am-anchor="`session-${session.id}`"
+    tabindex="-1"
+  >
     <div class="am-session-card__head">
       <label class="am-row__checkbox">
         <input
@@ -9,7 +14,11 @@
           @change="$emit('toggle-select', session.id)"
         />
       </label>
-      <span class="am-session-card__dot" :class="`am-session-card__dot--${session.statusTone}`" aria-hidden="true"></span>
+      <span
+        class="am-session-card__dot"
+        :class="`am-session-card__dot--${session.statusTone}`"
+        aria-hidden="true"
+      ></span>
       <span class="am-session-card__agent">{{ session.agent }}</span>
       <span class="am-session-card__when">{{ whenLabel }}</span>
     </div>
@@ -20,20 +29,30 @@
       <div><strong>Next gate</strong> · {{ session.gate }}</div>
     </div>
     <form class="am-session-card__reply" @submit.prevent="send">
-      <label :for="`am-reply-${session.id}`" class="am-visually-hidden">Reply to {{ session.agent }} inbox</label>
+      <label :for="`am-reply-${session.id}`" class="am-visually-hidden"
+        >Reply to {{ session.agent }} inbox</label
+      >
       <input
         :id="`am-reply-${session.id}`"
         type="text"
         class="am-session-card__reply-input"
         placeholder="Reply to session inbox…"
         :value="draft"
+        :disabled="!canSend"
         @input="$emit('draft', $event.target.value)"
       />
-      <button type="submit" class="am-session-card__send" aria-label="Send reply">
+      <button
+        type="submit"
+        class="am-session-card__send"
+        aria-label="Send reply"
+        :disabled="!canSend"
+      >
         <MaterialIcon name="send" :size="17" />
       </button>
     </form>
-    <div v-if="lastReply" class="am-session-card__delivered">Delivered to inbox: "{{ lastReply }}"</div>
+    <div v-if="lastReply" class="am-session-card__delivered">
+      Delivered to inbox: "{{ lastReply }}"
+    </div>
   </div>
 </template>
 
@@ -65,6 +84,7 @@ export default {
       type: Number,
       required: true,
     },
+    canSend: { type: Boolean, default: false },
   },
   computed: {
     whenLabel() {
@@ -73,7 +93,7 @@ export default {
   },
   methods: {
     send() {
-      if (!this.draft.trim()) return;
+      if (!this.canSend || !this.draft.trim()) return;
       this.$emit('send', this.session.id);
     },
   },

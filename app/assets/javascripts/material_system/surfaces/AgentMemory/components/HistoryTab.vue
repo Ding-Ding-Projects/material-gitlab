@@ -1,15 +1,27 @@
 <template>
-  <div id="am-tabpanel-history" class="am-tabpanel" role="tabpanel" aria-labelledby="am-tab-history" tabindex="0">
+  <div
+    id="am-tabpanel-history"
+    class="am-tabpanel"
+    role="tabpanel"
+    aria-labelledby="am-tab-history"
+    tabindex="0"
+  >
     <p v-if="loading" class="am-loading-text">Loading history…</p>
     <template v-else-if="items.length === 0">
       <EmptyState
         icon="undo"
-        :message="totalCount === 0 ? 'No revisions recorded yet.' : 'No history entries match your search.'"
+        :message="
+          totalCount === 0 ? 'No revisions recorded yet.' : 'No history entries match your search.'
+        "
         :action-label="totalCount > 0 ? 'Clear search' : ''"
         @action="$emit('clear-search')"
       />
     </template>
     <template v-else>
+      <p v-if="!canRestore" class="am-loading-text" role="status">
+        Revision restoration is unavailable because this host exposes a read-only Agent Memory
+        provider.
+      </p>
       <SelectionToolbar
         v-if="selectedIds.length > 0"
         :selected-count="selectedIds.length"
@@ -21,10 +33,19 @@
         @clear="$emit('clear')"
       >
         <template #actions>
-          <button type="button" class="am-btn am-btn--text am-btn--small" @click="$emit('bulk-restore')">
+          <button
+            type="button"
+            class="am-btn am-btn--text am-btn--small"
+            :disabled="!canRestore"
+            @click="$emit('bulk-restore')"
+          >
             <MaterialIcon name="undo" :size="16" /> Restore selected as new revisions
           </button>
-          <button type="button" class="am-btn am-btn--text am-btn--small" @click="$emit('bulk-export')">
+          <button
+            type="button"
+            class="am-btn am-btn--text am-btn--small"
+            @click="$emit('bulk-export')"
+          >
             <MaterialIcon name="save" :size="16" /> Export as changelog text
           </button>
         </template>
@@ -35,6 +56,7 @@
           :key="entry.id"
           :entry="entry"
           :selected="selectedIds.includes(entry.id)"
+          :can-restore="canRestore"
           @toggle-select="$emit('toggle-select', $event)"
           @restore="$emit('restore', $event)"
         />
@@ -69,6 +91,7 @@ export default {
       type: Boolean,
       default: false,
     },
+    canRestore: { type: Boolean, default: false },
   },
 };
 </script>

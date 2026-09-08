@@ -45,6 +45,8 @@
             :total-count="skills.length"
             :selected-ids="selection.skills"
             :loading="loading.skills"
+            :can-reinstall="capabilities.reinstallSkills"
+            :can-uninstall="capabilities.uninstallSkills"
             @clear-search="clearSearch"
             @toggle-select="toggleSelect('skills', $event)"
             @select-all="selectAllVisible('skills', visibleSkills)"
@@ -68,6 +70,8 @@
             :refresh-seconds="refreshSeconds"
             :last-refreshed-at="lastRefreshedAt"
             :now="now"
+            :can-send="capabilities.sendReply"
+            :can-archive="capabilities.archiveSessions"
             @clear-search="clearSearch"
             @toggle-select="toggleSelect('sessions', $event)"
             @select-all="selectAllVisible('sessions', visibleSessions)"
@@ -81,7 +85,12 @@
             @refresh-now="refreshNow(false)"
           />
 
-          <SyncTab v-else-if="activeTab === 'sync'" :phase="syncPhase" :steps="syncStepsView" @run-sync="runSync" />
+          <SyncTab
+            v-else-if="activeTab === 'sync'"
+            :phase="syncPhase"
+            :steps="syncStepsView"
+            :supported="capabilities.sync && baseSyncSteps.length > 0"
+          />
 
           <HistoryTab
             v-else-if="activeTab === 'history'"
@@ -89,6 +98,7 @@
             :total-count="history.length"
             :selected-ids="selection.history"
             :loading="loading.history"
+            :can-restore="capabilities.restoreHistory"
             @clear-search="clearSearch"
             @toggle-select="toggleSelect('history', $event)"
             @select-all="selectAllVisible('history', visibleHistory)"
@@ -132,11 +142,7 @@ import StatusHubTab from './components/StatusHubTab.vue';
 import SyncTab from './components/SyncTab.vue';
 import TabStrip from './components/TabStrip.vue';
 import TopBar from './components/TopBar.vue';
-import {
-  TABS,
-  nextHistoryRevisionId,
-  withStartedAt,
-} from './data';
+import { TABS, withStartedAt } from './data';
 
 const TAB_ICONS = {
   instructions: 'document',
@@ -186,6 +192,14 @@ export default {
       sessions: [],
       history: [],
       baseSyncSteps: [],
+      capabilities: {
+        reinstallSkills: false,
+        uninstallSkills: false,
+        sendReply: false,
+        archiveSessions: false,
+        restoreHistory: false,
+        sync: false,
+      },
       syncPhase: 'idle',
       drafts: {},
       replies: {},
@@ -271,13 +285,6 @@ export default {
           icon: 'search',
           group: 'Navigate',
           run: () => this.$nextTick(() => this.$refs.topBar && this.$refs.topBar.focusSearch()),
-        },
-        {
-          id: 'run-sync',
-          label: 'Run canonical sync now',
-          icon: 'sync',
-          group: 'Sync',
-          run: () => this.runSync(),
         },
         {
           id: 'refresh-sessions',
@@ -369,7 +376,8 @@ export default {
   },
   beforeDestroy() {
     window.removeEventListener('keydown', this.onKeydown);
-    if (this.systemThemeQuery) this.systemThemeQuery.removeEventListener('change', this.onSystemThemeChange);
+    if (this.systemThemeQuery)
+      this.systemThemeQuery.removeEventListener('change', this.onSystemThemeChange);
     if (this.unsubscribeSettings) this.unsubscribeSettings();
     if (this.clockTimer) window.clearInterval(this.clockTimer);
     if (this.syncTimer) window.clearTimeout(this.syncTimer);
@@ -385,7 +393,14 @@ export default {
         this.sessions = withStartedAt(data.sessions || [], this.now);
         this.history = data.history || [];
         this.baseSyncSteps = data.syncSteps || [];
-        this.loading = { targets: false, blocks: false, skills: false, sessions: false, history: false };
+        this.capabilities = { ...this.capabilities, ...(data.capabilities || {}) };
+        this.loading = {
+          targets: false,
+          blocks: false,
+          skills: false,
+          sessions: false,
+          history: false,
+        };
         this.lastRefreshedAt = Date.now();
       };
 
@@ -397,8 +412,15 @@ export default {
         apply({});
         return;
       }
-      fetch(this.dataEndpoint, { credentials: 'same-origin', headers: { Accept: 'application/json' } })
-        .then((response) => (response.ok ? response.json() : Promise.reject(new Error('Agent Memory data is unavailable.'))))
+      fetch(this.dataEndpoint, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      })
+        .then((response) =>
+          response.ok
+            ? response.json()
+            : Promise.reject(new Error('Agent Memory data is unavailable.')),
+        )
         .then(apply)
         .catch(() => apply({}));
     },
@@ -503,22 +525,21 @@ export default {
         severity: 'success',
       });
     },
+    reportUnavailable(operation) {
+      notificationCenter.notify({
+        title: 'Operation unavailable',
+        message: `${operation} is unavailable because this host exposes a read-only Agent Memory provider.`,
+        severity: 'warning',
+      });
+    },
     bulkReinstallSkills() {
-      const ids = [...this.selection.skills];
-      if (ids.length === 0) return;
-      this.skills = this.skills.map((skill) => (ids.includes(skill.id) ? { ...skill, status: 'installing' } : skill));
-      window.setTimeout(() => {
-        this.skills = this.skills.map((skill) =>
-          ids.includes(skill.id) ? { ...skill, status: 'installed' } : skill,
-        );
-        notificationCenter.notify({
-          title: 'Reinstalled',
-          message: `${ids.length} skill(s) reinstalled.`,
-          severity: 'success',
-        });
-      }, 900);
+      this.reportUnavailable('Skill reinstall');
     },
     requestUninstallSkill(skill) {
+      if (!this.capabilities.uninstallSkills) {
+        this.reportUnavailable('Skill uninstall');
+        return;
+      }
       if (!skill.removable) {
         notificationCenter.notify({
           title: 'Cannot uninstall',
@@ -535,6 +556,10 @@ export default {
       });
     },
     requestBulkUninstallSkills() {
+      if (!this.capabilities.uninstallSkills) {
+        this.reportUnavailable('Skill uninstall');
+        return;
+      }
       const selected = this.skills.filter((skill) => this.selection.skills.includes(skill.id));
       const removable = selected.filter((skill) => skill.removable);
       const blocked = selected.filter((skill) => !skill.removable);
@@ -558,61 +583,22 @@ export default {
         action: () => this.uninstallSkills(removable.map((skill) => skill.id)),
       });
     },
-    uninstallSkills(ids) {
-      this.skills = this.skills.filter((skill) => !ids.includes(skill.id));
-      this.selection.skills = this.selection.skills.filter((id) => !ids.includes(id));
-      notificationCenter.notify({
-        title: 'Uninstalled',
-        message: `${ids.length} skill(s) removed from the local catalog.`,
-        severity: 'success',
-      });
+    uninstallSkills() {
+      this.reportUnavailable('Skill uninstall');
     },
 
     // --- status hub sessions -------------------------------------------
     setDraft(sessionId, value) {
       this.drafts = { ...this.drafts, [sessionId]: value };
     },
-    sendReply(sessionId) {
-      const draft = (this.drafts[sessionId] || '').trim();
-      if (!draft) return;
-      this.replies = { ...this.replies, [sessionId]: draft };
-      this.drafts = { ...this.drafts, [sessionId]: '' };
-      notificationCenter.notify({
-        title: 'Delivered',
-        message: `Reply delivered to the session inbox: "${draft}"`,
-        severity: 'success',
-        timeout: 4000,
-      });
+    sendReply() {
+      this.reportUnavailable('Session reply delivery');
     },
     bulkRefreshSessions() {
-      const ids = [...this.selection.sessions];
-      if (ids.length === 0) return;
-      this.now = Date.now();
-      this.sessions = this.sessions.map((session) =>
-        ids.includes(session.id) && !session.archived
-          ? { ...session, startedAt: this.now, minutesAgo: 0 }
-          : session,
-      );
-      notificationCenter.notify({
-        title: 'Refreshed',
-        message: `${ids.length} session(s) refreshed.`,
-        severity: 'info',
-      });
+      this.refreshNow(false);
     },
     bulkArchiveSessions() {
-      const ids = [...this.selection.sessions];
-      if (ids.length === 0) return;
-      this.sessions = this.sessions.map((session) =>
-        ids.includes(session.id)
-          ? { ...session, statusTone: 'neutral', archived: true, live: false, minutesAgo: null, startedAt: null }
-          : session,
-      );
-      this.selection.sessions = [];
-      notificationCenter.notify({
-        title: 'Archived',
-        message: `${ids.length} session(s) archived.`,
-        severity: 'info',
-      });
+      this.reportUnavailable('Session archive');
     },
     toggleLiveRefresh(value) {
       this.liveRefresh = value;
@@ -622,7 +608,10 @@ export default {
     startLiveRefresh() {
       this.stopLiveRefresh();
       if (!this.liveRefresh) return;
-      this.refreshTimer = window.setInterval(() => this.refreshNow(true), this.refreshSeconds * 1000);
+      this.refreshTimer = window.setInterval(
+        () => this.refreshNow(true),
+        this.refreshSeconds * 1000,
+      );
     },
     stopLiveRefresh() {
       if (this.refreshTimer) {
@@ -632,57 +621,44 @@ export default {
     },
     refreshNow(silent) {
       if (!this.dataEndpoint) return;
-      fetch(this.dataEndpoint, { credentials: 'same-origin', headers: { Accept: 'application/json' } }).then((response) => response.json()).then((payload) => {
-        const data = payload.sessions || [];
-        const byId = new Map(this.sessions.map((session) => [session.id, session]));
-        const merged = data.map((incoming) => {
-          const existing = byId.get(incoming.id);
-          return existing && existing.archived ? existing : incoming;
-        });
-        this.now = Date.now();
-        this.sessions = withStartedAt(merged, this.now);
-        this.lastRefreshedAt = this.now;
-        if (!silent) {
-          notificationCenter.notify({
-            title: 'Sessions refreshed',
-            message: `${merged.length} session(s) up to date.`,
-            severity: 'info',
-            timeout: 3000,
+      fetch(this.dataEndpoint, {
+        credentials: 'same-origin',
+        headers: { Accept: 'application/json' },
+      })
+        .then((response) => response.json())
+        .then((payload) => {
+          const data = payload.sessions || [];
+          const byId = new Map(this.sessions.map((session) => [session.id, session]));
+          const merged = data.map((incoming) => {
+            const existing = byId.get(incoming.id);
+            return existing && existing.archived ? existing : incoming;
           });
-        }
-      });
+          this.now = Date.now();
+          this.sessions = withStartedAt(merged, this.now);
+          this.lastRefreshedAt = this.now;
+          if (!silent) {
+            notificationCenter.notify({
+              title: 'Sessions refreshed',
+              message: `${merged.length} session(s) up to date.`,
+              severity: 'info',
+              timeout: 3000,
+            });
+          }
+        });
     },
 
     // --- history -------------------------------------------------------
-    restoreEntry(entry) {
-      const id = nextHistoryRevisionId();
-      this.history = [{ id, icon: 'undo', title: `Restored ${entry.id} as new revision`, when: 'just now' }, ...this.history];
-      notificationCenter.notify({
-        title: 'Restored',
-        message: `${entry.id} restored as ${id}.`,
-        severity: 'success',
-      });
+    restoreEntry() {
+      this.reportUnavailable('Revision restore');
     },
     bulkRestoreHistory() {
-      const selected = this.history.filter((entry) => this.selection.history.includes(entry.id));
-      if (selected.length === 0) return;
-      const created = selected.map((entry) => ({
-        id: nextHistoryRevisionId(),
-        icon: 'undo',
-        title: `Restored ${entry.id} as new revision`,
-        when: 'just now',
-      }));
-      this.history = [...created, ...this.history];
-      this.selection.history = [];
-      notificationCenter.notify({
-        title: 'Restored',
-        message: `${created.length} revision(s) restored as new entries.`,
-        severity: 'success',
-      });
+      this.reportUnavailable('Revision restore');
     },
     bulkExportHistory() {
       const selected = this.history.filter((entry) => this.selection.history.includes(entry.id));
-      const text = selected.map((entry) => `- ${entry.id} — ${entry.title} (${entry.when})`).join('\n');
+      const text = selected
+        .map((entry) => `- ${entry.id} — ${entry.title} (${entry.when})`)
+        .join('\n');
       this.downloadTextFile('agent-memory-history.md', text);
       notificationCenter.notify({
         title: 'Exported',

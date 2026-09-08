@@ -11,9 +11,16 @@
     <MaterialIcon :name="entry.icon" :size="19" class="am-row__icon" />
     <div class="am-row__body">
       <div class="am-row__title">{{ entry.title }}</div>
-      <div class="am-row__subtitle"><span class="am-row__rev">{{ entry.id }}</span> · {{ entry.when }}</div>
+      <div class="am-row__subtitle">
+        <span class="am-row__rev">{{ entry.id }}</span> · {{ entry.when }}
+      </div>
     </div>
-    <button type="button" class="am-btn am-btn--outline am-btn--small" @click="$emit('restore', entry)">
+    <button
+      type="button"
+      class="am-btn am-btn--outline am-btn--small"
+      :disabled="!canRestore"
+      @click="$emit('restore', entry)"
+    >
       Restore as new revision
     </button>
   </div>
@@ -34,6 +41,7 @@ export default {
       type: Boolean,
       default: false,
     },
+    canRestore: { type: Boolean, default: false },
   },
 };
 </script>
