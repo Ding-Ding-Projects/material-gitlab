@@ -17,6 +17,24 @@
 
 ## Next
 
+- [ ] **The running application does not render the design, and the gap is a replacement gap rather
+      than a styling one.** Measured on a real instance serving this fork's own compiled frontend,
+      signed in as an administrator, with the class census taken from the live DOM rather than from
+      source:
+      - The content area carries **35 `gl-mds` classes**, which is GitLab's own design system, and
+        **zero** Material classes, **zero** Material Symbols icons, **zero** `md3` token classes and
+        **zero** Vue application roots.
+      - The only Material presence anywhere on the page is `m3-shell-*` classes applied to GitLab's
+        stock `super-sidebar`: the element holding the context name resolves to
+        `span.m3-shell-sidebar-context-name` inside `nav#super-sidebar.super-sidebar.m3-shell-sidebar`.
+      - That is the token-and-override layer over Pajamas which `HANDOFF.md` records as explicitly
+        rejected, and which was reaffirmed as rejected on 2026-09-03. The requirement is that a
+        surface **is** the design, not that Pajamas is restyled underneath it.
+      - So the 25 contracts in `design/` are not what the application renders, and no amount of CSS
+        repair closes the distance. Wave 1 remains Issues and Boards against `design/Issues.dc.html`.
+      - Recorded so it is not rediscovered: **Vue replaces its mount node**, so
+        `querySelector('#js-material-<surface>')` returning null is not evidence that a surface
+        failed to mount. Test for rendered content and its classes instead.
 - [ ] **Make this fork installable. This is the single most important thing missing.** The Material
       work is real application code, 376 files under `app/assets/javascripts/material_system/`, and
       nothing in this repository turns it into something anyone can install. There is no apt

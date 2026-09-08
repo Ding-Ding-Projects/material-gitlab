@@ -55,6 +55,47 @@ deleted. Anyone completing them should verify each one on its own merits.
 Two stashes remain. `stash@{0}` is empty. `stash@{1}` holds an untracked older `.github/workflows/pages.yml`
 that is superseded by the current file; its one useful idea, the main-only trigger, is now restored.
 
+### The design gap, measured on a running instance
+
+A real instance was stood up on WSL2 (Omnibus 19.3.1) serving this fork's own compiled frontend,
+11,317 webpack files replacing the stock 7,237. Signed in as an administrator, the live DOM says:
+
+| Measured on `/admin` | Result |
+| --- | --- |
+| `gl-mds` classes in the content area | 35 |
+| Material classes in the content area | 0 |
+| Material Symbols icons | 0 |
+| `md3` token classes | 0 |
+| Vue application roots | 0 |
+
+The only Material presence on the page is `m3-shell-*` applied to GitLab's stock `super-sidebar`.
+That is the token-and-override layer over Pajamas that this file already records as explicitly
+rejected. The distance to the 25 `design/` contracts is therefore a replacement gap, not a styling
+one, and cannot be closed by CSS.
+
+Three separate repairs were needed before any of this could even be measured, and each was invisible
+from reading the source:
+
+1. Every one of the 108,026 tracked files was mode `100644`, so the frontend could not be built at
+   all; `yarn webpack-prod` died on its first command with exit 126.
+2. `app/views/admin/dashboard/index.html.haml` was invalid HAML and had never rendered in any
+   environment. Hamlit ends a `-` statement at the line break, so an array opener alone on its line
+   compiles to `stats = [;`.
+3. The view needs the fork's own admin controller and route; views and compiled assets alone raise
+   `undefined method 'admin_dashboard_actions_path'`.
+
+Two traps worth keeping:
+
+- **Vue replaces its mount node.** `querySelector('#js-material-admin')` returning null is not
+  evidence that the surface failed to mount. Test for rendered content and its classes.
+- **A backup written beside a template is itself a resolvable template.** Rails globbed
+  `index.html.haml.stock-<stamp>` as a candidate for the same action. Keep backups outside the view
+  tree.
+- **WSL2 terminates the distro seconds after the last command exits**, which stops GitLab and makes
+  a browser capture fail with `ERR_CONNECTION_REFUSED` against an instance that answered `curl`
+  moments earlier. A keepalive process is required for the length of any capture run;
+  `vmIdleTimeout` in `.wslconfig` did not hold.
+
 ### What is still not proven
 
 - **No release has been published yet.** The pipeline reached the publish step for the first time
