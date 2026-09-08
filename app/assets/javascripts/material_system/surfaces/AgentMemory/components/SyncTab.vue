@@ -1,21 +1,35 @@
 <template>
-  <div id="am-tabpanel-sync" class="am-tabpanel" role="tabpanel" aria-labelledby="am-tab-sync" tabindex="0">
+  <div
+    id="am-tabpanel-sync"
+    class="am-tabpanel"
+    role="tabpanel"
+    aria-labelledby="am-tab-sync"
+    tabindex="0"
+  >
     <div class="am-card am-sync-card">
       <div class="am-sync-card__head">
-        <MaterialIcon :name="icon" :size="26" class="am-sync-card__icon" :class="`am-sync-card__icon--${tone}`" />
+        <MaterialIcon
+          :name="icon"
+          :size="26"
+          class="am-sync-card__icon"
+          :class="`am-sync-card__icon--${tone}`"
+        />
         <div>
           <div class="am-sync-card__title">{{ title }}</div>
           <div class="am-sync-card__subtitle">{{ subtitle }}</div>
         </div>
-        <button type="button" class="am-btn am-btn--filled" :disabled="running" @click="$emit('run-sync')">
+        <button v-if="supported" type="button" class="am-btn am-btn--filled" :disabled="running">
           <MaterialIcon name="sync" :size="18" :class="{ 'am-sync-step__icon--spin': running }" />
           {{ buttonLabel }}
         </button>
+        <p v-else class="am-sync-card__subtitle" role="status">
+          Canonical sync is unavailable because this host exposes no sync operation.
+        </p>
       </div>
       <SyncStepRow v-for="step in steps" :key="step.key" :step="step" />
       <div class="am-sync-card__footnote">
-        Timestamped backup created before every replacement · noncanonical checkouts fail closed without the
-        authorization word.
+        Timestamped backup created before every replacement · noncanonical checkouts fail closed
+        without the authorization word.
       </div>
     </div>
   </div>
@@ -37,6 +51,7 @@ export default {
       type: Array,
       required: true,
     },
+    supported: { type: Boolean, default: false },
   },
   computed: {
     running() {

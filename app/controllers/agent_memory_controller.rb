@@ -31,6 +31,14 @@ class AgentMemoryController < ApplicationController
       sessions: [],
       history: [],
       syncSteps: [],
+      capabilities: {
+        reinstallSkills: false,
+        uninstallSkills: false,
+        sendReply: false,
+        archiveSessions: false,
+        restoreHistory: false,
+        sync: false,
+      },
       limits: { maxRecords: MAX_RECORDS },
     }
   end

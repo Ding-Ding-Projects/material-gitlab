@@ -1,5 +1,11 @@
 <template>
-  <div id="am-tabpanel-skills" class="am-tabpanel" role="tabpanel" aria-labelledby="am-tab-skills" tabindex="0">
+  <div
+    id="am-tabpanel-skills"
+    class="am-tabpanel"
+    role="tabpanel"
+    aria-labelledby="am-tab-skills"
+    tabindex="0"
+  >
     <p v-if="loading" class="am-loading-text">Loading skills catalog…</p>
     <template v-else-if="items.length === 0">
       <EmptyState
@@ -10,6 +16,9 @@
       />
     </template>
     <template v-else>
+      <p v-if="!canReinstall || !canUninstall" class="am-loading-text" role="status">
+        Skill changes are unavailable because this host exposes a read-only Agent Memory provider.
+      </p>
       <SelectionToolbar
         v-if="selectedIds.length > 0"
         :selected-count="selectedIds.length"
@@ -21,15 +30,25 @@
         @clear="$emit('clear')"
       >
         <template #actions>
-          <button type="button" class="am-btn am-btn--text am-btn--small" @click="$emit('bulk-copy')">
+          <button
+            type="button"
+            class="am-btn am-btn--text am-btn--small"
+            @click="$emit('bulk-copy')"
+          >
             <MaterialIcon name="clipboard" :size="16" /> Copy names
           </button>
-          <button type="button" class="am-btn am-btn--text am-btn--small" @click="$emit('bulk-reinstall')">
+          <button
+            type="button"
+            class="am-btn am-btn--text am-btn--small"
+            :disabled="!canReinstall"
+            @click="$emit('bulk-reinstall')"
+          >
             <MaterialIcon name="sync" :size="16" /> Reinstall selected
           </button>
           <button
             type="button"
             class="am-btn am-btn--text am-btn--small am-btn--danger-text"
+            :disabled="!canUninstall"
             @click="$emit('bulk-uninstall')"
           >
             <MaterialIcon name="trash" :size="16" /> Uninstall selected
@@ -42,6 +61,7 @@
           :key="skill.id"
           :skill="skill"
           :selected="selectedIds.includes(skill.id)"
+          :can-uninstall="canUninstall"
           @toggle-select="$emit('toggle-select', $event)"
           @uninstall="$emit('uninstall', $event)"
         />
@@ -76,6 +96,8 @@ export default {
       type: Boolean,
       default: false,
     },
+    canReinstall: { type: Boolean, default: false },
+    canUninstall: { type: Boolean, default: false },
   },
 };
 </script>

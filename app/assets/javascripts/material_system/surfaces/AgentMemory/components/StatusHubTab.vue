@@ -1,5 +1,11 @@
 <template>
-  <div id="am-tabpanel-status" class="am-tabpanel" role="tabpanel" aria-labelledby="am-tab-status" tabindex="0">
+  <div
+    id="am-tabpanel-status"
+    class="am-tabpanel"
+    role="tabpanel"
+    aria-labelledby="am-tab-status"
+    tabindex="0"
+  >
     <div class="am-statushub-bar">
       <span class="am-statushub-bar__live" :class="{ 'am-statushub-bar__live--on': liveRefresh }">
         <span class="am-statushub-bar__dot" aria-hidden="true"></span>
@@ -7,10 +13,18 @@
       </span>
       <span class="am-statushub-bar__updated">Last refreshed {{ lastRefreshedLabel }}</span>
       <label class="am-statushub-bar__toggle">
-        <input type="checkbox" :checked="liveRefresh" @change="$emit('toggle-live', $event.target.checked)" />
+        <input
+          type="checkbox"
+          :checked="liveRefresh"
+          @change="$emit('toggle-live', $event.target.checked)"
+        />
         Auto-refresh every {{ refreshSeconds }}s
       </label>
-      <button type="button" class="am-btn am-btn--outline am-btn--small" @click="$emit('refresh-now')">
+      <button
+        type="button"
+        class="am-btn am-btn--outline am-btn--small"
+        @click="$emit('refresh-now')"
+      >
         <MaterialIcon name="sync" :size="15" /> Refresh now
       </button>
     </div>
@@ -19,12 +33,18 @@
     <template v-else-if="items.length === 0">
       <EmptyState
         icon="robot"
-        :message="totalCount === 0 ? 'No agent sessions reporting yet.' : 'No sessions match your search.'"
+        :message="
+          totalCount === 0 ? 'No agent sessions reporting yet.' : 'No sessions match your search.'
+        "
         :action-label="totalCount > 0 ? 'Clear search' : ''"
         @action="$emit('clear-search')"
       />
     </template>
     <template v-else>
+      <p v-if="!canSend || !canArchive" class="am-loading-text" role="status">
+        Session replies and archival are unavailable because this host exposes a read-only Agent
+        Memory provider.
+      </p>
       <SelectionToolbar
         v-if="selectedIds.length > 0"
         :selected-count="selectedIds.length"
@@ -36,10 +56,15 @@
         @clear="$emit('clear')"
       >
         <template #actions>
-          <button type="button" class="am-btn am-btn--text am-btn--small" @click="$emit('bulk-refresh')">
+          <button type="button" class="am-btn am-btn--text am-btn--small" disabled>
             <MaterialIcon name="sync" :size="16" /> Refresh selected
           </button>
-          <button type="button" class="am-btn am-btn--text am-btn--small" @click="$emit('bulk-archive')">
+          <button
+            type="button"
+            class="am-btn am-btn--text am-btn--small"
+            :disabled="!canArchive"
+            @click="$emit('bulk-archive')"
+          >
             <MaterialIcon name="save" :size="16" /> Archive selected
           </button>
         </template>
@@ -53,6 +78,7 @@
           :draft="drafts[session.id] || ''"
           :last-reply="replies[session.id] || ''"
           :now="now"
+          :can-send="canSend"
           @toggle-select="$emit('toggle-select', $event)"
           @draft="$emit('draft', session.id, $event)"
           @send="$emit('send', $event)"
@@ -113,6 +139,8 @@ export default {
       type: Number,
       required: true,
     },
+    canSend: { type: Boolean, default: false },
+    canArchive: { type: Boolean, default: false },
   },
   computed: {
     lastRefreshedLabel() {
