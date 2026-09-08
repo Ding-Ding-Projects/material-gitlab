@@ -5,7 +5,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { runNegativeRegression, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
+import { runNegativeRegression, sha256, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const inventoryPath = path.join(root, 'design', 'parity-inventory.json');
@@ -136,4 +136,65 @@ test('strict completion makes local font availability a reference-evidence bound
   assert.match(source, /diff requires an immutable approval record/);
   assert.match(source, /artifact hash does not match evidence/);
   assert.match(source, /function rootFile/);
+});
+
+test('strict completion accepts a complete 25-row fixture and rejects every provenance boundary', () => {
+  const fixture = path.join(root, 'tools', 'design-reference', 'test', `.tmp-complete-parity-${process.pid}`);
+  const fixtureDesign = path.join(fixture, 'design');
+  const commit = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
+  const rel = (file) => path.relative(fixture, file).replaceAll('\\', '/');
+  const jsonHash = (value) => crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex');
+  const png = (width, height) => { const bytes = Buffer.alloc(24); Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]).copy(bytes); bytes.write('IHDR', 12, 'ascii'); bytes.writeUInt32BE(width, 16); bytes.writeUInt32BE(height, 20); return bytes; };
+  fs.mkdirSync(fixture, { recursive: true }); fs.cpSync(path.join(root, 'design'), fixtureDesign, { recursive: true });
+  const complete = structuredClone(inventory);
+  complete.sourceCommit = commit; complete.capturePolicy.evidenceStatus = 'verified';
+  try {
+    for (const row of complete.contracts) {
+      row.productionRouteStatus = 'known'; row.materialAudit.status = 'verified'; row.materialAudit.review = 'fixture audit approval';
+      const base = path.join(fixture, 'evidence', row.id); fs.mkdirSync(base, { recursive: true });
+      const artifact = path.join(base, 'artifact.bin'); fs.writeFileSync(artifact, row.id);
+      const artifactHash = sha256(artifact); const manifest = path.join(base, 'manifest.json');
+      fs.writeFileSync(manifest, JSON.stringify({ schemaVersion: 1, sourceCommit: commit, artifacts: [{ path: rel(artifact), sha256: artifactHash }] }));
+      const manifestHash = sha256(manifest);
+      const tupleHash = jsonHash(row.tuple);
+      const rawReceipts = {};
+      for (const kind of ['reference', 'built']) {
+        const raw = path.join(base, `${kind}.png`); fs.writeFileSync(raw, png(row.tuple.viewport.width * row.tuple.scale, row.tuple.viewport.height * row.tuple.scale));
+        const session = path.join(base, `${kind}.session.json`);
+        const sessionRecord = { schemaVersion: 1, sourceCommit: commit, id: row.id, kind, target: `fixture://${row.id}/${kind}` };
+        fs.writeFileSync(session, JSON.stringify(sessionRecord));
+        const receipt = { schemaVersion: 2, id: row.id, kind, status: 'verified', referenceFile: row.referenceFile, referenceHash: sha256(path.join(fixture, row.referenceFile)), route: kind === 'reference' ? row.referenceRoute : row.productionRoute, tuple: row.tuple, tupleHash, artifact: { path: rel(artifact), sha256: artifactHash, manifest: { path: rel(manifest), sha256: manifestHash } }, sessionProvenance: { path: rel(session), sha256: sha256(session) }, raw: { path: rel(raw), sha256: sha256(raw), width: row.tuple.viewport.width * row.tuple.scale, height: row.tuple.viewport.height * row.tuple.scale, bytes: fs.statSync(raw).size }, sourceCommit: commit, ...(kind === 'reference' ? { fontProof: { transport: 'cheap Lowlevel headless route', availability: { 'Google Sans': true, 'Google Sans Text': true, 'Material Symbols Outlined': true } } } : {}) };
+        const receiptPath = `${raw}.receipt.json`; fs.writeFileSync(receiptPath, JSON.stringify(receipt)); rawReceipts[kind] = { raw, receiptPath, receipt };
+        row.evidence[kind === 'reference' ? 'referenceRaw' : 'builtRaw'] = { path: rel(raw), sha256: sha256(raw), status: 'verified', reason: 'fixture' };
+      }
+      const inputs = { reference: { path: row.evidence.referenceRaw.path, sha256: row.evidence.referenceRaw.sha256 }, built: { path: row.evidence.builtRaw.path, sha256: row.evidence.builtRaw.sha256 } };
+      const inputReceipts = { reference: { path: rel(rawReceipts.reference.receiptPath), sha256: sha256(rawReceipts.reference.receiptPath) }, built: { path: rel(rawReceipts.built.receiptPath), sha256: sha256(rawReceipts.built.receiptPath) } };
+      const side = path.join(base, 'side.svg'); fs.writeFileSync(side, '<svg/>');
+      const sideReceipt = { schemaVersion: 2, id: row.id, kind: 'side-by-side', status: 'verified', sourceCommit: commit, tuple: row.tuple, tupleHash, artifact: { sha256: sha256(side) }, inputs, inputReceipts };
+      fs.writeFileSync(`${side}.receipt.json`, JSON.stringify(sideReceipt)); row.evidence.sideBySide = { path: rel(side), sha256: sha256(side), status: 'verified', reason: 'fixture' };
+      const diff = path.join(base, 'diff.json'); const diffRecord = { schemaVersion: 2, id: row.id, status: 'unreviewed', sourceCommit: commit, tuple: row.tuple, tupleHash, inputs, review: { verdict: 'pending' } }; fs.writeFileSync(diff, JSON.stringify(diffRecord));
+      const diffReceipt = { schemaVersion: 2, id: row.id, kind: 'diff', status: 'verified', sourceCommit: commit, tuple: row.tuple, tupleHash, artifact: { sha256: sha256(diff) }, inputs, inputReceipts }; fs.writeFileSync(`${diff}.receipt.json`, JSON.stringify(diffReceipt));
+      fs.writeFileSync(`${diff}.review.json`, JSON.stringify({ schemaVersion: 1, id: row.id, status: 'approved', diff: { path: rel(diff), sha256: sha256(diff) }, sourceCommit: commit, tupleHash, reviewer: 'fixture reviewer', approval: 'fixture approval' }));
+      row.evidence.diff = { path: rel(diff), sha256: sha256(diff), status: 'verified', reason: 'fixture' };
+    }
+    assert.equal(validateCompletion(complete, { root: fixture }).valid, true, validateCompletion(complete, { root: fixture }).errors.join('\n'));
+    const red = (name, mutate) => { const broken = structuredClone(complete); mutate(broken); const verdict = validateCompletion(broken, { root: fixture }); assert.equal(verdict.valid, false, `${name} stayed green`); assert.equal(validateCompletion(complete, { root: fixture }).valid, true, `${name} did not restore green`); };
+    red('route', (value) => { value.contracts[0].evidence.referenceRaw.path = value.contracts[0].evidence.builtRaw.path; });
+    red('kind', (value) => { value.contracts[0].evidence.referenceRaw.path = value.contracts[0].evidence.builtRaw.path; value.contracts[0].evidence.referenceRaw.sha256 = value.contracts[0].evidence.builtRaw.sha256; });
+    red('commit', (value) => { value.sourceCommit = '0'.repeat(40); });
+    red('tuple', (value) => { value.contracts[0].tuple.theme = 'dark'; });
+    red('hash', (value) => { value.contracts[0].evidence.referenceRaw.sha256 = '0'.repeat(64); });
+    red('status', (value) => { value.contracts[0].evidence.referenceRaw.status = 'pending'; value.contracts[0].evidence.referenceRaw.sha256 = null; });
+    const review = path.join(fixture, `${complete.contracts[0].evidence.diff.path}.review.json`); const reviewOriginal = fs.readFileSync(review, 'utf8');
+    fs.writeFileSync(review, '{'); assert.equal(validateCompletion(complete, { root: fixture }).valid, false, 'malformed review fixture should turn red'); fs.writeFileSync(review, reviewOriginal);
+    assert.equal(validateCompletion(complete, { root: fixture }).valid, true, 'restored review fixture should turn green');
+    const rawReceipt = path.join(fixture, `${complete.contracts[0].evidence.referenceRaw.path}.receipt.json`); const rawReceiptOriginal = fs.readFileSync(rawReceipt, 'utf8');
+    const outside = path.join(path.dirname(fixture), `.tmp-parity-outside-${process.pid}`); const escape = path.join(fixture, 'escape'); fs.mkdirSync(outside); fs.writeFileSync(path.join(outside, 'manifest.json'), fs.readFileSync(path.join(fixture, 'evidence', complete.contracts[0].id, 'manifest.json')));
+    try {
+      fs.symlinkSync(outside, escape, 'junction');
+      const escaped = JSON.parse(rawReceiptOriginal); escaped.artifact.manifest.path = 'escape/manifest.json'; escaped.artifact.manifest.sha256 = sha256(path.join(outside, 'manifest.json')); fs.writeFileSync(rawReceipt, JSON.stringify(escaped));
+      assert.equal(validateCompletion(complete, { root: fixture }).valid, false, 'symlink escape stayed green'); fs.writeFileSync(rawReceipt, rawReceiptOriginal);
+      assert.equal(validateCompletion(complete, { root: fixture }).valid, true, 'restored symlink receipt should turn green');
+    } finally { fs.rmSync(escape, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
+  } finally { fs.rmSync(fixture, { recursive: true, force: true }); }
 });
