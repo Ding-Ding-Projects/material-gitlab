@@ -2,7 +2,7 @@
   <div class="mg-page-header">
     <h1 class="mg-page-header__title">Manage</h1>
     <div class="mg-tabs" role="tablist" aria-label="Manage sections">
-      <button
+      <material-button
         v-for="tab in tabs"
         :id="`mg-tab-${tab.id}`"
         :key="tab.id"
@@ -18,7 +18,7 @@
         @keydown.right="focusAdjacent(1)"
       >
         {{ tab.label }}
-      </button>
+      </material-button>
     </div>
     <a class="mg-page-header__members" :href="membersHref">
       Members
@@ -29,10 +29,11 @@
 
 <script>
 import MgIcon from './MgIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'ManagePageHeader',
-  components: { MgIcon },
+  components: { MgIcon, MaterialButton },
   props: {
     tabs: { type: Array, required: true },
     activeTab: { type: String, required: true },

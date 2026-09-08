@@ -4,7 +4,7 @@
       <div class="mg-palette__search">
         <MgIcon name="search" class="mg-palette__search-icon" />
         <label for="mg-palette-input" class="mg-visually-hidden">Search commands</label>
-        <input
+        <material-text-field
           id="mg-palette-input"
           ref="input"
           v-model="query"
@@ -38,10 +38,11 @@
 
 <script>
 import MgIcon from './MgIcon.vue';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'CommandPalette',
-  components: { MgIcon },
+  components: { MgIcon, MaterialTextField },
   props: {
     actions: { type: Array, required: true },
   },

@@ -17,6 +17,17 @@ const inventory = [
   ['Todos', 'components/TodoListItem.vue', ['material-checkbox', 'material-button']],
   ['Todos', 'components/TodosTopBar.vue', ['material-text-field', 'material-button']],
   ['Todos', 'components/TodosSelectionBar.vue', ['material-checkbox', 'material-button']],
+  ['Manage', 'components/ActivityFeed.vue', ['material-checkbox', 'material-button']],
+  ['Manage', 'components/CommandPalette.vue', ['material-text-field']],
+  ['Manage', 'components/ManagePageHeader.vue', ['material-button']],
+  ['Manage', 'components/ManageTopBar.vue', ['material-text-field', 'material-button']],
+  ['Manage', 'components/NotificationHost.vue', ['material-button']],
+  ['Manage', 'components/RegexBuilderPopover.vue', ['material-text-field', 'material-checkbox', 'material-button']],
+  ['Todos', 'Todos.vue', ['material-button']],
+  ['Todos', 'components/CommandPalette.vue', ['material-text-field']],
+  ['Todos', 'components/RegexBuilderPopover.vue', ['material-text-field', 'material-button']],
+  ['Todos', 'components/TodoList.vue', ['material-button']],
+  ['Todos', 'components/TodosSidebar.vue', ['material-text-field', 'material-button']],
 ];
 
 const settle = async (element) => {

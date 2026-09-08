@@ -4,7 +4,7 @@
       <div class="mg-search" :class="{ 'mg-search--invalid': regexMode && !searchValid }">
         <MgIcon name="search" class="mg-search__icon" />
         <label :for="searchInputId" class="mg-visually-hidden">{{ searchPlaceholder }}</label>
-        <input
+        <material-text-field
           :id="searchInputId"
           ref="searchInput"
           type="text"
@@ -13,9 +13,9 @@
           :placeholder="searchPlaceholder"
           :aria-invalid="regexMode && !searchValid"
           :aria-describedby="regexMode && !searchValid ? `${searchInputId}-error` : null"
-          @input="$emit('update:search', $event.target.value)"
+          @input="$emit('update:search', $event)"
         />
-        <button
+        <material-button
           type="button"
           class="mg-search__pill"
           :class="{ 'mg-search__pill--active': regexMode }"
@@ -24,8 +24,8 @@
           @click="$emit('toggle-regex-mode')"
         >
           .*
-        </button>
-        <button
+        </material-button>
+        <material-button
           type="button"
           class="mg-search__icon-btn"
           title="Regex builder"
@@ -34,7 +34,7 @@
           @click="$emit('open-regex-builder')"
         >
           <MgIcon name="wrench" size="small" />
-        </button>
+        </material-button>
       </div>
       <p v-if="regexMode && !searchValid" :id="`${searchInputId}-error`" class="mg-search__error" role="status">
         Invalid pattern{{ searchError ? `: ${searchError}` : '' }} — showing all results.
@@ -49,7 +49,7 @@
       />
     </div>
 
-    <button
+    <material-button
       type="button"
       class="mg-topbar__icon-btn"
       title="Command palette (Ctrl+Shift+F)"
@@ -57,8 +57,8 @@
       @click="$emit('open-palette')"
     >
       <MgIcon name="command" />
-    </button>
-    <button
+    </material-button>
+    <material-button
       type="button"
       class="mg-topbar__icon-btn"
       :title="dark ? 'Switch to light theme' : 'Switch to dark theme'"
@@ -66,7 +66,7 @@
       @click="$emit('toggle-theme')"
     >
       <MgIcon :name="dark ? 'sun' : 'moon'" />
-    </button>
+    </material-button>
     <div class="mg-topbar__avatar" :title="userName" aria-hidden="true">{{ userInitials }}</div>
   </header>
 </template>
@@ -74,10 +74,12 @@
 <script>
 import MgIcon from './MgIcon.vue';
 import RegexBuilderPopover from './RegexBuilderPopover.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'ManageTopBar',
-  components: { MgIcon, RegexBuilderPopover },
+  components: { MgIcon, RegexBuilderPopover, MaterialButton, MaterialTextField },
   props: {
     search: { type: String, default: '' },
     searchPlaceholder: { type: String, default: 'Search' },

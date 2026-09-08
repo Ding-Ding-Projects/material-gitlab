@@ -1,9 +1,11 @@
 <script>
 import MdIcon from './MdIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'TodosSidebar',
-  components: { MdIcon },
+  components: { MdIcon, MaterialButton, MaterialTextField },
   props: {
     sections: {
       type: Array,
@@ -46,16 +48,16 @@ export default {
 
     <div class="md-todos__nav-search">
       <md-icon name="search" :size="17" class="md-todos__nav-search-icon" />
-      <input
+      <material-text-field
         class="md-todos__nav-search-input"
         type="search"
         :value="query"
         placeholder="Search or go to…"
         aria-label="Search or go to a page"
         :aria-invalid="regexMode && !regexValid"
-        @input="$emit('update:query', $event.target.value)"
+        @input="$emit('update:query', $event)"
       />
-      <button
+      <material-button
         type="button"
         class="md-todos__regex-chip"
         :class="{ 'md-todos__regex-chip--active': regexMode }"
@@ -64,8 +66,8 @@ export default {
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button
         type="button"
         class="md-todos__icon-button md-todos__icon-button--tiny"
         title="Open regex builder for navigation search"
@@ -73,7 +75,7 @@ export default {
         @click="$emit('open-regex-builder')"
       >
         <md-icon name="construction" :size="15" />
-      </button>
+      </material-button>
     </div>
 
     <div v-for="section in sections" :key="section.name" class="md-todos__nav-section">

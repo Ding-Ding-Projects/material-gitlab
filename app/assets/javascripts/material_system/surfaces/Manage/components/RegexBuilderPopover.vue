@@ -9,13 +9,13 @@
   >
     <div class="mg-regex-popover__header">
       <h2 class="mg-regex-popover__title">Regex builder</h2>
-      <button type="button" class="mg-regex-popover__close" aria-label="Close regex builder" @click="close">
+      <material-button variant="text" type="button" class="mg-regex-popover__close" aria-label="Close regex builder" @click="close">
         <MgIcon name="close" size="small" />
-      </button>
+      </material-button>
     </div>
 
     <label class="mg-regex-popover__label" :for="patternId">Pattern</label>
-    <input
+    <material-text-field
       :id="patternId"
       ref="patternInput"
       type="text"
@@ -29,7 +29,7 @@
     <fieldset class="mg-regex-popover__flags">
       <legend class="mg-regex-popover__label">Flags</legend>
       <label v-for="flag in availableFlags" :key="flag.value" class="mg-regex-popover__flag">
-        <input type="checkbox" :checked="flags.includes(flag.value)" @change="toggleFlag(flag.value)" />
+        <material-checkbox :checked="flags.includes(flag.value)" @change="toggleFlag(flag.value)" />
         {{ flag.label }}
       </label>
     </fieldset>
@@ -56,10 +56,10 @@
     </div>
 
     <div class="mg-regex-popover__actions">
-      <button type="button" class="mg-btn mg-btn--text" @click="close">Cancel</button>
-      <button type="button" class="mg-btn mg-btn--filled" :disabled="!pattern || !syntax.valid" @click="apply">
+      <material-button variant="text" type="button" class="mg-btn mg-btn--text" @click="close">Cancel</material-button>
+      <material-button type="button" class="mg-btn mg-btn--filled" :disabled="!pattern || !syntax.valid" @click="apply">
         Apply
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
@@ -67,6 +67,9 @@
 <script>
 import MgIcon from './MgIcon.vue';
 import { RegexBuilder } from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
+import MaterialTextField from '../../../components/material_text_field';
 
 // Only "i" is offered: each corpus entry is matched independently with .test(), so
 // "g" (repeat matches within one string) and "m" (multiline anchors) have no observable
@@ -75,7 +78,7 @@ const AVAILABLE_FLAGS = [{ value: 'i', label: 'Ignore case (i)' }];
 
 export default {
   name: 'RegexBuilderPopover',
-  components: { MgIcon },
+  components: { MgIcon, MaterialButton, MaterialCheckbox, MaterialTextField },
   props: {
     initialPattern: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },
@@ -122,8 +125,8 @@ export default {
     document.removeEventListener('mousedown', this.onOutsideClick, true);
   },
   methods: {
-    onPatternInput(event) {
-      const snapshot = this.builder.update({ pattern: event.target.value });
+    onPatternInput(value) {
+      const snapshot = this.builder.update({ pattern: value });
       this.pattern = snapshot.pattern;
       this.syntax = snapshot.syntax;
     },

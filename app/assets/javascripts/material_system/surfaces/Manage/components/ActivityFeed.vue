@@ -9,19 +9,18 @@
       @clear="$emit('clear-selection')"
       @invert="$emit('invert-selection')"
     >
-      <button type="button" class="mg-btn mg-btn--text" @click="$emit('bulk-copy-links')">
+      <material-button variant="text" type="button" class="mg-btn mg-btn--text" @click="$emit('bulk-copy-links')">
         <MgIcon name="copy" size="small" /> Copy links
-      </button>
-      <button type="button" class="mg-btn mg-btn--text" @click="$emit('bulk-copy-details')">
+      </material-button>
+      <material-button variant="text" type="button" class="mg-btn mg-btn--text" @click="$emit('bulk-copy-details')">
         <MgIcon name="copy" size="small" /> Copy details
-      </button>
+      </material-button>
     </MgSelectionToolbar>
 
     <ul class="mg-list" role="list" aria-label="Activity">
       <li v-for="ev in events" :key="ev.id" class="mg-activity-row" :class="{ 'mg-activity-row--selected': selectedIds.includes(ev.id) }">
         <label class="mg-activity-row__select">
-          <input
-            type="checkbox"
+          <material-checkbox
             :checked="selectedIds.includes(ev.id)"
             :aria-label="`Select event: ${ev.author.name} ${ev.actionName} ${ev.targetTitle}`"
             @change="$emit('toggle-select', ev.id)"
@@ -45,11 +44,13 @@
 <script>
 import MgIcon from './MgIcon.vue';
 import MgSelectionToolbar from './MgSelectionToolbar.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 import { eventIconAccent, formatRelativeTime } from '../data';
 
 export default {
   name: 'ActivityFeed',
-  components: { MgIcon, MgSelectionToolbar },
+  components: { MgIcon, MgSelectionToolbar, MaterialButton, MaterialCheckbox },
   props: {
     events: { type: Array, required: true },
     selectedIds: { type: Array, default: () => [] },
