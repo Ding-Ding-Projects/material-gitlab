@@ -23,6 +23,10 @@ class Projects::AuditEventsController < Projects::ApplicationController
     @events = AuditEventSerializer.new.represent(events)
 
     Gitlab::Tracking.event(self.class.name, 'search_audit_event', user: current_user, project: project, namespace: project.namespace)
+
+    if request.format.json?
+      render json: { events: @events, next_page: (@is_last_page ? nil : pagination_params[:page].to_i.clamp(1, 1_000_000) + 1) }
+    end
   end
 
   def additional_properties_for_tracking

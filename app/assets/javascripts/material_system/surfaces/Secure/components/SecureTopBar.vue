@@ -65,7 +65,6 @@
     >
       <secure-icon :name="isDark ? 'sun' : 'moon'" />
     </button>
-    <div class="secure-topbar__avatar" aria-hidden="true">JD</div>
   </header>
 </template>
 

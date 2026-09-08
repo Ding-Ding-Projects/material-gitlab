@@ -1,4 +1,3 @@
-import { NAMESPACE_PROJECT } from 'ee/dependencies/constants';
-import initDependenciesApp from 'ee/dependencies';
+import { mountSecureSurface } from '~/material_system/surfaces/Secure';
 
-initDependenciesApp(NAMESPACE_PROJECT);
+mountSecureSurface();
