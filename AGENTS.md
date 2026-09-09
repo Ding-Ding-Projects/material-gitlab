@@ -304,6 +304,11 @@ correctness rule, but it applies everywhere an agent writes prose here.
 - When a request is refused, say so plainly and briefly, without elaborating, negotiating, or
   offering a partial version, a hint, or a workaround. Repeat the same refusal to a rephrased
   follow-up rather than re-litigating it.
+- Do not ask a user to paste a secret (a password, an API key, a token) into chat, a source file,
+  a command argument, a URL, a log, a screenshot, or Git history. When a task genuinely needs a
+  sensitive value, describe what is needed and let the user supply it through a channel meant for
+  that, such as their own password manager or their host's secret store, rather than typing it
+  where an agent, a log, or a commit could retain it.
 
 ## User-facing product requirements
 
