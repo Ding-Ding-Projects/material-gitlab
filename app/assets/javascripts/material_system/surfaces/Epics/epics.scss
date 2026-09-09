@@ -6,6 +6,10 @@
  * an explicit .gl-mds-epics--light/--dark modifier overrides the system preference.
  */
 
+// Registered Material Web element geometry (container-height, leading/trailing
+// space, field spacing) -- see md3/_material_web_geometry.scss.
+@import 'md3/material_web_geometry';
+
 .gl-mds-epics {
   --gl-mds-surf: #f4effa;
   --gl-mds-surfc: #ece4f6;
@@ -336,18 +340,20 @@
   margin-right: auto;
 }
 
+// Rendered on <material-button variant="text" class="gl-mds-epics__bulkbar-btn">
+// (BulkActionBar.vue) -- sized through the official tokens; a plain
+// padding/font-size on the host is inert (see _material_web_geometry.scss).
 .gl-mds-epics__bulkbar-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 14px;
   border-radius: 999px;
-  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
   border: none;
   background: var(--gl-mds-surf);
   color: var(--gl-mds-onsurf);
+  @include mw-button-size(32px, 14px, 14px, $label-size: 12.5px, $label-line-height: 16px);
 
   &:hover {
     background: var(--gl-mds-surfcl);
@@ -801,17 +807,22 @@
   letter-spacing: 0.5px;
 }
 
+// Rendered on <material-text-field type="textarea" class="gl-mds-epics__textarea">
+// (RegexBuilderDialog.vue) -- an md-filled-text-field host. `width`/`padding`/
+// `font-size`/`font-family` on the host are inert; sized and typeset through the
+// official tokens instead (see _material_web_geometry.scss).
 .gl-mds-epics__textarea {
   border: 1px solid var(--gl-mds-outl);
   border-radius: 12px;
-  padding: 10px 12px;
-  font-family: 'Roboto Mono', 'Consolas', monospace;
-  font-size: 12.5px;
   background: transparent;
   color: var(--gl-mds-onsurf);
   outline: none;
   resize: vertical;
-  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  @include mw-field-size(10px, 10px, 12px, 12px);
+  --md-filled-text-field-input-text-font: 'Roboto Mono', 'Consolas', monospace;
+  --md-filled-text-field-input-text-size: 12.5px;
 }
 
 .gl-mds-epics__preview-box {
@@ -900,21 +911,23 @@
   justify-content: flex-end;
 }
 
+// Rendered on <material-button class="gl-mds-epics__btn"> (variant="text" for
+// the base class, variant="filled" for the --filled modifier -- see Epics.vue,
+// ConfirmDialog.vue, RegexBuilderDialog.vue). Sized through the official
+// tokens; padding/font-size/font-family on the host is inert.
 .gl-mds-epics__btn {
-  padding: 10px 20px;
   border-radius: 999px;
-  font-size: 13.5px;
   cursor: pointer;
   border: none;
   background: transparent;
   color: var(--gl-mds-onprimc);
-  font-family: inherit;
+  @include mw-button-size(40px, 20px, 20px, $label-size: 13.5px, $label-line-height: 18px);
 
   &--filled {
-    padding: 10px 22px;
     font-weight: 500;
     background: var(--gl-mds-prim);
     color: var(--gl-mds-onprim);
+    @include mw-button-size(40px, 22px, 22px, $label-size: 13.5px, $label-line-height: 18px, $label-weight: 500);
   }
 
   &--danger {
@@ -1045,10 +1058,10 @@
   md-filled-text-field {
     min-width: 0;
     max-width: 100%;
-    padding: 0;
     border: 0;
     background: transparent;
     --md-filled-text-field-container-shape: 12px;
+    @include mw-field-size(16px, 16px);
   }
 
   md-text-button,
@@ -1056,9 +1069,9 @@
   md-outlined-button,
   md-filled-tonal-button,
   md-elevated-button {
-    padding: 0;
     border: 0;
     background: transparent;
     --md-text-button-label-text-color: currentColor;
+    @include mw-button-size(40px, 12px, 12px);
   }
 }

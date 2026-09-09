@@ -4,6 +4,10 @@
  * sub-component can read var(--gl-mds-*) without re-importing anything.
  */
 
+// Registered Material Web element geometry (container-height, leading/trailing
+// space, field spacing) -- see md3/_material_web_geometry.scss.
+@import 'md3/material_web_geometry';
+
 .gl-mds-plan {
   --gl-mds-surf: #f4effa;
   --gl-mds-surfc: #ece4f6;
@@ -57,7 +61,9 @@
   display: flex;
   min-height: 100%;
   height: 100%;
-  overflow: hidden;
+  // No overflow: hidden -- .gl-mds-plan__content (below) is the one scrolling
+  // region, and this surface's command-palette/regex-builder overlays must
+  // stay bounded by the viewport rather than by this surface's own box.
   position: relative;
 }
 
@@ -143,10 +149,10 @@
   md-filled-text-field {
     min-width: 0;
     max-width: 100%;
-    padding: 0;
     border: 0;
     background: transparent;
     --md-filled-text-field-container-shape: 12px;
+    @include mw-field-size(16px, 16px);
   }
 
   md-text-button,
@@ -154,9 +160,9 @@
   md-outlined-button,
   md-filled-tonal-button,
   md-elevated-button {
-    padding: 0;
     border: 0;
     background: transparent;
     --md-text-button-label-text-color: currentColor;
+    @include mw-button-size(40px, 12px, 12px);
   }
 }

@@ -9,6 +9,13 @@
 @import 'elevation';
 @import 'motion';
 
+// Registered Material Web (@material/web) custom-element geometry tokens.
+// Imported here (rather than only from the surface stylesheets that use those
+// elements) so application.scss and application_dark.scss both reach it through
+// color_modes/_md3.scss -> md3/index, alongside the primitives above. See
+// _material_web_geometry.scss's own header for the full reachability story.
+@import 'material_web_geometry';
+
 @import 'components/buttons';
 @import 'components/cards';
 @import 'components/chips';

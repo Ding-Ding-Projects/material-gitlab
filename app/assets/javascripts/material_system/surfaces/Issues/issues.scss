@@ -4,6 +4,10 @@
  * sub-component can read var(--gl-mds-*) without re-importing anything.
  */
 
+// Registered Material Web element geometry (container-height, leading/trailing
+// space, field spacing) -- see md3/_material_web_geometry.scss.
+@import 'md3/material_web_geometry';
+
 .gl-mds-issues {
   --gl-mds-surf: #f4effa;
   --gl-mds-surfc: #ece4f6;
@@ -114,6 +118,17 @@
 }
 
 // Official controls inherit the current surface theme through public Material Web tokens.
+//
+// This block also carries this surface's geometry DEFAULT for every registered
+// Material Web control: individual per-component overrides live in each
+// component's own <style scoped> block (out of this stylesheet's reach), so the
+// baseline set here is what any control renders at unless a more specific
+// selector further along the cascade overrides these same custom properties.
+// See app/assets/stylesheets/md3/_material_web_geometry.scss for why a plain
+// width/height/padding/font-size/font-family on the host (the `padding: 0` this
+// block used to carry) is inert -- Material Web's own :host rule recomputes
+// those from its token defaults regardless, so removing it changes nothing
+// visually and only the tokens below actually size these controls.
 .gl-mds-issues {
   --md-sys-color-primary: var(--gl-mds-prim);
   --md-sys-color-on-primary: var(--gl-mds-onprim);
@@ -129,10 +144,10 @@
   md-filled-text-field {
     min-width: 0;
     max-width: 100%;
-    padding: 0;
     border: 0;
     background: transparent;
     --md-filled-text-field-container-shape: 12px;
+    @include mw-field-size(16px, 16px);
   }
 
   md-text-button,
@@ -140,9 +155,9 @@
   md-outlined-button,
   md-filled-tonal-button,
   md-elevated-button {
-    padding: 0;
     border: 0;
     background: transparent;
     --md-text-button-label-text-color: currentColor;
+    @include mw-button-size(40px, 12px, 12px);
   }
 }
