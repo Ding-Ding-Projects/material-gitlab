@@ -57,3 +57,17 @@ that matrix in the same way it validates the 25-row parity inventory: structural
 complete, hash-bound whenever a row claims verified evidence, and — specific to the
 layout matrix — every layout-probe finding a verified row actually recorded must be
 named by a reviewed `intentionalFindings` entry or the row is red.
+
+## Running the whole set
+
+`scripts/design-parity/run-parity-captures.mjs` wraps the driver and the probe so one
+command per side covers all 25 inventory rows or all 70 layout-matrix tuples. It launches
+nothing: start the reference viewer with `--cdp-port`, or the isolated browser with
+`--remote-debugging-port` and `--app` pointed at the instance, on the approved hidden
+desktop first, then pass `--cdp`. On the built side it signs in once, on the first row,
+because the sign-in page redirects an already signed-in user away from its form; the
+browser profile cookie carries the remaining rows. `--derive` runs side-by-side and diff
+for every row whose two raw captures and receipts exist and skips the rest rather than
+inventing anything. `--write-reference-manifest` records the reference viewer entry file
+as the reference-side artifact. Every row is attempted, the outcome table is printed, and
+an ignored ledger is written under `artifacts/parity/_local/`.
