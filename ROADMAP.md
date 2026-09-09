@@ -6,16 +6,41 @@
 - [x] Verify wrong-size and corrupt-image rejection using executable fixtures.
 - [x] Add an immutable local GDK build helper with tested process boundaries.
 - [x] Correct the shared-shell ownership and action contract with focused tests.
+- [x] Build a capture driver that drives the reference viewer and the built application over one
+      identical CDP tuple, with a layout probe, a 70-tuple layout matrix, and strict-guard coverage.
+- [x] Rehearse all 25 reference captures at their tuple with verified receipts and font proofs
+      (bound to a non-final commit; not committed, and not production evidence).
+- [x] Size registered Material Web hosts through official tokens instead of inert host geometry,
+      with a red-then-green geometry guard, so the clipping the design mismatch caused is repaired at
+      the source rather than worked around.
 - [ ] Finish all 25 production route integrations and backend capability contracts.
 - [ ] Verify the activated Settings route and equivalent controls in the real built application.
 - [ ] Replace styled native control lookalikes with registered Material Design 3 primitives,
       retaining component provenance and negative replacement tests for every surface.
 - [ ] Remove Agent Memory's unsupported sync action and simulated backend success.
-- [ ] Build and start the final candidate on the current computer.
+- [ ] Build and start the final candidate. Route chosen: the packaged fork installed natively in a
+      WSL Ubuntu 24.04 distro. Blocked only on a published package; see the packaging list below.
 - [ ] Retain genuine production interactions, captures, comparisons, and reviews
       for every declared parity state. No demo screenshots qualify.
 - [ ] Integrate and verify the final work, then close out only proven task-owned
       temporary branches and checkouts.
+
+## Make this fork installable
+
+- [x] Commit the Omnibus build as scripts the workflow calls, not inline shell, so a local build and
+      CI run the same bytes.
+- [x] Fix the musl health-check failure (the frontend-islands cleanup is now unconditional).
+- [x] Fix the from-scratch asset-compile failure (the compile now installs dev dependencies, so
+      optionally-required production packages such as `graphql-ws` resolve).
+- [x] Verify the package by opening it: fork tree present, webpack files counted, no musl binaries,
+      `VERSION` matched.
+- [x] Build the container image from the verified package, boot it, and push it to the registry
+      (workflow's second job); the offline local build reads the package through a bind mount.
+- [x] A Docker Compose file and two deploy helpers (remote host over SSH, WSL native install).
+- [x] A site release manifest that starts empty and a Home install card that never fabricates a URL.
+- [ ] Publish the first Omnibus release: a non-draft `omnibus-<version>-<sha12>` release carrying the
+      `.deb` and the pushed image digest. Run 34309060466 is building as this is written.
+- [ ] Make the container-registry package public (an owner step; the API cannot).
 
 The older entries below describe historical source milestones. They do not
 upgrade the unchecked production-parity items above to completed work.
@@ -106,6 +131,10 @@ upgrade the unchecked production-parity items above to completed work.
 
 ## Open findings from the 2026-09-03 pass
 
+- [x] **The deployment article rendered its title twice and its links as raw Markdown.** Fixed in
+      `914d9d767`: the site now renders Markdown through one shared escaping module with tests, adds
+      no second heading when an article carries its own, and keeps the article listener attached so
+      more than one article opens per visit. Real captures recorded at `914d9d767`.
 - [ ] **The site header is visibly broken.** The first real capture of the built
       site (`site/evidence/landing-1280x900.png`) shows the navigation rendered
       twice, the tab strip and its search unplaced, a clipped glyph at the top
