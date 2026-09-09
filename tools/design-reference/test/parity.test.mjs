@@ -6,11 +6,14 @@ import crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { runNegativeRegression, sha256, validateCompletion, validateInventory } from '../scripts/parity-guard.mjs';
+import { LAYOUT_MATRIX_SURFACES, LAYOUT_MATRIX_TUPLES, layoutMatrixRowId, runLayoutMatrixNegativeRegression, runNegativeRegression, sha256, validateCompletion, validateInventory, validateLayoutMatrix } from '../scripts/parity-guard.mjs';
+import { buildTuple, substituteRoute } from '../scripts/drive-capture.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const inventoryPath = path.join(root, 'design', 'parity-inventory.json');
 const inventory = JSON.parse(fs.readFileSync(inventoryPath, 'utf8'));
+const layoutMatrixPath = path.join(root, 'design', 'layout-matrix.json');
+const layoutMatrix = JSON.parse(fs.readFileSync(layoutMatrixPath, 'utf8'));
 const require = createRequire(import.meta.url);
 const { PNG } = require('pngjs');
 
@@ -244,3 +247,106 @@ test('strict completion accepts a complete 25-row fixture and rejects every prov
     } finally { fs.rmSync(escape, { recursive: true, force: true }); fs.rmSync(outside, { recursive: true, force: true }); }
   } finally { fs.rmSync(fixture, { recursive: true, force: true }); }
 });
+
+test('drive-capture route parameter substitution requires every fixture key it uses', () => {
+  assert.equal(substituteRoute('/dashboard/projects', null), '/dashboard/projects');
+  assert.equal(substituteRoute('/:namespace/:project/-/issues', { namespace: 'acme', project: 'widgets' }), '/acme/widgets/-/issues');
+  assert.equal(substituteRoute('/groups/:id/-/epics', { id: 'design-team' }), '/groups/design-team/-/epics');
+  assert.equal(substituteRoute('/:namespace/:project/-/tree/:ref', { namespace: 'acme', project: 'widgets', ref: 'main' }), '/acme/widgets/-/tree/main');
+  assert.throws(() => substituteRoute('/:namespace/:project/-/issues', { namespace: 'acme' }), /needs fixture key "project"/);
+  assert.throws(() => substituteRoute('/:namespace/:project/-/issues', null), /needs fixture key "namespace"/);
+});
+
+test('drive-capture tuple overrides replace only the requested fields and validate the result', () => {
+  const base = { screen: 'surface.issues', state: 'default', theme: 'light', viewport: { width: 1280, height: 800 }, scale: 1, locale: 'en-US' };
+  assert.deepEqual(buildTuple(base, {}), base);
+  assert.deepEqual(buildTuple(base, { theme: 'dark', scale: '1.5' }), { ...base, theme: 'dark', scale: 1.5 });
+  assert.deepEqual(buildTuple(base, { width: '1024', height: '768' }), { ...base, viewport: { width: 1024, height: 768 } });
+  assert.throws(() => buildTuple(base, { theme: 'blue' }), /--theme must be light or dark/);
+  assert.throws(() => buildTuple(base, { scale: '0' }), /--scale must be a positive number/);
+});
+
+test('layout matrix hand-written inventory contains exactly the 70 declared surface/tuple rows', () => {
+  const verdict = validateLayoutMatrix(layoutMatrix, { root });
+  assert.equal(verdict.valid, true, verdict.errors.join('\n'));
+  assert.equal(layoutMatrix.rows.length, LAYOUT_MATRIX_SURFACES.length * LAYOUT_MATRIX_TUPLES.length);
+  assert.equal(layoutMatrix.rows.length, 70);
+  assert.deepEqual(layoutMatrix.surfaces, LAYOUT_MATRIX_SURFACES);
+  assert.equal(layoutMatrix.languageModes.applicable, false);
+  assert.match(layoutMatrix.languageModes.reason, /no runtime language-mode switch/);
+  for (const surfaceId of LAYOUT_MATRIX_SURFACES) for (const tuple of LAYOUT_MATRIX_TUPLES) {
+    const row = layoutMatrix.rows.find((candidate) => candidate.id === layoutMatrixRowId(surfaceId, tuple));
+    assert.ok(row, `missing row for ${surfaceId} at ${JSON.stringify(tuple)}`);
+    assert.equal(row.evidence.builtRaw.status, 'pending');
+    assert.equal(row.evidence.builtRaw.sha256, null);
+    assert.equal(row.evidence.layoutProbe.status, 'pending');
+    assert.equal(row.evidence.layoutProbe.sha256, null);
+  }
+});
+
+test('layout matrix negative regression turns red for every required field and a whole removed row, green after restore', () => {
+  const regression = runLayoutMatrixNegativeRegression(layoutMatrix);
+  assert.equal(regression.valid, true, regression.failures.join(', '));
+  assert.equal(regression.cases, layoutMatrix.rows.length * 10 + layoutMatrix.rows.length);
+  assert.equal(regression.wholeRowFailures, 0);
+  // the sweep itself must not have mutated the loaded fixture
+  assert.equal(validateLayoutMatrix(layoutMatrix, { root }).valid, true);
+});
+
+test('layout matrix removing one row turns the count and the missing-id check red', () => {
+  const broken = structuredClone(layoutMatrix);
+  const removed = broken.rows.shift();
+  const verdict = validateLayoutMatrix(broken, { root });
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.errors.some((error) => error.includes(`must have exactly ${layoutMatrix.rows.length} rows`)));
+  assert.ok(verdict.errors.some((error) => error.includes(`is missing the required row: ${removed.id}`)));
+});
+
+test('layout matrix removing one capture record (builtRaw) turns that row red', () => {
+  const broken = structuredClone(layoutMatrix);
+  const row = broken.rows[0];
+  delete row.evidence.builtRaw;
+  const verdict = validateLayoutMatrix(broken, { root });
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.errors.some((error) => error.includes(`${row.id}.evidence.builtRaw is required`)));
+});
+
+test('layout matrix removing one probe record (layoutProbe) turns that row red', () => {
+  const broken = structuredClone(layoutMatrix);
+  const row = broken.rows[0];
+  delete row.evidence.layoutProbe;
+  const verdict = validateLayoutMatrix(broken, { root });
+  assert.equal(verdict.valid, false);
+  assert.ok(verdict.errors.some((error) => error.includes(`${row.id}.evidence.layoutProbe is required`)));
+});
+
+test('layout matrix rejects an unresolved layout-probe finding until a matching intentionalFindings entry is recorded', () => {
+  const fixture = path.join(root, 'tools', 'design-reference', 'test', `.tmp-layout-matrix-finding-${process.pid}`);
+  fs.mkdirSync(fixture, { recursive: true });
+  try {
+    const broken = structuredClone(layoutMatrix);
+    const row = broken.rows[0];
+    const probePath = path.join(fixture, 'layout-probe.json');
+    fs.writeFileSync(probePath, JSON.stringify({ findings: [{ selector: 'md-filled-button#example', kind: 'horizontal-scroll-overflow' }] }));
+    row.evidence.layoutProbe = { path: path.relative(root, probePath).replaceAll('\\', '/'), sha256: sha256(probePath), status: 'verified', reason: 'fixture' };
+    let verdict = validateLayoutMatrix(broken, { root });
+    assert.equal(verdict.valid, false);
+    assert.ok(verdict.errors.some((error) => error.includes(`${row.id} has an unresolved layout-probe finding`) && error.includes('horizontal-scroll-overflow') && error.includes('md-filled-button#example')));
+    row.intentionalFindings = [{ selector: 'md-filled-button#example', kind: 'horizontal-scroll-overflow', reason: 'intentionally scrolls a long action list by design', approval: 'design owner sign-off' }];
+    verdict = validateLayoutMatrix(broken, { root });
+    assert.equal(verdict.valid, true, verdict.errors.join('\n'));
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
+test('parity-guard --strict CLI validates the layout matrix without disturbing the parity-inventory completion errors', () => {
+  const strict = spawnSync(process.execPath, ['scripts/parity-guard.mjs', '--strict'], { cwd: path.join(root, 'tools', 'design-reference'), encoding: 'utf8' });
+  assert.equal(strict.status, 1);
+  // The committed layout matrix is structurally valid with only pending evidence, so it
+  // must contribute zero errors of its own; every reported error still belongs to the
+  // (intentionally incomplete) parity inventory.
+  assert.doesNotMatch(strict.stderr, /layout-matrix/);
+  assert.match(strict.stderr, /materialAudit must be verified for completion/);
+});
+

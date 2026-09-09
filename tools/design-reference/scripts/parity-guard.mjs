@@ -10,6 +10,7 @@ const { PNG } = require('pngjs');
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const INVENTORY_PATH = path.join(ROOT, 'design', 'parity-inventory.json');
+const LAYOUT_MATRIX_PATH = path.join(ROOT, 'design', 'layout-matrix.json');
 const EXPECTED_IDS = [
   'surface.admin', 'surface.agent-memory', 'surface.analyze', 'surface.build', 'surface.code',
   'surface.command-palette', 'surface.deploy', 'surface.epics', 'surface.issues', 'surface.login',
@@ -18,6 +19,33 @@ const EXPECTED_IDS = [
   'surface.settings', 'surface.shell-a', 'surface.shell-b', 'surface.sidebar', 'surface.todos',
 ];
 const REQUIRED_PRIMITIVES = ['buttons', 'fields', 'menus', 'tabs', 'dialogs', 'navigation', 'selection', 'typography', 'color-roles', 'shape', 'elevation', 'state-layers', 'focus', 'motion', 'accessibility'];
+
+// The 10 surfaces the layout matrix hunts for clipping candidates across a
+// wider theme/scale/viewport grid than the single pinned tuple each parity-inventory
+// row carries. Order matters: design/layout-matrix.json's own "surfaces" array must
+// equal this list exactly, so a silent reorder or omission cannot pass unnoticed.
+export const LAYOUT_MATRIX_SURFACES = [
+  'surface.settings', 'surface.issues', 'surface.merge-requests', 'surface.plan', 'surface.epics',
+  'surface.shell-a', 'surface.shell-b', 'surface.sidebar', 'surface.command-palette', 'surface.regex-builder',
+];
+
+// Every surface in the matrix is captured at these 7 tuples: three scales in both
+// themes at 1280x800, plus one narrower 1024x768 tuple at scale 1 in light only.
+export const LAYOUT_MATRIX_TUPLES = [
+  { width: 1280, height: 800, scale: 1, theme: 'light' },
+  { width: 1280, height: 800, scale: 1, theme: 'dark' },
+  { width: 1280, height: 800, scale: 1.5, theme: 'light' },
+  { width: 1280, height: 800, scale: 1.5, theme: 'dark' },
+  { width: 1280, height: 800, scale: 2, theme: 'light' },
+  { width: 1280, height: 800, scale: 2, theme: 'dark' },
+  { width: 1024, height: 768, scale: 1, theme: 'light' },
+];
+
+export function layoutMatrixRowId(surfaceId, tuple) {
+  const slug = String(surfaceId).replace(/^surface\./, '');
+  const scaleLabel = String(tuple?.scale);
+  return `layout.${slug}.${tuple?.width}x${tuple?.height}@${scaleLabel}.${tuple?.theme}`;
+}
 
 export function sha256(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -237,16 +265,122 @@ export function runNegativeRegression(inventory) {
   return { valid: failures.length === 0, failures, cases: inventory.contracts.length * boundaries.length };
 }
 
+/**
+ * Validates design/layout-matrix.json: the hand-written 70-row (10 surfaces x 7
+ * tuples) inventory of layout probe tuples. This is a structural check with two
+ * conditional escalations, not an all-or-nothing completion gate like
+ * validateCompletion above — the matrix is meant to be populated incrementally as
+ * real captures land, so a row honestly recording pending evidence is not an error:
+ *
+ *   1. Every one of the 70 declared surface/tuple combinations is present exactly
+ *      once, with no extra, missing, or duplicated row.
+ *   2. Each row's builtRaw and layoutProbe evidence follows the same
+ *      path/status/reason/sha256 contract as a parity-inventory row's evidence, and
+ *      when a row claims a piece of evidence is "verified" its file must actually
+ *      exist at the recorded path with the recorded hash (reusing checkEvidence).
+ *   3. When layoutProbe evidence is verified, every finding recorded in the actual
+ *      layout-probe.json must be named by that row's intentionalFindings, or the row
+ *      is red — an unresolved clipping candidate can never quietly pass because
+ *      nobody looked at it.
+ */
+export function validateLayoutMatrix(matrix, { root = ROOT } = {}) {
+  const errors = [];
+  if (matrix?.schemaVersion !== 1) issue(errors, 'layout-matrix schemaVersion must be exactly 1');
+  if (matrix?.languageModes?.applicable !== false) issue(errors, 'layout-matrix languageModes.applicable must be false: this Rails application has no runtime language-mode switch');
+  if (typeof matrix?.languageModes?.reason !== 'string' || !matrix.languageModes.reason.trim()) issue(errors, 'layout-matrix languageModes.reason is required');
+  if (JSON.stringify(matrix?.surfaces) !== JSON.stringify(LAYOUT_MATRIX_SURFACES)) issue(errors, 'layout-matrix surfaces must exactly equal the 10 declared surfaces, in order');
+  if (!Array.isArray(matrix?.rows)) return { valid: false, errors: [...errors, 'layout-matrix rows must be an array'] };
+
+  const expectedIds = new Set();
+  for (const surfaceId of LAYOUT_MATRIX_SURFACES) for (const tuple of LAYOUT_MATRIX_TUPLES) expectedIds.add(layoutMatrixRowId(surfaceId, tuple));
+  if (matrix.rows.length !== expectedIds.size) issue(errors, `layout-matrix must have exactly ${expectedIds.size} rows (${LAYOUT_MATRIX_SURFACES.length} surfaces x ${LAYOUT_MATRIX_TUPLES.length} tuples), found ${matrix.rows.length}`);
+
+  const seenIds = new Set();
+  for (const [index, row] of matrix.rows.entries()) {
+    const label = `layout-matrix.rows[${index}]`;
+    if (!row || typeof row !== 'object') { issue(errors, `${label} must be an object`); continue; }
+    if (row.id && seenIds.has(row.id)) issue(errors, `${label}.id is duplicated: ${row.id}`);
+    if (row.id) seenIds.add(row.id);
+    if (!row.id || !expectedIds.has(row.id)) issue(errors, `${label}.id is not one of the ${expectedIds.size} declared surface/tuple combinations: ${row.id}`);
+    if (!LAYOUT_MATRIX_SURFACES.includes(row.surfaceId)) issue(errors, `${label}.surfaceId must be one of the 10 declared layout-matrix surfaces: ${row.surfaceId}`);
+    if (typeof row.tuple !== 'object' || row.tuple === null) {
+      issue(errors, `${label}.tuple is required`);
+    } else {
+      if (!Number.isInteger(row.tuple.width) || !Number.isInteger(row.tuple.height) || row.tuple.width <= 0 || row.tuple.height <= 0) issue(errors, `${label}.tuple must have positive integer width and height`);
+      if (![1, 1.5, 2].includes(row.tuple.scale)) issue(errors, `${label}.tuple.scale must be 1, 1.5, or 2`);
+      if (!['light', 'dark'].includes(row.tuple.theme)) issue(errors, `${label}.tuple.theme must be light or dark`);
+      if (row.id && row.surfaceId && row.id !== layoutMatrixRowId(row.surfaceId, row.tuple)) issue(errors, `${label}.id does not match layoutMatrixRowId(surfaceId, tuple): ${row.id}`);
+    }
+    checkEvidence(errors, row, 'builtRaw', root);
+    checkEvidence(errors, row, 'layoutProbe', root);
+    if (!Array.isArray(row.intentionalFindings)) {
+      issue(errors, `${label}.intentionalFindings must be an array`);
+    } else {
+      row.intentionalFindings.forEach((finding, findingIndex) => {
+        for (const key of ['selector', 'kind', 'reason', 'approval']) if (typeof finding?.[key] !== 'string' || !finding[key].trim()) issue(errors, `${label}.intentionalFindings[${findingIndex}].${key} is required`);
+      });
+      const layoutProbeEvidence = row.evidence?.layoutProbe;
+      if (layoutProbeEvidence?.status === 'verified') {
+        const probeFile = rootFile(root, layoutProbeEvidence.path);
+        if (probeFile) {
+          let probe;
+          try { probe = JSON.parse(fs.readFileSync(probeFile, 'utf8')); }
+          catch { probe = null; issue(errors, `${row.id}.evidence.layoutProbe is not valid JSON`); }
+          if (probe) {
+            const intentional = new Set((row.intentionalFindings || []).map((finding) => `${finding?.selector}::${finding?.kind}`));
+            for (const finding of Array.isArray(probe.findings) ? probe.findings : []) {
+              const key = `${finding?.selector}::${finding?.kind}`;
+              if (!intentional.has(key)) issue(errors, `${row.id} has an unresolved layout-probe finding with no recorded deviation: ${finding?.kind} at ${finding?.selector}`);
+            }
+          }
+        }
+      }
+    }
+  }
+  for (const id of expectedIds) if (!seenIds.has(id)) issue(errors, `layout-matrix is missing the required row: ${id}`);
+  return { valid: errors.length === 0, errors };
+}
+
+/**
+ * Removes each required layout-matrix field one at a time, and separately removes a
+ * whole row outright, proving the guard turns red for each and green once restored.
+ */
+export function runLayoutMatrixNegativeRegression(matrix) {
+  const fieldBoundaries = [
+    ['id'], ['surfaceId'], ['tuple'], ['tuple', 'width'], ['tuple', 'height'], ['tuple', 'scale'], ['tuple', 'theme'],
+    ['evidence', 'builtRaw'], ['evidence', 'layoutProbe'], ['intentionalFindings'],
+  ];
+  const failures = [];
+  for (const row of matrix.rows) for (const boundary of fieldBoundaries) {
+    const broken = clone(matrix); const target = broken.rows.find((candidate) => candidate.id === row.id); removeAt(target, boundary);
+    const verdict = validateLayoutMatrix(broken);
+    if (verdict.valid) failures.push(`${row.id}:${boundary.join('.')}`);
+  }
+  let wholeRowFailures = 0;
+  for (const row of matrix.rows) {
+    const broken = clone(matrix); broken.rows = broken.rows.filter((candidate) => candidate.id !== row.id);
+    const verdict = validateLayoutMatrix(broken);
+    if (verdict.valid) { failures.push(`${row.id}:whole-row-removed`); wholeRowFailures += 1; }
+  }
+  return { valid: failures.length === 0, failures, cases: matrix.rows.length * fieldBoundaries.length + matrix.rows.length, wholeRowFailures };
+}
+
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const inventory = JSON.parse(fs.readFileSync(INVENTORY_PATH, 'utf8'));
   const negative = process.argv.includes('--negative');
   const strict = process.argv.includes('--strict');
   const verdict = strict ? validateCompletion(inventory) : validateInventory(inventory);
-  if (!verdict.valid) { console.error(verdict.errors.join('\n')); process.exitCode = 1; }
+  // The layout matrix is validated only under --strict, per its own contract above;
+  // the default structural check and --negative continue to cover parity-inventory.json
+  // exactly as before this file gained layout-matrix awareness.
+  const layoutMatrix = strict ? JSON.parse(fs.readFileSync(LAYOUT_MATRIX_PATH, 'utf8')) : null;
+  const layoutVerdict = strict ? validateLayoutMatrix(layoutMatrix) : { valid: true, errors: [] };
+  const combinedErrors = [...verdict.errors, ...layoutVerdict.errors];
+  if (combinedErrors.length > 0) { console.error(combinedErrors.join('\n')); process.exitCode = 1; }
   else if (negative) {
     const regression = runNegativeRegression(inventory);
     if (!regression.valid) { console.error(`negative regression missed ${regression.failures.join(', ')}`); process.exitCode = 1; }
     else console.log(`design-parity: green; ${inventory.contracts.length} rows; ${regression.cases} exact red/green boundary cases`);
-  } else if (strict) console.log(`design-parity: complete; ${inventory.contracts.length} rows; all receipts and audits are verified`);
+  } else if (strict) console.log(`design-parity: complete; ${inventory.contracts.length} rows; all receipts and audits are verified; layout matrix: ${layoutMatrix.rows.length} rows structurally valid`);
   else console.log(`design-parity: structural green; ${inventory.contracts.length} rows; captures remain pending by policy`);
 }
