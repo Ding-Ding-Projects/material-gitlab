@@ -772,6 +772,19 @@ To run it on a remote host over SSH instead, use the same `docker context` steps
 
 ---
 
+<details>
+<summary><b>Agent instructions</b></summary>
+
+This repository carries a sanitized mirror of the shared agent instructions its owners use across
+their projects, in [`AGENTS.md`](AGENTS.md). It is a mirror, not the source: the canonical
+instructions live in a private shared instructions repository maintained by this project's owners,
+and this copy is refreshed here whenever that source changes in a way that affects public,
+project-changing work.
+
+</details>
+
+---
+
 ## 廣東話簡介
 
 呢個 repo 係一個 Material Design 外殼項目,包住一份釘死咗版本嘅上游 GitLab 原始碼。成
