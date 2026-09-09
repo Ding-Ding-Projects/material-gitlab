@@ -84,3 +84,30 @@ deviation is listed as open. Material audits (`--audit=<json>`) and intentional
 deviations (`--deviations=<json>`) are judgements supplied by a reviewer and are copied,
 never derived. `--dry-run` prints the outcome table and writes nothing. The strict guard
 remains the authority afterwards.
+
+## Built-side session against the packaged instance
+
+The order that produced evidence on a WSL2 instance of the packaged fork, kept here so a
+later run does not rediscover it:
+
+1. Keep the distro alive for the whole session (`wsl -d <distro> -- sleep infinity` in the
+   background), then confirm `curl -fsS http://localhost:8929/-/health` answers.
+2. Seed and prepare, both through the instance's own runner:
+   `gitlab-rails runner scripts/design-parity/seed.rb` and
+   `gitlab-rails runner scripts/design-parity/prepare-capture-user.rb`, with
+   `DESIGN_PARITY_FIXTURE_INSTANCE=lan-omnibus` and `DESIGN_PARITY_FIXTURE_HOST=<host>`.
+   The seed prints the fixture identifiers; the route fixture JSON for the driver is
+   `{"namespace": "design-parity-fixture", "project": "product-verification", "id": "design-parity-fixture", "ref": "main"}`.
+3. Fetch the exact package the instance runs and mint the built-artifact manifest:
+   `node scripts/design-parity/fetch-built-artifact.mjs --tag <release tag> --commit <sha>`.
+4. Launch the isolated browser on the approved hidden desktop with a fresh profile,
+   `--app=http://localhost:8929`, `--remote-debugging-port=<port>`, and the isolation flags
+   named in `tools/design-reference/README.md`; require exactly one page target.
+5. Run every inventory row once, signing in on the first:
+   `node scripts/design-parity/run-parity-captures.mjs --kind=built --cdp=http://127.0.0.1:<port> --commit=<sha> --base-url=http://localhost:8929 --fixture=<fixture.json> --sign-in-user=root --password-file=<distro-only file> --probe --mint-receipt --artifact-manifest=artifacts/parity/built-artifact-manifest.json --artifact=<package path from the manifest>`.
+6. Run the layout matrix the same way with `--matrix` (no receipts; the matrix binds by hash).
+7. Capture the reference side at the same commit through the viewer with `--cdp-port`, then
+   `--derive` for side-by-side and diff, `review-diff.mjs` per row with the honest verdict,
+   `record-evidence.mjs --inventory` and `--matrix`, and finally
+   `node tools/design-reference/scripts/parity-guard.mjs --strict`, whose real result is
+   reported as it is.
