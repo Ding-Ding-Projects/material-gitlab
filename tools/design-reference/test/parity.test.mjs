@@ -157,21 +157,32 @@ test('strict completion stays red while the 25 rows intentionally hold pending e
 });
 
 test('strict completion rejects a forged verified row without a receipt and artifact provenance', () => {
-  const broken = structuredClone(inventory);
-  broken.sourceCommit = 'a'.repeat(40);
-  broken.capturePolicy.evidenceStatus = 'verified';
-  const row = broken.contracts[0];
-  row.productionRouteStatus = 'known';
-  row.materialAudit.status = 'verified';
-  row.materialAudit.review = 'reviewed by accessibility owner';
-  for (const evidence of Object.values(row.evidence)) {
-    evidence.status = 'verified';
-    evidence.sha256 = 'a'.repeat(64);
+  // Validate against an isolated root that holds the design contracts and no evidence at
+  // all. Validating against the repository root made this test depend on whether real
+  // captures happened to exist on disk, so it turned red the moment evidence was
+  // produced, which is the opposite of what a forgery check should do.
+  const fixture = path.join(root, 'tools', 'design-reference', 'test', `.tmp-forged-parity-${process.pid}`);
+  fs.mkdirSync(fixture, { recursive: true });
+  fs.cpSync(path.join(root, 'design'), path.join(fixture, 'design'), { recursive: true });
+  try {
+    const broken = structuredClone(inventory);
+    broken.sourceCommit = 'a'.repeat(40);
+    broken.capturePolicy.evidenceStatus = 'verified';
+    const row = broken.contracts[0];
+    row.productionRouteStatus = 'known';
+    row.materialAudit.status = 'verified';
+    row.materialAudit.review = 'reviewed by accessibility owner';
+    for (const evidence of Object.values(row.evidence)) {
+      evidence.status = 'verified';
+      evidence.sha256 = 'a'.repeat(64);
+    }
+    const verdict = validateCompletion(broken, { root: fixture });
+    assert.equal(verdict.valid, false);
+    assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw verified path is missing')));
+    assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw evidence path escapes root')));
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
   }
-  const verdict = validateCompletion(broken, { root });
-  assert.equal(verdict.valid, false);
-  assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw verified path is missing')));
-  assert.ok(verdict.errors.some((error) => error.includes('surface.admin.evidence.referenceRaw evidence path escapes root')));
 });
 
 test('strict completion makes local font availability a reference-evidence boundary', () => {

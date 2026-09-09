@@ -301,7 +301,13 @@ async function main() {
     expected.searchParams.set('theme', tuple.theme);
     expected.searchParams.set('scale', String(tuple.scale));
     expected.searchParams.set('locale', tuple.locale);
-    if (currentUrl.href !== expected.href) fail(`reference target URL does not match the expected tuple for ${id}.\n  expected: ${expected.href}\n  actual:   ${currentUrl.href}\nRelaunch the reference app with --surface/--state/--theme/--scale/--locale (or --width/--height) matching this run's effective tuple.`);
+    // One viewer process serves every reference slug from the same loopback server, so a
+    // run over all 25 rows navigates the sole target to each expected URL (the driver's
+    // own navigation below) instead of relaunching the viewer per surface. The served
+    // page carries the determinism shim on every load and the capture-ready flag is
+    // awaited after navigation, so a page that did not settle fails rather than being
+    // photographed early. The origin is not allowed to change: that is a different server.
+    if (currentUrl.origin !== expected.origin) fail(`reference target origin ${currentUrl.origin} does not match the expected ${expected.origin}; relaunch the reference app on the intended server.`);
     targetUrl = expected.href;
   } else {
     const baseUrl = String(args['base-url']).replace(/\/$/, '');
@@ -322,6 +328,10 @@ async function main() {
     }
 
     await navigateAndSettle(cdp, targetUrl);
+    if (kind === 'reference') {
+      const afterNavigation = await evaluateSync(cdp, 'location.href');
+      if (afterNavigation !== targetUrl) fail(`reference target URL does not match the expected tuple for ${id} after navigation.\n  expected: ${targetUrl}\n  actual:   ${afterNavigation}`);
+    }
     await cdp.send('Emulation.setDeviceMetricsOverride', { width: tuple.viewport.width, height: tuple.viewport.height, deviceScaleFactor: tuple.scale, mobile: false });
 
     let fontProof = null;
