@@ -141,6 +141,10 @@ jobs:
         shell: bash
         run: scripts/omnibus/patch-frontend-islands-cleanup.sh omnibus-gitlab
 
+      - name: Install dev dependencies for the from-scratch asset compile
+        shell: bash
+        run: scripts/omnibus/patch-assets-install.sh omnibus-gitlab
+
       - name: Route GNU dependency downloads to a mirror that is actually up
         shell: bash
         run: scripts/omnibus/route-gnu-mirror.sh omnibus-gitlab
