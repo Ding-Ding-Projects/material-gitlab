@@ -1,5 +1,65 @@
 # Material GitLab overlay handoff
 
+## Documentation pass: README rewrite and deploy docs in step, 2026-09-08/09
+
+This section supersedes every older claim it contradicts below. It covers only the documentation
+lane of the wider deploy/omnibus task: the README rewrite, `deploy/README.md`, `BUILD.md`,
+`ROADMAP.md`, `CHANGELOG.md`, and one new site article. The packaging, Compose, and workflow work it
+documents was done by sibling lanes on the same coordinating branch,
+`feature/parity-deploy-omnibus-20260908` (tip `ed950bd9f` at the time this section was written).
+
+### What was corrected
+
+The README carried three claims that the tree already contradicted:
+
+1. It said no Omnibus/`.deb` route exists for this fork. `.github/workflows/omnibus-package.yml` has
+   existed and been dispatched multiple times before this pass; the workflow, `scripts/omnibus/*.sh`,
+   the container recipe under `deploy/docker/`, and the root `docker-compose.yml` targeting this
+   fork's own image all predate this documentation pass. The claim is now corrected to describe what
+   actually exists and what is still unproven (see below).
+2. It said there were no releases and no tags. As of this writing there are 34 `windows-NN-<sha12>`
+   tags with published non-draft Windows releases (for example `windows-95-0a4dd948e9ab`), and the
+   count keeps growing because `windows-release.yml` fires on every push to `main` and this branch
+   has had many. The README now points at the live releases page instead of a number that would be
+   stale within the hour.
+3. It said `.github/workflows/` was 5 files and 531 lines. It is 4 files (three `.yml` workflows plus
+   one `.md` dependency-notes file) totalling 1,109 lines, measured directly with `wc -l` on this
+   commit; `omnibus-package.yml` alone is 534 lines. The old figures could not have been reproduced by
+   any command in the repository and are corrected throughout.
+
+### What is running as this is written
+
+Omnibus workflow run
+[34293113846](https://github.com/Ding-Ding-Projects/material-gitlab/actions/runs/34293113846) was
+dispatched on `ed950bd9f` (the tip this documentation lane branched from) at 2026-09-09T00:00:25Z UTC
+and was still `in_progress` when this section was written. The prior run,
+[34239883194](https://github.com/Ding-Ding-Projects/material-gitlab/actions/runs/34239883194),
+compiled the entire package in about two hours and five minutes and failed only at the final health
+check, on musl-linked Node binaries under `ee/frontend_islands/node_modules` that upstream deletes
+only in EE builds; `scripts/omnibus/patch-frontend-islands-cleanup.sh` (pushed as part of `ed950bd9f`)
+is the fix. Whether the new run reaches a published release is not yet known. The README's install
+steps are written to be correct once a release exists, and point at the releases page for whichever
+one currently does, rather than asserting one exists now.
+
+### What remains unproven
+
+- **No Omnibus release has published yet.** Until run 34293113846 or a later one finishes and
+  publishes, `apt-get install`-ing this fork and pulling `ghcr.io/ding-ding-projects/material-gitlab`
+  both remain unavailable, exactly as the README now states.
+- **"Nothing in this repository deploys GitLab" is no longer an accurate summary**, and older text
+  in this file that said so is superseded here rather than deleted. A working `docker-compose.yml`
+  and container image recipe for this fork exist; what is still missing is a published package or
+  image for them to install. The desktop tools remain configuration and preview shells by explicit
+  design and deploy nothing themselves.
+- **The design-parity inventory now shows all 25 rows with a `known` production route** (the
+  20-known/5-placeholder split recorded elsewhere in this repository's history is stale), while every
+  row's capture evidence (`referenceRaw`, `builtRaw`, `sideBySide`, `diff`) remains `pending` and
+  `sourceCommit` is still the literal string `WORKTREE` rather than a real commit. That is unrelated
+  to this documentation lane and is tracked in `ROADMAP.md` and `doc/development/design_parity_audit.md`.
+- The Status Hub ingest credential was not available in this environment, so this lane's progress is
+  recorded only in this file, in the rolling commit history, and in the pull request this branch will
+  produce — not in a live status page.
+
 ## Active design-parity implementation, 8 September 2026
 
 This section supersedes older runtime and release availability claims below.

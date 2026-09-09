@@ -62,32 +62,45 @@ upgrade the unchecked production-parity items above to completed work.
       - Recorded so it is not rediscovered: **Vue replaces its mount node**, so
         `querySelector('#js-material-<surface>')` returning null is not evidence that a surface
         failed to mount. Test for rendered content and its classes instead.
-- [ ] **Make this fork installable. This is the single most important thing missing.** The Material
-      work is real application code, 376 files under `app/assets/javascripts/material_system/`, and
-      nothing in this repository turns it into something anyone can install. There is no apt
-      repository serving it, so `apt-get install` reaches only stock upstream GitLab, and no
-      Dockerfile builds a runnable image of it. Every working install instruction in the README
-      installs the exact product this fork exists to replace. Two candidate routes, neither built:
-      - Compile this tree's assets with the existing standalone path (`yarn install`, then
-        `yarn webpack-prod`, which runs `webpack --config config/webpack.config.js` without needing
-        the Rails stack) and layer the resulting `public/assets` plus the changed `app/views` onto
-        the official image at a matching version. Note the base image and tree versions must be kept
-        pinned in step: the tree is `19.3.0-pre` while the currently published package is
-        `19.3.1-ce.0`.
-      - Build an Omnibus package from this tree and publish it, which is what would make
-        `apt-get install` reach this fork the same way it reaches upstream today.
-        A workflow for this is committed and has been run seven times. Six distinct causes are
-        fixed and recorded in `HANDOFF.md`; the network and toolchain-version problems are
-        solved and the build now reaches real compilation. No package exists yet, and a full
-        build may still exceed the job time ceiling, which would be a real outcome rather than
-        a defect.
+- **Make this fork installable. This was the single most important thing missing, and most of the
+  packaging machinery now exists; what is still missing is a published result.** The Material work is
+  real application code, 376 files under `app/assets/javascripts/material_system/`, and until a
+  release publishes there is still nothing anyone can `apt-get install` or `docker pull`.
+  - [x] Commit an Omnibus packaging workflow (`.github/workflows/omnibus-package.yml`) and its
+        supporting scripts (`scripts/omnibus/*.sh`) that repoint the build at this fork's source,
+        patch the `ee/frontend_islands/node_modules` cleanup to run unconditionally, route dependency
+        downloads around a dead GNU mirror, and read the correct OpenSSL toolchain version from the
+        upstream ref instead of guessing.
+  - [x] Get the build past every previously recorded failure cause. Eight runs, seven distinct causes,
+        all recorded in `HANDOFF.md`. Run 34239883194 compiled the entire package (about 2h05m) and
+        failed only at the final health check, on musl-linked Node binaries under
+        `ee/frontend_islands/node_modules` that upstream deletes only in EE builds; that fix is pushed.
+  - [x] Add a container image recipe for this fork (`deploy/docker/Dockerfile`, derived from upstream
+        `omnibus-gitlab`'s own Docker assets under Apache-2.0, with per-file provenance hashes in
+        `deploy/docker/UPSTREAM-NOTICE.md`) and a root `docker-compose.yml` that builds it from a
+        release `.deb` or pulls a published image.
+  - [ ] Publish a passing run. No `.deb` and no `ghcr.io/ding-ding-projects/material-gitlab` image
+        exist yet; a full build may still exceed the job time ceiling, which would be a real outcome
+        rather than a defect. Check the [releases page](https://github.com/Ding-Ding-Projects/material-gitlab/releases)
+        for the current state.
+  - [ ] Prove the Docker install route end to end against a real published release: image pull or
+        local build, container health check, initial root password, and the Material assets actually
+        present in the running container.
+  - [ ] Prove the direct `.deb` install route end to end on a clean Debian or Ubuntu host.
+  - [ ] Keep the base image and tree versions pinned in step for the layered-assets alternative
+        described in [README.md, step 3](README.md#alternative-layer-compiled-assets-onto-the-official-image):
+        the tree is `19.3.0-pre` while the most recently published upstream package was
+        `19.3.1-ce.0` at the time this was last checked.
 - Run the production Rails application at the same commit and finish built-route captures,
   side-by-side comparisons, Material audits, and visual diffs for all 25 parity rows.
   Design folder parity itself is currently intact and independently verified: all 25 reference
   hashes match, no file is missing, and no `.dc.html` on disk is absent from the inventory. What is
   missing is the visual evidence. `capturePolicy.evidenceStatus` is `pending-capture` and
   `sourceCommit` is the literal string `WORKTREE` rather than a commit, so no row is yet bound to a
-  real revision. 20 of the 25 production routes are `known`; 5 remain `placeholder`.
+  real revision. All 25 rows now record `productionRouteStatus: "known"` in
+  `design/parity-inventory.json` (an earlier 20-known/5-placeholder split recorded elsewhere in this
+  repository's history is stale); every row's `referenceRaw`, `builtRaw`, `sideBySide`, and `diff`
+  evidence remains `pending`.
 - Keep the reference hashes, production routes, evidence receipts, and documentation synchronized
   whenever a design or surface changes.
 

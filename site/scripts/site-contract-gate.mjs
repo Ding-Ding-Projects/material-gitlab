@@ -22,7 +22,7 @@ async function failures(overrides = {}) {
   if (!runtime.includes('createRegexBuilder') || !runtime.includes('querySelectorAll(\'select\')')) result.push('dropdown filters must own full regex builders');
   if (!runtime.includes('contextmenu') || !runtime.includes('data-context-builder')) result.push('context menus must own a regex builder');
   if (!config.includes("base: './'")) result.push('Vite base must be relative');
-  if (!Array.isArray(docs.documents) || docs.documents.length !== 28) result.push('docs manifest must contain 28 bundled articles');
+  if (!Array.isArray(docs.documents) || docs.documents.length !== 29) result.push('docs manifest must contain 29 bundled articles');
   for (const article of docs.documents || []) {
     if (article.availability !== 'bundled') result.push(`article ${article.id} is not bundled`);
     try { await access(path.join(root, article.path)); } catch { result.push(`article path is missing: ${article.path}`); }
