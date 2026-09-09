@@ -106,6 +106,7 @@ const OVERLAY_FILES = new Set([
   'build.bat',
   'build-installer.bat',
   'README.md',
+  'AGENTS.md',
   'ROADMAP.md',
   'HANDOFF.md',
   'BUILD.md',
