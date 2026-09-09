@@ -7,6 +7,7 @@ import { evaluateRegex } from '../src/regex-builder.js';
 import { normalizeRule, ruleMatches, resolveScheduledValues } from '../src/scheduled-settings.js';
 import { buildAdapterCatalog, findAdapters, createConversionQueue } from '../src/file-converter.js';
 import { createOllamaManager } from '../src/ollama-manager.js';
+import { markdownToHtml, articleHasOwnTitle, escapeHtml } from '../src/markdown.js';
 import {
   renderReleaseCard,
   validateReleaseManifest,
@@ -227,4 +228,31 @@ test('formatBytes and shortCommit produce deterministic, testable display values
   assert.equal(formatBytes(-5), 'unknown size');
   assert.equal(shortCommit('b'.repeat(40)), 'b'.repeat(12));
   assert.equal(shortCommit(), '');
+});
+
+test('an article that opens with its own top-level heading is detected so the viewer adds no second one', () => {
+  assert.equal(articleHasOwnTitle('# Deployment\n\nBody.'), true);
+  assert.equal(articleHasOwnTitle('\n\n# Deployment\n'), true);
+  assert.equal(articleHasOwnTitle('Intro paragraph\n\n# Later heading'), false);
+  assert.equal(articleHasOwnTitle(''), false);
+  const html = markdownToHtml('# Deployment\n\nBody.');
+  assert.equal((html.match(/<h2>/g) || []).length, 1);
+});
+
+test('inline links render as anchors only for http(s) and relative targets, and never for a script scheme', () => {
+  const external = markdownToHtml('See [the README](https://example.test/repo#readme) now.');
+  assert.match(external, /<a href="https:\/\/example\.test\/repo#readme" target="_blank" rel="noopener">the README<\/a>/);
+  const relative = markdownToHtml('Read [the guide](docs/deployment.md).');
+  assert.match(relative, /<a href="docs\/deployment\.md">the guide<\/a>/);
+  const script = markdownToHtml('Bad [link](javascript:alert(1)) here.');
+  assert.doesNotMatch(script, /<a /);
+  assert.match(script, /\[link\]\(javascript:alert\(1\)\)/);
+});
+
+test('the renderer escapes markup before rendering so an article cannot inject HTML', () => {
+  const html = markdownToHtml('Text with <script>alert(1)</script> and `code`.');
+  assert.doesNotMatch(html, /<script>/);
+  assert.match(html, /&lt;script&gt;/);
+  assert.match(html, /<code>code<\/code>/);
+  assert.equal(escapeHtml('a & b'), 'a &amp; b');
 });

@@ -18,6 +18,7 @@ import { applyMobileAccessibility, installFocusRing } from './mobile-accessibili
 import { initProductContent } from './content.js';
 import { initCommandPalette } from './command-palette.js';
 import { loadChangelog, filterChangelog, renderChangelog } from './changelog.js';
+import { markdownToHtml, articleHasOwnTitle } from './markdown.js';
 import { selectionFromCheckboxes } from './bulk-actions.js';
 import { detectFileType, buildAdapterCatalog, findAdapters } from './file-converter.js';
 import { bindSupportTickets, supportDisclosure, openRecoveryFolder } from './support-tickets.js';
@@ -46,32 +47,23 @@ import { renderReleaseCard } from './releases.js';
     return response.text();
   }
 
-  function markdownToHtml(markdown) {
-    return text(markdown)
-      .replace(/^### (.+)$/gm, '<h4>$1</h4>')
-      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^# (.+)$/gm, '<h2>$1</h2>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/^(?:- |\* )(.+)$/gm, '<li>$1</li>')
-      .replace(/(?:<li>.*<\/li>\n?)+/g, (list) => `<ul>${list}</ul>`)
-      .split(/\n{2,}/)
-      .map((paragraph) => /^(<h[234]|<ul>)/.test(paragraph.trim()) ? paragraph : `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
-      .join('');
-  }
-
   function renderDocs() {
     const container = $('[data-documents], #documents, .documents-list');
     if (!container || !state.docs.length) return;
     container.innerHTML = state.docs.map((doc, index) => `<article class="doc-card" data-search="${text(`${doc.title} ${doc.path}`.toLowerCase())}"><h3>${text(doc.title)}</h3><p>${text(doc.summary || doc.path)}</p><button type="button" data-doc-index="${index}">Read article</button></article>`).join('');
+    // Not a once-only listener: a reader opens as many articles as they like in one visit.
     container.addEventListener('click', async (event) => {
       const button = event.target.closest('[data-doc-index]');
       if (!button) return;
       const doc = state.docs[Number(button.dataset.docIndex)];
       const panel = $('[data-document-viewer], #document-viewer') || container;
-      try { panel.innerHTML = `<article class="document-view"><h2>${text(doc.title)}</h2>${markdownToHtml(await loadText(doc.path))}</article>`; }
-      catch (error) { panel.innerHTML = `<p role="alert">Unable to load this article: ${text(error.message)}</p>`; }
-    }, { once: true });
+      try {
+        const body = await loadText(doc.path);
+        // An article that opens with its own top-level heading is not given a second one.
+        const heading = articleHasOwnTitle(body) ? '' : `<h2>${text(doc.title)}</h2>`;
+        panel.innerHTML = `<article class="document-view">${heading}${markdownToHtml(body)}</article>`;
+      } catch (error) { panel.innerHTML = `<p role="alert">Unable to load this article: ${text(error.message)}</p>`; }
+    });
   }
 
   function renderInventory() {
