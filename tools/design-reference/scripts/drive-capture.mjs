@@ -349,9 +349,14 @@ async function main() {
     const userAgent = await evaluateSync(cdp, 'navigator.userAgent');
     const finalUrl = await evaluateSync(cdp, 'location.href');
 
+    // No clip. A CDP clip is page-relative, so once a productionActions click or a mount
+    // wait has scrolled the page, a clip at the origin photographs the empty page above
+    // the viewport: measured on the documentation site, a clipped capture came back as a
+    // uniform 4,716-byte image while the unclipped viewport capture held the content. The
+    // device metrics override already fixes the viewport to the tuple, and the dimension
+    // check below refuses anything that is not exactly width*scale by height*scale.
     const shot = await cdp.send('Page.captureScreenshot', {
       format: 'png',
-      clip: { x: 0, y: 0, width: tuple.viewport.width, height: tuple.viewport.height, scale: tuple.scale },
       captureBeyondViewport: false,
     });
     const pngBuffer = Buffer.from(shot.data, 'base64');
