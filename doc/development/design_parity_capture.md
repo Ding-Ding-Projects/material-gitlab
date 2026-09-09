@@ -71,3 +71,16 @@ for every row whose two raw captures and receipts exist and skips the rest rathe
 inventing anything. `--write-reference-manifest` records the reference viewer entry file
 as the reference-side artifact. Every row is attempted, the outcome table is printed, and
 an ignored ledger is written under `artifacts/parity/_local/`.
+
+## Recording evidence into the inventories
+
+`scripts/design-parity/record-evidence.mjs` copies what is really on disk into
+`design/parity-inventory.json` (`--inventory`) and `design/layout-matrix.json`
+(`--matrix`). An inventory entry becomes verified only when its file exists and its
+receipt is verified, names the same row and kind, and is bound to the same `--commit`;
+a receipt bound to another commit is reported as stale and left pending. A matrix entry
+becomes verified when its file exists, and every layout-probe finding without a recorded
+deviation is listed as open. Material audits (`--audit=<json>`) and intentional
+deviations (`--deviations=<json>`) are judgements supplied by a reviewer and are copied,
+never derived. `--dry-run` prints the outcome table and writes nothing. The strict guard
+remains the authority afterwards.
