@@ -131,3 +131,22 @@ verifies the selected profile emits working minified code without a source map;
 invalid flag values fail. The helper dry run asserts all three build arguments.
 This profile still requires a successful complete runtime build before its memory
 benefit or capture readiness can be claimed.
+
+## Packaged-instance route
+
+The GDK recipe above is one way to obtain a running candidate. The route used for
+production evidence from September 2026 is the packaged fork itself: the Omnibus package
+built by `.github/workflows/omnibus-package.yml` (scripts under `scripts/omnibus/`), the
+container image built from that package (`deploy/docker/`), and the root
+`docker-compose.yml` running it on a dedicated Docker host. Because that instance runs
+in production mode, the fixture seed accepts it through its `lan-omnibus` marker (see
+`design_parity_fixture.md`).
+
+Built-side receipts bind to the package as the rendered artifact. Run
+`node scripts/design-parity/fetch-built-artifact.mjs --tag <release tag> --commit <sha>`
+first: it downloads the release package into the ignored `artifacts/parity/_local/`
+directory, verifies it against the release's own `SHA256SUMS.txt`, and writes
+`artifacts/parity/built-artifact-manifest.json`, the source-commit-bound manifest that
+`capture.mjs` and the strict guard verify against the same bytes. The session provenance
+record for each built capture names the exact instance URL and the image digest that was
+running, so a receipt can never be satisfied by a different build of the same commit.
