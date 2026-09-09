@@ -1,5 +1,79 @@
 # Material GitLab overlay handoff
 
+## Packaging pass: two build failures fixed, capture toolkit landed, 2026-09-09
+
+This section supersedes older claims it contradicts. It records the packaging and evidence work on
+`feature/parity-deploy-omnibus-20260908` after the documentation pass below, so the next owner does
+not rediscover the two failures the Omnibus build hit or how each was fixed.
+
+### The Omnibus build failed twice, each for a distinct, recorded cause
+
+The build compiles the whole Omnibus stack from source and takes roughly two hours to reach its
+late stages, so each failure costs a full run. Both were real defects, not flakes, and both were
+fixed by a committed patch script that the workflow calls (`scripts/omnibus/`), so a local build on
+a Linux Docker host and CI run the same bytes.
+
+1. **musl health check** (run 34239883194). The package built completely and failed omnibus's own
+   health check on three `linux-x64-musl` `.node` binaries left under
+   `ee/frontend_islands/node_modules`, depending on `libc.musl-x86_64.so.1`, which the package does
+   not provide. Upstream deletes that directory only for EE builds; this is an EE-layout tree
+   packaged under the CE project, so the guard never fired. Fixed by
+   `scripts/omnibus/patch-frontend-islands-cleanup.sh` (commit `ed950bd9f`), which makes the
+   cleanup unconditional with a directory test around the find.
+2. **asset compile cannot resolve graphql-ws** (run 34293113846). With the health check passed, the
+   build ran two more hours and failed `rake gitlab:assets:compile` three times on
+   `Can't resolve 'graphql-ws' in @graphiql/toolkit/dist/cjs/create-fetcher`. `graphql-ws` is not a
+   declared dependency of `@graphiql/toolkit`; the toolkit requires it optionally, and the only chain
+   that installs it (`@graphql-tools/url-loader` -> `executor-graphql-ws` -> `graphql-ws`) is pruned
+   by `yarn install --production`, while `@graphiql/toolkit` still reaches the production bundle
+   through `graphiql` -> `@graphiql/react`. Upstream never sees this because its omnibus copies assets
+   a CI job already compiled with the dev dependencies present. Fixed by
+   `scripts/omnibus/patch-assets-install.sh` (commit `9a1954a14`), which drops `--production` from the
+   asset-compile yarn install. It costs the package nothing: the definition moves `node_modules` out
+   of the rails app to the cache root after the compile, so no `node_modules` ships either way.
+   Dropping `--production` rather than adding one package resolves the whole class of
+   optionally-required production packages, not just this one.
+
+The lesson worth carrying: compiling GitLab's production assets requires a full (dev plus prod)
+`node_modules`, because production packages optionally require dev-chain packages at bundle time.
+Any build that compiles assets from scratch, rather than copying a CI job's output, must install the
+full dependency set.
+
+### Also landed this pass
+
+- `scripts/omnibus/verify-package.sh` opens the `.deb` before anything is published: it asserts the
+  fork's `material_system` tree is present, counts compiled webpack files, refuses any surviving musl
+  binary, and checks the `VERSION` inside the package against the tree that was meant to be packaged.
+- `deploy/docker/` builds the container image from the verified package, in the official Omnibus
+  container layout, and the workflow's second job boots it, proves it serves and carries this fork,
+  then pushes it to the container registry. `deploy/docker/.dockerignore` must not exclude
+  `packages/*.deb`, or the offline local build's bind mount sees nothing (fixed in `e3709494a`).
+- Deploy routes: the root `docker-compose.yml` runs the fork image with a build-from-release-package
+  fallback; `deploy/scripts/remote-up.sh` brings it up on a remote Docker host over SSH;
+  `deploy/scripts/wsl-install.sh` installs the `.deb` natively in a WSL Ubuntu 24.04 distro, the
+  route chosen for local verification. The WSL2 distro stops seconds after its last command exits,
+  taking GitLab with it, so a keepalive process must run for the length of any capture session.
+- Design-parity capture: `tools/design-reference/scripts/drive-capture.mjs` drives both the
+  reference viewer and the built application over CDP at one identical tuple; `layout-probe.mjs`
+  records clipping candidates with exact rects; `design/layout-matrix.json` is a 70-tuple inventory
+  with its own strict-guard coverage. Two capture lessons were paid for here: a CDP screenshot clip
+  is page-relative, so after a scroll a clip at the origin photographs empty page (capture the
+  viewport instead); and the reference driver navigates one viewer process to each row rather than
+  relaunching per surface. `scripts/design-parity/run-parity-captures.mjs` runs the whole set with
+  one command per side, and `record-evidence.mjs` copies only receipt-bound, commit-bound files into
+  the inventories, refusing a Material audit that skipped any primitive.
+- All 25 reference rows were captured at 1280x800 with verified receipts and font proofs as a
+  rehearsal, bound to a non-final commit and not committed. The built side waits on a published
+  package installed in the WSL instance.
+
+### What is still unproven
+
+No Omnibus package or container image has published yet; run 34309060466 (on `9a1954a14`, the
+graphql-ws fix) was in its asset-compile step when this was written. Until a release publishes, the
+install routes in the README are correct steps against a package that does not exist, the site's
+release manifest is honestly empty, and the design-parity strict guard stays red because no built
+capture exists. None of that is hidden: each surface says so.
+
 ## Documentation pass: README rewrite and deploy docs in step, 2026-09-08/09
 
 This section supersedes every older claim it contradicts below. It covers only the documentation
