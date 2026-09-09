@@ -8,6 +8,39 @@ is a short index of what is under this directory and why.
 | --- | --- |
 | [`docker/`](docker/) | The container image recipe for **this fork**. Installs the `.deb` built by [`omnibus-package.yml`](../.github/workflows/omnibus-package.yml) into the official Omnibus container layout. |
 | [`upstream-baseline/`](upstream-baseline/) | A Compose file for **stock upstream** `gitlab/gitlab-ce`. Runs the product this fork exists to replace, kept only as a comparison baseline for design parity. |
+| [`scripts/remote-up.sh`](scripts/remote-up.sh) | One command that copies the Compose file and image recipe to a remote Docker host over SSH, builds or pulls the image, starts the container and waits for its health check. |
+| [`scripts/wsl-install.sh`](scripts/wsl-install.sh) | Installs the `.deb` natively inside a WSL Ubuntu 24.04 distro on Windows, the route used here for local verification. |
+
+## Running the package in WSL on Windows
+
+The package is a Debian package for Ubuntu 24.04, and a WSL2 distro of that release runs it
+natively. Windows reaches the instance on `localhost` through WSL2 port forwarding, so the
+default `EXTERNAL_URL` is `http://localhost:8929`.
+
+```powershell
+# On Windows: a fresh 24.04 distro (any name; this one matches the project)
+wsl --install Ubuntu-24.04 --name material-gitlab --no-launch
+wsl -d material-gitlab -u root -- bash
+```
+
+```bash
+# Inside the distro, as root: install straight from the release asset
+bash deploy/scripts/wsl-install.sh \
+  https://github.com/Ding-Ding-Projects/material-gitlab/releases/download/<tag>/<package>.deb \
+  http://localhost:8929 /root/material-gitlab/root_password
+```
+
+Two WSL2 facts decide whether this works:
+
+- **The distro stops when its last command exits**, taking GitLab with it. Keep a shell open
+  inside the distro, or run `wsl -d material-gitlab -- sleep infinity` from Windows, for as long
+  as the instance must stay up. A browser that gets `connection refused` seconds after `curl`
+  answered was almost certainly talking to a distro that had just shut down.
+- **Memory is capped by `.wslconfig`**, not by the host. GitLab needs about 6 GB to be
+  comfortable; check `free -g` inside the distro before blaming the package.
+
+The password file is optional. Without it the package writes a generated password to
+`/etc/gitlab/initial_root_password` and deletes that file after 24 hours.
 
 The root [`docker-compose.yml`](../docker-compose.yml) builds and runs `deploy/docker/`; it is the
 one to use for actually running this fork. See README.md, section **Install with Docker**, for the
