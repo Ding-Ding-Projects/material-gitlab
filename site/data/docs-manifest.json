@@ -176,6 +176,12 @@
       "title": "Status Hub",
       "path": "docs/status-hub.md",
       "availability": "bundled"
+    },
+    {
+      "id": "deployment",
+      "title": "Deployment",
+      "path": "docs/deployment.md",
+      "availability": "bundled"
     }
   ]
 }

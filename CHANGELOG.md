@@ -2,6 +2,59 @@
 
 ## Unreleased
 
+### Docker Compose, container image, and Omnibus packaging for this fork
+
+- Point the root `docker-compose.yml` at this fork's own image
+  (`ghcr.io/ding-ding-projects/material-gitlab`) instead of a one-line stub, with a `build:` fallback
+  that produces the image locally from a release `.deb` when no published image is pulled.
+- Add `deploy/docker/`, a container image recipe derived from upstream `omnibus-gitlab`'s own Docker
+  assets at `19.3.0+ce.0` (Apache-2.0; per-file provenance and hashes in `deploy/docker/UPSTREAM-NOTICE.md`),
+  changed only so the image installs a local or downloaded `.deb` built from this fork rather than
+  fetching upstream's own package.
+- Add `deploy/upstream-baseline/docker-compose.yml`, the stock-`gitlab/gitlab-ce` comparison baseline
+  moved out of the root Compose file, and `deploy/README.md` indexing both.
+- Fix `scripts/omnibus/patch-frontend-islands-cleanup.sh` ([`ed950bd9f`](https://github.com/Ding-Ding-Projects/material-gitlab/commit/ed950bd9f)):
+  make the `ee/frontend_islands/node_modules` cleanup in `config/software/gitlab-rails.rb`
+  unconditional. Upstream only runs it when the build is flagged EE; this fork is an EE-layout tree
+  packaged under the CE project, so run 34239883194 compiled the entire package (about 2h05m) and
+  failed only at the final health check, on musl-linked Node binaries the guarded cleanup never
+  removed. A workflow dispatch on this fix (run 34293113846) was in progress as this entry was
+  written; no `.deb` and no image have published yet.
+- The other six `scripts/omnibus/*.sh` steps (`repoint-sources.sh`, `route-gnu-mirror.sh`,
+  `read-toolchain.sh`, `build-package.sh`, `build-package-inner.sh`, `verify-package.sh`) and
+  `.github/workflows/omnibus-package.yml` itself predate this entry; see `HANDOFF.md` for their
+  individual fixes across eight recorded build attempts.
+
+### Documentation: README rewritten as step-by-step instructions, and corrected
+
+- Rewrite `README.md` as numbered, verifiable install steps (Docker, direct `.deb`, build-it-yourself,
+  Windows source build) instead of a narrative "nothing here installs this fork" framing that three
+  parts of the tree had already outgrown:
+  - It said no Omnibus/`.deb` route exists. `.github/workflows/omnibus-package.yml` and
+    `scripts/omnibus/*.sh` already existed and had been run multiple times.
+  - It said there were no releases and no tags. 34 `windows-NN-<sha12>` tags with published non-draft
+    releases already existed (for example `windows-95-0a4dd948e9ab`), and the count grows on every
+    push to `main`.
+  - It said `.github/workflows/` was 5 files and 531 lines. It is 4 files (three `.yml` plus one `.md`)
+    totalling 1,109 lines, measured directly rather than carried forward from an earlier count.
+- Correct `BUILD.md`: the root `build.bat`/`build-installer.bat` build the GitLab Rails frontend and
+  an unsigned source ZIP, not an installable desktop artifact. The installable Squirrel.Windows
+  artifacts come from the separate `build.bat`/`build-installer.bat` pair inside each of
+  `tools/material-gitlab-deployer/` and `tools/material-gitlab-instant/`, which is what
+  `windows-release.yml` actually builds and publishes.
+- Add `site/docs/deployment.md`, register it in `site/data/docs-manifest.json`, add its row to
+  `site/data/completeness-inventory.json` (status `planned`, since no release has published a
+  capture can bind evidence to), and update `site/scripts/site-contract-gate.mjs`'s bundled-article
+  count from 28 to 29 to match.
+- Update `ROADMAP.md`'s installability item into checked sub-items for what is actually done (the
+  packaging scripts, the frontend-islands fix, the container recipe, the Compose change) with the
+  remaining package/image/end-to-end-install work left honestly unchecked, and correct a stale
+  "20 of 25 production routes known" line against the current `design/parity-inventory.json`, where
+  all 25 now record `productionRouteStatus: "known"`.
+- Add a dated section to `HANDOFF.md` recording this pass and correcting the older "nothing in this
+  repository deploys GitLab" summary, which a working Compose file and image recipe have partially
+  outgrown even though no package has published yet.
+
 ### Design parity implementation, 8 September 2026, in progress
 
 - Integrate real Rails routes for the project, collaboration, operations, security,
