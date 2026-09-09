@@ -256,6 +256,26 @@ Pin with `sudo apt-mark hold gitlab-ce` if you want to control upgrade timing yo
 
 </details>
 
+<details>
+<summary><b>On Windows: run the same package in WSL</b></summary>
+
+A WSL2 distro of Ubuntu 24.04 runs this package natively, and Windows reaches it on
+`localhost` through WSL2 port forwarding. [`deploy/scripts/wsl-install.sh`](deploy/scripts/wsl-install.sh)
+does steps 1 to 4 above inside the distro in one command, verifying the download against the
+release `SHA256SUMS.txt` on the way:
+
+```bash
+# Inside the distro, as root
+bash deploy/scripts/wsl-install.sh '<release .deb asset URL>' http://localhost:8929
+```
+
+**Check:** the script ends with `healthy`, the installed version, and the sign-in URL. Keep a shell
+open in the distro (or run `wsl -d <distro> -- sleep infinity` from Windows) while you use the
+instance: WSL2 stops a distro seconds after its last command exits, and GitLab stops with it. The
+full route, including the memory note, is in [`deploy/README.md`](deploy/README.md).
+
+</details>
+
 ---
 
 ## 3. Build the package yourself
