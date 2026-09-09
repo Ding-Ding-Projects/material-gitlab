@@ -1,0 +1,3 @@
+# Local packages are build inputs, never tracked.
+*.deb
+!.gitkeep

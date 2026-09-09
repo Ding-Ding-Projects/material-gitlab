@@ -1,17 +1,20 @@
 name: Omnibus package
 
-# Builds a Debian package of THIS fork, so that installing it gets you the Material
-# work rather than stock upstream GitLab.
+# Builds a Debian package of THIS fork, so that installing it gets you the Material work
+# rather than stock upstream GitLab, then builds the official-layout container image from
+# that package and pushes it to GHCR.
 #
 # Deliberately manual. A full Omnibus build compiles Ruby, PostgreSQL, Redis, nginx and
 # the Go components from source. It is enormous, and running it on every push would be
 # both useless and rude to the runner pool.
 #
-# Honesty about the state of this workflow: it has not yet produced a package. It is
-# committed so the work is real and reviewable rather than described in a roadmap, and
-# so its failures are visible. The two things most likely to stop it on a hosted runner
-# are disk and wall clock; both are checked and reported explicitly rather than being
-# left to fail as something obscure two hours in.
+# Every shell step calls a committed script under scripts/omnibus/. The scripts are the
+# single implementation, so a local run on a Linux Docker host and this workflow cannot
+# drift apart. History of this workflow, recorded because none of it was visible from the
+# error it produced: eight runs failed for seven distinct causes. The last one, run
+# 34239883194, compiled the entire package in about two hours and failed only at the final
+# health check on musl-linked node binaries that upstream deletes only in EE builds.
+# scripts/omnibus/patch-frontend-islands-cleanup.sh is that fix.
 
 on:
   workflow_dispatch:
@@ -25,12 +28,17 @@ on:
         required: false
         default: ''
       attach_to_release:
-        description: 'Attach the resulting .deb to a GitHub release'
+        description: 'Publish the .deb on a new GitHub release'
         type: boolean
-        default: false
+        default: true
+      push_image:
+        description: 'Build the container image from the .deb and push it to GHCR'
+        type: boolean
+        default: true
 
 permissions:
   contents: write
+  packages: write
 
 concurrency:
   # Never cancel in progress: this workflow publishes, so a half-finished run that is
@@ -44,9 +52,20 @@ env:
 jobs:
   build-package:
     runs-on: ubuntu-24.04
-    # 360 minutes is the GitHub hosted runner ceiling for one job. An Omnibus build can
-    # legitimately need more than this on 4 cores, which is a real risk, not a defect.
+    # 360 minutes is the GitHub hosted runner ceiling for one job. Run 34239883194 reached
+    # the health check after about 2h05m, so the ceiling is a real risk, not a defect.
     timeout-minutes: 360
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+      sha12: ${{ steps.target.outputs.sha12 }}
+      version: ${{ steps.target.outputs.version }}
+      image_ref: ${{ steps.target.outputs.image_ref }}
+      image_latest: ${{ steps.target.outputs.image_latest }}
+      deb_name: ${{ steps.verify.outputs.deb_name }}
+      deb_sha256: ${{ steps.verify.outputs.deb_sha256 }}
+      deb_bytes: ${{ steps.verify.outputs.deb_bytes }}
+      release_tag: ${{ steps.publish.outputs.release_tag }}
+      deb_url: ${{ steps.publish.outputs.deb_url }}
 
     steps:
       - name: Check out this fork at the exact ref to package
@@ -55,15 +74,35 @@ jobs:
           ref: ${{ inputs.gitlab_ref || github.sha }}
           fetch-depth: 0
 
+      - name: Record when this run started
+        id: timing
+        shell: bash
+        run: |
+          set -euo pipefail
+          started="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}" --jq .run_started_at)"
+          if [ -z "$started" ]; then
+            echo "::error::GitHub Actions run metadata did not provide run_started_at."
+            exit 1
+          fi
+          echo "workflow_started=$started" >> "$GITHUB_OUTPUT"
+          echo "Workflow started at $started"
+
       - name: Record what is being packaged
         id: target
         shell: bash
         run: |
           set -euo pipefail
           sha="$(git rev-parse HEAD)"
+          sha12="${sha:0:12}"
           version="$(tr -d '[:space:]' < VERSION)"
-          echo "sha=$sha"          >> "$GITHUB_OUTPUT"
-          echo "version=$version"  >> "$GITHUB_OUTPUT"
+          owner="$(printf '%s' "${GITHUB_REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')"
+          {
+            echo "sha=$sha"
+            echo "sha12=$sha12"
+            echo "version=$version"
+            echo "image_ref=ghcr.io/${owner}/material-gitlab:${version}-${sha12}"
+            echo "image_latest=ghcr.io/${owner}/material-gitlab:latest"
+          } >> "$GITHUB_OUTPUT"
           echo "Packaging $sha at declared version $version"
           echo "Building with omnibus-gitlab ${{ inputs.omnibus_ref }}"
 
@@ -92,231 +131,39 @@ jobs:
           set -euo pipefail
           git clone --depth 1 --branch "${{ inputs.omnibus_ref }}" \
             https://gitlab.com/gitlab-org/omnibus-gitlab.git omnibus-gitlab
-          cd omnibus-gitlab
-          git log -1 --format='omnibus-gitlab at %H %s'
+          git -C omnibus-gitlab log -1 --format='omnibus-gitlab at %H %s'
 
       - name: Point the gitlab-rails component at this fork
         shell: bash
-        run: |
-          set -euo pipefail
-          cd omnibus-gitlab
-          # Omnibus resolves each component's git remote through .custom_sources.yml.
-          # Repointing gitlab-rails at this repository is what makes the resulting
-          # package carry the Material work instead of upstream's application code.
-          test -f .custom_sources.yml || { echo "::error::.custom_sources.yml is missing; the omnibus layout has changed and this step needs revisiting."; exit 1; }
-          cp .custom_sources.yml .custom_sources.yml.orig
-          python3 - <<'PY'
-          import re, sys, pathlib
-          p = pathlib.Path('.custom_sources.yml')
-          text = p.read_text(encoding='utf-8')
-          fork = 'https://github.com/Ding-Ding-Projects/material-gitlab.git'
-          # Operate on the gitlab-rails block only. The (?=^\S|\Z) lookahead ends the block
-          # at the next top level key, which is what keeps gitlab-rails-ee out of range;
-          # a plain prefix match would rewrite it too, and the build would then be EE.
-          block_re = re.compile(r'(^gitlab-rails:\n)((?:[ \t]+.*\n|\n)*?)(?=^\S|\Z)', re.M)
-          m = block_re.search(text)
-          if not m:
-              sys.exit('gitlab-rails block not found in .custom_sources.yml')
-          body = m.group(2)
-          changed = 0
-          def swap(mm):
-              global changed
-              changed += 1
-              return mm.group(1) + '"' + fork + '"'
-          # Both keys must point at the fork. Omnibus reads "alternative" when
-          # ALTERNATIVE_SOURCES is set, so rewriting only "remote" can silently build
-          # upstream while looking correct.
-          for key in ('remote', 'alternative'):
-              body, _ = re.subn(r'(^[ \t]+%s:[ \t]*)("[^"]*"|\S+)' % key, swap, body, count=1, flags=re.M)
-          if changed != 2:
-              sys.exit('Expected to rewrite remote and alternative; rewrote %d' % changed)
-          p.write_text(text[:m.start(2)] + body + text[m.end(2):], encoding='utf-8')
-          print('gitlab-rails remote and alternative repointed to', fork)
-          PY
-          echo "--- diff ---"
-          diff -u .custom_sources.yml.orig .custom_sources.yml || true
+        run: scripts/omnibus/repoint-sources.sh omnibus-gitlab "https://github.com/${{ github.repository }}.git"
+
+      - name: Make the frontend-islands node_modules cleanup unconditional
+        shell: bash
+        run: scripts/omnibus/patch-frontend-islands-cleanup.sh omnibus-gitlab
 
       - name: Route GNU dependency downloads to a mirror that is actually up
         shell: bash
-        run: |
-          set -euo pipefail
-          cd omnibus-gitlab
-          # Several dependency tarballs are fetched from ftpmirror.gnu.org, which is a
-          # redirector rather than a host. When that redirector is down the build dies part
-          # way through compilation: libtool, libiconv and ncurses all failed here with
-          # 502 Bad Gateway and read timeouts, 22 minutes in, after real work had been done.
-          #
-          # This routes around an upstream outage; it does not fix one. It changes where the
-          # bytes come from and not which bytes are accepted, because every download is still
-          # verified against the checksum in its own software definition. A mirror serving
-          # different content would fail the build rather than quietly poison the package.
-          candidates=("https://ftpmirror.gnu.org" "https://ftp.gnu.org/gnu" "https://mirrors.kernel.org/gnu")
-          chosen=""
-          for c in "${candidates[@]}"; do
-            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 25 "$c/libtool/" || echo 000)"
-            echo "  $c -> $code"
-            if [ "$code" = "200" ]; then chosen="$c"; break; fi
-          done
-          if [ -z "$chosen" ]; then
-            echo "::error::No GNU source mirror responded. The build cannot fetch its dependencies and would fail late and confusingly, so it is stopping now."
-            exit 1
-          fi
-          echo "Using $chosen"
-          if [ "$chosen" = "https://ftpmirror.gnu.org" ]; then
-            echo "The usual redirector is healthy, so the software definitions are left untouched."
-            exit 0
-          fi
-          # grep exits 1 when it matches nothing, and under `set -e -o pipefail` that
-          # kills the step. The whole point of the line below is that after a successful
-          # substitution there is nothing left to find, so the success case was being
-          # treated as a failure. || true on the assignment keeps the count and drops the
-          # status; the explicit comparisons underneath are what actually decide.
-          before="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)" || true
-          echo "software definitions pointing at the redirector: $before"
-          if [ "$before" -eq 0 ]; then
-            echo "::warning::Nothing referenced ftpmirror.gnu.org, so no substitution was made. The upstream layout may have changed and this step needs revisiting."
-            exit 0
-          fi
-          # Two URL shapes live in these definitions and they must map differently:
-          #   ftpmirror.gnu.org/gnu/ncurses/...  already carries /gnu/
-          #   ftpmirror.gnu.org/libtool/...      does not
-          # The redirector accepts both. A real GNU host only serves /gnu/<package>/, so one
-          # blind prefix swap turns the first shape into /gnu/gnu/ and every fetch 404s. That
-          # is precisely what happened on the previous attempt: the 502s went away and were
-          # replaced by 404s on the single package using the longer form. Longest form first.
-          files="$(grep -rl 'ftpmirror\.gnu\.org' config/software)" || true
-          # shellcheck disable=SC2086
-          sed -i "s|https://ftpmirror\.gnu\.org/gnu/|$chosen/|g" $files
-          # shellcheck disable=SC2086
-          sed -i "s|https://ftpmirror\.gnu\.org/|$chosen/|g" $files
-          # A doubled path segment is the exact defect above, and it is silent: the build runs
-          # for minutes before any fetch is attempted. Catch it here, where it costs seconds.
-          if grep -rn '/gnu/gnu/' config/software; then
-            echo "::error::Substitution produced a doubled /gnu/gnu/ path, which 404s on every real mirror. Refusing to start a build that cannot fetch anything."
-            exit 1
-          fi
-          after="$(grep -rl 'ftpmirror\.gnu\.org' config/software | wc -l)" || true
-          echo "references remaining: $after"
-          if [ "$after" -ne 0 ]; then
-            echo "::error::Substitution left $after references behind, so the build would still reach the failing host. Refusing to start it."
-            exit 1
-          fi
-          echo "--- rewritten ---"
-          grep -rn "$chosen" config/software | head -8 || true
+        run: scripts/omnibus/route-gnu-mirror.sh omnibus-gitlab
 
       - name: Read the toolchain versions this upstream ref declares
         id: omnibusvars
         shell: bash
-        run: |
-          set -euo pipefail
-          cd omnibus-gitlab
-          # config/software/openssl.rb chooses between OpenSSL 1.1.1 and 3.x purely on whether
-          # OPENSSL_VERSION starts with "3". Unset means 1.1.1, and curl at this ref refuses to
-          # configure against anything below 3.0.0. The result is a build that fetches and
-          # compiles happily for 25 minutes and then dies on "OpenSSL 3.0.0 or upper required",
-          # with nothing anywhere naming the variable that was never set.
-          #
-          # Read the value from the ref's own CI variables rather than hard coding it, so it
-          # stays correct when the ref moves instead of silently going stale.
-          f=gitlab-ci-config/variables.yml
-          test -f "$f" || { echo "::error::$f is missing, so the toolchain versions this ref expects cannot be read. The omnibus layout may have changed."; exit 1; }
-          ver="$(grep -oE '^[[:space:]]*OPENSSL_VERSION:[[:space:]]*[0-9][0-9.]*' "$f" | head -1 | awk '{print $2}')" || true
-          if [ -z "${ver:-}" ]; then
-            echo "::error::No OPENSSL_VERSION found in $f. Guessing one would build the wrong OpenSSL and fail far later, so this stops here."
-            exit 1
-          fi
-          case "$ver" in
-            3*) : ;;
-            *) echo "::error::This ref declares OPENSSL_VERSION=$ver, which selects the 1.1.1 definition that curl will reject."; exit 1 ;;
-          esac
-          echo "openssl_version=$ver" >> "$GITHUB_OUTPUT"
-          echo "This ref expects OpenSSL $ver"
+        run: scripts/omnibus/read-toolchain.sh omnibus-gitlab
 
       - name: Build the package in the official omnibus builder image
         shell: bash
         env:
+          OMNIBUS_DIR: omnibus-gitlab
+          OMNIBUS_REF: ${{ inputs.omnibus_ref }}
           GITLAB_VERSION: ${{ steps.target.outputs.sha }}
-        run: |
-          set -euo pipefail
-          # The official builder image carries the exact toolchain omnibus expects.
-          # Installing those dependencies by hand on a bare runner is a reliable way to
-          # fail slowly for reasons that have nothing to do with this fork.
-          builder="registry.gitlab.com/gitlab-org/gitlab-omnibus-builder/ubuntu_24.04:latest"
-          docker pull "$builder"
-          # Without this, the gitlab-rails definition takes its "copy the assets a CI
-          # job already built" path and syncs "$CI_PROJECT_DIR/$ASSET_PATH" into
-          # public/assets. Outside GitLab own CI both variables are empty, so that path
-          # collapses to "/" and it copies the entire filesystem root into the package.
-          # It ran for 43 seconds doing exactly that before dying trying to recreate
-          # /usr/bin inside public/assets. Compiling the assets here is the correct route
-          # and the only one available, since there is no upstream job to copy from.
-          docker run --rm \
-            -e GITLAB_VERSION \
-            -e OMNIBUS_REF="${{ inputs.omnibus_ref }}" \
-            -e OPENSSL_VERSION="${{ steps.omnibusvars.outputs.openssl_version }}" \
-            -e COMPILE_ASSETS=true \
-            -e BUILD_VERSION="${{ steps.target.outputs.version }}" \
-            -v "$PWD/omnibus-gitlab:/omnibus" \
-            -w /omnibus \
-            "$builder" \
-            bash -lc '
-              set -euo pipefail
-              # The checkout is owned by the runner user and this container runs as root,
-              # so git refuses to read it: "detected dubious ownership in repository".
-              # Omnibus derives its version from `git describe --tags --exact-match`, so
-              # without this the build dies before compiling anything, with an error that
-              # names git rather than ownership.
-              git config --global --add safe.directory /omnibus
-              git config --global --add safe.directory "*"
+          BUILD_VERSION: ${{ steps.target.outputs.version }}
+          OPENSSL_VERSION: ${{ steps.omnibusvars.outputs.openssl_version }}
+        run: scripts/omnibus/build-package.sh
 
-              # That describe also needs the tag itself, which a shallow branch clone does
-              # not always bring along. Create it locally when it is missing rather than
-              # letting omnibus fail on an empty version.
-              if ! git -C /omnibus describe --tags --exact-match >/dev/null 2>&1; then
-                echo "no exact tag on HEAD; creating ${OMNIBUS_REF} locally so omnibus can version the build"
-                git -C /omnibus tag -f "${OMNIBUS_REF}" HEAD
-              fi
-              git -C /omnibus describe --tags --exact-match
-
-              bundle config set --local path /omnibus/.bundle-vendor
-              bundle install --jobs 4
-
-              # Omnibus fetches every dependency source over the network, and a single
-              # upstream 502 kills the whole build: the first run past the ownership fix
-              # died on "NetFetcher: libffi ... 502 Bad Gateway". Omnibus caches software
-              # it has already built, so a retry resumes rather than starting over.
-              # Three attempts, and the exit status of the last one is what counts.
-              attempt=1
-              until bundle exec omnibus build gitlab --log-level=info; do
-                status=$?
-                if [ "$attempt" -ge 3 ]; then
-                  echo "::error::omnibus build failed $attempt times; last exit $status"
-                  exit "$status"
-                fi
-                echo "::warning::omnibus build attempt $attempt failed with exit $status; retrying after a pause"
-                attempt=$((attempt + 1))
-                sleep 60
-              done
-            '
-
-      - name: Verify a real package was produced
+      - name: Verify a real package of this fork was produced
         id: verify
         shell: bash
-        run: |
-          set -euo pipefail
-          shopt -s nullglob
-          debs=(omnibus-gitlab/pkg/*.deb)
-          if [ ${#debs[@]} -eq 0 ]; then
-            echo "::error::The build finished without producing a .deb. Nothing will be published."
-            exit 1
-          fi
-          for d in "${debs[@]}"; do
-            echo "=== $d ==="
-            ls -l "$d"
-            dpkg-deb --info "$d" | head -20
-            sha256sum "$d"
-          done
-          echo "deb_count=${#debs[@]}" >> "$GITHUB_OUTPUT"
+        run: scripts/omnibus/verify-package.sh omnibus-gitlab/pkg "${{ steps.target.outputs.version }}"
 
       - name: Upload the package as a build artifact
         if: ${{ always() }}
@@ -324,40 +171,364 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: omnibus-deb-${{ steps.target.outputs.sha }}
-          path: omnibus-gitlab/pkg/*.deb
+          path: |
+            omnibus-gitlab/pkg/*.deb
+            omnibus-gitlab/pkg/SHA256SUMS.txt
           if-no-files-found: warn
           retention-days: 14
 
-      - name: Attach the package to a release
-        if: ${{ inputs.attach_to_release && steps.verify.outcome == 'success' }}
+      - name: Count the lines this release ships
+        id: linecount
+        if: ${{ steps.verify.outcome == 'success' && inputs.attach_to_release }}
         shell: bash
         run: |
           set -euo pipefail
-          sha="${{ steps.target.outputs.sha }}"
-          tag="omnibus-${{ steps.target.outputs.version }}-${sha:0:12}"
+          mkdir -p "$RUNNER_TEMP/line-count"
+          out="$RUNNER_TEMP/line-count/LINE-COUNT.json"
+          # --no-blame is deliberate for this repository. Surviving-line authorship needs
+          # one git blame per tracked text file, and the squashed upstream import means
+          # there are over 100,000 of them. The counter records attribution as skipped
+          # rather than inventing a number.
+          node scripts/release/line_count.mjs --json --no-blame "--revision=${{ steps.target.outputs.sha }}" > "$out"
+          echo "line_count_path=$out" >> "$GITHUB_OUTPUT"
+          sha256sum "$out"
+
+      - name: Resolve a published dim-sum code name and photo
+        id: dimsum
+        if: ${{ steps.verify.outcome == 'success' && inputs.attach_to_release }}
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $catalogUrl = 'https://raw.githubusercontent.com/Ding-Ding-Projects/dim-sum-photos/main/catalog/index.json'
+          if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+            throw 'GH_TOKEN is empty, so the dim-sum catalog calls would be unauthenticated and rate limited. Refusing to start.'
+          }
+          $apiHeaders = @{
+            'User-Agent'    = 'material-gitlab-omnibus-package'
+            Accept          = 'application/vnd.github+json'
+            Authorization   = "Bearer $env:GH_TOKEN"
+          }
+          $catalogPath = Join-Path $env:RUNNER_TEMP 'dim-sum-catalog.json'
+          Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $catalogUrl -OutFile $catalogPath
+          $catalog = Get-Content -Raw -LiteralPath $catalogPath | ConvertFrom-Json
+          $assets = @()
+          $maxReleasePages = 10
+          for ($releasePage = 1; $releasePage -le $maxReleasePages; $releasePage++) {
+            $releases = @(Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/Ding-Ding-Projects/dim-sum-photos/releases?per_page=100&page=$releasePage")
+            $assets += @($releases |
+              Where-Object { $_.tag_name -match '^catalog-v1(?:$|-)' } |
+              ForEach-Object { $_.assets } |
+              Where-Object { $_.name -match '^hk-dish-\d{4}-.+\.(png|jpg|jpeg)$' })
+            if ($releases.Count -lt 100) { break }
+          }
+          if (-not $assets) { throw 'No published catalog-v1 photo assets were found.' }
+          $prior = Invoke-RestMethod -Headers $apiHeaders -Uri "https://api.github.com/repos/${{ github.repository }}/releases?per_page=100"
+          $used = (($prior | ForEach-Object { $_.body }) -join "`n")
+          $chosen = $null
+          foreach ($dish in $catalog.dishes) {
+            $leaf = [IO.Path]::GetFileName($dish.image.path)
+            $asset = $assets | Where-Object { $_.name -eq $leaf } | Select-Object -First 1
+            $code = "$($dish.name.en) · $($dish.name.zhHant)"
+            if ($asset -and $used -notmatch [regex]::Escape($code)) { $chosen = [pscustomobject]@{ Dish = $dish; Asset = $asset; Code = $code }; break }
+          }
+          if (-not $chosen) { throw 'No unused catalog dish with a published photo asset is available.' }
+          $photoPath = Join-Path $env:RUNNER_TEMP $chosen.Asset.name
+          Invoke-WebRequest -UseBasicParsing -Headers $apiHeaders -Uri $chosen.Asset.browser_download_url -OutFile $photoPath
+          $bytes = [IO.File]::ReadAllBytes($photoPath)
+          $extension = [IO.Path]::GetExtension($chosen.Asset.name).ToLowerInvariant()
+          $isPng = $bytes.Length -ge 8 -and $bytes[0] -eq 0x89 -and $bytes[1] -eq 0x50 -and $bytes[2] -eq 0x4e -and $bytes[3] -eq 0x47 -and $bytes[4] -eq 0x0d -and $bytes[5] -eq 0x0a -and $bytes[6] -eq 0x1a -and $bytes[7] -eq 0x0a
+          $isJpeg = $bytes.Length -ge 3 -and $bytes[0] -eq 0xff -and $bytes[1] -eq 0xd8 -and $bytes[2] -eq 0xff
+          if (($extension -eq '.png' -and -not $isPng) -or ($extension -in '.jpg','.jpeg' -and -not $isJpeg)) { throw "Published dim-sum photo signature does not match $extension." }
+          "code_name=$($chosen.Code)" >> $env:GITHUB_OUTPUT
+          "photo_url=$($chosen.Asset.browser_download_url)" >> $env:GITHUB_OUTPUT
+          "photo_path=$photoPath" >> $env:GITHUB_OUTPUT
+
+      - name: Prepare release notes and verify timing
+        id: notes
+        if: ${{ steps.verify.outcome == 'success' && inputs.attach_to_release && steps.dimsum.outcome == 'success' }}
+        shell: bash
+        env:
+          WORKFLOW_STARTED: ${{ steps.timing.outputs.workflow_started }}
+          SHA: ${{ steps.target.outputs.sha }}
+          SHA12: ${{ steps.target.outputs.sha12 }}
+          VERSION: ${{ steps.target.outputs.version }}
+          OMNIBUS_REF: ${{ inputs.omnibus_ref }}
+          DEB_NAME: ${{ steps.verify.outputs.deb_name }}
+          DEB_SHA256: ${{ steps.verify.outputs.deb_sha256 }}
+          DEB_BYTES: ${{ steps.verify.outputs.deb_bytes }}
+          WEBPACK_FILES: ${{ steps.verify.outputs.webpack_files }}
+          IMAGE_REF: ${{ steps.target.outputs.image_ref }}
+          PUSH_IMAGE: ${{ inputs.push_image }}
+          DIM_SUM_CODE: ${{ steps.dimsum.outputs.code_name }}
+          DIM_SUM_PHOTO_URL: ${{ steps.dimsum.outputs.photo_url }}
+          LINE_COUNT_PATH: ${{ steps.linecount.outputs.line_count_path }}
+        run: |
+          set -euo pipefail
+          completed="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          start_s="$(date -u -d "$WORKFLOW_STARTED" +%s)"
+          end_s="$(date -u -d "$completed" +%s)"
+          dur=$(( end_s - start_s ))
+          duration="$(printf '%02d:%02d:%02d' $((dur/3600)) $(((dur%3600)/60)) $((dur%60)))"
+          tag="omnibus-${VERSION}-${SHA12}"
+          repo="${{ github.repository }}"
+          deb_url="https://github.com/${repo}/releases/download/${tag}/${DEB_NAME}"
+          line_sha="$(sha256sum "$LINE_COUNT_PATH" | awk '{print $1}')"
+          counted_files="$(jq -r .counted.files "$LINE_COUNT_PATH")"
+          counted_total="$(jq -r .counted.total "$LINE_COUNT_PATH")"
+          counted_nonblank="$(jq -r .counted.nonBlank "$LINE_COUNT_PATH")"
+          grand_files="$(jq -r .grandTotal.files "$LINE_COUNT_PATH")"
+          grand_total="$(jq -r .grandTotal.total "$LINE_COUNT_PATH")"
+          excluded_files="$(jq -r .exclusions.files "$LINE_COUNT_PATH")"
+          attribution="$(jq -r 'if .attribution.skipped then "Surviving-line authorship was not computed for this release: " + .attribution.reason else "Agent-written lines: " + (.attribution.agentLines|tostring) + " (rule: " + .attribution.rule + ")" end' "$LINE_COUNT_PATH")"
+          bucket_rows="$(jq -r '.counted.buckets | to_entries | sort_by(.key) | .[] | "| \(.key) | \(.value.files) | \(.value.total) | \(.value.nonBlank) |"' "$LINE_COUNT_PATH")"
+          notes="$RUNNER_TEMP/omnibus-release-notes.md"
           {
             echo "## Omnibus package"
             echo
-            echo "Debian package built from this fork, so installing it gets you the Material"
-            echo "work rather than stock upstream GitLab."
+            echo "Debian package built from this fork, so installing it gets you the Material work rather than stock upstream GitLab."
             echo
-            echo "- Target commit: $sha"
-            echo "- Declared version: ${{ steps.target.outputs.version }}"
-            echo "- Built with omnibus-gitlab: ${{ inputs.omnibus_ref }}"
+            echo "- Target commit: \`$SHA\`"
+            echo "- Declared version: \`$VERSION\`"
+            echo "- Built with omnibus-gitlab: \`$OMNIBUS_REF\`"
+            echo "- Dim-sum code name: **$DIM_SUM_CODE**"
+            echo "- Photo: $DIM_SUM_PHOTO_URL"
             echo
-            echo "### Install"
+            echo "### Package"
+            echo
+            echo "| Asset | Bytes | SHA-256 |"
+            echo "| --- | ---: | --- |"
+            echo "| \`$DEB_NAME\` | $DEB_BYTES | \`$DEB_SHA256\` |"
+            echo
+            echo "The package carries \`app/assets/javascripts/material_system/\` and $WEBPACK_FILES compiled webpack files; both were verified by opening the package before publication."
+            echo
+            echo "### Install with Docker"
+            echo
+            echo '```bash'
+            echo "git clone https://github.com/${repo}.git && cd material-gitlab"
+            echo "git checkout $SHA"
+            echo "printf 'GITLAB_HOSTNAME=gitlab.example.internal\nGITLAB_HTTP_PORT=8929\nGITLAB_SSH_PORT=2229\nGITLAB_HOME=/srv/material-gitlab\n' > .env"
+            echo "MATERIAL_GITLAB_DEB_URL='$deb_url' MATERIAL_GITLAB_VERSION='${VERSION}-${SHA12}' docker compose build"
+            echo "docker compose up -d"
+            echo "docker inspect --format '{{.State.Health.Status}}' material-gitlab   # wait for healthy"
+            echo '```'
+            echo
+            echo "### Install the package directly on Debian or Ubuntu"
             echo
             echo '```bash'
             echo "sudo apt-get install -y curl openssh-server ca-certificates tzdata perl"
-            echo "sudo EXTERNAL_URL=\"http://gitlab.example.com\" dpkg -i <package>.deb"
+            echo "curl -fLo $DEB_NAME '$deb_url'"
+            echo "echo '$DEB_SHA256  $DEB_NAME' | sha256sum -c"
+            echo "sudo EXTERNAL_URL='http://gitlab.example.internal' dpkg -i $DEB_NAME"
             echo '```'
             echo
-            echo "The package is unsigned. Code signing is deliberately disabled in this project."
-          } > release-notes.md
-          gh release create "$tag" \
-            --repo '${{ github.repository }}' \
-            --target "$sha" \
-            --title "Omnibus ${{ steps.target.outputs.version }}" \
-            --notes-file release-notes.md \
-            omnibus-gitlab/pkg/*.deb
-          gh release view "$tag" --repo '${{ github.repository }}' --json tagName,isDraft,assets
+            echo "### Container image"
+            echo
+            if [ "$PUSH_IMAGE" = "true" ]; then
+              echo "The build-image job of this run builds \`$IMAGE_REF\` from this package, boots it, verifies it is this fork, and pushes it. That job appends the pushed digest to these notes after a verified push. If no digest section follows, the image was not pushed."
+            else
+              echo "Image publication was not requested for this run. Build it locally with the Docker steps above."
+            fi
+            echo
+            echo "### Workflow timing (UTC)"
+            echo
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Workflow started | $WORKFLOW_STARTED |"
+            echo "| Workflow completed | $completed |"
+            echo "| Workflow duration | $duration |"
+            echo
+            echo "### Committed line-count report"
+            echo
+            echo "| Bucket | Files | Total lines | Non-blank |"
+            echo "| --- | --- | --- | --- |"
+            echo "$bucket_rows"
+            echo "| **Counted total** | **$counted_files** | **$counted_total** | **$counted_nonblank** |"
+            echo "| **Grand total, including excluded** | **$grand_files** | **$grand_total** | |"
+            echo
+            echo "Excluded files: $excluded_files. $attribution"
+            echo
+            echo "The complete machine-readable report is attached as LINE-COUNT.json (SHA-256 $line_sha). Reproduce locally with: node scripts/release/line_count.mjs --json --revision=$SHA"
+            echo
+            echo "### Honest limits"
+            echo
+            echo "- The package is unsigned. Code signing is deliberately disabled in this project."
+            echo "- No tests, lint, type checks, or static analysis ran in this workflow."
+            echo "- This is an EE-layout source tree built under the CE omnibus project. The instance runs as the Free tier; features that need a paid tier show their normal licence prompts."
+            echo "- The package name and version come from omnibus-gitlab \`$OMNIBUS_REF\`; the application code is this fork at the target commit above."
+          } > "$notes"
+          if [ "$(wc -c < "$notes")" -gt 120000 ]; then
+            echo "::error::Release body exceeds the GitHub limit; trim the summary instead of inlining a report."
+            exit 1
+          fi
+          echo "notes_path=$notes" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$tag" >> "$GITHUB_OUTPUT"
+          cat "$notes"
+
+      - name: Publish one unique non-draft release
+        id: publish
+        if: ${{ steps.notes.outcome == 'success' }}
+        shell: bash
+        env:
+          TAG: ${{ steps.notes.outputs.release_tag }}
+          NOTES: ${{ steps.notes.outputs.notes_path }}
+          SHA: ${{ steps.target.outputs.sha }}
+          SHA12: ${{ steps.target.outputs.sha12 }}
+          VERSION: ${{ steps.target.outputs.version }}
+          DEB_PATH: ${{ steps.verify.outputs.deb_path }}
+          DEB_NAME: ${{ steps.verify.outputs.deb_name }}
+          DEB_BYTES: ${{ steps.verify.outputs.deb_bytes }}
+          LINE_COUNT_PATH: ${{ steps.linecount.outputs.line_count_path }}
+          PHOTO_PATH: ${{ steps.dimsum.outputs.photo_path }}
+        run: |
+          set -euo pipefail
+          repo="${{ github.repository }}"
+          if gh release view "$TAG" --repo "$repo" >/dev/null 2>&1; then
+            echo "::error::Release tag $TAG already exists; refusing to overwrite it."
+            exit 1
+          fi
+          gh release create "$TAG" \
+            --repo "$repo" \
+            --target "$SHA" \
+            --title "Omnibus $VERSION ($SHA12)" \
+            --notes-file "$NOTES" \
+            "$DEB_PATH" omnibus-gitlab/pkg/SHA256SUMS.txt "$LINE_COUNT_PATH" "$PHOTO_PATH"
+          release="$(gh api "repos/$repo/releases/tags/$TAG")"
+          draft="$(jq -r .draft <<<"$release")"
+          target="$(jq -r .target_commitish <<<"$release")"
+          if [ "$draft" != "false" ] || [ "$target" != "$SHA" ]; then
+            echo "::error::Published release did not resolve to the exact non-draft target commit (draft=$draft target=$target)."
+            exit 1
+          fi
+          size="$(jq -r --arg n "$DEB_NAME" '.assets[] | select(.name == $n) | .size' <<<"$release")"
+          if [ "$size" != "$DEB_BYTES" ]; then
+            echo "::error::Published package size $size does not match the verified $DEB_BYTES bytes."
+            exit 1
+          fi
+          url="$(jq -r --arg n "$DEB_NAME" '.assets[] | select(.name == $n) | .browser_download_url' <<<"$release")"
+          code="$(curl -sSIL -o /dev/null -w '%{http_code}' "$url")"
+          if [ "$code" != "200" ]; then
+            echo "::error::The published package URL answered HTTP $code rather than 200: $url"
+            exit 1
+          fi
+          echo "release_tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "deb_url=$url" >> "$GITHUB_OUTPUT"
+          gh release view "$TAG" --repo "$repo" --json tagName,isDraft,assets
+
+  build-image:
+    needs: build-package
+    if: ${{ inputs.push_image && needs.build-package.result == 'success' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      IMAGE_REF: ${{ needs.build-package.outputs.image_ref }}
+      IMAGE_LATEST: ${{ needs.build-package.outputs.image_latest }}
+      VERSION: ${{ needs.build-package.outputs.version }}
+      SHA12: ${{ needs.build-package.outputs.sha12 }}
+
+    steps:
+      - name: Check out this fork at the exact ref that was packaged
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build-package.outputs.sha }}
+
+      - name: Download the verified package
+        uses: actions/download-artifact@v4
+        with:
+          name: omnibus-deb-${{ needs.build-package.outputs.sha }}
+          path: deploy/docker/packages
+
+      - name: Confirm the downloaded package is the verified one
+        shell: bash
+        env:
+          DEB_NAME: ${{ needs.build-package.outputs.deb_name }}
+          DEB_SHA256: ${{ needs.build-package.outputs.deb_sha256 }}
+        run: |
+          set -euo pipefail
+          ls -l deploy/docker/packages
+          echo "$DEB_SHA256  deploy/docker/packages/$DEB_NAME" | sha256sum -c
+
+      - name: Build the image from the package
+        shell: bash
+        env:
+          DEB_URL: ${{ needs.build-package.outputs.deb_url }}
+        run: |
+          set -euo pipefail
+          docker build \
+            --build-arg RELEASE_VERSION="${VERSION}-${SHA12}" \
+            --build-arg DOWNLOAD_URL="${DEB_URL}" \
+            -t "$IMAGE_REF" -t "$IMAGE_LATEST" \
+            deploy/docker
+          docker image ls "$IMAGE_REF"
+
+      - name: Boot the image and prove it is this fork
+        shell: bash
+        run: |
+          set -euo pipefail
+          rails=/opt/gitlab/embedded/service/gitlab-rails
+          docker run -d --name smoke --shm-size 256m -p 8929:80 \
+            -e GITLAB_OMNIBUS_CONFIG="external_url 'http://127.0.0.1:8929'; nginx['listen_port'] = 80; nginx['listen_https'] = false; gitlab_rails['gitlab_shell_ssh_port'] = 2229" \
+            "$IMAGE_REF"
+          healthy=0
+          for i in $(seq 1 120); do
+            if docker exec smoke /opt/gitlab/bin/gitlab-healthcheck --fail --max-time 10 >/dev/null 2>&1; then healthy=1; break; fi
+            if [ "$(docker inspect --format '{{.State.Running}}' smoke)" != "true" ]; then break; fi
+            sleep 10
+          done
+          if [ "$healthy" != "1" ]; then
+            echo "::error::The image did not become healthy within 20 minutes."
+            docker logs smoke 2>&1 | tail -120
+            exit 1
+          fi
+          code="$(curl -s -o /tmp/sign_in.html -w '%{http_code}' http://127.0.0.1:8929/users/sign_in)"
+          if [ "$code" != "200" ]; then
+            echo "::error::The sign-in page answered HTTP $code."
+            docker logs smoke 2>&1 | tail -80
+            exit 1
+          fi
+          docker exec smoke cat "$rails/VERSION" | grep -qx "$VERSION"
+          docker exec smoke test -f "$rails/app/assets/javascripts/material_system/components/register.js"
+          webpack_files="$(docker exec smoke sh -c "find $rails/public/assets/webpack -type f | wc -l")"
+          echo "webpack files in the running image: $webpack_files"
+          if [ "$webpack_files" -lt 1000 ]; then
+            echo "::error::Only $webpack_files webpack files are present; the compiled frontend did not land."
+            exit 1
+          fi
+          docker rm -f smoke
+
+      - name: Push the image to GHCR
+        id: push
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          docker push "$IMAGE_REF"
+          docker push "$IMAGE_LATEST"
+          digest="$(docker inspect --format '{{index .RepoDigests 0}}' "$IMAGE_REF")"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "Pushed $IMAGE_REF as $digest"
+          docker manifest inspect "$IMAGE_REF" > /dev/null
+
+      - name: Record the pushed image on the release
+        if: ${{ needs.build-package.outputs.release_tag != '' }}
+        shell: bash
+        env:
+          TAG: ${{ needs.build-package.outputs.release_tag }}
+          DIGEST: ${{ steps.push.outputs.digest }}
+        run: |
+          set -euo pipefail
+          repo="${{ github.repository }}"
+          body="$RUNNER_TEMP/release-body.md"
+          gh release view "$TAG" --repo "$repo" --json body --jq .body > "$body"
+          {
+            echo
+            echo "### Container image, pushed and verified"
+            echo
+            echo "- Image: \`$IMAGE_REF\`"
+            echo "- Also tagged: \`$IMAGE_LATEST\`"
+            echo "- Digest: \`$DIGEST\`"
+            echo "- Boot check: the image started on the runner, answered its own health check, served the sign-in page, and carries this fork's application tree and compiled frontend."
+            echo
+            echo "Pull it with \`docker pull $IMAGE_REF\` once the package is public on GHCR; until then, build locally from the package with the Docker steps above."
+          } >> "$body"
+          gh release edit "$TAG" --repo "$repo" --notes-file "$body"
+          gh release view "$TAG" --repo "$repo" --json body --jq .body | grep -F "$DIGEST" > /dev/null
