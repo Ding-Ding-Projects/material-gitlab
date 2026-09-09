@@ -45,14 +45,18 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 40px;
+  // min-height, not height: a fixed height clips a label that needs to wrap
+  // (a long bilingual or Cantonese string, a high text-scale setting). No
+  // white-space: nowrap either, for the same reason -- this is plain native
+  // button markup (see doc/development/fe_guide/md3.md), so removing it lets
+  // a label that cannot fit on one line wrap instead of overflowing.
+  min-height: 40px;
   min-width: 40px;
   padding: 0 24px;
   border: 0;
   background-color: transparent;
   cursor: pointer;
   user-select: none;
-  white-space: nowrap;
   text-decoration: none;
   @include gl-md3-shape('full');
   @include gl-md3-label-large;
@@ -159,8 +163,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  // min-width/min-height rather than a fixed size: a floor, not a ceiling, so
+  // an unusually large icon or a higher text-scale setting grows the button
+  // (into a rounded pill via its full border-radius) instead of clipping it.
+  min-width: 40px;
+  min-height: 40px;
   border: 0;
   background-color: transparent;
   color: var(--gl-md3-onsurfv);
@@ -219,8 +226,8 @@
   align-items: center;
   justify-content: center;
   gap: 12px;
-  width: 56px;
-  height: 56px;
+  min-width: 56px;
+  min-height: 56px;
   padding: 0 16px;
   border: 0;
   background-color: var(--gl-md3-primc);
@@ -263,8 +270,8 @@
 
 // Small FAB: a lower-emphasis size for dense toolbars.
 .md3-fab--small {
-  width: 40px;
-  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   padding: 0;
   @include gl-md3-shape('m');
 }

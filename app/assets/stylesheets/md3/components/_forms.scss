@@ -12,8 +12,15 @@
 .md3-field__input {
   order: 1;
   width: 100%;
-  height: 56px;
-  padding: 20px 16px 6px;
+  // min-height, not height: a fixed 56px box clips a descender (g/y/p/q/j)
+  // that a particular font or display scale renders taller than
+  // body-large's nominal 20px line-height. Padding is expressed in em,
+  // relative to this element's own font-size (gl-md3-body-large's 14px), so
+  // the reserved space above/below the text scales with the text itself
+  // rather than staying a fixed number of pixels while the glyphs grow --
+  // 20px/16px/6px at 14px is 1.429em/1.143em/0.429em.
+  min-height: 4em;
+  padding: 1.429em 1.143em 0.429em;
   border: 0;
   background-color: transparent;
   color: var(--gl-md3-onsurf);
@@ -29,7 +36,7 @@
 textarea.md3-field__input {
   height: auto;
   min-height: 96px;
-  padding-top: 22px;
+  padding-top: 1.571em; // 22px at the 14px body-large font-size above
   resize: vertical;
 }
 
@@ -78,7 +85,9 @@ textarea.md3-field__input {
 
 .md3-field--filled .md3-field__input:focus {
   border-bottom: 2px solid var(--gl-md3-prim);
-  padding-bottom: 5px;
+  // Base padding-bottom (0.429em, see .md3-field__input above) minus the 1px
+  // the active indicator grows by on focus, so the outer edge doesn't shift.
+  padding-bottom: calc(0.429em - 1px);
 }
 
 .md3-field--filled .md3-field__input:hover:not(:focus):not(:disabled) {
@@ -88,8 +97,8 @@ textarea.md3-field__input {
 // Outlined variant: a full border that notches around the floated label,
 // matching the corner radius the design's own text inputs use (12px).
 .md3-field--outlined .md3-field__input {
-  height: 56px;
-  padding: 16px;
+  min-height: 4em;
+  padding: 1.143em; // 16px at the 14px body-large font-size above
   border: 1px solid var(--gl-md3-outl);
   border-radius: var(--gl-md3-shape-m);
   background-color: transparent;
@@ -101,7 +110,9 @@ textarea.md3-field__input {
 
 .md3-field--outlined .md3-field__input:focus {
   border: 2px solid var(--gl-md3-prim);
-  padding: 15px;
+  // Base padding (1.143em, see .md3-field--outlined .md3-field__input above)
+  // minus the 1px the border grows by on focus, so the outer edge doesn't shift.
+  padding: calc(1.143em - 1px);
 }
 
 .md3-field--outlined .md3-field__label {

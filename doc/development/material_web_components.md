@@ -54,7 +54,16 @@ The adapters bridge Vue 2's component model to browser custom elements.
 - Styling and interaction anatomy remain inside each official `md-*` shadow tree.
   Application code may set supported public properties, CSS custom properties, and
   event listeners. It must not query, patch, or depend on private shadow parts as
-  though they were application-owned DOM.
+  though they were application-owned DOM. In particular, a registered element's
+  geometry (its container height, its internal padding, its label typography)
+  must be set through that element's own official CSS custom properties, never
+  through a plain `width`/`height`/`padding`/`font-size`/`font-family` on the
+  host selector — the host's own `:host { ... }` rule recomputes those from its
+  token defaults regardless of what a surrounding stylesheet declares directly,
+  so a plain property there is inert and the control clips or overflows instead
+  of resizing. See [`material_web_geometry.md`](material_web_geometry.md) for
+  the full explanation, the shared `md3/_material_web_geometry.scss` mixins that
+  every surface uses instead, and the guard test that enforces this.
 
 ## Per-surface inventory
 
