@@ -19,13 +19,16 @@
     "sections.reference",
     "sections.settings",
     "sections.library",
+    "sections.install",
     "guides.workspace",
     "guides.momentum",
     "guides.details",
     "states.empty",
     "states.loading",
     "states.offline",
-    "states.saved"
+    "states.saved",
+    "states.installUnavailable",
+    "states.installManifestInvalid"
   ],
   "textFields": [
     {

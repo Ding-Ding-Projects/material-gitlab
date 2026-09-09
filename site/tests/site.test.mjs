@@ -7,6 +7,17 @@ import { evaluateRegex } from '../src/regex-builder.js';
 import { normalizeRule, ruleMatches, resolveScheduledValues } from '../src/scheduled-settings.js';
 import { buildAdapterCatalog, findAdapters, createConversionQueue } from '../src/file-converter.js';
 import { createOllamaManager } from '../src/ollama-manager.js';
+import {
+  renderReleaseCard,
+  validateReleaseManifest,
+  formatBytes,
+  shortCommit,
+  buildPackageCommands,
+  buildDockerCommands,
+  EMPTY_INSTALL_MESSAGE,
+  INVALID_MANIFEST_MESSAGE,
+  RELEASES_PAGE_URL,
+} from '../src/releases.js';
 
 test('universal state is bounded and preserves only supported values', () => {
   const state = normalizeUniversalState({ displayName: 'X'.repeat(200), school: { enabled: true, name: 'Quiet' }, narrator: { language: 'both', rate: 9, pitch: -4 }, download: { state: 'complete', bytes: 12 } });
@@ -98,4 +109,122 @@ test('Ollama manager distinguishes unavailable transport and evidence-backed fit
   const manager = createOllamaManager({ transport: { health: async () => ({ version: '1.0' }) } });
   assert.equal((await manager.checkHealth()).state, 'healthy');
   assert.equal(manager.fitVerdict({ sizeBytes: 1 }, {}), 'Unknown');
+});
+
+function buildVerifiedReleaseManifest() {
+  const commit = 'b'.repeat(40);
+  const sha12 = commit.slice(0, 12);
+  const tag = `omnibus-19.3.0-pre-${sha12}`;
+  const releaseUrl = `https://github.com/Ding-Ding-Projects/material-gitlab/releases/tag/${tag}`;
+  const sha256 = 'a'.repeat(64);
+  const asset = {
+    name: 'gitlab-ce_19.3.0-pre_amd64.deb',
+    url: `https://github.com/Ding-Ding-Projects/material-gitlab/releases/download/${tag}/gitlab-ce_19.3.0-pre_amd64.deb`,
+    sha256,
+    bytes: 432000000,
+  };
+  const verified = { by: 'test harness', at: '2026-09-09T00:00:00Z', method: 'unit test fixture' };
+  const digest = `ghcr.io/ding-ding-projects/material-gitlab@sha256:${'c'.repeat(64)}`;
+  return {
+    schemaVersion: 1,
+    updatedAt: '2026-09-09T00:00:00Z',
+    entries: [
+      { kind: 'omnibus-package', version: '19.3.0-pre', commit, tag, releaseUrl, assets: [asset], image: null, verified },
+      {
+        kind: 'container-image',
+        version: '19.3.0-pre',
+        commit,
+        tag,
+        releaseUrl,
+        assets: [],
+        image: { reference: `ghcr.io/ding-ding-projects/material-gitlab:${tag.replace('omnibus-', '')}`, digest },
+        verified,
+      },
+    ],
+  };
+}
+
+test('release manifest validation accepts a well-formed manifest and fails closed on every malformed shape', () => {
+  const manifest = buildVerifiedReleaseManifest();
+  assert.equal(validateReleaseManifest(manifest).ok, true);
+  assert.equal(validateReleaseManifest(null).ok, false);
+  assert.match(validateReleaseManifest(null).reason, /object/);
+  assert.match(validateReleaseManifest({ schemaVersion: 2, updatedAt: manifest.updatedAt, entries: [] }).reason, /schemaVersion/);
+  assert.match(validateReleaseManifest({ schemaVersion: 1, updatedAt: manifest.updatedAt, entries: 'nope' }).reason, /entries must be an array/);
+  const badSha = JSON.parse(JSON.stringify(manifest));
+  badSha.entries[0].assets[0].sha256 = 'not-a-hash';
+  assert.match(validateReleaseManifest(badSha).reason, /sha256/);
+  const missingDeb = JSON.parse(JSON.stringify(manifest));
+  missingDeb.entries[0].assets = [];
+  assert.match(validateReleaseManifest(missingDeb).reason, /\.deb/);
+  const badDigest = JSON.parse(JSON.stringify(manifest));
+  badDigest.entries[1].image.digest = 'sha256:zzzz';
+  assert.match(validateReleaseManifest(badDigest).reason, /digest/);
+  const imageOnPackage = JSON.parse(JSON.stringify(manifest));
+  imageOnPackage.entries[0].image = { reference: 'x', digest: 'y' };
+  assert.match(validateReleaseManifest(imageOnPackage).reason, /image must be null/);
+});
+
+test('the install card renders an honest empty state with no download control when the manifest has no entries', () => {
+  const result = renderReleaseCard({ schemaVersion: 1, updatedAt: '2026-09-09T00:00:00Z', entries: [] });
+  assert.equal(result.ok, true);
+  assert.equal(result.reason, null);
+  assert.ok(result.html.includes(EMPTY_INSTALL_MESSAGE));
+  assert.ok(result.html.includes('data-install-state="empty"'));
+  assert.ok(result.html.includes(RELEASES_PAGE_URL));
+  assert.ok(!result.html.includes('data-install-download'));
+  assert.ok(!result.html.includes('data-install-image-ref'));
+});
+
+test('the install card renders real controls whose URLs equal the manifest values for a verified entry', () => {
+  const manifest = buildVerifiedReleaseManifest();
+  const [packageEntry, imageEntry] = manifest.entries;
+  const asset = packageEntry.assets[0];
+  const result = renderReleaseCard(manifest);
+
+  assert.equal(result.ok, true);
+  assert.equal(result.reason, null);
+  assert.ok(result.html.includes('data-install-state="available"'));
+  assert.ok(result.html.includes(`href="${asset.url}"`));
+  assert.ok(result.html.includes(asset.sha256));
+  assert.ok(result.html.includes(`href="${packageEntry.releaseUrl}"`));
+  assert.ok(result.html.includes(imageEntry.image.reference));
+  assert.ok(result.html.includes(imageEntry.image.digest));
+  assert.ok(result.html.includes(shortCommit(packageEntry.commit)));
+
+  assert.deepEqual(buildPackageCommands(packageEntry), [
+    `curl -fLo ${asset.name} '${asset.url}'`,
+    `sudo EXTERNAL_URL="https://gitlab.example.internal" dpkg -i ${asset.name}`,
+  ]);
+  assert.deepEqual(buildDockerCommands(imageEntry), [
+    `docker pull ${imageEntry.image.reference}`,
+    'docker compose up -d',
+  ]);
+});
+
+test('a malformed manifest fails closed to the no-download-control state and reports the reason', () => {
+  const brokenEntries = renderReleaseCard({ schemaVersion: 1, updatedAt: '2026-09-09T00:00:00Z', entries: 'not-an-array' });
+  assert.equal(brokenEntries.ok, false);
+  assert.match(brokenEntries.reason, /entries must be an array/);
+  assert.ok(brokenEntries.html.includes(INVALID_MANIFEST_MESSAGE));
+  assert.ok(brokenEntries.html.includes('data-install-state="invalid"'));
+  assert.ok(!brokenEntries.html.includes('data-install-download'));
+
+  const brokenSchema = renderReleaseCard({ schemaVersion: 99, updatedAt: '', entries: [] });
+  assert.equal(brokenSchema.ok, false);
+  assert.match(brokenSchema.reason, /schemaVersion/);
+  assert.ok(!brokenSchema.html.includes('data-install-download'));
+
+  assert.equal(renderReleaseCard(null).ok, false);
+  assert.ok(renderReleaseCard(undefined).html.includes(INVALID_MANIFEST_MESSAGE));
+});
+
+test('formatBytes and shortCommit produce deterministic, testable display values', () => {
+  assert.equal(formatBytes(0), '0 B');
+  assert.equal(formatBytes(999), '999 B');
+  assert.equal(formatBytes(432000000), '432.0 MB');
+  assert.equal(formatBytes(Number.NaN), 'unknown size');
+  assert.equal(formatBytes(-5), 'unknown size');
+  assert.equal(shortCommit('b'.repeat(40)), 'b'.repeat(12));
+  assert.equal(shortCommit(), '');
 });

@@ -129,3 +129,74 @@
     transition: none;
   }
 }
+
+/*
+ * Install card (Home page "Install Material GitLab"). Rendered from
+ * site/data/releases.json by site/src/releases.js; this stylesheet only
+ * ever shapes markup that module already produced, it never decides what
+ * the card says.
+ */
+
+.install-meta {
+  display: grid;
+  gap: 0.5rem;
+  margin: 1rem 0;
+}
+
+.install-meta div {
+  border-block-end: 1px solid color-mix(in srgb, var(--outline, #79747e) 35%, transparent);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  justify-content: space-between;
+  padding-block-end: 0.4rem;
+}
+
+.install-meta dt {
+  color: color-mix(in srgb, var(--on-surface, #1d1b20) 68%, transparent);
+  font-weight: 650;
+}
+
+.install-meta dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+  text-align: end;
+}
+
+.install-commands {
+  background: color-mix(in srgb, var(--on-surface, #1d1b20) 6%, var(--surface, #fffbfe));
+  border-radius: 0.75rem;
+  font-size: 0.85rem;
+  margin: 0;
+  overflow-x: auto;
+  padding: 0.9rem 1rem;
+  white-space: pre;
+}
+
+.install-empty {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.install-updated {
+  color: color-mix(in srgb, var(--on-surface, #1d1b20) 62%, transparent);
+  font-size: 0.85rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 42rem) {
+  .install-meta div {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .install-meta dd {
+    text-align: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .install-commands {
+    scroll-behavior: auto;
+  }
+}
