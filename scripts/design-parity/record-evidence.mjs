@@ -102,9 +102,21 @@ if (args.inventory) {
     }
     if (audit[row.id]) {
       const entry = audit[row.id];
+      if (entry.status === 'pending') { note(row.id, 'materialAudit', 'pending', 'audit still pending'); continue; }
       if (entry.status !== 'verified' || typeof entry.review !== 'string' || !entry.review.trim()) fail(`audit for ${row.id} must carry status "verified" and a non-empty review`);
+      // A verified audit must have looked at every primitive the row declares; a pending
+      // or unknown verdict means the reviewer skipped one, and that is refused rather than
+      // recorded as complete.
+      const verdicts = entry.primitives && typeof entry.primitives === 'object' ? entry.primitives : null;
+      if (!verdicts) fail(`audit for ${row.id} must carry per-primitive verdicts (use audit-skeleton.mjs)`);
+      for (const name of row.materialAudit.primitives) {
+        const verdict = verdicts[name]?.verdict;
+        if (!['conforms', 'deviates', 'not-present'].includes(verdict)) fail(`audit for ${row.id} leaves primitive "${name}" at "${verdict}"; every primitive needs conforms, deviates or not-present`);
+        if (typeof verdicts[name]?.note !== 'string' || !verdicts[name].note.trim()) fail(`audit for ${row.id} primitive "${name}" needs a note naming what was looked at`);
+      }
       row.materialAudit.status = 'verified';
       row.materialAudit.review = entry.review;
+      row.materialAudit.verdicts = Object.fromEntries(row.materialAudit.primitives.map((name) => [name, verdicts[name].verdict]));
       note(row.id, 'materialAudit', 'recorded', 'verified');
     }
   }
