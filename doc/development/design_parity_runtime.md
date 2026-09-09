@@ -66,7 +66,7 @@ pwsh -NoProfile -File scripts/tests/build-design-parity-runtime.tests.ps1
 The helper refuses a filesystem root, any repository path or child path, an existing
 Git checkout, an existing candidate directory, invalid commits, missing recipe files,
 and failing archive, Docker, or inspection commands. It also refuses output roots that
-contain the source Oak Kay, are a child of it, or traverse a junction or another reparse
+contain the source repository, are a child of it, or traverse a junction or another reparse
 point. It creates files only
 inside the requested output root and never removes output from a prior candidate.
 # Database-free asset compilation
