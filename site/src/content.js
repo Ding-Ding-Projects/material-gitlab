@@ -72,6 +72,14 @@ export const CONTENT_CATALOG = Object.freeze({
         'zh-Hant': '先查看實作狀態，再開啟解釋細節的文章。',
       },
     },
+    install: {
+      eyebrow: { en: 'Deployment', 'zh-Hant': '部署' },
+      title: { en: 'Install Material GitLab', 'zh-Hant': '安裝 Material GitLab' },
+      description: {
+        en: 'The package, the container image, and the WSL route, each read from the same verified release manifest.',
+        'zh-Hant': '套件、容器映像和 WSL 途徑，全部讀取自同一份已驗證的發佈清單。',
+      },
+    },
   },
   guides: [
     {
@@ -116,6 +124,14 @@ export const CONTENT_CATALOG = Object.freeze({
       'zh-Hant': '目前顯示這部裝置上已儲存的資料。',
     },
     saved: { en: 'Saved on this device.', 'zh-Hant': '已儲存於這部裝置。' },
+    installUnavailable: {
+      en: 'No package has been published yet; the first build is in progress. Watch the releases page.',
+      'zh-Hant': '目前尚未發佈任何套件，第一次建置正在進行中。請留意發佈頁面。',
+    },
+    installManifestInvalid: {
+      en: 'The install information could not be read from the release manifest. Watch the releases page for updates.',
+      'zh-Hant': '無法從發佈清單讀取安裝資訊。請留意發佈頁面以取得最新消息。',
+    },
   },
 });
 

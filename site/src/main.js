@@ -22,6 +22,7 @@ import { selectionFromCheckboxes } from './bulk-actions.js';
 import { detectFileType, buildAdapterCatalog, findAdapters } from './file-converter.js';
 import { bindSupportTickets, supportDisclosure, openRecoveryFolder } from './support-tickets.js';
 import { initUniversalRuntime } from './universal-runtime.js';
+import { renderReleaseCard } from './releases.js';
 (function () {
   'use strict';
 
@@ -77,6 +78,28 @@ import { initUniversalRuntime } from './universal-runtime.js';
     const container = $('[data-inventory], #inventory, .inventory-list');
     if (!container || !state.features.length) return;
     container.innerHTML = state.features.map((feature) => `<li data-search="${text(`${feature.id} ${feature.label} ${feature.status}`.toLowerCase())}"><span>${text(feature.label)}</span><span class="status-chip status-${text(feature.status)}">${text(feature.status)}</span></li>`).join('');
+  }
+
+  /**
+   * The install card reads its own data file independently of the other
+   * startup fetches, so a missing or malformed manifest never blocks the
+   * rest of the page from rendering. renderReleaseCard() always fails
+   * closed to an honest, no-download-control state; this function's only
+   * job is to fetch, hand the result to it, and surface the exact reason
+   * for any validation failure where a maintainer will actually see it.
+   */
+  async function renderInstallSurface() {
+    const container = $('[data-install-card]');
+    if (!container) return;
+    let raw = null;
+    try {
+      raw = await loadJson('data/releases.json');
+    } catch (error) {
+      console.warn(`Install manifest could not be loaded: ${error.message}`);
+    }
+    const result = renderReleaseCard(raw);
+    if (!result.ok) console.warn(`Install manifest failed validation: ${result.reason}`);
+    container.innerHTML = result.html;
   }
 
   function wireSearch() {
@@ -317,6 +340,7 @@ import { initUniversalRuntime } from './universal-runtime.js';
       if (status) status.textContent = `Documentation data unavailable: ${error.message}`;
     }
     renderInventory(); renderDocs(); wireSearch(); wireTabs(); wireNavigationFoundation(); wirePreferencesFoundation(); wireExpansionSurfaces(); initProductContent(document);
+    await renderInstallSurface();
     document.dispatchEvent(new CustomEvent('material-site-ready', { detail: { basePath: base.href, state } }));
   }
 

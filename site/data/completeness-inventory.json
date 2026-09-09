@@ -1401,6 +1401,56 @@
         ],
         "assertion": "evidence record names the source commit, capture method, and SHA-256 of the capture"
       }
+    },
+    {
+      "id": "release-install-card",
+      "label": "Home page install card driven by a verified release manifest",
+      "status": "planned",
+      "implementation": {
+        "paths": [
+          "site/index.html",
+          "site/src/releases.js",
+          "site/src/main.js"
+        ],
+        "assertion": "Home page card renders package and image entries from a committed, schema-validated release manifest and never fabricates a download URL"
+      },
+      "documentation": {
+        "paths": [
+          "site/docs/deployment.md",
+          "site/data/releases.schema.md"
+        ],
+        "assertion": "deployment article and manifest schema document the package, image, WSL routes and the verified-entry-only rule"
+      },
+      "localization": {
+        "paths": [
+          "site/src/content.js"
+        ],
+        "assertion": "install card copy has English and Traditional Chinese catalogue entries alongside the site's other dynamic-list copy"
+      },
+      "persistence": {
+        "paths": [
+          "site/data/releases.json"
+        ],
+        "assertion": "the committed manifest is the sole source of truth for install entries and starts with an empty entries array"
+      },
+      "tests": {
+        "paths": [
+          "site/tests/site.test.mjs"
+        ],
+        "assertion": "empty-manifest, verified-entry and malformed-manifest rendering are named in the executable check"
+      },
+      "capture": {
+        "paths": [
+          "site/evidence/release-install-card.json"
+        ],
+        "assertion": "a real built-site capture of the empty state and of a populated state must be recorded before this row can claim implemented"
+      },
+      "evidence": {
+        "paths": [
+          "site/evidence/release-install-card.json"
+        ],
+        "assertion": "no capture evidence exists yet in this environment, so status honestly remains planned rather than implemented"
+      }
     }
   ]
 }
