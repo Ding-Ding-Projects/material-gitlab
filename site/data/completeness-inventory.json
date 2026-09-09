@@ -1355,7 +1355,7 @@
     {
       "id": "deployment",
       "label": "Deployment: Docker Compose, .deb package, and container image for this fork",
-      "status": "planned",
+      "status": "implemented",
       "implementation": {
         "paths": [
           "docker-compose.yml",
@@ -1391,15 +1391,16 @@
       },
       "capture": {
         "paths": [
-          "site/evidence/deployment.json"
+          "site/evidence/deployment.json",
+          "site/evidence/deployment-article.png"
         ],
-        "assertion": "a built-site capture of the rendered deployment article exists with its receipt"
+        "assertion": "a real built-site capture of the rendered deployment article, opened through the library Documentation tab and its Read article control, exists with its receipt"
       },
       "evidence": {
         "paths": [
           "site/evidence/deployment.json"
         ],
-        "assertion": "evidence record names the source commit, capture method, and SHA-256 of the capture"
+        "assertion": "evidence record names the source commit, the served built artifact, the CDP capture method, the viewer position at capture, and the SHA-256 of the capture"
       }
     },
     {
@@ -1441,15 +1442,16 @@
       },
       "capture": {
         "paths": [
-          "site/evidence/release-install-card.json"
+          "site/evidence/release-install-card.json",
+          "site/evidence/release-install-card.png"
         ],
-        "assertion": "a real built-site capture of the empty state and of a populated state must be recorded before this row can claim implemented"
+        "assertion": "a real built-site capture of the empty state exists with its receipt; a capture of a populated state is still required before this row can claim implemented, and none can exist until a release is published"
       },
       "evidence": {
         "paths": [
           "site/evidence/release-install-card.json"
         ],
-        "assertion": "no capture evidence exists yet in this environment, so status honestly remains planned rather than implemented"
+        "assertion": "the empty-state evidence record names the source commit, capture method and SHA-256 and confirms no download control rendered; status stays planned until the populated-state capture exists"
       }
     }
   ]

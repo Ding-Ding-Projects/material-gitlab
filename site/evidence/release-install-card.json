@@ -1,0 +1,24 @@
+{
+  "feature": "release-install-card",
+  "sourceCommit": "914d9d7670b24c3106a4e0de9353d3ca27de67b4",
+  "capturedAt": "2026-09-09T02:16:23.121Z",
+  "route": "http://127.0.0.1:4173/#install",
+  "servedFrom": "site/dist (the built artifact, served by vite preview on 127.0.0.1:4173)",
+  "viewport": "1280x800 CDP device metrics, deviceScaleFactor 1",
+  "theme": "light",
+  "displayScale": "100%",
+  "method": "hidden Windows desktop, isolated guest browser profile with extensions and sync disabled, single CDP page target verified, Page.captureScreenshot at the exact viewport",
+  "verificationState": "verified",
+  "captures": [
+    {
+      "path": "site/evidence/release-install-card.png",
+      "bytes": 60770,
+      "sha256": "512f7c52fd5b26d5e3ec7b8caf288a5d1096e60fdd8a705621833c98fe2b4865"
+    }
+  ],
+  "notes": [
+    "The card rendered from the committed empty manifest and read: \"No package has been published yet; the first build is in progress. Watch the releases page.Watch the releases page →\".",
+    "A package download control was absent, as required with an empty manifest; the only link points at the releases page.",
+    "Captured at the exact device metrics through CDP rather than a window photograph; the visible desktop was never touched."
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "feature": "deployment",
+  "sourceCommit": "914d9d7670b24c3106a4e0de9353d3ca27de67b4",
+  "capturedAt": "2026-09-09T02:16:25.076Z",
+  "route": "http://127.0.0.1:4173/#library",
+  "servedFrom": "site/dist (the built artifact, served by vite preview on 127.0.0.1:4173)",
+  "viewport": "1280x800 CDP device metrics, deviceScaleFactor 1",
+  "theme": "light",
+  "displayScale": "100%",
+  "method": "hidden Windows desktop, isolated guest browser profile with extensions and sync disabled, single CDP page target verified, Page.captureScreenshot at the exact viewport",
+  "verificationState": "verified",
+  "captures": [
+    {
+      "path": "site/evidence/deployment-article.png",
+      "bytes": 152639,
+      "sha256": "f2435aefd568a161f14df9521c3e995a731bec4a88a205afa469e9628ec76ace"
+    }
+  ],
+  "notes": [
+    "tab clicked; panel hidden=false; clicked Deployment; the viewer then showed: \"Deployment\\n\\nThis fork ships a Debian package recipe, a container image recipe, and a Docker Compose file so it\\ncan be in\"; viewer position in the viewport at capture: {\"top\":182,\"height\":1103,\"scrollY\":9049}.",
+    "The article is the bundled site/docs/deployment.md rendered by the shared documentation viewer in the built artifact.",
+    "Captured at the exact device metrics through CDP rather than a window photograph; the visible desktop was never touched."
+  ]
+}
