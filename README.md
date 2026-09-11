@@ -340,7 +340,8 @@ scripts/omnibus/verify-package.sh omnibus-gitlab/pkg "$(cat VERSION)"
 ```
 
 **Check:** `verify-package.sh` prints a SHA-256 and byte count and exits 0. It fails closed if the
-package does not carry `app/assets/javascripts/material_system/components/register.js`, has fewer
+package is missing any of the tree's `app/helpers/material_*_helper.rb` files or the compiled fork-only
+`pages.agent_memory` entry (Omnibus never ships `app/assets` source, so the check uses what does ship), has fewer
 than 1,000 compiled webpack files, still contains musl-linked binaries, or reports the wrong
 `VERSION` inside the package — each a specific, named reason rather than a generic build failure.
 

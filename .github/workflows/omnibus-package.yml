@@ -316,7 +316,7 @@ jobs:
             echo "| --- | ---: | --- |"
             echo "| \`$DEB_NAME\` | $DEB_BYTES | \`$DEB_SHA256\` |"
             echo
-            echo "The package carries \`app/assets/javascripts/material_system/\` and $WEBPACK_FILES compiled webpack files; both were verified by opening the package before publication."
+            echo "The package carries this fork's \`app/helpers/material_*_helper.rb\` files, its compiled fork-only \`pages.agent_memory\` entry, and $WEBPACK_FILES compiled webpack files; all were verified by opening the package before publication. Omnibus never ships app/assets source, so the Material source files are not in the package, only their compiled output."
             echo
             echo "### Install with Docker"
             echo
@@ -507,7 +507,10 @@ jobs:
             exit 1
           fi
           docker exec smoke cat "$rails/VERSION" | grep -qx "$VERSION"
-          docker exec smoke test -f "$rails/app/assets/javascripts/material_system/components/register.js"
+          # Omnibus never ships app/assets source, so prove the fork with what does ship: its
+          # material helpers and the compiled fork-only agent_memory entry (see verify-package.sh).
+          docker exec smoke sh -c "ls $rails/app/helpers/material_*_helper.rb >/dev/null"
+          docker exec smoke sh -c "ls $rails/public/assets/webpack/pages.agent_memory.*.chunk.js >/dev/null"
           webpack_files="$(docker exec smoke sh -c "find $rails/public/assets/webpack -type f | wc -l")"
           echo "webpack files in the running image: $webpack_files"
           if [ "$webpack_files" -lt 1000 ]; then
