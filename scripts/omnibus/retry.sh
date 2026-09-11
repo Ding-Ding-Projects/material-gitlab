@@ -26,7 +26,20 @@ set -uo pipefail
 # Extend or trim this list as new transient network failures are observed in real build logs.
 # Keep it specific enough that a real compile error, a real test failure, or a real logic
 # error never matches; a pattern that is too broad turns this back into retry-everything.
-_OMNIBUS_RETRY_NETWORK_PATTERN='NetFetcher|Net::ReadTimeout|Net::OpenTimeout|Errno::ECONNRESET|Errno::ETIMEDOUT|Failed to open TCP connection|SocketError|getaddrinfo|Could not resolve host|502 Bad Gateway|503 Service Unavailable|504 Gateway|ESOCKETTIMEDOUT|ETIMEDOUT|ECONNRESET|EAI_AGAIN|There appears to be trouble with your network connection|curl: \(28\)|curl: \(56\)'
+#
+# Bare "NetFetcher" used to be in this list and was wrong: every software download, including
+# a completely ordinary one, logs a line like
+#   [NetFetcher: libtool] I | ... | Downloading from `https://ftp.gnu.org/gnu/libtool-2.4.6.tar.gz'
+# through Omnibus::NetFetcher#fetch (omnibus gem 9.0.19, lib/omnibus/fetchers/net_fetcher.rb).
+# That line appears in EVERY build log, including the 34309060466 webpack-failure log this file
+# exists to stop retrying, so "NetFetcher" alone matched a deterministic failure 120 times over
+# and defeated the whole point of this file. The two lines below are what omnibus itself prints
+# only when a download actually fails (omnibus gem 9.0.19, lib/omnibus/download_helpers.rb):
+# "Retrying failed download due to #{e} (#{n} retries left)..." while a download is being
+# retried internally, and "Download failed - #{e.class}!" once its own retries are exhausted.
+# The exception classes that rescue clause catches are also matched directly, in case one of
+# them ever surfaces in a raw Ruby backtrace instead of through those log lines.
+_OMNIBUS_RETRY_NETWORK_PATTERN='Net::ReadTimeout|Net::OpenTimeout|Errno::ECONNRESET|Errno::ETIMEDOUT|Errno::ECONNREFUSED|Errno::ENETUNREACH|Failed to open TCP connection|SocketError|OpenURI::HTTPError|Timeout::Error|Retrying failed download due to|Download failed - |getaddrinfo|Could not resolve host|502 Bad Gateway|503 Service Unavailable|504 Gateway|ESOCKETTIMEDOUT|ETIMEDOUT|ECONNRESET|EAI_AGAIN|There appears to be trouble with your network connection|curl: \(28\)|curl: \(56\)'
 
 omnibus_retry() {
   # Disable and restore this function's own copy of the shell options ("local -" is the bash

@@ -140,6 +140,86 @@ note "case (d): the real exit code survives, not tee's"
 OMNIBUS_RETRY_SLEEP=0 omnibus_retry 1 "$work/log-d" -- network_fail_code_7
 expect_eq "case (d) exit status" 7 "$?"
 
+# (e) the regression this file exists to catch: run 34309060466's real log carried ordinary
+# NetFetcher download chatter (from Omnibus::NetFetcher#fetch, unrelated to the actual failure)
+# alongside the deterministic webpack error. Bare "NetFetcher" used to match that chatter and
+# retry a failure that could never succeed. Every attempt log realistically contains this
+# chatter, so it belongs in the fixture, not just the failure line.
+counter_e="$work/counter-e"
+echo 0 > "$counter_e"
+webpack_fail_with_netfetcher_chatter() {
+  local n
+  n="$(cat "$counter_e")"
+  n=$((n + 1))
+  echo "$n" > "$counter_e"
+  cat <<'LOG'
+[NetFetcher: cacerts] I | 2026-09-09T04:00:58+00:00 | Downloading from `https://curl.haxx.se/ca/cacert-2025-11-04.pem'
+[NetFetcher: libtool] I | 2026-09-09T04:00:58+00:00 | Downloading from `https://ftp.gnu.org/gnu/libtool/libtool-2.4.6.tar.gz'
+[NetFetcher: libffi] I | 2026-09-09T04:00:59+00:00 | Downloading from `https://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz'
+ERROR in ./x.js Module not found: Error: Can't resolve './missing' in '/app'
+LOG
+  return 1
+}
+note "case (e): a deterministic failure surrounded by normal NetFetcher download chatter is not retried"
+OMNIBUS_RETRY_SLEEP=0 omnibus_retry 3 "$work/log-e" -- webpack_fail_with_netfetcher_chatter
+status_e=$?
+if [ "$status_e" -eq 0 ]; then
+  note "  FAIL: omnibus_retry reported success for a failing command"
+  fail=1
+else
+  note "  pass: omnibus_retry reported failure ($status_e)"
+fi
+expect_eq "case (e) attempt count" 1 "$(cat "$counter_e")"
+
+# (f) the real download-failure text omnibus itself prints (download_helpers.rb, omnibus gem
+# 9.0.19) must still be retried: this is the actual network-failure signal that "NetFetcher"
+# chatter was wrongly standing in for.
+counter_f="$work/counter-f"
+echo 0 > "$counter_f"
+network_download_then_ok() {
+  local n
+  n="$(cat "$counter_f")"
+  n=$((n + 1))
+  echo "$n" > "$counter_f"
+  if [ "$n" -eq 1 ]; then
+    cat <<'LOG'
+[NetFetcher: libffi] I | 2026-09-09T04:00:59+00:00 | Downloading from `https://sourceware.org/pub/libffi/libffi-3.2.1.tar.gz'
+[NetFetcher: libffi] W | 2026-09-09T04:01:29+00:00 | Retrying failed download due to end of file reached (4 retries left)...
+LOG
+    return 1
+  fi
+  echo "fetch succeeded on attempt $n"
+  return 0
+}
+note "case (f): the omnibus gem's own real download-failure text is retried"
+OMNIBUS_RETRY_SLEEP=0 omnibus_retry 3 "$work/log-f" -- network_download_then_ok
+expect_eq "case (f) exit status" 0 "$?"
+expect_eq "case (f) attempt count" 2 "$(cat "$counter_f")"
+
+# Sanity check: a realistic multi-line webpack/asset-compile failure, the actual shape of the
+# 34309060466 failure, must not match the network pattern at all. None of the timeout, socket,
+# or DNS fragments should be able to match a module path or stack frame.
+webpack_block="$work/webpack-block.log"
+cat > "$webpack_block" <<'LOG'
+ERROR in ./ee/app/assets/javascripts/some_file.vue
+Module not found: Error: Can't resolve 'graphql-ws' in '/opt/gitlab-rails/embedded/service/gitlab-rails/node_modules/@graphiql/toolkit/dist/cjs/create-fetcher'
+ @ ./node_modules/@graphiql/toolkit/dist/cjs/index.js 15:0-45
+ @ ./ee/app/assets/javascripts/some_file.vue 3:0-40
+Error: Unable to compile production assets.
+    at ChildProcess.<anonymous> (/opt/gitlab-rails/lib/tasks/gitlab/assets.rake:45:12)
+    at ChildProcess.emit (node:events:513:28)
+    at maybeClose (node:internal/child_process:1105:16)
+    at Process.ChildProcess._handle.onexit (node:internal/child_process:305:5)
+LOG
+note "sanity: a realistic webpack/asset-compile failure block does not match the network pattern"
+if grep -qE "$_OMNIBUS_RETRY_NETWORK_PATTERN" "$webpack_block"; then
+  note "  FAIL: the network pattern matched a realistic webpack failure block"
+  grep -nE "$_OMNIBUS_RETRY_NETWORK_PATTERN" "$webpack_block"
+  fail=1
+else
+  note "  pass: no match"
+fi
+
 if [ "$fail" -ne 0 ]; then
   note "retry.test.sh: FAILURES ABOVE"
   exit 1
