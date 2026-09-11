@@ -1,5 +1,23 @@
 # Material GitLab overlay roadmap
 
+## Next pass
+
+The continuation pass is planned in
+[`doc/development/material_orchestration_plan.md`](doc/development/material_orchestration_plan.md):
+the verified 11 September 2026 baseline, one card per lane with explicit allowed paths, the wave
+order, and what is deliberately out of scope. Nothing in it is done yet.
+
+- [ ] Repair the package verifier's last step, which fails writing `SHA256SUMS.txt` into a
+      root-owned package directory, and publish the first `omnibus-*` release and container image
+      from the package the build already produces.
+- [ ] Replace all 25 design surfaces so each one is its contract, across thirteen surface lanes plus
+      a shared shell foundation lane.
+- [ ] Integrate or honestly retain the four branches that carry commits `main` does not have.
+- [ ] Repair the site header, make the site completeness gate exit non-zero when it fails, and carry
+      the 27 honestly planned site feature rows to real implementations with real evidence.
+- [ ] Reconcile `README.md`, `HANDOFF.md`, `ROADMAP.md` and `CHANGELOG.md` against the tree at the
+      end of the pass.
+
 ## Current design-parity completion
 
 - [x] Separate structural inventory validation from strict evidence completion.

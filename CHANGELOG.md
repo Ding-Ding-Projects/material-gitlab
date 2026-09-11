@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Orchestration plan for the continuation pass
+
+- Add [`doc/development/material_orchestration_plan.md`](doc/development/material_orchestration_plan.md),
+  the plan for the next pass: the verified 11 September 2026 baseline, the rules every lane carries,
+  a wave map, and one card per lane with explicit allowed paths so no two lanes write the same file.
+  It plans work rather than reporting it, and nothing in it is implemented yet.
+- Record in `HANDOFF.md` that run 34563358622 built a real 1,090,583,792-byte package and then failed
+  its own verify step on `SHA256SUMS.txt: Permission denied`, because the builder image runs as root
+  over a bind mount with no user mapping. Every content check on that package passed. This fork has
+  now built a genuine package and has still never published one.
+
 ### Docker Compose, container image, and Omnibus packaging for this fork
 
 - Point the root `docker-compose.yml` at this fork's own image

@@ -1,5 +1,75 @@
 # Material GitLab overlay handoff
 
+## Orchestration plan for the continuation pass, and the state it was written against, 2026-09-11
+
+This section supersedes older claims it contradicts. It records the repository state measured on
+11 September 2026 and points at the plan written from it. No code changed in this pass: the plan is
+the deliverable, and it lives at
+[`doc/development/material_orchestration_plan.md`](doc/development/material_orchestration_plan.md).
+
+### The package build now succeeds; its last check does not
+
+Workflow run [34563358622](https://github.com/Ding-Ding-Projects/material-gitlab/actions/runs/34563358622)
+on `3613b6b2f93f4434bc55242018f6a03daee6a111` compiled for about 1h59m and produced a real package.
+`scripts/omnibus/verify-package.sh` then reported every content check passing:
+
+```
+material helpers in package: 11 of 11
+fork-only compiled entry: pages.agent_memory.f1a7e1a8.chunk.js
+compiled webpack files in package: 9556
+```
+
+and died on the next line:
+
+```
+scripts/omnibus/verify-package.sh: line 74: omnibus-gitlab/pkg/SHA256SUMS.txt: Permission denied
+```
+
+The cause is file ownership, not packaging. `scripts/omnibus/build-package.sh` runs the official
+builder image as root over a bind mount with no user mapping, so `omnibus-gitlab/pkg/` and the
+package inside it come back owned by root, and the runner user cannot create `SHA256SUMS.txt` beside
+them. The release, image, line count and code name steps were skipped as a consequence, so no release
+exists even though a valid package does.
+
+**State this plainly: this fork has now built a genuine package and has still never published one.**
+The run's artifact `omnibus-deb-3613b6b2f93f4434bc55242018f6a03daee6a111` holds
+1,090,583,792 bytes and expires on 25 September 2026. There are zero `omnibus-*` releases; the newest
+release is `windows-106-3613b6b2f93f`.
+
+### Other measured facts carried into the plan
+
+- The remote carries 27 branches. Twenty-two non-`main` tips are already ancestors of `main`. Four
+  carry unique commits: `codex/material-gitlab-ce-shell-tokens`,
+  `codex/material-gitlab-site-expansion-clean`, `codex/material-gitlab-site-hosting` and
+  `codex/preserve-gitlab-instant-candidate`.
+- `README.md` says 376 files under `app/assets/javascripts/material_system/` where there are 403, and
+  "29 rows" where `site/data/completeness-inventory.json` has 30. `CHANGELOG.md` carries a stray
+  second top-level heading. The sections below this one stop at 9 September and therefore do not know
+  about the three production compile fixes, the network-only build retries, or the package verifier
+  rewrite; those exist only in commit messages and in comments on issue #3.
+- `site/scripts/completeness-gate.mjs` prints its failures and still exits 0. That is a live defect
+  and it has its own lane in the plan.
+- Every one of the 100 evidence entries in `design/parity-inventory.json` is still `pending` and its
+  `sourceCommit` is still the literal string `WORKTREE`.
+
+### What the plan does and does not cover
+
+Thirteen surface lanes cover all 25 design contracts, plus a shell foundation lane, a package
+publication lane, a branch integration lane, six site lanes, a compile-proof lane, a review loop, a
+release manifest lane and a records lane. Each carries explicit allowed paths so no two lanes write
+the same file.
+
+By the maintainer's direction the plan is cloud-capable only. Proving the install routes on a real
+host, capturing the built side of the 25 parity rows, finishing the Development Kit bootstrap, and
+making the container registry package public are recorded in the plan as out of scope rather than
+written as lanes.
+
+### Limitation of the session that wrote this
+
+The `gh` CLI is not available in the environment this plan was written in, so the pull request for
+the plan branch was opened through the GitHub API rather than through `gh`. That is recorded rather
+than worked around silently; a session on the maintainer's own machine has `gh` and should use it.
+
 ## Packaging pass: two build failures fixed, capture toolkit landed, 2026-09-09
 
 This section supersedes older claims it contradicts. It records the packaging and evidence work on
@@ -132,7 +202,7 @@ one currently does, rather than asserting one exists now.
   to this documentation lane and is tracked in `ROADMAP.md` and `doc/development/design_parity_audit.md`.
 - The Status Hub ingest credential was not available in this environment, so this lane's progress is
   recorded only in this file, in the rolling commit history, and in the pull request this branch will
-  produce — not in a live status page.
+  produce, not in a live status page.
 
 ## Active design-parity implementation, 8 September 2026
 
