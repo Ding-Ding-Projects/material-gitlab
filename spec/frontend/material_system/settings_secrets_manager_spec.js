@@ -1,5 +1,12 @@
 import { createSecretsManagerSettingsAdapter } from '~/material_system/surfaces/Settings/secrets_manager_settings_adapter';
-jest.mock('~/lib/utils/csrf', () => ({ token: 'csrf-value' }));
+// Shaped to match the real module (`app/assets/javascripts/lib/utils/csrf.js`), which has only
+// a default export. A mock with a bare top-level `token` property would also satisfy the broken
+// `import { token as csrfToken } from '~/lib/utils/csrf'` named import, hiding the exact webpack
+// failure this regression exists to catch.
+jest.mock('~/lib/utils/csrf', () => ({
+  __esModule: true,
+  default: { token: 'mock-csrf-token', headerKey: 'X-CSRF-Token' },
+}));
 const response = (body) => ({ ok: true, status: 200, json: jest.fn().mockResolvedValue(body) });
 const metadata = { available: true, allowed: true, full_path: 'group/project', top_level_group_full_path: 'group', graphql_endpoint: '/api/graphql' };
 describe('Secrets Manager design adapter', () => {
@@ -48,5 +55,17 @@ describe('Secrets Manager design adapter', () => {
     const fetchImpl = jest.fn().mockResolvedValue(response({ data: {} }));
     const adapter = createSecretsManagerSettingsAdapter({ metadata, fetchImpl });
     await expect(adapter.deletePermission({ id: 8, type: 'USER' })).rejects.toThrow('did not confirm');
+  });
+
+  it('sends the real CSRF token as the X-CSRF-Token header on every GraphQL request', async () => {
+    const fetchImpl = jest.fn().mockResolvedValueOnce(response({ data: { secretsManager: { status: 'ACTIVE' } } })).mockResolvedValueOnce(response({ data: { openbaoHealth: true } })).mockResolvedValueOnce(response({ data: { group: { secretsManagerEntitlement: null } } })).mockResolvedValueOnce(response({ data: { secretsPermissions: { nodes: [] } } }));
+    const adapter = createSecretsManagerSettingsAdapter({ metadata, fetchImpl });
+    await adapter.load();
+    expect(fetchImpl).toHaveBeenCalledWith(
+      '/api/graphql',
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'X-CSRF-Token': 'mock-csrf-token' }),
+      }),
+    );
   });
 });

@@ -2,7 +2,7 @@ jest.mock('@gitlab/ui', () => ({
   GlForm: { name: 'GlForm' }, GlButton: { name: 'GlButton' },
   GlFormCheckbox: { name: 'GlFormCheckbox' }, GlFormGroup: { name: 'GlFormGroup' },
   GlFormInput: { name: 'GlFormInput' }, GlFormTextarea: { name: 'GlFormTextarea' },
-  GlInputGroup: { name: 'GlInputGroup' },
+  GlFormInputGroup: { name: 'GlFormInputGroup' }, GlInputGroupText: { name: 'GlInputGroupText' },
 }));
 jest.mock('~/lib/utils/csrf', () => ({ token: 'form-csrf' }));
 import { mount } from '@vue/test-utils';
@@ -34,7 +34,8 @@ const stubs = {
   'gl-form-checkbox': { props: ['value'], template: '<label><input type="checkbox" :checked="value" @change="$emit(\'input\', $event.target.checked)" /><slot /></label>' },
   'gl-form-group': { template: '<div><slot /></div>' },
   'gl-form-input': { props: ['value'], template: '<input :value="value" v-on="$listeners" />' },
-  'gl-input-group': { template: '<div><slot /></div>' },
+  'gl-form-input-group': { template: '<div><slot name="prepend" /><slot /></div>' },
+  'gl-input-group-text': { template: '<div><slot /></div>' },
   ConfirmDialog: { props: ['title', 'description', 'confirmLabel'], template: '<div data-testid="confirm-dialog"><button data-testid="confirm" @click="$emit(\'confirm\')">{{ confirmLabel }}</button></div>' },
 };
 
