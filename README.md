@@ -81,7 +81,9 @@ exists by the time you read this. Once one does, these are the real steps.
 
 **Sizing, before you start.** GitLab needs 4 GB of RAM as a practical minimum and is comfortable at
 8 GB, plus 2 CPU cores and room for repositories. First boot takes several minutes before the
-instance answers.
+instance answers. `docker-compose.yml` caps the container at `GITLAB_CPU_LIMIT` cores (default 4)
+as well as `GITLAB_MEMORY_LIMIT`, so GitLab's bundled services cannot starve anything else running
+on a shared host; raise it if the host has cores to spare and repositories are large.
 
 **Step 1. Configure it**, in a `.env` file next to `docker-compose.yml` (never commit that file):
 
@@ -93,6 +95,7 @@ GITLAB_SSH_PORT=2229
 GITLAB_HOME=/srv/material-gitlab
 # GITLAB_ROOT_PASSWORD=set-your-own-or-leave-unset-for-a-generated-one
 GITLAB_MEMORY_LIMIT=10g
+GITLAB_CPU_LIMIT=4
 EOF
 ```
 

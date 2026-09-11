@@ -5,6 +5,8 @@
 
 set -euo pipefail
 
+source "$(dirname "${BASH_SOURCE[0]}")/retry.sh"
+
 # The checkout is owned by the runner user and this container runs as root, so git
 # refuses to read it: "detected dubious ownership in repository". Omnibus derives its
 # version from `git describe --tags --exact-match`, so without this the build dies before
@@ -25,16 +27,10 @@ bundle config set --local path /omnibus/.bundle-vendor
 bundle install --jobs 4
 
 # Omnibus fetches every dependency source over the network, and a single upstream 502
-# kills the whole build. Omnibus caches software it has already built, so a retry resumes
-# rather than starting over. The exit status of the last attempt is what counts.
-attempt=1
-until bundle exec omnibus build gitlab --log-level=info; do
-  status=$?
-  if [ "$attempt" -ge "${OMNIBUS_ATTEMPTS:-3}" ]; then
-    echo "::error::omnibus build failed $attempt times; last exit $status"
-    exit "$status"
-  fi
-  echo "::warning::omnibus build attempt $attempt failed with exit $status; retrying after a pause"
-  attempt=$((attempt + 1))
-  sleep 60
-done
+# kills the whole build. Retrying that is worthwhile because omnibus caches software it has
+# already built, so a retry resumes rather than starting over. Retrying a deterministic
+# failure, such as a broken JS import, is not worthwhile: it fails the same way every time and
+# only burns runner minutes. omnibus_retry (scripts/omnibus/retry.sh) tells the two apart by
+# checking each failed attempt's log for a network-failure signature before retrying.
+omnibus_retry "${OMNIBUS_ATTEMPTS:-3}" "/omnibus/log/omnibus-build-attempts" -- \
+  bundle exec omnibus build gitlab --log-level=info

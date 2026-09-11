@@ -14,6 +14,8 @@
 #   GITLAB_HOME=/srv/material-gitlab            where config, logs and data persist
 #   GITLAB_ROOT_PASSWORD=...                    first-boot password for root (optional)
 #   GITLAB_MEMORY_LIMIT=10g                     container memory ceiling
+#   GITLAB_CPU_LIMIT=4                          container CPU ceiling, in cores; keeps a
+#                                                shared host responsive under GitLab's load
 #
 # The stock upstream comparison baseline lives in deploy/upstream-baseline/.
 
@@ -52,5 +54,8 @@ services:
     # GitLab's bundled PostgreSQL needs more shared memory than Docker's 64 MB default.
     shm_size: '256m'
     mem_limit: ${GITLAB_MEMORY_LIMIT:-10g}
+    # Keeps a shared host responsive: GitLab's bundled services will happily use every core
+    # they can see, which starves anything else running on the same machine.
+    cpus: ${GITLAB_CPU_LIMIT:-4}
     # The image defines its own HEALTHCHECK through gitlab-healthcheck. Watch it with:
     #   docker inspect --format '{{.State.Health.Status}}' material-gitlab

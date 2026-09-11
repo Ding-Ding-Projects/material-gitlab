@@ -11,6 +11,11 @@ is a short index of what is under this directory and why.
 | [`scripts/remote-up.sh`](scripts/remote-up.sh) | One command that copies the Compose file and image recipe to a remote Docker host over SSH, builds or pulls the image, starts the container and waits for its health check. |
 | [`scripts/wsl-install.sh`](scripts/wsl-install.sh) | Installs the `.deb` natively inside a WSL Ubuntu 24.04 distro on Windows, the route used here for local verification. |
 
+The `.env` keys the root [`docker-compose.yml`](../docker-compose.yml) reads are listed in the root
+README's **Install with Docker** section. `GITLAB_CPU_LIMIT` (default `4`) caps the container to that
+many CPU cores, the same way `GITLAB_MEMORY_LIMIT` caps its memory, so a shared host stays
+responsive; raise it on a dedicated host with cores to spare.
+
 ## Running the package in WSL on Windows
 
 The package is a Debian package for Ubuntu 24.04, and a WSL2 distro of that release runs it
