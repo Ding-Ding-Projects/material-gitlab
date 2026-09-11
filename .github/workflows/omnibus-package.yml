@@ -15,6 +15,15 @@ name: Omnibus package
 # 34239883194, compiled the entire package in about two hours and failed only at the final
 # health check on musl-linked node binaries that upstream deletes only in EE builds.
 # scripts/omnibus/patch-frontend-islands-cleanup.sh is that fix.
+#
+# Run 34309060466 failed on a deterministic webpack compile error, but the retry logic at the
+# time retried on ANY failure: scripts/omnibus/build-package-inner.sh looped up to three whole
+# `omnibus build gitlab` invocations, and the omnibus gem itself retried the failing command a
+# further two times on top of that (scripts/omnibus/patch-build-retries.sh explains and
+# disables that inner retry). One deterministic error cost roughly nine compiles at about 30
+# minutes each, and the job hit the 360-minute runner ceiling and was cancelled without ever
+# reporting the real error clearly. scripts/omnibus/retry.sh is that fix: it retries only when
+# a failed attempt's log actually looks like a transient network problem.
 
 on:
   workflow_dispatch:
@@ -144,6 +153,10 @@ jobs:
       - name: Install dev dependencies for the from-scratch asset compile
         shell: bash
         run: scripts/omnibus/patch-assets-install.sh omnibus-gitlab
+
+      - name: Stop the omnibus gem retrying a deterministic build failure
+        shell: bash
+        run: scripts/omnibus/patch-build-retries.sh omnibus-gitlab
 
       - name: Route GNU dependency downloads to a mirror that is actually up
         shell: bash
