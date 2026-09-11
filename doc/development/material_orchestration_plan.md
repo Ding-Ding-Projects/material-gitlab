@@ -333,6 +333,11 @@ needs the maintainer's own machine or network.
 
 Every one of these cost real time once. None of them should cost it twice.
 
+- `scripts/verify-public-vocabulary.mjs` reads `git ls-files`, so it scans tracked file contents and
+  tracked paths and nothing else. A branch name, a tag, a release title, an issue comment or a
+  discussion post is structurally invisible to it and has to be caught by reading before it is
+  published. Choose branch names in plain, ordinary words before the first push, because a branch name
+  on the remote cannot be corrected without deleting the branch.
 - A green packaging exit only proves that packaging exited green. The package is opened and checked
   separately, and the checker itself has been wrong before: an earlier version looked for JavaScript
   source that the packaging step never ships, and refused the first genuine package this fork ever
