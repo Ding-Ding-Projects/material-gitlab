@@ -21,11 +21,13 @@
   max-width: 600px;
 }
 
+// No white-space: nowrap -- this sits flex-shrink: 0 next to a flex: 1 search
+// field, so a long localized error message wraps onto a second line instead
+// of forcing the row wider than the top bar (or overflowing it outright).
 .md3-topbar__search-error {
   flex-shrink: 0;
   color: var(--gl-md3-err);
   font-size: 12px;
-  white-space: nowrap;
 }
 
 // The ".*" regex-mode pill: smaller and more compact than a standard
@@ -61,8 +63,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   border: 0;
   background-color: transparent;
   color: var(--gl-md3-onsurfv);
@@ -95,8 +97,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 36px;
-  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
   background-color: var(--gl-md3-primc);
   color: var(--gl-md3-onprimc);
   font-size: 13px;

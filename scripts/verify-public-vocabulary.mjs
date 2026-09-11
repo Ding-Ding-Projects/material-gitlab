@@ -79,23 +79,43 @@ const OVERLAY_PREFIXES = [
   'site/',
   'design/',
   'tools/',
+  'deploy/',
   '.github/',
   'app/assets/stylesheets/md3/',
   'app/assets/javascripts/md3/',
   'app/assets/javascripts/material_system/',
   'scripts/verify-',
+  'scripts/omnibus/',
+  'scripts/design-parity/',
+  'scripts/release/',
+  'scripts/tests/',
+  'scripts/frontend/webpack_material_scss_rule',
+  'config/helpers/material_web_loader',
+  'config/webpack/loaders/material_scss_loader',
+  // Fork-authored documentation lives inside the imported doc/ tree, which is otherwise
+  // skipped. A term in one of these files went undetected once; list them explicitly.
+  'doc/development/design_parity_',
+  'doc/development/design_reference_parity',
+  'doc/development/material_',
+  'doc/development/project_controls_migration',
+  'doc/development/fe_guide/material_system',
+  'doc/development/ux/material-shells',
 ];
 
 const OVERLAY_FILES = new Set([
   'build.bat',
   'build-installer.bat',
   'README.md',
+  'AGENTS.md',
   'ROADMAP.md',
   'HANDOFF.md',
   'BUILD.md',
+  'CHANGELOG.md',
+  'docker-compose.yml',
   'upstream-overlay.json',
   'app/assets/stylesheets/color_modes/_md3.scss',
   'doc/development/fe_guide/md3.md',
+  'qa/gdk/Dockerfile.gdk',
 ]);
 
 function isOverlayFile(path) {
@@ -127,8 +147,14 @@ function resolvePrivateSource() {
     }
     return fromEnv;
   }
-  const sibling = resolve(repoRoot, '..', 'agent-global-memory', 'PERSONAL_VOCABULARY.json');
-  return existsSync(sibling) ? sibling : null;
+  // A primary checkout sits beside the private source; a linked checkout sits one
+  // directory deeper, so both locations are tried. A skip that only happens from a
+  // linked checkout would look exactly like a pass.
+  const candidates = [
+    resolve(repoRoot, '..', 'agent-global-memory', 'PERSONAL_VOCABULARY.json'),
+    resolve(repoRoot, '..', '..', 'agent-global-memory', 'PERSONAL_VOCABULARY.json'),
+  ];
+  return candidates.find((candidate) => existsSync(candidate)) ?? null;
 }
 
 function loadTerms(sourcePath) {

@@ -24,6 +24,10 @@
   background-color: transparent;
   color: var(--gl-md3-onsurfv);
   text-decoration: none;
+  // white-space: nowrap is intentional: .md3-tabs itself scrolls horizontally
+  // (overflow-x: auto) rather than shrinking its tabs, so a long localized
+  // label keeps this tab on one line and the row scrolls instead of wrapping
+  // it into an uneven two-line tab beside single-line siblings.
   white-space: nowrap;
   cursor: pointer;
   @include gl-md3-label-large;
@@ -90,6 +94,9 @@
   color: var(--gl-md3-onsurfv);
   font-size: 13px;
   font-weight: 500;
+  // white-space: nowrap is intentional: .md3-segmented is an unconstrained
+  // inline-flex track (no fixed or max-width), so a long option label grows
+  // the pill rather than being squeezed into wrapping.
   white-space: nowrap;
   cursor: pointer;
   border-radius: var(--gl-md3-shape-full);
@@ -212,8 +219,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 56px;
-  height: 32px;
+  min-width: 56px;
+  min-height: 32px;
   background-color: transparent;
   border-radius: var(--gl-md3-shape-full);
   @include gl-md3-motion-standard(background-color);

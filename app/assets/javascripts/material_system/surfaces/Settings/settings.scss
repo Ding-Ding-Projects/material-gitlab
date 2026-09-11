@@ -2,6 +2,10 @@
 // Settings.dc.html's <style> block. Scoped entirely to .st-surface so nothing
 // here leaks into the rest of the app, and nothing outside can bleed in.
 
+// Registered Material Web element geometry (container-height, leading/trailing
+// space, field spacing) -- see md3/_material_web_geometry.scss.
+@import 'md3/material_web_geometry';
+
 @mixin st-dark-tokens {
   --st-surf: #141218;
   --st-surfc: #211f26;
@@ -111,15 +115,18 @@
     opacity: 0.7;
   }
 
+  // Rendered on <MaterialButton class="st-btn"> (an md-text-button/
+  // md-filled-button/md-outlined-button host depending on `variant`); sized
+  // through the official tokens rather than `padding`/`font-size`/`min-height`,
+  // which the component's own shadow-DOM :host rule recomputes from its own
+  // token defaults regardless of what this selector declares directly.
   .st-btn {
     border-radius: var(--st-radius-pill);
-    padding: 9px 18px;
     font: inherit;
     font-weight: 600;
-    font-size: 13.5px;
     cursor: pointer;
     border: none;
-    min-height: var(--st-touch);
+    @include mw-button-size(40px, 18px, 18px, $label-size: 13.5px, $label-line-height: 18px, $label-weight: 600);
 
     &:focus-visible {
       outline: 2px solid var(--st-prim);
@@ -185,9 +192,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 14px;
-    min-height: 32px;
-    font-size: 12.5px;
+    @include mw-button-size(32px, 14px, 14px, $label-size: 12.5px, $label-line-height: 16px);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -218,10 +223,10 @@
   md-filled-text-field {
     min-width: 0;
     max-width: 100%;
-    padding: 0;
     border: 0;
     background: transparent;
     --md-filled-text-field-container-shape: 12px;
+    @include mw-field-size(16px, 16px);
   }
 
   md-text-button,
@@ -229,9 +234,9 @@
   md-outlined-button,
   md-filled-tonal-button,
   md-elevated-button {
-    padding: 0;
     border: 0;
     background: transparent;
     --md-text-button-label-text-color: currentColor;
+    @include mw-button-size(40px, 12px, 12px);
   }
 }

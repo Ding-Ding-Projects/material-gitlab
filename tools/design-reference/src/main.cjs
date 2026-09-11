@@ -50,7 +50,7 @@ function freezeScript(tuple) {
     `window.Date=FrozenDate; let seed=tuple.deterministic.randomSeed>>>0; Math.random=()=>((seed=(1664525*seed+1013904223)>>>0)/4294967296);\n` +
     `const nativeFetch=window.fetch.bind(window); window.fetch=(input,init)=>{ const u=new URL(typeof input==='string'?input:input.url,location.href); if(u.origin!==location.origin) return Promise.reject(new Error('External network blocked by design-reference policy')); return nativeFetch(input,init); };\n` +
     `const style=document.createElement('style'); style.textContent='*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}'; document.documentElement.appendChild(style);\n` +
-    `const families=['Google Sans','Google Sans Text','Material Symbols Outlined']; window.__DESIGN_REFERENCE_CAPTURE_READY__=document.fonts.ready.then(()=>{const faces=Array.from(document.fonts); const availability=Object.fromEntries(families.map((family)=>[family,document.fonts.check('16px "'+family+'"')&&faces.some((face)=>face.family.replaceAll('\\"','').replaceAll("'",'')===family&&face.status==='loaded')])); const proof={transport:'cheap Lowlevel headless route',availability,loadedAt:new Date(0).toISOString()}; window.__DESIGN_REFERENCE_FONT_PROOF__=proof; document.documentElement.dataset.designReferenceFonts=Object.values(availability).every(Boolean)?'ready':'unavailable'; return proof;});\n` +
+    `const families=['Google Sans','Google Sans Text','Material Symbols Outlined']; window.__DESIGN_REFERENCE_CAPTURE_READY__=document.fonts.ready.then(()=>{const faces=Array.from(document.fonts); const availability=Object.fromEntries(families.map((family)=>[family,document.fonts.check('16px "'+family+'"')&&faces.some((face)=>face.family.replaceAll('\\"','').replaceAll("'",'')===family&&face.status==='loaded')])); const proof={transport:'cheap Lowlevel headless route',availability,loadedAt:new Date(0).toISOString()}; window.__DESIGN_REFERENCE_FONT_PROOF__=proof; document.documentElement.dataset.designReferenceFonts=Object.values(availability).every(Boolean)?'ready':'unavailable'; window.__DESIGN_REFERENCE_CAPTURE_READY__=true; return proof;});\n` +
     `document.addEventListener('DOMContentLoaded',()=>{ if(tuple.theme==='dark') document.body.classList.add('dark'); document.documentElement.dataset.designReferenceTheme=tuple.theme; document.documentElement.dataset.designReferenceState=tuple.state; });\n` +
     `})();</script>`;
 }
@@ -138,7 +138,7 @@ function startServer() {
 
 function cliOptions() {
   const args = process.argv.slice(1);
-  const result = { surface: 'admin', state: 'default', theme: 'light', scale: 1, width: 1280, height: 800, locale: 'en-US' };
+  const result = { surface: 'admin', state: 'default', theme: 'light', scale: 1, width: 1280, height: 800, locale: 'en-US', cdpPort: 0 };
   for (const arg of args) {
     const [key, value] = arg.split('=', 2);
     if (key === '--surface' && value) result.surface = value;
@@ -148,8 +148,21 @@ function cliOptions() {
     if (key === '--width' && value) result.width = Number(value);
     if (key === '--height' && value) result.height = Number(value);
     if (key === '--locale' && value) result.locale = value;
+    if (key === '--cdp-port' && value) result.cdpPort = Number(value);
   }
   return result;
+}
+
+// Remote debugging must be requested before the app is ready, so the flag is parsed and
+// applied at module load time rather than inside createWindow(). This exists solely so the
+// design-parity capture driver (scripts/drive-capture.mjs) can attach over the Chrome
+// DevTools Protocol and capture a deterministic screenshot; it never runs against a
+// production or end-user build of this internal reference tool.
+const startupOptions = cliOptions();
+if (startupOptions.cdpPort) {
+  if (!Number.isInteger(startupOptions.cdpPort) || startupOptions.cdpPort <= 0 || startupOptions.cdpPort > 65535) fail('--cdp-port must be a positive integer port number');
+  app.commandLine.appendSwitch('remote-debugging-port', String(startupOptions.cdpPort));
+  app.commandLine.appendSwitch('remote-allow-origins', '*');
 }
 
 async function createWindow(port) {

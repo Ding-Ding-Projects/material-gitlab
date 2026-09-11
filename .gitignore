@@ -165,3 +165,6 @@ CLAUDE.local.md
 /tools/material-gitlab-deployer/dist/
 /tools/material-gitlab-instant/app-dist/
 /tools/material-gitlab-instant/installer/
+
+# Design-parity built artifact fetched from a release for strict verification; never tracked.
+/artifacts/parity/_local/

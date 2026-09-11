@@ -1,5 +1,139 @@
 # Material GitLab overlay handoff
 
+## Packaging pass: two build failures fixed, capture toolkit landed, 2026-09-09
+
+This section supersedes older claims it contradicts. It records the packaging and evidence work on
+`feature/parity-deploy-omnibus-20260908` after the documentation pass below, so the next owner does
+not rediscover the two failures the Omnibus build hit or how each was fixed.
+
+### The Omnibus build failed twice, each for a distinct, recorded cause
+
+The build compiles the whole Omnibus stack from source and takes roughly two hours to reach its
+late stages, so each failure costs a full run. Both were real defects, not flakes, and both were
+fixed by a committed patch script that the workflow calls (`scripts/omnibus/`), so a local build on
+a Linux Docker host and CI run the same bytes.
+
+1. **musl health check** (run 34239883194). The package built completely and failed omnibus's own
+   health check on three `linux-x64-musl` `.node` binaries left under
+   `ee/frontend_islands/node_modules`, depending on `libc.musl-x86_64.so.1`, which the package does
+   not provide. Upstream deletes that directory only for EE builds; this is an EE-layout tree
+   packaged under the CE project, so the guard never fired. Fixed by
+   `scripts/omnibus/patch-frontend-islands-cleanup.sh` (commit `ed950bd9f`), which makes the
+   cleanup unconditional with a directory test around the find.
+2. **asset compile cannot resolve graphql-ws** (run 34293113846). With the health check passed, the
+   build ran two more hours and failed `rake gitlab:assets:compile` three times on
+   `Can't resolve 'graphql-ws' in @graphiql/toolkit/dist/cjs/create-fetcher`. `graphql-ws` is not a
+   declared dependency of `@graphiql/toolkit`; the toolkit requires it optionally, and the only chain
+   that installs it (`@graphql-tools/url-loader` -> `executor-graphql-ws` -> `graphql-ws`) is pruned
+   by `yarn install --production`, while `@graphiql/toolkit` still reaches the production bundle
+   through `graphiql` -> `@graphiql/react`. Upstream never sees this because its omnibus copies assets
+   a CI job already compiled with the dev dependencies present. Fixed by
+   `scripts/omnibus/patch-assets-install.sh` (commit `9a1954a14`), which drops `--production` from the
+   asset-compile yarn install. It costs the package nothing: the definition moves `node_modules` out
+   of the rails app to the cache root after the compile, so no `node_modules` ships either way.
+   Dropping `--production` rather than adding one package resolves the whole class of
+   optionally-required production packages, not just this one.
+
+The lesson worth carrying: compiling GitLab's production assets requires a full (dev plus prod)
+`node_modules`, because production packages optionally require dev-chain packages at bundle time.
+Any build that compiles assets from scratch, rather than copying a CI job's output, must install the
+full dependency set.
+
+### Also landed this pass
+
+- `scripts/omnibus/verify-package.sh` opens the `.deb` before anything is published: it asserts the
+  fork's `material_system` tree is present, counts compiled webpack files, refuses any surviving musl
+  binary, and checks the `VERSION` inside the package against the tree that was meant to be packaged.
+- `deploy/docker/` builds the container image from the verified package, in the official Omnibus
+  container layout, and the workflow's second job boots it, proves it serves and carries this fork,
+  then pushes it to the container registry. `deploy/docker/.dockerignore` must not exclude
+  `packages/*.deb`, or the offline local build's bind mount sees nothing (fixed in `e3709494a`).
+- Deploy routes: the root `docker-compose.yml` runs the fork image with a build-from-release-package
+  fallback; `deploy/scripts/remote-up.sh` brings it up on a remote Docker host over SSH;
+  `deploy/scripts/wsl-install.sh` installs the `.deb` natively in a WSL Ubuntu 24.04 distro, the
+  route chosen for local verification. The WSL2 distro stops seconds after its last command exits,
+  taking GitLab with it, so a keepalive process must run for the length of any capture session.
+- Design-parity capture: `tools/design-reference/scripts/drive-capture.mjs` drives both the
+  reference viewer and the built application over CDP at one identical tuple; `layout-probe.mjs`
+  records clipping candidates with exact rects; `design/layout-matrix.json` is a 70-tuple inventory
+  with its own strict-guard coverage. Two capture lessons were paid for here: a CDP screenshot clip
+  is page-relative, so after a scroll a clip at the origin photographs empty page (capture the
+  viewport instead); and the reference driver navigates one viewer process to each row rather than
+  relaunching per surface. `scripts/design-parity/run-parity-captures.mjs` runs the whole set with
+  one command per side, and `record-evidence.mjs` copies only receipt-bound, commit-bound files into
+  the inventories, refusing a Material audit that skipped any primitive.
+- All 25 reference rows were captured at 1280x800 with verified receipts and font proofs as a
+  rehearsal, bound to a non-final commit and not committed. The built side waits on a published
+  package installed in the WSL instance.
+
+### What is still unproven
+
+No Omnibus package or container image has published yet; run 34309060466 (on `9a1954a14`, the
+graphql-ws fix) was in its asset-compile step when this was written. Until a release publishes, the
+install routes in the README are correct steps against a package that does not exist, the site's
+release manifest is honestly empty, and the design-parity strict guard stays red because no built
+capture exists. None of that is hidden: each surface says so.
+
+## Documentation pass: README rewrite and deploy docs in step, 2026-09-08/09
+
+This section supersedes every older claim it contradicts below. It covers only the documentation
+lane of the wider deploy/omnibus task: the README rewrite, `deploy/README.md`, `BUILD.md`,
+`ROADMAP.md`, `CHANGELOG.md`, and one new site article. The packaging, Compose, and workflow work it
+documents was done by sibling lanes on the same coordinating branch,
+`feature/parity-deploy-omnibus-20260908` (tip `ed950bd9f` at the time this section was written).
+
+### What was corrected
+
+The README carried three claims that the tree already contradicted:
+
+1. It said no Omnibus/`.deb` route exists for this fork. `.github/workflows/omnibus-package.yml` has
+   existed and been dispatched multiple times before this pass; the workflow, `scripts/omnibus/*.sh`,
+   the container recipe under `deploy/docker/`, and the root `docker-compose.yml` targeting this
+   fork's own image all predate this documentation pass. The claim is now corrected to describe what
+   actually exists and what is still unproven (see below).
+2. It said there were no releases and no tags. As of this writing there are 34 `windows-NN-<sha12>`
+   tags with published non-draft Windows releases (for example `windows-95-0a4dd948e9ab`), and the
+   count keeps growing because `windows-release.yml` fires on every push to `main` and this branch
+   has had many. The README now points at the live releases page instead of a number that would be
+   stale within the hour.
+3. It said `.github/workflows/` was 5 files and 531 lines. It is 4 files (three `.yml` workflows plus
+   one `.md` dependency-notes file) totalling 1,109 lines, measured directly with `wc -l` on this
+   commit; `omnibus-package.yml` alone is 534 lines. The old figures could not have been reproduced by
+   any command in the repository and are corrected throughout.
+
+### What is running as this is written
+
+Omnibus workflow run
+[34293113846](https://github.com/Ding-Ding-Projects/material-gitlab/actions/runs/34293113846) was
+dispatched on `ed950bd9f` (the tip this documentation lane branched from) at 2026-09-09T00:00:25Z UTC
+and was still `in_progress` when this section was written. The prior run,
+[34239883194](https://github.com/Ding-Ding-Projects/material-gitlab/actions/runs/34239883194),
+compiled the entire package in about two hours and five minutes and failed only at the final health
+check, on musl-linked Node binaries under `ee/frontend_islands/node_modules` that upstream deletes
+only in EE builds; `scripts/omnibus/patch-frontend-islands-cleanup.sh` (pushed as part of `ed950bd9f`)
+is the fix. Whether the new run reaches a published release is not yet known. The README's install
+steps are written to be correct once a release exists, and point at the releases page for whichever
+one currently does, rather than asserting one exists now.
+
+### What remains unproven
+
+- **No Omnibus release has published yet.** Until run 34293113846 or a later one finishes and
+  publishes, `apt-get install`-ing this fork and pulling `ghcr.io/ding-ding-projects/material-gitlab`
+  both remain unavailable, exactly as the README now states.
+- **"Nothing in this repository deploys GitLab" is no longer an accurate summary**, and older text
+  in this file that said so is superseded here rather than deleted. A working `docker-compose.yml`
+  and container image recipe for this fork exist; what is still missing is a published package or
+  image for them to install. The desktop tools remain configuration and preview shells by explicit
+  design and deploy nothing themselves.
+- **The design-parity inventory now shows all 25 rows with a `known` production route** (the
+  20-known/5-placeholder split recorded elsewhere in this repository's history is stale), while every
+  row's capture evidence (`referenceRaw`, `builtRaw`, `sideBySide`, `diff`) remains `pending` and
+  `sourceCommit` is still the literal string `WORKTREE` rather than a real commit. That is unrelated
+  to this documentation lane and is tracked in `ROADMAP.md` and `doc/development/design_parity_audit.md`.
+- The Status Hub ingest credential was not available in this environment, so this lane's progress is
+  recorded only in this file, in the rolling commit history, and in the pull request this branch will
+  produce — not in a live status page.
+
 ## Active design-parity implementation, 8 September 2026
 
 This section supersedes older runtime and release availability claims below.

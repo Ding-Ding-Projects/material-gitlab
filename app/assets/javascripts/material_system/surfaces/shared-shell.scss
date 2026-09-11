@@ -1,3 +1,13 @@
+// Registered Material Web elements render here: .material-shell__brand
+// (md-text-button), .material-shell__search (md-filled-text-field), and
+// .material-shell__regex/.material-shell__palette/.material-shell__theme/
+// .material-shell__menu (md-icon-button). Their geometry is sized exclusively
+// through the official custom properties this partial provides -- see
+// app/assets/stylesheets/md3/_material_web_geometry.scss for why a plain
+// width/height/padding/font-size/font-family/white-space on those hosts is
+// inert and clips instead of resizing them.
+@import 'md3/material_web_geometry';
+
 .material-shell,
 .material-sidebar,
 .material-command-palette,
@@ -37,7 +47,12 @@
 .material-shell { display: flex; min-height: 100%; background: var(--m3-surface); color: var(--m3-on-surface); }
 .material-shell__body { display: flex; flex: 1; min-width: 0; flex-direction: column; }
 .material-shell__topbar { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 8px 24px; box-sizing: border-box; border-bottom: 1px solid var(--m3-surface-container-high); }
-.material-shell__brand { color: var(--m3-on-surface); font-weight: 700; text-decoration: none; white-space: nowrap; }
+
+.material-shell__brand {
+  color: var(--m3-on-surface);
+  text-decoration: none;
+  @include mw-button-size(40px, 12px, 12px, $label-weight: 700);
+}
 .material-analyze__topbar > button { min-width: 40px; min-height: 40px; border: 0; border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
 .material-analyze__topbar > button:hover { background: var(--m3-surface-container-high); }
 .material-analyze__search-wrap { display: flex; align-items: center; flex: 1; max-width: 640px; gap: 8px; margin-left: auto; padding: 4px 8px 4px 16px; border-radius: 999px; background: var(--m3-surface-container); }
@@ -88,7 +103,12 @@
 .material-regex-builder__actions button { min-height: 40px; padding: 8px 18px; border: 0; border-radius: 999px; background: var(--m3-primary); color: var(--m3-on-primary); cursor: pointer; }
 .material-regex-builder__actions button:first-child { background: transparent; color: var(--m3-on-primary-container); }
 
-.material-analyze { display: flex; min-height: 100%; flex-direction: column; overflow: hidden; background: var(--m3-surface); }
+// No outer overflow: hidden here -- .material-analyze__content (below) is the
+// one scrolling region, and command-palette/regex-builder overlays render as
+// position: fixed scrims (.material-command-palette__scrim,
+// .material-regex-builder__scrim) that must stay bounded by the viewport
+// rather than by whatever box this surface happens to occupy.
+.material-analyze { display: flex; min-height: 100%; flex-direction: column; background: var(--m3-surface); }
 .material-analyze__topbar, .material-analyze__heading { display: flex; align-items: center; gap: 12px; padding: 12px 24px 8px; }
 .material-analyze__heading h1 { margin: 0; font-size: 24px; font-weight: 500; }
 .material-analyze__tabs { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 999px; background: var(--m3-surface-container); }
@@ -129,5 +149,14 @@
   font-family: var(--md-ref-typeface-plain);
 }
 .material-shell__search-wrap { display: flex; align-items: center; flex: 1; min-width: 0; max-width: 640px; gap: 8px; margin-left: auto; }
-.material-shell__search { flex: 1; min-width: 0; }
-.material-shell__menu, .material-shell__icon-button, .material-shell__regex { flex: 0 0 auto; }
+
+.material-shell__search {
+  flex: 1;
+  min-width: 0;
+  @include mw-field-size(4px, 4px);
+}
+
+.material-shell__menu, .material-shell__icon-button, .material-shell__regex {
+  flex: 0 0 auto;
+  @include mw-icon-button-size(40px, 24px);
+}

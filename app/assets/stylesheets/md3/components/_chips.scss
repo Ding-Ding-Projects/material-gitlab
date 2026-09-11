@@ -18,13 +18,18 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 32px;
+  // min-height, not height: a floor a chip cannot shrink below, not a
+  // ceiling that clips it if its label needs more room.
+  min-height: 32px;
   padding: 0 14px;
   border: 1px solid var(--gl-md3-outl);
   background-color: transparent;
   color: var(--gl-md3-onsurf);
   cursor: pointer;
   user-select: none;
+  // white-space: nowrap is intentional here: .md3-chip-group wraps multiple
+  // chips onto new lines as a group, so an individual chip keeps its own
+  // label on one line rather than breaking mid-pill.
   white-space: nowrap;
   @include gl-md3-shape('xs');
   @include gl-md3-label-large;
@@ -110,8 +115,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 18px;
-  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
   margin-left: 2px;
   padding: 0;
   border: 0;

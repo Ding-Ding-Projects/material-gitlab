@@ -45,14 +45,20 @@ $md3-sidebar-overlay-z: 900;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
   background-color: var(--gl-md3-prim);
   color: var(--gl-md3-onprim);
   font-size: 15px;
   @include gl-md3-shape('s');
 }
 
+// overflow: hidden + white-space: nowrap + text-overflow: ellipsis is the
+// intentional truncate-with-ellipsis pattern for a brand name that can run
+// long: whoever renders this element is responsible for keeping the full
+// text available as the element's accessible name (or a title attribute),
+// since a stylesheet alone cannot add one. Every other nowrap in this file
+// paired with overflow: hidden below follows the same contract.
 .md3-sidebar__brand-text {
   overflow: hidden;
   white-space: nowrap;
@@ -89,8 +95,8 @@ $md3-sidebar-overlay-z: 900;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: 26px;
-  height: 26px;
+  min-width: 26px;
+  min-height: 26px;
   background-color: var(--gl-md3-warnc);
   color: var(--gl-md3-warn);
   font-size: 12px;

@@ -1,0 +1,1816 @@
+{
+  "schemaVersion": 1,
+  "description": "Hand-written layout-probe capture matrix hunting clipping candidates across a wider theme/scale/viewport grid than the single pinned tuple each design/parity-inventory.json row carries. See doc/development/design_parity_capture.md.",
+  "languageModes": {
+    "applicable": false,
+    "reason": "This Rails application has no runtime language-mode switch (no persisted English/Cantonese/bilingual selector exists on any surface at this commit), so this matrix does not enumerate language-mode rows. Recorded once here, rather than silently omitted, per the project-wide rule that a genuine non-applicability is stated rather than left as a silent gap."
+  },
+  "surfaces": [
+    "surface.settings",
+    "surface.issues",
+    "surface.merge-requests",
+    "surface.plan",
+    "surface.epics",
+    "surface.shell-a",
+    "surface.shell-b",
+    "surface.sidebar",
+    "surface.command-palette",
+    "surface.regex-builder"
+  ],
+  "tuples": [
+    {
+      "width": 1280,
+      "height": 800,
+      "scale": 1,
+      "theme": "light"
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "scale": 1,
+      "theme": "dark"
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "scale": 1.5,
+      "theme": "light"
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "scale": 1.5,
+      "theme": "dark"
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "scale": 2,
+      "theme": "light"
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "scale": 2,
+      "theme": "dark"
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "scale": 1,
+      "theme": "light"
+    }
+  ],
+  "rows": [
+    {
+      "id": "layout.settings.1280x800@1.light",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.settings.1280x800@1.dark",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.settings.1280x800@1.5.light",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.settings.1280x800@1.5.dark",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.settings.1280x800@2.light",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.settings.1280x800@2.dark",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.settings.1024x768@1.light",
+      "surfaceId": "surface.settings",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/settings/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/settings/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1280x800@1.light",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1280x800@1.dark",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1280x800@1.5.light",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1280x800@1.5.dark",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1280x800@2.light",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1280x800@2.dark",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.issues.1024x768@1.light",
+      "surfaceId": "surface.issues",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/issues/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/issues/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1280x800@1.light",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1280x800@1.dark",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1280x800@1.5.light",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1280x800@1.5.dark",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1280x800@2.light",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1280x800@2.dark",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.merge-requests.1024x768@1.light",
+      "surfaceId": "surface.merge-requests",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/merge-requests/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/merge-requests/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1280x800@1.light",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1280x800@1.dark",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1280x800@1.5.light",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1280x800@1.5.dark",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1280x800@2.light",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1280x800@2.dark",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.plan.1024x768@1.light",
+      "surfaceId": "surface.plan",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/plan/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/plan/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1280x800@1.light",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1280x800@1.dark",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1280x800@1.5.light",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1280x800@1.5.dark",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1280x800@2.light",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1280x800@2.dark",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.epics.1024x768@1.light",
+      "surfaceId": "surface.epics",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/epics/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/epics/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1280x800@1.light",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1280x800@1.dark",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1280x800@1.5.light",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1280x800@1.5.dark",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1280x800@2.light",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1280x800@2.dark",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-a.1024x768@1.light",
+      "surfaceId": "surface.shell-a",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-a/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-a/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1280x800@1.light",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1280x800@1.dark",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1280x800@1.5.light",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1280x800@1.5.dark",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1280x800@2.light",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1280x800@2.dark",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.shell-b.1024x768@1.light",
+      "surfaceId": "surface.shell-b",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/shell-b/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/shell-b/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1280x800@1.light",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1280x800@1.dark",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1280x800@1.5.light",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1280x800@1.5.dark",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1280x800@2.light",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1280x800@2.dark",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.sidebar.1024x768@1.light",
+      "surfaceId": "surface.sidebar",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/sidebar/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/sidebar/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1280x800@1.light",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1280x800@1.dark",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1280x800@1.5.light",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1280x800@1.5.dark",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1280x800@2.light",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1280x800@2.dark",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.command-palette.1024x768@1.light",
+      "surfaceId": "surface.command-palette",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/command-palette/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/command-palette/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1280x800@1.light",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1280x800@1.dark",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1280x800@1.5.light",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.5.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.5.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1280x800@1.5.dark",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 1.5,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.5.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1280x800@1.5.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1280x800@2.light",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1280x800@2.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1280x800@2.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1280x800@2.dark",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1280,
+        "height": 800,
+        "scale": 2,
+        "theme": "dark"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1280x800@2.dark/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1280x800@2.dark/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    },
+    {
+      "id": "layout.regex-builder.1024x768@1.light",
+      "surfaceId": "surface.regex-builder",
+      "tuple": {
+        "width": 1024,
+        "height": 768,
+        "scale": 1,
+        "theme": "light"
+      },
+      "evidence": {
+        "builtRaw": {
+          "path": "artifacts/layout/regex-builder/1024x768@1.light/built.png",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Requires a built Windows app capture at this tuple through drive-capture.mjs (see tools/design-reference/README.md)."
+        },
+        "layoutProbe": {
+          "path": "artifacts/layout/regex-builder/1024x768@1.light/layout-probe.json",
+          "sha256": null,
+          "status": "pending",
+          "reason": "Derived by layout-probe.mjs from the same loaded page as builtRaw; requires builtRaw to exist first."
+        }
+      },
+      "intentionalFindings": []
+    }
+  ]
+}

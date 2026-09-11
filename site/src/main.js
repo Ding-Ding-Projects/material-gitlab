@@ -18,10 +18,12 @@ import { applyMobileAccessibility, installFocusRing } from './mobile-accessibili
 import { initProductContent } from './content.js';
 import { initCommandPalette } from './command-palette.js';
 import { loadChangelog, filterChangelog, renderChangelog } from './changelog.js';
+import { markdownToHtml, articleHasOwnTitle } from './markdown.js';
 import { selectionFromCheckboxes } from './bulk-actions.js';
 import { detectFileType, buildAdapterCatalog, findAdapters } from './file-converter.js';
 import { bindSupportTickets, supportDisclosure, openRecoveryFolder } from './support-tickets.js';
 import { initUniversalRuntime } from './universal-runtime.js';
+import { renderReleaseCard } from './releases.js';
 (function () {
   'use strict';
 
@@ -45,38 +47,51 @@ import { initUniversalRuntime } from './universal-runtime.js';
     return response.text();
   }
 
-  function markdownToHtml(markdown) {
-    return text(markdown)
-      .replace(/^### (.+)$/gm, '<h4>$1</h4>')
-      .replace(/^## (.+)$/gm, '<h3>$1</h3>')
-      .replace(/^# (.+)$/gm, '<h2>$1</h2>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
-      .replace(/^(?:- |\* )(.+)$/gm, '<li>$1</li>')
-      .replace(/(?:<li>.*<\/li>\n?)+/g, (list) => `<ul>${list}</ul>`)
-      .split(/\n{2,}/)
-      .map((paragraph) => /^(<h[234]|<ul>)/.test(paragraph.trim()) ? paragraph : `<p>${paragraph.replace(/\n/g, '<br>')}</p>`)
-      .join('');
-  }
-
   function renderDocs() {
     const container = $('[data-documents], #documents, .documents-list');
     if (!container || !state.docs.length) return;
     container.innerHTML = state.docs.map((doc, index) => `<article class="doc-card" data-search="${text(`${doc.title} ${doc.path}`.toLowerCase())}"><h3>${text(doc.title)}</h3><p>${text(doc.summary || doc.path)}</p><button type="button" data-doc-index="${index}">Read article</button></article>`).join('');
+    // Not a once-only listener: a reader opens as many articles as they like in one visit.
     container.addEventListener('click', async (event) => {
       const button = event.target.closest('[data-doc-index]');
       if (!button) return;
       const doc = state.docs[Number(button.dataset.docIndex)];
       const panel = $('[data-document-viewer], #document-viewer') || container;
-      try { panel.innerHTML = `<article class="document-view"><h2>${text(doc.title)}</h2>${markdownToHtml(await loadText(doc.path))}</article>`; }
-      catch (error) { panel.innerHTML = `<p role="alert">Unable to load this article: ${text(error.message)}</p>`; }
-    }, { once: true });
+      try {
+        const body = await loadText(doc.path);
+        // An article that opens with its own top-level heading is not given a second one.
+        const heading = articleHasOwnTitle(body) ? '' : `<h2>${text(doc.title)}</h2>`;
+        panel.innerHTML = `<article class="document-view">${heading}${markdownToHtml(body)}</article>`;
+      } catch (error) { panel.innerHTML = `<p role="alert">Unable to load this article: ${text(error.message)}</p>`; }
+    });
   }
 
   function renderInventory() {
     const container = $('[data-inventory], #inventory, .inventory-list');
     if (!container || !state.features.length) return;
     container.innerHTML = state.features.map((feature) => `<li data-search="${text(`${feature.id} ${feature.label} ${feature.status}`.toLowerCase())}"><span>${text(feature.label)}</span><span class="status-chip status-${text(feature.status)}">${text(feature.status)}</span></li>`).join('');
+  }
+
+  /**
+   * The install card reads its own data file independently of the other
+   * startup fetches, so a missing or malformed manifest never blocks the
+   * rest of the page from rendering. renderReleaseCard() always fails
+   * closed to an honest, no-download-control state; this function's only
+   * job is to fetch, hand the result to it, and surface the exact reason
+   * for any validation failure where a maintainer will actually see it.
+   */
+  async function renderInstallSurface() {
+    const container = $('[data-install-card]');
+    if (!container) return;
+    let raw = null;
+    try {
+      raw = await loadJson('data/releases.json');
+    } catch (error) {
+      console.warn(`Install manifest could not be loaded: ${error.message}`);
+    }
+    const result = renderReleaseCard(raw);
+    if (!result.ok) console.warn(`Install manifest failed validation: ${result.reason}`);
+    container.innerHTML = result.html;
   }
 
   function wireSearch() {
@@ -317,6 +332,7 @@ import { initUniversalRuntime } from './universal-runtime.js';
       if (status) status.textContent = `Documentation data unavailable: ${error.message}`;
     }
     renderInventory(); renderDocs(); wireSearch(); wireTabs(); wireNavigationFoundation(); wirePreferencesFoundation(); wireExpansionSurfaces(); initProductContent(document);
+    await renderInstallSurface();
     document.dispatchEvent(new CustomEvent('material-site-ready', { detail: { basePath: base.href, state } }));
   }
 

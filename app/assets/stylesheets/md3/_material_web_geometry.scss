@@ -1,0 +1,210 @@
+// Shared Material Web (@material/web) geometry layer.
+//
+// WHY THIS FILE EXISTS
+// ---------------------
+// Every registered Material Web custom element (md-text-button, md-filled-button,
+// md-outlined-button, md-filled-tonal-button, md-elevated-button, md-icon-button,
+// md-filled-text-field, md-checkbox, md-radio, md-switch) renders its real geometry
+// inside shadow DOM. Each of those elements carries its own `:host { ... }` rule
+// (see node_modules/@material/web/button/internal/shared-styles.css and
+// node_modules/@material/web/iconbutton/internal/standard-styles.css) that computes
+// the host's own `min-height`/`height`, `width`, `padding-block`/`padding-inline`,
+// `font-family`, `font-size` and `text-wrap` FROM THAT COMPONENT'S OWN CSS CUSTOM
+// PROPERTIES (`--md-text-button-container-height`, `--md-icon-button-state-layer-*`,
+// `--md-filled-text-field-*-space`, and so on) -- never from whatever plain CSS an
+// outer stylesheet declares on the same selector.
+//
+// Concretely: a light-DOM rule such as `.mr-icon-btn { width: 32px; height: 32px }`
+// targets the same host element that the component's own `:host { height:
+// var(--_state-layer-height); width: var(--_state-layer-width) }` rule targets,
+// and the token-driven declaration wins (its custom properties default to 40px when
+// nothing has set them). The 32px the author asked for never actually appears on
+// screen; the button renders at Material Web's unmodified default and clips or
+// overflows whatever slot the author sized for 32px. The same shadow-DOM host rule
+// also re-specifies `font-family`, `font-size` and `line-height` from its own
+// label-text tokens, so an author-level `font-size: 12px` or `font-family: monospace`
+// on the host is equally inert for the rendered label. Only the OFFICIAL custom
+// properties reach the internal calculation that sizes the container, the label,
+// the icon, the ripple, the focus ring and the touch target together, coherently.
+//
+// THE FIX: size every Material Web host exclusively through its own official
+// tokens, never through plain `width`/`height`/`padding`/`font-size`/`font-family`/
+// `white-space` on the host selector. This file is the one place those token sets
+// are named, with a documented default and compact size for each control family.
+//
+// WHERE THIS IS IMPORTED (so the layer reaches every rendering path)
+// --------------------------------------------------------------------
+// 1. app/assets/stylesheets/md3/index.scss imports this partial, and that index is
+//    imported by app/assets/stylesheets/color_modes/_md3.scss, which in turn is
+//    imported by BOTH app/assets/stylesheets/application.scss and
+//    app/assets/stylesheets/application_dark.scss -- the two Sprockets entry points
+//    GitLab compiles for the light and (separately loaded) dark theme. Importing it
+//    once here, rather than in application.scss/application_dark.scss directly,
+//    keeps the geometry layer next to the token/typography/shape primitives it is
+//    conceptually part of and avoids a second near-duplicate import site that could
+//    drift out of sync with the md3 prototype layer's own load-order comment.
+// 2. Every material_system/surfaces/**/*.scss file that hosts a registered Material
+//    Web element imports this same partial directly (`@import 'md3/material_web_geometry';`).
+//    Those surface stylesheets are compiled independently by
+//    config/webpack/loaders/material_scss_loader.js via `sass.compileString`, whose
+//    `loadPaths` include `app/assets/stylesheets` -- so `md3/material_web_geometry`
+//    resolves there exactly as `md3/index` would, with no webpack-specific alias
+//    needed. A surface stylesheet that does not use a Material Web element (for
+//    example operations.scss, which renders everything through plain `<button>`/
+//    `<input>`) has no need to import this file and does not.
+//
+// SIZES
+// -----
+// "default" pins the control to Material Web's own shipped default (so the
+// intent is explicit rather than implicit), and "compact" is the smaller size the
+// design contracts under design/*.dc.html actually draw for dense chrome (the
+// global/local search top bars, in-field regex affordances). Values below are
+// cited against the design contract that specifies them; see
+// doc/development/material_web_geometry.md for the full table.
+//
+//   Buttons (md-text-button / md-filled-button / md-outlined-button /
+//   md-filled-tonal-button / md-elevated-button):
+//     default  container-height 40px, leading/trailing-space 12px (the library's
+//              own shipped default -- see button/internal/text-styles.css's
+//              `var(--md-text-button-container-height, 40px)`).
+//     compact  container-height 28px, leading/trailing-space 10px, label-text-size
+//              12px/16px line-height -- derived from design/Merge Requests.dc.html
+//              and design/Issues.dc.html's regex-mode toggle
+//              (`padding:5px 10px;border-radius:999px;font-size:12px;font-weight:700`).
+//
+//   Icon buttons (md-icon-button):
+//     default  state-layer 40px, icon-size 24px (the library's own shipped default;
+//              also the exact size of design/Issues.dc.html's command-palette and
+//              theme-toggle icon buttons, `width:40px;height:40px`).
+//     compact  state-layer 32px, icon-size 18px -- design/Issues.dc.html and
+//              design/Merge Requests.dc.html's in-field regex-builder trigger,
+//              `width:32px;height:32px` with an 18px icon.
+//
+//   Filled text fields (md-filled-text-field):
+//     default  top/bottom-space 16px, with-label top/bottom-space 8px each (the
+//              library's own shipped default, ~56px tall with body-large's 24px
+//              line-height).
+//     compact  top/bottom-space 4px, with-label top/bottom-space 4px each -- sized
+//              so the field's own box stays close to its 24px line-height (~32px
+//              total) and lets the surrounding chip/pill (the shared shell topbar's
+//              8px vertical padding, the per-surface topbar's 8px/12px padding)
+//              supply the rest of the visual height, matching
+//              design/Sidebar.dc.html's `padding:6px 8px 6px 12px` search pill and
+//              design/Issues.dc.html / design/Merge Requests.dc.html's
+//              `padding:8px 8px 8px 18px` search pill.
+//
+// Every mixin call sets the token for every button variant it can apply to (text,
+// filled, outlined, filled-tonal, elevated) even when the call site only ever
+// renders one variant. Setting `--md-filled-button-container-height` on a host that
+// is actually rendered as `md-text-button` has no effect at all -- only the tag
+// that is actually present reads its own token -- so this costs nothing and keeps
+// one mixin call correct regardless of which `variant` prop a Vue call site passes.
+
+@mixin mw-button-size(
+  $container-height,
+  $leading-space: null,
+  $trailing-space: null,
+  $label-size: null,
+  $label-line-height: null,
+  $label-weight: null
+) {
+  --md-text-button-container-height: #{$container-height};
+  --md-filled-button-container-height: #{$container-height};
+  --md-outlined-button-container-height: #{$container-height};
+  --md-filled-tonal-button-container-height: #{$container-height};
+  --md-elevated-button-container-height: #{$container-height};
+
+  @if $leading-space != null {
+    --md-text-button-leading-space: #{$leading-space};
+    --md-filled-button-leading-space: #{$leading-space};
+    --md-outlined-button-leading-space: #{$leading-space};
+    --md-filled-tonal-button-leading-space: #{$leading-space};
+    --md-elevated-button-leading-space: #{$leading-space};
+  }
+
+  @if $trailing-space != null {
+    --md-text-button-trailing-space: #{$trailing-space};
+    --md-filled-button-trailing-space: #{$trailing-space};
+    --md-outlined-button-trailing-space: #{$trailing-space};
+    --md-filled-tonal-button-trailing-space: #{$trailing-space};
+    --md-elevated-button-trailing-space: #{$trailing-space};
+  }
+
+  @if $label-size != null {
+    --md-text-button-label-text-size: #{$label-size};
+    --md-filled-button-label-text-size: #{$label-size};
+    --md-outlined-button-label-text-size: #{$label-size};
+    --md-filled-tonal-button-label-text-size: #{$label-size};
+    --md-elevated-button-label-text-size: #{$label-size};
+  }
+
+  @if $label-line-height != null {
+    --md-text-button-label-text-line-height: #{$label-line-height};
+    --md-filled-button-label-text-line-height: #{$label-line-height};
+    --md-outlined-button-label-text-line-height: #{$label-line-height};
+    --md-filled-tonal-button-label-text-line-height: #{$label-line-height};
+    --md-elevated-button-label-text-line-height: #{$label-line-height};
+  }
+
+  @if $label-weight != null {
+    --md-text-button-label-text-weight: #{$label-weight};
+    --md-filled-button-label-text-weight: #{$label-weight};
+    --md-outlined-button-label-text-weight: #{$label-weight};
+    --md-filled-tonal-button-label-text-weight: #{$label-weight};
+    --md-elevated-button-label-text-weight: #{$label-weight};
+  }
+}
+
+@mixin mw-icon-button-size($state-layer-size, $icon-size: null) {
+  --md-icon-button-state-layer-height: #{$state-layer-size};
+  --md-icon-button-state-layer-width: #{$state-layer-size};
+
+  @if $icon-size != null {
+    --md-icon-button-icon-size: #{$icon-size};
+  }
+}
+
+@mixin mw-field-size($top-space, $bottom-space, $leading-space: null, $trailing-space: null) {
+  --md-filled-text-field-top-space: #{$top-space};
+  --md-filled-text-field-bottom-space: #{$bottom-space};
+  --md-filled-text-field-with-label-top-space: #{$top-space};
+  --md-filled-text-field-with-label-bottom-space: #{$bottom-space};
+
+  @if $leading-space != null {
+    --md-filled-text-field-leading-space: #{$leading-space};
+    --md-filled-text-field-with-leading-icon-leading-space: #{$leading-space};
+  }
+
+  @if $trailing-space != null {
+    --md-filled-text-field-trailing-space: #{$trailing-space};
+    --md-filled-text-field-with-trailing-icon-trailing-space: #{$trailing-space};
+  }
+}
+
+// Ready-made classes for the common case: apply the size directly to whatever
+// element the Vue adapter renders, either from a `.vue` template's static class
+// list or by extending them from a more specific selector in a surface's own
+// stylesheet (`@extend .mw-btn--compact;` after this file has been imported).
+.mw-btn--default {
+  @include mw-button-size(40px, 12px, 12px);
+}
+
+.mw-btn--compact {
+  @include mw-button-size(28px, 10px, 10px, 12px, 16px);
+}
+
+.mw-icon-btn--default {
+  @include mw-icon-button-size(40px, 24px);
+}
+
+.mw-icon-btn--compact {
+  @include mw-icon-button-size(32px, 18px);
+}
+
+.mw-field--default {
+  @include mw-field-size(16px, 16px);
+}
+
+.mw-field--compact {
+  @include mw-field-size(4px, 4px);
+}

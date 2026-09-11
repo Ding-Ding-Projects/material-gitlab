@@ -1,0 +1,6 @@
+# Keep documentation out of the build context. The packages/ directory is deliberately
+# NOT ignored: the Dockerfile bind-mounts it to read a local .deb, and an ignored file is
+# absent from the context, so the bind mount would see nothing and the offline build would
+# fall back to a network download. A local .deb never becomes an image layer anyway, since
+# it is bind-mounted rather than copied. .gitignore keeps it out of version control.
+*.md

@@ -2,6 +2,14 @@
 // This surface renders the bespoke Material design (see design/Merge Requests.dc.html),
 // not GitLab's Pajamas/Tailwind system, so every color routes through the --mr-* custom
 // properties below rather than gl- utility classes or hardcoded values.
+//
+// Registered Material Web elements render here (MrTopBar.vue's search field and
+// icon/regex buttons, and the plain buttons rendered by <material-button> across
+// this surface's components). Every one of those hosts is sized through the
+// official custom properties in md3/_material_web_geometry.scss -- a plain
+// width/height/padding/font-size/font-family on the host is inert (overridden by
+// the component's own shadow-DOM :host rule) and clips instead of resizing it.
+@import 'md3/material_web_geometry';
 
 .mr-app {
   --mr-surf: #f4effa;
@@ -158,6 +166,9 @@
   color: var(--mr-onsurf);
   flex: 1;
   min-width: 0;
+  // The pill (.mr-topbar__search) supplies the visible chip padding; keep the
+  // field's own box close to its line-height so the two don't double up.
+  @include mw-field-size(4px, 4px);
 
   &::placeholder {
     color: var(--mr-onsurfv);
@@ -165,9 +176,11 @@
   }
 }
 
+// Rendered as <material-button variant="text"> with only an icon in its
+// default slot (see MrTopBar.vue/MrDetailHeader.vue) -- an md-text-button
+// used to look like an icon button. Matches design/Merge Requests.dc.html's
+// 32px in-field regex-builder trigger (`width:32px;height:32px`).
 .mr-icon-btn {
-  width: 32px;
-  height: 32px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -177,6 +190,7 @@
   background: transparent;
   color: inherit;
   flex-shrink: 0;
+  @include mw-button-size(32px, 6px, 6px);
 
   &:hover,
   &:focus-visible {
@@ -184,23 +198,23 @@
   }
 }
 
+// Matches design/Merge Requests.dc.html's 40px command-palette/theme-toggle
+// icon buttons (`width:40px;height:40px`).
 .mr-icon-btn--lg {
-  width: 40px;
-  height: 40px;
   color: var(--mr-onsurfv);
+  @include mw-button-size(40px, 8px, 8px);
 }
 
 .mr-topbar__regex-toggle {
-  padding: 5px 10px;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
   cursor: pointer;
-  font-family: monospace;
   background: var(--mr-surfch);
   color: var(--mr-onsurfv);
   border: none;
   flex-shrink: 0;
+  // design/Merge Requests.dc.html: padding:5px 10px;font-size:12px;font-weight:700;font-family:monospace
+  @include mw-button-size(26px, 10px, 10px, $label-size: 12px, $label-line-height: 16px, $label-weight: 700);
+  --md-text-button-label-text-font: monospace;
 
   &[data-active='true'] {
     background: var(--mr-prim);
@@ -256,11 +270,10 @@
   color: var(--mr-onprim);
   border: none;
   border-radius: 999px;
-  padding: 10px 20px;
   font-weight: 500;
-  font-size: 14px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  @include mw-button-size(40px, 20px, 20px);
 
   &:hover,
   &:focus-visible {
@@ -330,10 +343,9 @@
   background: transparent;
   color: var(--mr-onprimc);
   border-radius: 999px;
-  padding: 7px 16px;
-  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  @include mw-button-size(32px, 16px, 16px, $label-size: 13px, $label-line-height: 18px);
 
   &:hover,
   &:focus-visible {
@@ -384,10 +396,9 @@
   background: transparent;
   border: none;
   color: var(--mr-onprimc);
-  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
-  padding: 4px 8px;
+  @include mw-button-size(24px, 8px, 8px, $label-size: 12.5px, $label-line-height: 16px);
 }
 
 .mr-list__empty {
@@ -435,7 +446,9 @@
   background: transparent;
   text-align: left;
   color: inherit;
-  padding: 0;
+  // Wraps the whole row (icon + title/meta + stats): no forced minimum height
+  // or side inset so it sizes purely to that content, flush with the row.
+  @include mw-button-size(0, 0, 0);
 }
 
 .mr-list-item__state-icon {
@@ -903,13 +916,12 @@
 
 .mr-thread__resolve-btn {
   margin-top: 8px;
-  font-size: 12.5px;
   font-weight: 500;
   color: var(--mr-onprimc);
   cursor: pointer;
   background: transparent;
   border: none;
-  padding: 0;
+  @include mw-button-size(24px, 0, 0, $label-size: 12.5px, $label-line-height: 16px);
 }
 
 .mr-comment-composer {
@@ -938,11 +950,10 @@
   color: var(--mr-onprim);
   border: none;
   border-radius: 999px;
-  padding: 10px 20px;
   font-weight: 500;
-  font-size: 13.5px;
   cursor: pointer;
   flex-shrink: 0;
+  @include mw-button-size(40px, 20px, 20px, $label-size: 13.5px, $label-line-height: 20px);
 
   &:disabled {
     opacity: 0.5;
@@ -1040,12 +1051,11 @@
 .mr-btn {
   border: none;
   border-radius: 999px;
-  padding: 8px 16px;
-  font-size: 12.5px;
   font-weight: 500;
   cursor: pointer;
   background: var(--mr-surfch);
   color: var(--mr-onsurf);
+  @include mw-button-size(32px, 16px, 16px, $label-size: 12.5px, $label-line-height: 16px);
 
   &:hover,
   &:focus-visible {
@@ -1286,10 +1296,10 @@
   md-filled-text-field {
     min-width: 0;
     max-width: 100%;
-    padding: 0;
     border: 0;
     background: transparent;
     --md-filled-text-field-container-shape: 12px;
+    @include mw-field-size(16px, 16px);
   }
 
   md-text-button,
@@ -1297,9 +1307,9 @@
   md-outlined-button,
   md-filled-tonal-button,
   md-elevated-button {
-    padding: 0;
     border: 0;
     background: transparent;
     --md-text-button-label-text-color: currentColor;
+    @include mw-button-size(40px, 12px, 12px);
   }
 }

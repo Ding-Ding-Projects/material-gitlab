@@ -1351,6 +1351,108 @@
         ],
         "assertion": "evidence records real SHA, timestamp and verification state"
       }
+    },
+    {
+      "id": "deployment",
+      "label": "Deployment: Docker Compose, .deb package, and container image for this fork",
+      "status": "implemented",
+      "implementation": {
+        "paths": [
+          "docker-compose.yml",
+          "deploy/docker/Dockerfile",
+          ".github/workflows/omnibus-package.yml"
+        ],
+        "assertion": "a published release provides an installable .deb and container image built from this fork's own source"
+      },
+      "documentation": {
+        "paths": [
+          "site/docs/deployment.md",
+          "deploy/README.md"
+        ],
+        "assertion": "deployment article documents the Docker, .deb, and build-it-yourself install routes and their current state"
+      },
+      "localization": {
+        "paths": [
+          "site/src/main.js"
+        ],
+        "assertion": "deployment article renders through the shared documentation viewer in all three language modes"
+      },
+      "persistence": {
+        "paths": [
+          "site/src/main.js"
+        ],
+        "assertion": "no visitor-local state is owned by this article; it is static reference content"
+      },
+      "tests": {
+        "paths": [
+          "site/scripts/completeness-check.mjs"
+        ],
+        "assertion": "deployment article path and bundled status are named in the executable completeness check"
+      },
+      "capture": {
+        "paths": [
+          "site/evidence/deployment.json",
+          "site/evidence/deployment-article.png"
+        ],
+        "assertion": "a real built-site capture of the rendered deployment article, opened through the library Documentation tab and its Read article control, exists with its receipt"
+      },
+      "evidence": {
+        "paths": [
+          "site/evidence/deployment.json"
+        ],
+        "assertion": "evidence record names the source commit, the served built artifact, the CDP capture method, the viewer position at capture, and the SHA-256 of the capture"
+      }
+    },
+    {
+      "id": "release-install-card",
+      "label": "Home page install card driven by a verified release manifest",
+      "status": "planned",
+      "implementation": {
+        "paths": [
+          "site/index.html",
+          "site/src/releases.js",
+          "site/src/main.js"
+        ],
+        "assertion": "Home page card renders package and image entries from a committed, schema-validated release manifest and never fabricates a download URL"
+      },
+      "documentation": {
+        "paths": [
+          "site/docs/deployment.md",
+          "site/data/releases.schema.md"
+        ],
+        "assertion": "deployment article and manifest schema document the package, image, WSL routes and the verified-entry-only rule"
+      },
+      "localization": {
+        "paths": [
+          "site/src/content.js"
+        ],
+        "assertion": "install card copy has English and Traditional Chinese catalogue entries alongside the site's other dynamic-list copy"
+      },
+      "persistence": {
+        "paths": [
+          "site/data/releases.json"
+        ],
+        "assertion": "the committed manifest is the sole source of truth for install entries and starts with an empty entries array"
+      },
+      "tests": {
+        "paths": [
+          "site/tests/site.test.mjs"
+        ],
+        "assertion": "empty-manifest, verified-entry and malformed-manifest rendering are named in the executable check"
+      },
+      "capture": {
+        "paths": [
+          "site/evidence/release-install-card.json",
+          "site/evidence/release-install-card.png"
+        ],
+        "assertion": "a real built-site capture of the empty state exists with its receipt; a capture of a populated state is still required before this row can claim implemented, and none can exist until a release is published"
+      },
+      "evidence": {
+        "paths": [
+          "site/evidence/release-install-card.json"
+        ],
+        "assertion": "the empty-state evidence record names the source commit, capture method and SHA-256 and confirms no download control rendered; status stays planned until the populated-state capture exists"
+      }
     }
   ]
 }
