@@ -1,4 +1,4 @@
-import { token as csrfToken } from '~/lib/utils/csrf';
+import csrf from '~/lib/utils/csrf';
 
 export const STATUS_QUERY = `query MaterialSettingsSecretsStatus($fullPath: ID!) { secretsManager: projectSecretsManager(projectPath: $fullPath) { status entity: project { id archived markedForDeletion } } }`;
 export const HEALTH_QUERY = 'query MaterialSettingsOpenbaoHealth { openbaoHealth }';
@@ -23,7 +23,7 @@ export function createSecretsManagerSettingsAdapter({ metadata, fetchImpl = glob
   };
   const gql = async (query, variables = {}) => {
     if (metadata?.available !== true || !metadata.full_path || !local(metadata.graphql_endpoint)) throw new Error('Secrets Manager metadata endpoint is unavailable.');
-    const response = await fetchImpl(metadata.graphql_endpoint, { method: 'POST', credentials: 'same-origin', redirect: 'error', headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-Token': csrfToken }, body: JSON.stringify({ query, variables }) });
+    const response = await fetchImpl(metadata.graphql_endpoint, { method: 'POST', credentials: 'same-origin', redirect: 'error', headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-Token': csrf.token }, body: JSON.stringify({ query, variables }) });
     if (!response.ok) throw new Error(`Secrets Manager request failed (${response.status}).`);
     const body = await response.json();
     if (body?.errors?.length || !body?.data || typeof body.data !== 'object') throw new Error('Secrets Manager metadata is unavailable for your current project access.');

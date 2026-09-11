@@ -2,7 +2,14 @@ import { mount } from '@vue/test-utils';
 import SpecialCapabilitiesSettings from '~/material_system/surfaces/Settings/components/SpecialCapabilitiesSettings.vue';
 import { createSpecialCapabilitiesAdapter } from '~/material_system/surfaces/Settings/special_capabilities_adapter';
 
-jest.mock('~/lib/utils/csrf', () => ({ token: 'csrf-value' }));
+// Shaped to match the real module (`app/assets/javascripts/lib/utils/csrf.js`), which has only
+// a default export. A mock with a bare top-level `token` property would also satisfy the broken
+// `import { token as csrfToken } from '~/lib/utils/csrf'` named import, hiding the exact webpack
+// failure this regression exists to catch.
+jest.mock('~/lib/utils/csrf', () => ({
+  __esModule: true,
+  default: { token: 'mock-csrf-token', headerKey: 'X-CSRF-Token' },
+}));
 jest.mock('@gitlab/ui', () => ({
   GlAlert: {
     render(h) {
@@ -140,7 +147,7 @@ describe('specialized Settings design controls', () => {
         method: 'GET',
         credentials: 'same-origin',
         redirect: 'error',
-        headers: expect.objectContaining({ 'X-CSRF-Token': 'csrf-value' }),
+        headers: expect.objectContaining({ 'X-CSRF-Token': 'mock-csrf-token' }),
       }),
     );
   });

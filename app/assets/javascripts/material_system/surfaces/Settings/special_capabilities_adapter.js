@@ -1,4 +1,4 @@
-import { token as csrfToken } from '~/lib/utils/csrf';
+import csrf from '~/lib/utils/csrf';
 
 export const CI_CATALOG_QUERY = `query MaterialSettingsCiCatalog($fullPath: ID!) {
   project(fullPath: $fullPath) { id isCatalogResource description }
@@ -45,7 +45,7 @@ export function createSpecialCapabilitiesAdapter({
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
-        'X-CSRF-Token': csrfToken,
+        'X-CSRF-Token': csrf.token,
       },
       body: body === undefined ? undefined : JSON.stringify(body),
     });

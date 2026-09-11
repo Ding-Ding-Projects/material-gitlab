@@ -2,7 +2,14 @@ import { shallowMount } from '@vue/test-utils';
 import { createServiceDeskAdapter } from '~/material_system/surfaces/Settings/service_desk_adapter';
 import ServiceDeskSettings from '~/material_system/surfaces/Settings/components/ServiceDeskSettings.vue';
 
-jest.mock('~/lib/utils/csrf', () => ({ token: 'csrf-value' }));
+// Shaped to match the real module (`app/assets/javascripts/lib/utils/csrf.js`), which has only
+// a default export. A mock with a bare top-level `token` property would also satisfy the broken
+// `import { token } from '~/lib/utils/csrf'` named import, hiding the exact webpack failure this
+// regression exists to catch.
+jest.mock('~/lib/utils/csrf', () => ({
+  __esModule: true,
+  default: { token: 'mock-csrf-token', headerKey: 'X-CSRF-Token' },
+}));
 jest.mock('@gitlab/ui', () => ({
   GlAlert: {
     render(h) {
@@ -97,7 +104,7 @@ describe('Service Desk design adapter', () => {
       expect.objectContaining({
         method: 'PUT',
         credentials: 'same-origin',
-        headers: expect.objectContaining({ 'X-CSRF-Token': 'csrf-value' }),
+        headers: expect.objectContaining({ 'X-CSRF-Token': 'mock-csrf-token' }),
       }),
     );
     expect(JSON.parse(fetchImpl.mock.calls[0][1].body)).toEqual({

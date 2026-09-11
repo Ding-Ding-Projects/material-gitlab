@@ -1,4 +1,4 @@
-import { token } from '~/lib/utils/csrf';
+import csrf from '~/lib/utils/csrf';
 
 const CUSTOM_EMAIL_ERROR = 'Custom email request failed. Check the settings and try again.';
 const MALFORMED_RESPONSE = 'Service Desk returned an invalid settings response.';
@@ -92,7 +92,7 @@ const request = async (fetchImpl, url, method, body, options = {}) => {
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      'X-CSRF-Token': token,
+      'X-CSRF-Token': csrf.token,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
   });

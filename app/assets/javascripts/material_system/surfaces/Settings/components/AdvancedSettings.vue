@@ -35,7 +35,7 @@
       <p class="st-card__desc">Changing the project path can require local repository and deployment service updates.</p>
       <gl-form :action="actionFor('path_change')" method="post">
         <input type="hidden" name="_method" value="patch" /><input type="hidden" name="material_settings_section" value="advanced" /><input :value="csrfToken" type="hidden" name="authenticity_token" />
-        <gl-form-group label="Path" label-for="st-project-path"><gl-input-group :prepend="`${metadata.path_change.prefix}/`"><gl-form-input id="st-project-path" name="project[path]" :value="metadata.path_change.current_path" required /></gl-input-group></gl-form-group>
+        <gl-form-group label="Path" label-for="st-project-path"><gl-form-input-group><template #prepend><gl-input-group-text>{{ `${metadata.path_change.prefix}/` }}</gl-input-group-text></template><gl-form-input id="st-project-path" name="project[path]" :value="metadata.path_change.current_path" required /></gl-form-input-group></gl-form-group>
         <gl-button type="submit" variant="danger">Change path</gl-button>
       </gl-form>
     </div>
@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlInputGroup } from '@gitlab/ui';
+import { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlFormInputGroup, GlInputGroupText } from '@gitlab/ui';
 import csrf from '~/lib/utils/csrf';
 import ConfirmDialog from './ConfirmDialog.vue';
 import SearchField from './SearchField.vue';
@@ -98,7 +98,7 @@ const safeLocalAction = (action) => typeof action === 'string' && action.startsW
 
 export default {
   name: 'AdvancedSettings',
-  components: { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlInputGroup, ConfirmDialog, SearchField, MaterialButton },
+  components: { GlButton, GlForm, GlFormCheckbox, GlFormGroup, GlFormInput, GlFormInputGroup, GlInputGroupText, ConfirmDialog, SearchField, MaterialButton },
   props: { metadata: { type: Object, default: () => ({}) } },
   data() { return { pruneAcknowledged: false, transferNamespaceId: '', transferConfirmation: '', transferQuery: '', transferRegexMode: false, transferRegexOpen: false, transferDestinations: [], transferPage: 1, transferTotalPages: 1, transferLoading: false, transferError: false, removeForkConfirmation: '', deleteConfirmation: '', pendingAction: null }; },
   computed: {
