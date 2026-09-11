@@ -433,7 +433,11 @@ jobs:
 
   build-image:
     needs: build-package
-    if: ${{ inputs.push_image && needs.build-package.result == 'success' }}
+    # Runs whenever a verified package exists, even if publishing the release failed. The
+    # image installs the package from the uploaded artifact, not from the release, so a
+    # release-only failure (GitHub refuses assets of 2 GiB or more, for example) must not
+    # also cost the container image after a two hour build.
+    if: ${{ always() && inputs.push_image && needs.build-package.outputs.deb_sha256 != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:
