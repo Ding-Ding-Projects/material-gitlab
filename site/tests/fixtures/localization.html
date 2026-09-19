@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Localization regression fixture</title>
+  <link rel="stylesheet" href="../../src/content.css">
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 1rem; }
+    h1 { overflow-wrap: anywhere; }
+    main { max-width: 36rem; }
+    main > div, main > label { margin-block: 1rem; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+  </style>
+</head>
+<body>
+  <h1>Localization regression fixture</h1>
+  <main id="fixture">
+    <div><label for="site-search">Search the library</label><input id="site-search" type="search" value="git push origin main" aria-describedby="external-error"><p id="external-error">External service returned status 503.</p></div>
+    <div><label for="tab-search">Search tabs</label><input id="tab-search" type="search" placeholder="Search tabs"><button id="next-control">Next control</button></div>
+    <label>Tool search<input data-tools-search type="search"></label>
+    <label>Document search<input data-offline-doc-search type="search"></label>
+    <label>Command search<input data-command-search type="search"></label>
+    <label>Personal vocabulary JSON <input data-vocabulary-upload type="file" accept="application/json,.json"><button id="clear-control">Clear local vocabulary</button></label>
+    <div id="factory"></div>
+    <div id="lazy"></div>
+  </main>
+  <pre id="results" role="status">Running checks…</pre>
+  <script type="module">
+    import { createTextField, getContent, initProductContent, TEXT_FIELD_SPECS } from '../../src/content.js';
+    import { loadPreferences, savePreferences } from '../../src/preferences.js';
+    const results = [];
+    const check = (name, condition) => {
+      results.push({ name, passed: Boolean(condition) });
+      if (!condition) throw new Error(name);
+    };
+    const settle = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const page = document.documentElement;
+    const scope = document.querySelector('#fixture');
+    const input = document.querySelector('#site-search');
+    const original = input;
+    let inputs = 0;
+    input.addEventListener('input', () => { inputs += 1; });
+    // Isolate preferences so opening this fixture never changes a user's saved settings.
+    const records = new Map();
+    const storage = { getItem: (key) => records.get(key) ?? null, setItem: (key, value) => records.set(key, value) };
+    window.localizationDone = (async () => {
+      savePreferences({ language: 'zh-Hant', funnyLevelEnglish: 1, funnyLevelCantonese: 5 }, storage);
+      page.dataset.language = loadPreferences(storage).language;
+      const controller = initProductContent(scope);
+      check('element-root initialization honors the saved language', input.getAttribute('aria-label') === '搜尋文件庫');
+      check('initial supporting copy is localized', document.querySelector('#site-search-supporting').textContent.includes('搜尋指南標題'));
+      check('external description remains linked', input.getAttribute('aria-describedby').split(' ').includes('external-error'));
+      check('existing clear button is preserved', Boolean(document.querySelector('#clear-control')));
+      for (const language of ['en', 'zh-Hant', 'bilingual']) {
+        page.dataset.language = language;
+        await settle();
+        const expected = getContent(TEXT_FIELD_SPECS.siteSearch.label, language);
+        check(`${language}: accessible label refreshes`, input.getAttribute('aria-label') === expected);
+        check(`${language}: visible label refreshes`, input.labels[0].textContent === expected);
+        check(`${language}: placeholder refreshes`, input.placeholder === getContent(TEXT_FIELD_SPECS.siteSearch.placeholder, language));
+        check(`${language}: the original control and its value survive`, input === original && input.value === 'git push origin main');
+      }
+      check('bilingual spans identify both spoken languages', input.labels[0].querySelector('[lang="en"]') && input.labels[0].querySelector('[lang="yue"]'));
+      const ids = [...scope.querySelectorAll('[id]')].map((element) => element.id);
+      check('anonymous fields receive unique IDs and descriptions', new Set(ids).size === ids.length);
+      check('reinitialization reuses the controller', initProductContent(scope) === controller);
+      check('reinitialization does not add duplicate descriptions', scope.querySelectorAll('#site-search-supporting').length === 1);
+      input.dispatchEvent(new Event('input'));
+      check('existing event listeners survive', inputs === 1);
+      input.focus();
+      page.dataset.schoolMode = 'true';
+      await settle();
+      check('Focus override forces English on registered fields', input.getAttribute('aria-label') === 'Search the library');
+      check('language changes retain focus', document.activeElement === input);
+      check('Focus override does not rewrite saved language or levels', loadPreferences(storage).language === 'zh-Hant' && loadPreferences(storage).funnyLevelEnglish === 1);
+      page.dataset.schoolMode = 'false';
+      await settle();
+      check('leaving Focus restores the effective bilingual presentation', input.getAttribute('aria-label') === 'Search the library / 搜尋文件庫');
+      const support = document.querySelector('#site-search-supporting');
+      support.textContent = 'Validation service returned status 422.';
+      input.setAttribute('aria-invalid', 'true');
+      page.dataset.language = 'zh-Hant';
+      await settle();
+      check('external error text and invalid state survive language changes', support.textContent === 'Validation service returned status 422.' && input.getAttribute('aria-invalid') === 'true');
+      const lazy = document.createElement('input');
+      lazy.type = 'search';
+      lazy.dataset.commandSearch = '';
+      document.querySelector('#lazy').append(lazy);
+      await settle();
+      check('late-mounted fields use the active language', lazy.getAttribute('aria-label') === '搜尋文件庫');
+      const field = createTextField({ id: 'factory-input', name: 'regexPattern', state: 'error', language: 'bilingual', describedBy: 'external-error', value: '^[a-z]+$' });
+      document.querySelector('#factory').append(field.element);
+      check('factory initial errors are localized in both languages', field.supporting.textContent === getContent(TEXT_FIELD_SPECS.regexPattern.errors.invalid, 'bilingual'));
+      check('factory external descriptions are kept', field.input.getAttribute('aria-describedby') === 'external-error factory-input-supporting');
+      field.setState('error', '<img src=x onerror="window.injected=true">');
+      field.setLanguage('zh-Hant');
+      check('external errors are literal text, not HTML', !field.supporting.querySelector('img') && !window.injected && field.supporting.textContent.includes('<img'));
+      field.setState('default');
+      check('factory normal-state copy uses the current language', field.supporting.textContent === getContent(TEXT_FIELD_SPECS.regexPattern.supporting, 'zh-Hant'));
+      field.setLanguage('en');
+      check('factory language changes preserve entered data', field.input.value === '^[a-z]+$');
+      controller.dispose();
+      page.dataset.language = 'en';
+      await settle();
+      check('disposed controllers stop observing', input.getAttribute('aria-label') === '搜尋文件庫');
+      window.controller = initProductContent(scope);
+      check('disposed controllers can be replaced without duplicate descriptions', input.getAttribute('aria-label') === 'Search the library' && scope.querySelectorAll('#site-search-supporting').length === 1);
+      window.factoryField = field;
+      page.dataset.language = 'bilingual';
+      await settle();
+      return results;
+    })();
+    window.localizationDone.then((checks) => {
+      document.querySelector('#results').textContent = JSON.stringify({ passed: checks.length, checks }, null, 2);
+      document.body.dataset.result = 'passed';
+    }).catch((error) => {
+      document.querySelector('#results').textContent = JSON.stringify({ error: error.message, checks: results }, null, 2);
+      document.body.dataset.result = 'failed';
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
