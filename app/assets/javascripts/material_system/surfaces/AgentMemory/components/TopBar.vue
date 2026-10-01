@@ -5,16 +5,16 @@
       <label for="am-search-input" class="am-visually-hidden">
         {{ regexMode ? 'Regex search across memory inventory' : 'Search memory, skills, sessions' }}
       </label>
-      <input
+      <MaterialTextField
         id="am-search-input"
         ref="searchInput"
         type="text"
         class="am-search-bar__input"
         :value="search"
         :placeholder="placeholder"
-        @input="$emit('update:search', $event.target.value)"
+        @input="$emit('update:search', $event)"
       />
-      <button
+      <MaterialTextButton
         type="button"
         class="am-regex-mode-pill"
         :class="{ 'am-regex-mode-pill--active': regexMode }"
@@ -23,8 +23,8 @@
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </MaterialTextButton>
+      <MaterialIconButton
         type="button"
         class="am-icon-btn"
         title="Regex builder"
@@ -33,25 +33,25 @@
         @click="openBuilder"
       >
         <MaterialIcon name="tune" :size="18" />
-      </button>
+      </MaterialIconButton>
     </div>
 
-    <button
+    <MaterialIconButton
       type="button"
       class="am-icon-btn"
       title="Command palette (Ctrl+Shift+F)"
       @click="$emit('open-palette')"
     >
       <MaterialIcon name="command" :size="20" />
-    </button>
-    <button
+    </MaterialIconButton>
+    <MaterialIconButton
       type="button"
       class="am-icon-btn"
       :title="dark ? 'Switch to light theme' : 'Switch to dark theme'"
       @click="$emit('toggle-theme')"
     >
       <MaterialIcon :name="dark ? 'sun' : 'moon'" :size="20" />
-    </button>
+    </MaterialIconButton>
     <div class="am-avatar" title="Signed in as JD" aria-hidden="true">JD</div>
 
     <RegexBuilderPopover
@@ -69,10 +69,19 @@
 <script>
 import MaterialIcon from './MaterialIcon.vue';
 import RegexBuilderPopover from './RegexBuilderPopover.vue';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextButton from '../../../components/material_text_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'TopBar',
-  components: { MaterialIcon, RegexBuilderPopover },
+  components: {
+    MaterialIcon,
+    RegexBuilderPopover,
+    MaterialIconButton,
+    MaterialTextButton,
+    MaterialTextField,
+  },
   props: {
     search: {
       type: String,
