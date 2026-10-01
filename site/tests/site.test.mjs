@@ -61,7 +61,7 @@ test('option filter supports plain text and reports invalid regex', () => {
 
 test('preferences and private vocabulary fail closed', () => {
   assert.equal(normalizePreferences({ language: 'unknown', funnyLevelEnglish: 9 }).language, 'en');
-  assert.equal(normalizePreferences({ funnyLevelEnglish: 9 }).funnyLevelEnglish, 1);
+  assert.equal(normalizePreferences({ funnyLevelEnglish: 9 }).funnyLevelEnglish, 5);
   assert.deepEqual(validateVocabularyPayload({ schemaVersion: 1, entries: { hello: 'world' } }).entries, { hello: 'world' });
   assert.throws(() => validateVocabularyPayload({ schemaVersion: 2, entries: {} }), /Unsupported/);
   assert.throws(() => validateVocabularyPayload('{"schemaVersion":1,"entries":{"__proto__":"x"}}'), /unsafe|object/i);

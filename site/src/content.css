@@ -1,15 +1,21 @@
 /* Framework-free Material 3 text fields for the public site. */
 
-.m3-field {
+.m3-field,
+.m3-field__label,
+.m3-field__control,
+.m3-field__supporting {
   --m3-field-container: var(--surface, #fffbfe);
   --m3-field-on-container: var(--on-surface, #1d1b20);
   --m3-field-outline: var(--outline, #79747e);
   --m3-field-primary: var(--primary, #6750a4);
   --m3-field-error: var(--error, #ba1a1a);
+}
+
+.m3-field {
   display: grid;
   gap: 0.35rem;
   inline-size: min(100%, 36rem);
-  min-inline-size: 12rem;
+  min-inline-size: 0;
   position: relative;
 }
 
@@ -21,6 +27,7 @@
 }
 
 .m3-field__control {
+  box-sizing: border-box;
   appearance: none;
   background: var(--m3-field-container);
   border: 1px solid var(--m3-field-outline);
@@ -199,4 +206,15 @@
   .install-commands {
     scroll-behavior: auto;
   }
+}
+
+/* A secondary language wraps instead of widening controls or clipping labels. */
+.m3-field__label,
+.m3-field__supporting {
+  overflow-wrap: anywhere;
+}
+
+.m3-copy-secondary {
+  font-size: 0.9em;
+  font-weight: 400;
 }

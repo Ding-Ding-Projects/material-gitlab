@@ -1,3 +1,5 @@
+import { bindLocalizedFields, describeWith, localizedText, normalizeLanguage, renderLocalizedText, uniqueId } from './localization.js';
+
 /**
  * Product copy and small, framework-free Material 3 field helpers.
  *
@@ -173,15 +175,10 @@ export const TEXT_FIELD_SPECS = Object.freeze({
 
 const DEFAULT_LANGUAGE = 'en';
 
-export function getContent(value, language = DEFAULT_LANGUAGE) {
-  if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return value[language] ?? value[DEFAULT_LANGUAGE] ?? Object.values(value)[0] ?? '';
-  }
-  return String(value ?? '');
-}
+export const getContent = localizedText;
 
 export function getFieldSpec(name) {
-  return TEXT_FIELD_SPECS[name] ?? null;
+  return Object.hasOwn(TEXT_FIELD_SPECS, name) ? TEXT_FIELD_SPECS[name] : null;
 }
 
 export function createTextField({
@@ -193,54 +190,56 @@ export function createTextField({
   state = 'default',
   describedBy,
   spec = getFieldSpec(name),
+  document = globalThis.document,
 } = {}) {
   if (!id) throw new TypeError('createTextField requires an id');
-  if (typeof document === 'undefined') throw new Error('createTextField requires a browser document');
+  if (!document) throw new Error('createTextField requires a browser document');
 
   const field = document.createElement('div');
   field.className = 'm3-field';
-  field.dataset.fieldState = state;
-  field.dataset.language = language;
   field.dataset.copyKey = name;
-
   const label = document.createElement('label');
   label.className = 'm3-field__label';
   label.htmlFor = id;
-  label.textContent = getContent(spec?.label ?? name, language);
-
   const input = document.createElement(type === 'textarea' ? 'textarea' : 'input');
   input.className = 'm3-field__control';
   input.id = id;
   input.name = name;
+  if (type !== 'textarea') input.type = type;
   input.value = value;
-  if (input instanceof HTMLInputElement) input.type = type;
-  input.placeholder = getContent(spec?.placeholder, language);
-  input.setAttribute('aria-describedby', describedBy ?? `${id}-supporting`);
-  input.setAttribute('aria-invalid', String(state === 'error'));
-
   const supporting = document.createElement('span');
   supporting.className = 'm3-field__supporting';
-  supporting.id = describedBy ?? `${id}-supporting`;
-  supporting.textContent = getContent(spec?.supporting, language);
-
+  supporting.id = uniqueId(document, `${id}-supporting`);
+  if (describedBy) input.setAttribute('aria-describedby', describedBy);
+  describeWith(input, supporting.id);
   field.append(label, input, supporting);
 
-  const setState = (nextState = 'default', message) => {
-    field.dataset.fieldState = nextState;
-    input.setAttribute('aria-invalid', String(nextState === 'error'));
-    supporting.textContent = message ?? getContent(nextState === 'error' ? spec?.errors?.invalid : spec?.supporting, language);
+  let currentState = state;
+  let currentMessage;
+  const render = () => {
+    field.dataset.language = language;
+    field.dataset.fieldState = currentState;
+    input.setAttribute('aria-invalid', String(currentState === 'error'));
+    renderLocalizedText(label, spec?.label ?? name, language);
+    input.placeholder = getContent(spec?.placeholder, language);
+    const message = currentMessage ?? (currentState === 'error'
+      ? spec?.errors?.invalid ?? spec?.errors?.empty ?? spec?.supporting
+      : spec?.supporting);
+    renderLocalizedText(supporting, message, language);
   };
-
-  return { element: field, input, label, supporting, setState };
+  const setState = (nextState = 'default', message) => {
+    currentState = nextState;
+    currentMessage = message;
+    render();
+  };
+  const setLanguage = (nextLanguage) => { language = normalizeLanguage(nextLanguage); render(); };
+  setLanguage(language);
+  return { element: field, input, label, supporting, setState, setLanguage };
 }
 
-/**
- * Upgrade existing, semantic form controls without replacing their values,
- * event listeners, or feature-specific behaviour. Each control keeps an
- * explicit visible label and a concise supporting message.
- */
-export function initProductContent(root = document, language = DEFAULT_LANGUAGE) {
-  const fields = [
+/** Upgrade only registered fields, keeping controls, values and external error descriptions. */
+export function initProductContent(root = document, language) {
+  return bindLocalizedFields(root, TEXT_FIELD_SPECS, [
     ['#site-search', 'siteSearch'],
     ['#tab-search', 'tabSearch'],
     ['#tab-regex', 'regexPattern'],
@@ -249,29 +248,5 @@ export function initProductContent(root = document, language = DEFAULT_LANGUAGE)
     ['[data-command-search]', 'siteSearch'],
     ['[data-tab-regex-flags]', 'regexFlags'],
     ['[data-vocabulary-upload]', 'vocabularyUpload'],
-  ];
-
-  fields.forEach(([selector, specName]) => {
-    root.querySelectorAll(selector).forEach((input) => {
-      const spec = getFieldSpec(specName);
-      const wrapper = input.closest('label') ?? input.parentElement;
-      if (!wrapper || !spec) return;
-
-      wrapper.classList.add('m3-field');
-      input.classList.add('m3-field__control');
-      input.placeholder ||= getContent(spec.placeholder, language);
-      input.setAttribute('aria-label', input.getAttribute('aria-label') || getContent(spec.label, language));
-
-      const supportId = `${input.id || specName}-supporting`;
-      let supporting = root.getElementById(supportId);
-      if (!supporting) {
-        supporting = root.createElement('span');
-        supporting.id = supportId;
-        supporting.className = 'm3-field__supporting';
-        supporting.textContent = getContent(spec.supporting, language);
-        wrapper.append(supporting);
-      }
-      input.setAttribute('aria-describedby', supportId);
-    });
-  });
+  ], language);
 }

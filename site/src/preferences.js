@@ -14,8 +14,8 @@ export const MAX_VOCABULARY_TEXT_LENGTH = 200;
 export const DEFAULT_PREFERENCES = Object.freeze({
   schemaVersion: PREFERENCES_SCHEMA_VERSION,
   language: 'en',
-  funnyLevelEnglish: 1,
-  funnyLevelCantonese: 1,
+  funnyLevelEnglish: 5,
+  funnyLevelCantonese: 5,
   showEmojis: true,
   theme: 'light',
   density: 'standard',

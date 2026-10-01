@@ -14,8 +14,8 @@ const HEX_COLOR = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
 export const DEFAULT_SETTINGS = Object.freeze({
   schemaVersion: SETTINGS_SCHEMA_VERSION,
   language: 'en',
-  funnyLevelEnglish: 3,
-  funnyLevelCantonese: 3,
+  funnyLevelEnglish: 5,
+  funnyLevelCantonese: 5,
   showDialogEmojis: true,
   theme: 'system',
   density: 'comfortable',
