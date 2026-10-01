@@ -809,3 +809,33 @@
     transform: none;
   }
 }
+
+// Official component color roles follow the surface palette in both themes.
+.mgl-pipelines {
+  --md-sys-color-primary: var(--prim);
+  --md-sys-color-on-primary: var(--onprim);
+  --md-sys-color-primary-container: var(--primc);
+  --md-sys-color-on-primary-container: var(--onprimc);
+  --md-sys-color-secondary-container: var(--sec);
+  --md-sys-color-on-secondary-container: var(--onsurf);
+  --md-sys-color-surface: var(--surf);
+  --md-sys-color-on-surface: var(--onsurf);
+  --md-sys-color-on-surface-variant: var(--onsurfv);
+  --md-sys-color-surface-container: var(--surfc);
+  --md-sys-color-surface-container-high: var(--surfch);
+  --md-sys-color-surface-container-highest: var(--surfch);
+  --md-sys-color-outline: var(--outl);
+  --md-sys-color-outline-variant: var(--outlv);
+  --md-sys-color-error: var(--err);
+  --md-sys-color-on-error: var(--onprim);
+  --md-sys-color-error-container: var(--errc);
+  --md-sys-color-on-error-container: var(--onsurf);
+  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  md-filled-text-field { min-width: 0; }
+  md-text-button, md-filled-button { min-height: 40px; height: auto; min-width: 40px; }
+  md-text-button { --md-text-button-label-text-color: var(--onsurf); }
+  .mgl-pl-search md-filled-text-field { flex: 1; min-width: 0; }
+  .mgl-pl-filled-btn--danger { --md-filled-button-container-color: var(--err); --md-filled-button-label-text-color: var(--onprim); }
+  .mgl-pl-bulk-btn--danger, .mgl-pl-detail-btn--danger { --md-text-button-label-text-color: var(--err); }
+}

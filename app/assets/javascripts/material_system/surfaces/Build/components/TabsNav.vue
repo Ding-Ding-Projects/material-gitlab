@@ -1,6 +1,6 @@
 <template>
   <div class="build-tabs" role="tablist" aria-label="Build sections" @keydown="onKeydown">
-    <button
+    <material-text-button
       v-for="tab in tabs"
       :id="`build-tab-${tab.id}`"
       :key="tab.id"
@@ -13,13 +13,15 @@
       :aria-controls="`build-panel-${tab.id}`"
       :tabindex="tab.id === active ? 0 : -1"
       @click="select(tab.id)"
-    >{{ tab.label }}</button>
+    >{{ tab.label }}</material-text-button>
   </div>
 </template>
 
 <script>
+import MaterialTextButton from '../../../components/material_text_button';
 export default {
   name: 'BuildTabsNav',
+  components: { MaterialTextButton },
   props: {
     tabs: { type: Array, required: true },
     active: { type: String, required: true },

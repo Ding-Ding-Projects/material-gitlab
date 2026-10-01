@@ -1,9 +1,10 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'CommitsPanel',
-  components: { MIcon },
+  components: { MIcon, MaterialButton },
   props: {
     commits: {
       type: Array,
@@ -33,10 +34,10 @@ export default {
         <div class="commits-panel__body">
           <p class="commits-panel__message">{{ commit.message }}</p>
           <p class="commits-panel__meta">
-            <button type="button" class="commits-panel__sha" :title="`Copy ${commit.sha}`" @click="copySha(commit.sha)">
+            <material-button type="button" variant="text" class="commits-panel__sha" :title="`Copy ${commit.sha}`" @click="copySha(commit.sha)">
               <m-icon name="copy" :size="12" decorative />
               {{ commit.sha }}
-            </button>
+            </material-button>
             &middot; {{ commit.author }} &middot; {{ commit.when }}
           </p>
         </div>

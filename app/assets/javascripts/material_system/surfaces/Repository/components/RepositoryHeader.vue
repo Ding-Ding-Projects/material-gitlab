@@ -1,10 +1,11 @@
 <script>
 import MIcon from './MIcon.vue';
 import CloneOptionsPopover from './CloneOptionsPopover.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'RepositoryHeader',
-  components: { MIcon, CloneOptionsPopover },
+  components: { MIcon, CloneOptionsPopover, MaterialButton },
   props: {
     project: {
       type: Object,
@@ -38,7 +39,7 @@ export default {
       <h1 class="repo-header__title">{{ project.name }}</h1>
       <span class="repo-header__visibility">{{ project.visibility }}</span>
       <div class="repo-header__actions">
-        <button
+        <material-button variant="text"
           type="button"
           class="repo-header__pill"
           :aria-pressed="project.starred"
@@ -47,13 +48,13 @@ export default {
         >
           <m-icon name="star" :size="17" decorative />
           {{ project.starred ? 'Starred' : 'Star' }} &middot; {{ project.stars }}
-        </button>
-        <button v-if="project.canFork" type="button" class="repo-header__pill" @click="fork">
+        </material-button>
+        <material-button v-if="project.canFork" type="button" variant="text" class="repo-header__pill" @click="fork">
           <m-icon name="fork" :size="17" decorative />
           Fork &middot; {{ project.forks }}
-        </button>
+        </material-button>
         <div class="repo-header__clone">
-          <button
+          <material-button variant="text"
             type="button"
             class="repo-header__pill repo-header__pill--filled"
             aria-haspopup="dialog"
@@ -62,7 +63,7 @@ export default {
           >
             <m-icon name="download" :size="17" decorative />
             Code
-          </button>
+          </material-button>
           <clone-options-popover
             v-if="cloneOpen"
             :clone-urls="project.cloneUrls"

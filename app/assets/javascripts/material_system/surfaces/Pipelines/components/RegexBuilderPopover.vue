@@ -14,7 +14,7 @@
         <h2 id="mgl-pl-regex-title">Regex builder</h2>
         <span class="mgl-pl-regex-valid" :style="{ background: validBg, color: validFg }">{{ validLabel }}</span>
         <div class="mgl-pl-regex-flags" role="group" aria-label="Regex flags">
-          <button
+          <material-button variant="text"
             v-for="flag in flagChips"
             :key="flag.name"
             type="button"
@@ -26,12 +26,12 @@
             @click="toggleFlag(flag.name)"
           >
             {{ flag.name }}
-          </button>
+          </material-button>
         </div>
       </div>
 
       <label class="mgl-visually-hidden" for="mgl-pl-regex-pattern">Regex pattern</label>
-      <input
+      <material-text-field
         id="mgl-pl-regex-pattern"
         class="mgl-pl-regex-pattern"
         :value="pattern"
@@ -39,14 +39,14 @@
         placeholder="pattern, e.g. (auth|login).*fail"
         autocomplete="off"
         spellcheck="false"
-        @input="setPattern($event.target.value)"
-      />
+        @input="setPattern($event)"
+       aria-label="Regex pattern" />
       <div v-if="errorMsg" class="mgl-pl-regex-error">{{ errorMsg }}</div>
 
       <div class="mgl-pl-regex-snippets">
         <div v-for="group in snippetGroups" :key="group.name" class="mgl-pl-regex-snippet-row">
           <span class="mgl-pl-regex-snippet-label">{{ group.name }}</span>
-          <button
+          <material-button variant="text"
             v-for="item in group.items"
             :key="item.text"
             type="button"
@@ -55,7 +55,7 @@
             @click="insertSnippet(item.text)"
           >
             {{ item.text }}
-          </button>
+          </material-button>
         </div>
       </div>
 
@@ -63,14 +63,14 @@
         <div class="mgl-pl-regex-col">
           <div class="mgl-pl-regex-label">Test string</div>
           <label class="mgl-visually-hidden" for="mgl-pl-regex-sample">Test string</label>
-          <textarea
+          <material-text-field type="textarea"
             id="mgl-pl-regex-sample"
             class="mgl-pl-regex-textarea"
             :value="sample"
             :maxlength="sampleLimit"
             rows="4"
-            @input="setSample($event.target.value)"
-          ></textarea>
+            @input="setSample($event)"
+           aria-label="Test string"></material-text-field>
           <div class="mgl-pl-regex-highlight" aria-live="polite">
             <component
               :is="segment.match ? 'mark' : 'span'"
@@ -103,14 +103,16 @@
       </div>
 
       <div class="mgl-pl-confirm-actions">
-        <button type="button" class="mgl-pl-text-btn" @click="$emit('close')">Cancel</button>
-        <button type="button" class="mgl-pl-filled-btn" @click="apply">Apply to search</button>
+        <material-button variant="text" type="button" class="mgl-pl-text-btn" @click="$emit('close')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="mgl-pl-filled-btn" @click="apply">Apply to search</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialTextField from '../../../components/material_text_field';
+import MaterialButton from '../../../components/material_button';
 import { RegexBuilder, REGEX_LIMITS } from '../../../regex-builder';
 
 const FLAG_TIPS = { i: 'case-insensitive', g: 'global', m: 'multiline', s: 'dotall' };
@@ -135,6 +137,7 @@ const EXPLAIN_DICT = [
 const DEFAULT_TEST_TEXT = 'auth: login failed for user 42\npipeline #8812 passed in 04:31\nERROR TokenRefresh retry_count=3';
 
 export default {
+  components: { MaterialTextField, MaterialButton },
   name: 'PipelinesRegexBuilderPopover',
   props: {
     initialPattern: { type: String, default: '' },

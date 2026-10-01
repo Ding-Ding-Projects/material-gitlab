@@ -1,6 +1,8 @@
 <script>
 import MaterialIcon from './icons/MaterialIcon.vue';
 import RegexBuilderPopover from './RegexBuilderPopover.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 /**
  * Top bar: search field with inline regex-mode toggle and anchored regex
@@ -9,7 +11,7 @@ import RegexBuilderPopover from './RegexBuilderPopover.vue';
  */
 export default {
   name: 'TopBar',
-  components: { MaterialIcon, RegexBuilderPopover },
+  components: { MaterialIcon, RegexBuilderPopover, MaterialButton, MaterialTextField },
   props: {
     search: {
       type: String,
@@ -55,16 +57,17 @@ export default {
   <header class="sec-topbar" aria-label="Security dashboard top bar">
     <div class="sec-search" :class="{ 'sec-search--regex': regexOpen }">
       <material-icon name="search" />
-      <input
+      <material-text-field
         class="sec-search__input"
         type="text"
         :value="search"
         :placeholder="placeholder"
         aria-label="Search vulnerabilities"
         autocomplete="off"
-        @input="$emit('update-search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update-search', $event)"
+      ></material-text-field>
+      <material-button
+        variant="text"
         type="button"
         class="sec-search__regex-chip"
         :class="{ 'sec-search__regex-chip--active': regexMode }"
@@ -74,8 +77,9 @@ export default {
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button
+        variant="text"
         type="button"
         class="sec-icon-button"
         title="Regex builder"
@@ -85,7 +89,7 @@ export default {
         @click="$emit('open-regex-builder')"
       >
         <material-icon name="tune" :size="18" />
-      </button>
+      </material-button>
       <regex-builder-popover
         v-if="regexOpen"
         :initial-pattern="regexMode ? search : ''"
@@ -95,7 +99,8 @@ export default {
         @close="$emit('close-regex-builder')"
       />
     </div>
-    <button
+    <material-button
+      variant="text"
       type="button"
       class="sec-icon-button sec-icon-button--lg"
       title="Command palette (Ctrl+Shift+F)"
@@ -103,8 +108,9 @@ export default {
       @click="$emit('open-palette')"
     >
       <material-icon name="command" />
-    </button>
-    <button
+    </material-button>
+    <material-button
+      variant="text"
       type="button"
       class="sec-icon-button sec-icon-button--lg"
       :title="themeLabel"
@@ -113,7 +119,7 @@ export default {
       @click="$emit('toggle-theme')"
     >
       <material-icon :name="themeIcon" />
-    </button>
+    </material-button>
     <div v-if="avatarInitials" class="sec-avatar" aria-hidden="true">{{ avatarInitials }}</div>
   </header>
 </template>

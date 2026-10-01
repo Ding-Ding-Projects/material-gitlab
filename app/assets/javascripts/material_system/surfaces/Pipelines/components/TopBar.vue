@@ -3,7 +3,7 @@
     <div class="mgl-pl-search">
       <span class="mgl-icon" aria-hidden="true">search</span>
       <label class="mgl-visually-hidden" for="mgl-pl-search-input">Search pipelines</label>
-      <input
+      <material-text-field
         id="mgl-pl-search-input"
         type="search"
         :value="search"
@@ -11,9 +11,9 @@
         :maxlength="regexMode ? patternLimit : null"
         role="searchbox"
         :aria-describedby="regexMode ? 'mgl-pl-search-hint' : null"
-        @input="$emit('update:search', $event.target.value)"
-      />
-      <button
+        @input="$emit('update:search', $event)"
+       aria-label="Search pipelines" />
+      <material-button variant="text"
         type="button"
         class="mgl-pl-chip-btn"
         :style="{ background: regexMode ? 'var(--prim)' : 'var(--surfch)', color: regexMode ? 'var(--onprim)' : 'var(--onsurfv)' }"
@@ -23,8 +23,8 @@
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         type="button"
         class="mgl-pl-icon-btn"
         title="Regex builder"
@@ -33,10 +33,10 @@
         @click="$emit('open-regex-builder')"
       >
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">construction</span>
-      </button>
+      </material-button>
       <span v-if="regexMode" id="mgl-pl-search-hint" class="mgl-visually-hidden">Regex mode is on. Search text is evaluated as a regular expression.</span>
     </div>
-    <button
+    <material-button variant="text"
       type="button"
       class="mgl-pl-icon-btn mgl-pl-icon-btn--lg"
       title="Command palette (Ctrl+Shift+F)"
@@ -45,8 +45,8 @@
       @click="$emit('open-palette')"
     >
       <span class="mgl-icon" aria-hidden="true">keyboard_command_key</span>
-    </button>
-    <button
+    </material-button>
+    <material-button variant="text"
       type="button"
       class="mgl-pl-icon-btn mgl-pl-icon-btn--lg"
       title="Toggle theme"
@@ -54,15 +54,18 @@
       @click="$emit('toggle-theme')"
     >
       <span class="mgl-icon" aria-hidden="true">{{ dark ? 'light_mode' : 'dark_mode' }}</span>
-    </button>
+    </material-button>
     <div class="mgl-pl-avatar" role="img" aria-label="Signed in as JD">JD</div>
   </header>
 </template>
 
 <script>
+import MaterialTextField from '../../../components/material_text_field';
+import MaterialButton from '../../../components/material_button';
 import { REGEX_LIMITS } from '../../../regex-builder';
 
 export default {
+  components: { MaterialTextField, MaterialButton },
   name: 'PipelinesTopBar',
   props: {
     search: { type: String, default: '' },

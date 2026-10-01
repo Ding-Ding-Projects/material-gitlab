@@ -1,9 +1,10 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'DeleteConfirmDialog',
-  components: { MIcon },
+  components: { MIcon, MaterialButton },
   props: {
     items: {
       type: Array,
@@ -51,8 +52,8 @@ export default {
         <li v-for="name in items" :key="name">{{ name }}</li>
       </ul>
       <div class="confirm-dialog__actions">
-        <button ref="cancelButton" type="button" class="btn-text" @click="cancel">Cancel</button>
-        <button type="button" class="btn-danger" @click="confirm">Delete permanently</button>
+        <material-button ref="cancelButton" type="button" variant="text" class="btn-text" @click="cancel">Cancel</material-button>
+        <material-button variant="filled" type="button" class="btn-danger" @click="confirm">Delete permanently</material-button>
       </div>
     </div>
   </div>

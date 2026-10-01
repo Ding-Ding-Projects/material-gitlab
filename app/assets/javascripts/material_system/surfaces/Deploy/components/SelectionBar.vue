@@ -56,7 +56,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-height: 24px;
+  min-height: 40px;
   cursor: pointer;
   color: var(--dp-onsurf);
   font-weight: 500;

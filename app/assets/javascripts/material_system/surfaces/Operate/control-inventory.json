@@ -1,0 +1,16 @@
+{
+  "surface": "Operate",
+  "files": [
+    {
+      "file": "Operate.vue",
+      "buttons": 0,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 8,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    }
+  ]
+}

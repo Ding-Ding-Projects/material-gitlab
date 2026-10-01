@@ -9,6 +9,7 @@ import BulkActionBar from './components/BulkActionBar.vue';
 import TriageDrawer from './components/TriageDrawer.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import NotificationStack from './components/NotificationStack.vue';
+import MaterialButton from '../../components/material_button';
 import {
   SEVERITIES,
   CLOSED_STATUSES,
@@ -39,6 +40,7 @@ export default {
     TriageDrawer,
     CommandPalette,
     NotificationStack,
+    MaterialButton,
   },
   props: {
     initialVulnerabilities: { type: Array, default: () => [] },
@@ -346,7 +348,7 @@ export default {
     </div>
 
     <p v-if="loading" class="sec-live-state" role="status">Loading live vulnerability data…</p>
-    <p v-else-if="loadError" class="sec-live-state sec-live-state--error" role="alert">{{ loadError }} <button type="button" @click="loadLiveVulnerabilities">Retry</button></p>
+    <p v-else-if="loadError" class="sec-live-state sec-live-state--error" role="alert">{{ loadError }} <material-button variant="text" type="button" @click="loadLiveVulnerabilities">Retry</material-button></p>
 
     <severity-cards v-if="!loading && !loadError" :cards="severityCards" @toggle="toggleSeverityFilter" />
 

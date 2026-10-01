@@ -1,0 +1,159 @@
+{
+  "surface": "Pipelines",
+  "files": [
+    {
+      "file": "Pipelines.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/BulkActionsBar.vue",
+      "buttons": 5,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CommandPalette.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/ConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/DetailHeader.vue",
+      "buttons": 3,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/FilterBar.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/JobCard.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/JobLogViewer.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/ListHeader.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/PipelineList.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 1,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/PipelineRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 1,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/RegexBuilderPopover.vue",
+      "buttons": 4,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/ToastStack.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/TopBar.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    }
+  ]
+}

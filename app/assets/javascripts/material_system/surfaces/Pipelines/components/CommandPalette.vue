@@ -13,31 +13,31 @@
       <div class="mgl-pl-palette-head">
         <span class="mgl-icon" aria-hidden="true">search</span>
         <label class="mgl-visually-hidden" for="mgl-pl-palette-query">Jump to an action</label>
-        <input
+        <material-text-field
           id="mgl-pl-palette-query"
           ref="input"
           :value="query"
           placeholder="Jump to a pipelines action…"
           role="searchbox"
-          @input="query = $event.target.value"
+          @input="query = $event"
           @keydown.down.prevent="moveFocus(1)"
           @keydown.up.prevent="moveFocus(-1)"
-        />
+         aria-label="Jump to an action" />
         <span class="mgl-pl-palette-kbd">Ctrl+Shift+F</span>
       </div>
       <ul class="mgl-pl-palette-list" role="listbox" aria-label="Palette results">
         <li v-for="(result, index) in results" :key="result.label">
-          <button
+          <material-button variant="text"
             :ref="`result-${index}`"
             type="button"
             class="mgl-pl-palette-result"
             role="option"
             @click="pick(result)"
           >
-            <span class="mgl-icon" aria-hidden="true">{{ result.icon || 'bolt' }}</span>
+            <span class="mgl-pl-palette-result-content"><span class="mgl-icon" aria-hidden="true">{{ result.icon || 'bolt' }}</span>
             {{ result.label }}
-            <span class="mgl-pl-palette-kind">Action</span>
-          </button>
+            <span class="mgl-pl-palette-kind">Action</span></span>
+          </material-button>
         </li>
       </ul>
       <div v-if="!results.length" class="mgl-pl-palette-empty">No matches.</div>
@@ -46,7 +46,10 @@
 </template>
 
 <script>
+import MaterialTextField from '../../../components/material_text_field';
+import MaterialButton from '../../../components/material_button';
 export default {
+  components: { MaterialTextField, MaterialButton },
   name: 'PipelinesCommandPalette',
   props: {
     actions: { type: Array, default: () => [] },
@@ -69,7 +72,7 @@ export default {
       this.$emit('close');
     },
     moveFocus(delta) {
-      const buttons = this.results.map((_, index) => this.$refs[`result-${index}`]).filter(Boolean);
+      const buttons = this.results.map((_, index) => this.$refs[`result-${index}`]).flat().filter(Boolean).map((button) => button.$el || button);
       if (!buttons.length) return;
       const current = buttons.indexOf(document.activeElement);
       const next = current === -1 ? 0 : (current + delta + buttons.length) % buttons.length;
@@ -94,7 +97,7 @@ export default {
   border-bottom: 1px solid var(--outlv);
 }
 
-.mgl-pl-palette-head input {
+.mgl-pl-palette-head md-filled-text-field {
   border: none;
   outline: none;
   background: transparent;
@@ -141,6 +144,8 @@ export default {
 .mgl-pl-palette-result:focus-visible {
   background: var(--surfc);
 }
+
+.mgl-pl-palette-result-content { display: flex; align-items: center; gap: 12px; min-width: 0; white-space: normal; }
 
 .mgl-pl-palette-kind {
   margin-left: auto;

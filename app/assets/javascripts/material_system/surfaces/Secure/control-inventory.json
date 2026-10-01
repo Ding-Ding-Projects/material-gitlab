@@ -1,0 +1,13 @@
+{
+  "surface": "Secure",
+  "files": [
+    { "file": "components/SecureCommandPalette.vue", "buttons": 1, "textFields": 1, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecureConfirmDialog.vue", "buttons": 2, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecureListPanel.vue", "buttons": 5, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecureListRow.vue", "buttons": 1, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecurePageHeader.vue", "buttons": 2, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecureRegexBuilder.vue", "buttons": 4, "textFields": 2, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecureToastStack.vue", "buttons": 1, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SecureTopBar.vue", "buttons": 4, "textFields": 1, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] }
+  ]
+}

@@ -9,19 +9,20 @@
   >
     <div class="dp-regex-popover__header">
       <h2 class="dp-regex-popover__title">Regex builder</h2>
-      <button type="button" class="dp-regex-popover__close" aria-label="Close regex builder" @click="close">
+      <material-icon-button type="button" class="dp-regex-popover__close" aria-label="Close regex builder" @click="close">
         <DpIcon name="close" size="small" />
-      </button>
+      </material-icon-button>
     </div>
 
     <label class="dp-regex-popover__label" :for="patternId">Pattern</label>
-    <input
+    <material-text-field
       :id="patternId"
       ref="patternInput"
       type="text"
       class="dp-regex-popover__input"
       :value="pattern"
       placeholder="e.g. ^v17\.[0-9]+\.0$"
+      aria-label="Regex pattern"
       :aria-invalid="!syntax.valid"
       @input="onPatternInput"
     />
@@ -29,7 +30,7 @@
     <fieldset class="dp-regex-popover__flags">
       <legend class="dp-regex-popover__label">Flags</legend>
       <label v-for="flag in availableFlags" :key="flag.value" class="dp-regex-popover__flag">
-        <input type="checkbox" :checked="flags.includes(flag.value)" @change="toggleFlag(flag.value)" />
+        <material-checkbox :checked="flags.includes(flag.value)" :value="flag.value" @change="toggleFlag(flag.value)" />
         {{ flag.label }}
       </label>
     </fieldset>
@@ -56,10 +57,10 @@
     </div>
 
     <div class="dp-regex-popover__actions">
-      <button type="button" class="dp-btn dp-btn--text" @click="close">Cancel</button>
-      <button type="button" class="dp-btn dp-btn--filled" :disabled="!pattern || !syntax.valid" @click="apply">
+      <material-button type="button" variant="text" class="dp-btn dp-btn--text" @click="close">Cancel</material-button>
+      <material-button type="button" class="dp-btn dp-btn--filled" :disabled="!pattern || !syntax.valid" @click="apply">
         Apply
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
@@ -67,6 +68,10 @@
 <script>
 import DpIcon from './DpIcon.vue';
 import { RegexBuilder } from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const AVAILABLE_FLAGS = [
   { value: 'i', label: 'Ignore case (i)' },
@@ -76,7 +81,7 @@ const AVAILABLE_FLAGS = [
 
 export default {
   name: 'RegexBuilderPopover',
-  components: { DpIcon },
+  components: { DpIcon, MaterialButton, MaterialCheckbox, MaterialIconButton, MaterialTextField },
   props: {
     initialPattern: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },
@@ -124,7 +129,7 @@ export default {
   },
   methods: {
     onPatternInput(event) {
-      const snapshot = this.builder.update({ pattern: event.target.value });
+      const snapshot = this.builder.update({ pattern: event });
       this.pattern = snapshot.pattern;
       this.syntax = snapshot.syntax;
     },
@@ -185,8 +190,8 @@ export default {
   background: transparent;
   color: var(--dp-onsurfv);
   cursor: pointer;
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   display: flex;
   align-items: center;

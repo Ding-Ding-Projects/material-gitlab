@@ -29,6 +29,16 @@
 }
 
 .dp-surface {
+  // Material Web hosts consume the surface's own M3 palette rather than inherited globals.
+  --md-sys-color-primary: var(--dp-prim);
+  --md-sys-color-on-primary: var(--dp-onprim);
+  --md-sys-color-primary-container: var(--dp-primc);
+  --md-sys-color-on-primary-container: var(--dp-onprimc);
+  --md-sys-color-surface: var(--dp-surf);
+  --md-sys-color-on-surface: var(--dp-onsurf);
+  --md-sys-color-surface-container: var(--dp-surfc);
+  --md-sys-color-outline: var(--dp-outl);
+  --md-sys-color-error: var(--dp-err);
   --dp-surf: #f4effa;
   --dp-surfc: #ece4f6;
   --dp-surfch: #e0d5f2;
@@ -177,3 +187,30 @@
     align-items: flex-start;
   }
 }
+
+// Public component roles preserve the local light and dark palettes.
+.dp-surface {
+  --md-sys-color-primary: var(--dp-prim);
+  --md-sys-color-on-primary: var(--dp-onprim);
+  --md-sys-color-primary-container: var(--dp-primc);
+  --md-sys-color-on-primary-container: var(--dp-onprimc);
+  --md-sys-color-secondary-container: var(--dp-sec);
+  --md-sys-color-on-secondary-container: var(--dp-onsurf);
+  --md-sys-color-surface: var(--dp-surf);
+  --md-sys-color-on-surface: var(--dp-onsurf);
+  --md-sys-color-on-surface-variant: var(--dp-onsurfv);
+  --md-sys-color-surface-container: var(--dp-surfc);
+  --md-sys-color-surface-container-high: var(--dp-surfch);
+  --md-sys-color-surface-container-highest: var(--dp-surfch);
+  --md-sys-color-outline: var(--dp-outl);
+  --md-sys-color-outline-variant: var(--dp-outlv);
+  --md-sys-color-error: var(--dp-err);
+  --md-sys-color-on-error: var(--dp-onprim);
+  --md-sys-color-error-container: var(--dp-errc);
+  --md-sys-color-on-error-container: var(--dp-onsurf);
+  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
+  md-filled-text-field { min-width: 0; max-width: 100%; }
+}
+.dp-surface { .dp-btn--danger { --md-filled-button-container-color: var(--dp-err); --md-filled-button-label-text-color: var(--dp-onprim); --md-text-button-label-text-color: var(--dp-err); } }

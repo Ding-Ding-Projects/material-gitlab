@@ -13,17 +13,19 @@
       <h2 :id="titleId">{{ title }}</h2>
       <p :id="messageId">{{ message }}</p>
       <div class="mgl-pl-confirm-actions">
-        <button type="button" class="mgl-pl-text-btn" @click="$emit('cancel')">Cancel</button>
-        <button type="button" class="mgl-pl-filled-btn mgl-pl-filled-btn--danger" @click="$emit('confirm')">{{ confirmLabel }}</button>
+        <material-button variant="text" type="button" class="mgl-pl-text-btn" @click="$emit('cancel')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="mgl-pl-filled-btn mgl-pl-filled-btn--danger" @click="$emit('confirm')">{{ confirmLabel }}</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 let uid = 0;
 
 export default {
+  components: { MaterialButton },
   name: 'PipelinesConfirmDialog',
   props: {
     title: { type: String, required: true },

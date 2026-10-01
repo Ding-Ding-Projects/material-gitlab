@@ -1,0 +1,16 @@
+{
+  "surface": "Monitor",
+  "files": [
+    {
+      "file": "Monitor.vue",
+      "buttons": 0,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 7,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    }
+  ]
+}

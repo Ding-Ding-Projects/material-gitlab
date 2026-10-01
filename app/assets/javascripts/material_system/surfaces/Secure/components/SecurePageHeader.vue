@@ -3,7 +3,8 @@
     <h1 class="secure-page-header__title">Secure</h1>
     <span class="secure-page-header__badge">Ultimate</span>
     <div ref="tablist" class="secure-tabs" role="tablist" aria-label="Secure sections" @keydown="onTablistKeydown">
-      <button
+      <material-button
+        variant="text"
         v-for="tab in tabs"
         :id="`secure-tab-${tab.id}`"
         :key="tab.id"
@@ -17,7 +18,7 @@
         @click="$emit('select-tab', tab.id)"
       >
         {{ tab.label }}
-      </button>
+      </material-button>
     </div>
     <a
       v-if="securityDashboardPath"
@@ -27,19 +28,20 @@
       Security dashboard
       <secure-icon name="chevron-right" :size="16" />
     </a>
-    <button v-else type="button" class="secure-page-header__link" @click="$emit('navigate-security-dashboard')">
+    <material-button v-else variant="text" type="button" class="secure-page-header__link" @click="$emit('navigate-security-dashboard')">
       Security dashboard
       <secure-icon name="chevron-right" :size="16" />
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
 import SecureIcon from './SecureIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'SecurePageHeader',
-  components: { SecureIcon },
+  components: { SecureIcon, MaterialButton },
   props: {
     tabs: { type: Array, required: true },
     activeTabId: { type: String, required: true },

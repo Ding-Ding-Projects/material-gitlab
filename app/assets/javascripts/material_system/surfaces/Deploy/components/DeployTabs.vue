@@ -1,6 +1,6 @@
 <template>
   <div class="dp-tabs" role="tablist" aria-label="Deploy sections" data-screen-label="Deploy tabs">
-    <button
+    <material-text-button
       v-for="tab in tabs"
       :id="`${instanceId}-tab-${tab.id}`"
       :key="tab.id"
@@ -15,13 +15,15 @@
       @keydown="onKeydown($event, tab.id)"
     >
       {{ tab.label }}
-    </button>
+    </material-text-button>
   </div>
 </template>
 
 <script>
+import MaterialTextButton from '../../../components/material_text_button';
 export default {
   name: 'DeployTabs',
+  components: { MaterialTextButton },
   props: {
     tabs: { type: Array, required: true },
     activeId: { type: String, required: true },

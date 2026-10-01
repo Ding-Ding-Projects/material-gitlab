@@ -13,7 +13,7 @@
         <div v-if="item.title" class="mgl-pl-toast-title">{{ item.title }}</div>
         <div>{{ item.message }}</div>
         <div v-if="item.actions.length" class="mgl-pl-toast-actions">
-          <button
+          <material-button variant="text"
             v-for="action in item.actions"
             :key="action.id"
             type="button"
@@ -21,20 +21,22 @@
             @click="runAction(item.id, action.id)"
           >
             {{ action.label }}
-          </button>
+          </material-button>
         </div>
       </div>
-      <button type="button" class="mgl-pl-toast-close" aria-label="Dismiss notification" @click="dismiss(item.id)">
+      <material-button variant="text" type="button" class="mgl-pl-toast-close" aria-label="Dismiss notification" @click="dismiss(item.id)">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">close</span>
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 import { notificationCenter } from '../../../notifications';
 
 export default {
+  components: { MaterialButton },
   name: 'PipelinesToastStack',
   data() {
     return { items: [] };

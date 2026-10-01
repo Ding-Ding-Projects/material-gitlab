@@ -1,6 +1,9 @@
 <script>
+import MaterialButton from '../../../components/material_button';
+
 export default {
   name: 'RepositoryBreadcrumbs',
+  components: { MaterialButton },
   props: {
     crumbs: {
       type: Array,
@@ -20,7 +23,7 @@ export default {
   <nav class="breadcrumbs" aria-label="Repository path">
     <ol class="breadcrumbs__list">
       <li v-for="(crumb, index) in crumbs" :key="crumb.path.join('/') || 'root'" class="breadcrumbs__item">
-        <button
+        <material-button variant="text"
           type="button"
           class="breadcrumbs__crumb"
           :aria-current="isLast(index) ? 'page' : null"
@@ -28,7 +31,7 @@ export default {
           @click="$emit('navigate', crumb.path)"
         >
           {{ crumb.name }}
-        </button>
+        </material-button>
         <span v-if="!isLast(index)" class="breadcrumbs__sep" aria-hidden="true">/</span>
       </li>
     </ol>

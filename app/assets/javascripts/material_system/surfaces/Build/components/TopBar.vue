@@ -10,12 +10,12 @@
       :corpus="corpus"
       class="build-topbar__search"
     />
-    <button type="button" class="icon-btn" title="Command palette (Ctrl+Shift+F)" @click="$emit('open-palette')">
+    <material-icon-button type="button" class="icon-btn" title="Command palette (Ctrl+Shift+F)" @click="$emit('open-palette')">
       <icon name="command" />
-    </button>
-    <button type="button" class="icon-btn" :title="isDark ? 'Switch to light theme' : 'Switch to dark theme'" @click="$emit('toggle-theme')">
+    </material-icon-button>
+    <material-icon-button type="button" class="icon-btn" :title="isDark ? 'Switch to light theme' : 'Switch to dark theme'" @click="$emit('toggle-theme')">
       <icon :name="isDark ? 'light_mode' : 'dark_mode'" />
-    </button>
+    </material-icon-button>
     <div class="build-topbar__avatar" aria-hidden="true">{{ avatarInitials }}</div>
   </header>
 </template>
@@ -23,10 +23,11 @@
 <script>
 import Icon from './Icon.vue';
 import SearchField from './SearchField.vue';
+import MaterialIconButton from '../../../components/material_icon_button';
 
 export default {
   name: 'BuildTopBar',
-  components: { Icon, SearchField },
+  components: { Icon, SearchField, MaterialIconButton },
   props: {
     search: { type: String, default: '' },
     regexMode: { type: Boolean, default: false },

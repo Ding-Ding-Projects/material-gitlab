@@ -3,6 +3,9 @@ import RegexBuilder from '../../../regex-builder';
 import notificationCenter from '../../../notifications';
 import MaterialIcon from './icons/MaterialIcon.vue';
 import trapFocus from '../focus_trap';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
+import MaterialTextField from '../../../components/material_text_field';
 
 const FLAG_OPTIONS = [
   { flag: 'g', label: 'Global — find every match' },
@@ -18,7 +21,7 @@ const FLAG_OPTIONS = [
  */
 export default {
   name: 'RegexBuilderPopover',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialButton, MaterialCheckbox, MaterialTextField },
   flagOptions: FLAG_OPTIONS,
   props: {
     initialPattern: {
@@ -71,8 +74,8 @@ export default {
     onScrimClick() {
       this.$emit('close');
     },
-    onPatternInput(event) {
-      this.view = this.builder.update({ pattern: event.target.value });
+    onPatternInput(value) {
+      this.view = this.builder.update({ pattern: value });
     },
     onModeToggle(useRegex) {
       this.view = this.builder.update({ regex: useRegex });
@@ -134,13 +137,14 @@ export default {
     <div class="sec-regex-popover" role="dialog" aria-modal="true" aria-label="Regex builder">
       <div class="sec-regex-popover__header">
         <h3>Regex builder</h3>
-        <button type="button" class="sec-icon-button" aria-label="Close regex builder" @click="$emit('close')">
+        <material-button variant="text" type="button" class="sec-icon-button" aria-label="Close regex builder" @click="$emit('close')">
           <material-icon name="close" />
-        </button>
+        </material-button>
       </div>
 
       <div class="sec-regex-popover__mode" role="group" aria-label="Search mode">
-        <button
+        <material-button
+          variant="text"
           type="button"
           class="sec-segmented"
           :class="{ 'sec-segmented--active': !view.regex }"
@@ -148,8 +152,9 @@ export default {
           @click="onModeToggle(false)"
         >
           Plain text
-        </button>
-        <button
+        </material-button>
+        <material-button
+          variant="text"
           type="button"
           class="sec-segmented"
           :class="{ 'sec-segmented--active': view.regex }"
@@ -157,31 +162,32 @@ export default {
           @click="onModeToggle(true)"
         >
           Regex
-        </button>
+        </material-button>
       </div>
 
       <label class="sec-field">
         <span class="sec-field__label">Pattern</span>
-        <input
+        <material-text-field
           class="sec-input sec-regex-popover__pattern"
+          aria-label="Regex pattern"
           type="text"
           :value="view.pattern"
           spellcheck="false"
           autocomplete="off"
           :aria-invalid="!view.syntax.valid"
           @input="onPatternInput"
-        />
+        ></material-text-field>
       </label>
 
       <div v-if="view.regex" class="sec-regex-popover__flags">
         <span class="sec-field__label">Flags</span>
         <label v-for="option in $options.flagOptions" :key="option.flag" class="sec-regex-popover__flag">
-          <input
+          <material-checkbox
             type="checkbox"
             class="sec-checkbox"
             :checked="hasFlag(option.flag)"
             @change="onFlagToggle(option.flag)"
-          />
+          ></material-checkbox>
           <span :title="option.label">{{ option.flag }}</span>
         </label>
       </div>
@@ -213,17 +219,17 @@ export default {
       </div>
 
       <div class="sec-regex-popover__footer">
-        <button type="button" class="sec-text-button" @click="onCopy">
+        <material-button variant="text" type="button" class="sec-text-button" @click="onCopy">
           <material-icon name="copy" :size="16" />
           Copy
-        </button>
-        <button type="button" class="sec-text-button" @click="onExport">
+        </material-button>
+        <material-button variant="text" type="button" class="sec-text-button" @click="onExport">
           <material-icon name="download" :size="16" />
           Export
-        </button>
+        </material-button>
         <span class="sec-regex-popover__spacer"></span>
-        <button type="button" class="sec-text-button" @click="$emit('close')">Cancel</button>
-        <button type="button" class="sec-button" :disabled="!canApply" @click="onApply">Apply</button>
+        <material-button variant="text" type="button" class="sec-text-button" @click="$emit('close')">Cancel</material-button>
+        <material-button variant="filled" type="button" class="sec-button" :disabled="!canApply" @click="onApply">Apply</material-button>
       </div>
     </div>
   </div>

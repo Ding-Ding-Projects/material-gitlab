@@ -1,9 +1,10 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'BlobViewer',
-  components: { MIcon },
+  components: { MIcon, MaterialButton },
   props: {
     blob: {
       type: Object,
@@ -28,9 +29,9 @@ export default {
       <m-icon name="file" :size="18" decorative class="blob-viewer__icon" />
       <span class="blob-viewer__name">{{ blob.name }}</span>
       <span class="blob-viewer__size">{{ blob.size }}</span>
-      <button ref="closeButton" type="button" class="blob-viewer__close" aria-label="Close file preview" @click="$emit('close')">
+      <material-button ref="closeButton" type="button" variant="text" class="blob-viewer__close" aria-label="Close file preview" @click="$emit('close')">
         <m-icon name="close" :size="18" decorative />
-      </button>
+      </material-button>
     </div>
     <a v-if="blob.rawPath" :href="blob.rawPath">Download raw file</a>
     <p v-if="blob.binary" role="status">This file contains binary or non-UTF-8 content. Download it to inspect its original bytes.</p>

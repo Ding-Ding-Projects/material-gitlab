@@ -29,3 +29,23 @@
   .material-analyze .material-analyze__bar-row { flex-wrap: wrap; }
   .material-analyze .material-analyze__bar-row > span:first-child { flex-basis: 100%; }
 }
+
+.material-analyze {
+  --md-sys-color-primary: var(--m3-primary);
+  --md-sys-color-on-primary: var(--m3-on-primary);
+  --md-sys-color-primary-container: var(--m3-primary-container);
+  --md-sys-color-on-primary-container: var(--m3-on-primary-container);
+  --md-sys-color-surface: var(--m3-surface);
+  --md-sys-color-on-surface: var(--m3-on-surface);
+  --md-sys-color-on-surface-variant: var(--m3-on-surface-variant);
+  --md-sys-color-surface-container: var(--m3-surface-container);
+  --md-sys-color-surface-container-high: var(--m3-surface-container-high);
+  --md-sys-color-surface-container-highest: var(--m3-surface-container-high);
+  --md-sys-color-outline: var(--m3-outline);
+  --md-sys-color-outline-variant: var(--m3-outline);
+  --md-sys-color-error: var(--m3-error, #b3261e);
+  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+}
+
+.material-analyze[data-theme="dark"] { --m3-error: #f2b8b5; }

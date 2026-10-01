@@ -4,18 +4,19 @@
       <div class="dp-search" :class="{ 'dp-search--invalid': regexMode && !searchValid }">
         <DpIcon name="search" class="dp-search__icon" />
         <label :for="searchInputId" class="dp-visually-hidden">{{ searchPlaceholder }}</label>
-        <input
+        <material-text-field
           :id="searchInputId"
           ref="searchInput"
           type="text"
           class="dp-search__input"
           :value="search"
           :placeholder="searchPlaceholder"
+          :aria-label="searchPlaceholder"
           :aria-invalid="regexMode && !searchValid"
           :aria-describedby="regexMode && !searchValid ? `${searchInputId}-error` : null"
-          @input="$emit('update:search', $event.target.value)"
+          @input="$emit('update:search', $event)"
         />
-        <button
+        <material-text-button
           type="button"
           class="dp-search__pill"
           :class="{ 'dp-search__pill--active': regexMode }"
@@ -24,8 +25,8 @@
           @click="$emit('toggle-regex-mode')"
         >
           .*
-        </button>
-        <button
+        </material-text-button>
+        <material-icon-button
           type="button"
           class="dp-search__icon-btn"
           title="Regex builder"
@@ -34,7 +35,7 @@
           @click="$emit('open-regex-builder')"
         >
           <DpIcon name="wrench" size="small" />
-        </button>
+        </material-icon-button>
       </div>
       <p v-if="regexMode && !searchValid" :id="`${searchInputId}-error`" class="dp-search__error" role="status">
         Invalid pattern{{ searchError ? `: ${searchError}` : '' }} — showing all results.
@@ -49,7 +50,7 @@
       />
     </div>
 
-    <button
+    <material-icon-button
       type="button"
       class="dp-topbar__icon-btn"
       title="Command palette (Ctrl+Shift+F)"
@@ -57,8 +58,8 @@
       @click="$emit('open-palette')"
     >
       <DpIcon name="command" />
-    </button>
-    <button
+    </material-icon-button>
+    <material-icon-button
       type="button"
       class="dp-topbar__icon-btn"
       :title="dark ? 'Switch to light theme' : 'Switch to dark theme'"
@@ -66,7 +67,7 @@
       @click="$emit('toggle-theme')"
     >
       <DpIcon :name="dark ? 'sun' : 'moon'" />
-    </button>
+    </material-icon-button>
     <div v-if="userInitials" class="dp-topbar__avatar" :title="userName" aria-hidden="true">{{ userInitials }}</div>
   </header>
 </template>
@@ -74,10 +75,13 @@
 <script>
 import DpIcon from './DpIcon.vue';
 import RegexBuilderPopover from './RegexBuilderPopover.vue';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextButton from '../../../components/material_text_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'DeployTopBar',
-  components: { DpIcon, RegexBuilderPopover },
+  components: { DpIcon, RegexBuilderPopover, MaterialIconButton, MaterialTextButton, MaterialTextField },
   props: {
     search: { type: String, default: '' },
     searchPlaceholder: { type: String, default: 'Search' },
@@ -185,8 +189,8 @@ export default {
 }
 
 .dp-search__icon-btn {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   display: flex;
   align-items: center;
@@ -236,8 +240,8 @@ export default {
 }
 
 .dp-topbar__avatar {
-  width: 36px;
-  height: 36px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   background: var(--dp-primc);
   color: var(--dp-onprimc);

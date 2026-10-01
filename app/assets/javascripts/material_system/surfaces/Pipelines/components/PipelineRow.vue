@@ -6,7 +6,7 @@
       :aria-label="`Select pipeline #${pipeline.id}, ${pipeline.title}`"
       @change="$emit('toggle-select', pipeline.id)"
     ></material-checkbox>
-    <material-button type="button" variant="text" class="mgl-pl-row-open" @click="$emit('open', pipeline.id)">
+    <div class="mgl-pl-row-open">
       <span class="mgl-pl-badge" :style="{ background: badge.bg, color: badge.fg }">
         <span
           class="mgl-icon mgl-icon--sm"
@@ -16,7 +16,7 @@
         >{{ pipeline.status }}
       </span>
       <span class="mgl-pl-row-main">
-        <span class="mgl-pl-row-title">{{ pipeline.title }}</span>
+        <material-button type="button" variant="text" class="mgl-pl-row-title" @click="$emit('open', pipeline.id)">{{ pipeline.title }}</material-button>
         <span class="mgl-pl-row-meta">
           #{{ pipeline.id }} · <span class="mgl-pl-sha">{{ pipeline.sha }}</span> · {{ pipeline.branch }} · {{ pipeline.origin }}
         </span>
@@ -25,7 +25,7 @@
       <span class="mgl-pl-row-duration">
         <span class="mgl-icon mgl-icon--sm" aria-hidden="true">schedule</span>{{ pipeline.duration }}
       </span>
-    </material-button>
+    </div>
   </li>
 </template>
 

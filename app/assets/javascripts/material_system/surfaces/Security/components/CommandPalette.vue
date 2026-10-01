@@ -1,6 +1,7 @@
 <script>
 import MaterialIcon from './icons/MaterialIcon.vue';
 import trapFocus from '../focus_trap';
+import MaterialTextField from '../../../components/material_text_field';
 
 /**
  * Surface-local command palette, ported from the design's `dc-import name="Command
@@ -10,7 +11,7 @@ import trapFocus from '../focus_trap';
  */
 export default {
   name: 'CommandPalette',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialTextField },
   props: {
     actions: {
       type: Array,
@@ -89,8 +90,8 @@ export default {
     <div class="sec-palette" role="dialog" aria-modal="true" aria-label="Command palette">
       <div class="sec-palette__search">
         <material-icon name="search" />
-        <input
-          v-model="query"
+        <material-text-field
+          :value="query"
           class="sec-palette__input"
           type="text"
           role="combobox"
@@ -101,7 +102,8 @@ export default {
           placeholder="Search Security dashboard commands"
           aria-label="Search commands"
           autocomplete="off"
-        />
+          @input="query = $event"
+        ></material-text-field>
         <kbd class="sec-palette__kbd">Esc</kbd>
       </div>
       <ul id="sec-palette-listbox" class="sec-palette__list" role="listbox" aria-label="Commands">

@@ -9,6 +9,13 @@ const FOCUSABLE_SELECTOR = [
   'input:not([disabled])',
   'select:not([disabled])',
   'textarea:not([disabled])',
+  'md-filled-button:not([disabled])',
+  'md-outlined-button:not([disabled])',
+  'md-filled-tonal-button:not([disabled])',
+  'md-elevated-button:not([disabled])',
+  'md-text-button:not([disabled])',
+  'md-filled-text-field:not([disabled])',
+  'md-checkbox:not([disabled])',
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
 

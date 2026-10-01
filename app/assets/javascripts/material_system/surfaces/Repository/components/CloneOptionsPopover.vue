@@ -1,9 +1,11 @@
 <script>
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'CloneOptionsPopover',
-  components: { MIcon },
+  components: { MIcon, MaterialButton, MaterialTextField },
   props: {
     cloneUrls: {
       type: Object,
@@ -38,6 +40,9 @@ export default {
         this.$emit('copy-failed', this.activeUrl);
       }
     },
+    selectCloneUrl() {
+      this.$refs.cloneUrl?.$el?.select?.();
+    },
   },
 };
 </script>
@@ -45,7 +50,7 @@ export default {
 <template>
   <div class="clone-popover" role="dialog" aria-label="Clone repository" @keydown.esc="$emit('close')">
     <div class="clone-popover__tabs" role="tablist">
-      <button
+      <material-button variant="text"
         type="button"
         role="tab"
         class="clone-popover__tab"
@@ -54,8 +59,8 @@ export default {
         @click="activeTab = 'https'"
       >
         HTTPS
-      </button>
-      <button
+      </material-button>
+      <material-button variant="text"
         type="button"
         role="tab"
         class="clone-popover__tab"
@@ -64,18 +69,18 @@ export default {
         @click="activeTab = 'ssh'"
       >
         SSH
-      </button>
-      <button ref="closeButton" type="button" class="clone-popover__close" aria-label="Close clone options" @click="$emit('close')">
+      </material-button>
+      <material-button ref="closeButton" type="button" variant="text" class="clone-popover__close" aria-label="Close clone options" @click="$emit('close')">
         <m-icon name="close" :size="16" decorative />
-      </button>
+      </material-button>
     </div>
     <div class="clone-popover__row">
       <label class="visually-hidden" for="clone-url-field">{{ activeTab === 'https' ? 'HTTPS clone URL' : 'SSH clone URL' }}</label>
-      <input id="clone-url-field" class="clone-popover__url" type="text" :value="activeUrl" readonly @focus="$event.target.select()" />
-      <button type="button" class="clone-popover__copy" @click="copy">
+      <material-text-field id="clone-url-field" ref="cloneUrl" class="clone-popover__url" type="text" :value="activeUrl" readonly aria-label="Clone URL" @focus="selectCloneUrl"></material-text-field>
+      <material-button type="button" variant="text" class="clone-popover__copy" @click="copy">
         <m-icon name="copy" :size="16" decorative />
         Copy
-      </button>
+      </material-button>
     </div>
   </div>
 </template>

@@ -2,14 +2,16 @@
   <div id="build-panel-editor" role="tabpanel" aria-labelledby="build-tab-editor" class="pipeline-editor" data-screen-label="Pipeline editor">
     <div class="pipeline-editor__source">
       <label class="pipeline-editor__label" for="pipeline-yaml">.gitlab-ci.yml</label>
-      <textarea
+      <material-text-field
         id="pipeline-yaml"
         class="pipeline-editor__textarea"
         rows="18"
         spellcheck="false"
+        type="textarea"
+        aria-label="Pipeline YAML"
         :value="yaml"
-        @input="$emit('update:yaml', $event.target.value)"
-      ></textarea>
+        @input="$emit('update:yaml', $event)"
+      />
     </div>
     <div class="pipeline-editor__side">
       <div class="pipeline-editor__card">
@@ -28,12 +30,12 @@
         </template>
         <p v-else class="pipeline-editor__muted">No stages declared yet.</p>
       </div>
-      <button
+      <material-button
         type="button"
         class="pipeline-editor__commit"
         :disabled="!lint.valid || busy"
         @click="$emit('commit')"
-      >{{ committed ? 'Committed to main ✓' : busy ? 'Committing…' : 'Commit changes' }}</button>
+      >{{ committed ? 'Committed to main ✓' : busy ? 'Committing…' : 'Commit changes' }}</material-button>
     </div>
   </div>
 </template>
@@ -41,10 +43,12 @@
 <script>
 import Icon from './Icon.vue';
 import { lintPipelineYaml } from '../data';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'BuildPipelineEditor',
-  components: { Icon },
+  components: { Icon, MaterialButton, MaterialTextField },
   props: {
     yaml: { type: String, default: '' },
     committed: { type: Boolean, default: false },

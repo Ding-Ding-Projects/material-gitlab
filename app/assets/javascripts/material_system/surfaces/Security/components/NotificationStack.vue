@@ -1,6 +1,7 @@
 <script>
 import notificationCenter from '../../../notifications';
 import MaterialIcon from './icons/MaterialIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 const SEVERITY_ICON = {
   info: 'addCircle',
@@ -16,7 +17,7 @@ const SEVERITY_ICON = {
  */
 export default {
   name: 'NotificationStack',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialButton },
   data() {
     return {
       items: [],
@@ -61,7 +62,8 @@ export default {
           <div v-if="item.title" class="sec-toast__title">{{ item.title }}</div>
           <div class="sec-toast__message">{{ item.message }}</div>
           <div v-if="item.actions.length" class="sec-toast__actions">
-            <button
+            <material-button
+              variant="text"
               v-for="action in item.actions"
               :key="action.id"
               type="button"
@@ -69,12 +71,12 @@ export default {
               @click="runAction(item.id, action.id)"
             >
               {{ action.label }}
-            </button>
+            </material-button>
           </div>
         </div>
-        <button type="button" class="sec-icon-button" aria-label="Dismiss notification" @click="dismiss(item.id)">
+        <material-button variant="text" type="button" class="sec-icon-button" aria-label="Dismiss notification" @click="dismiss(item.id)">
           <material-icon name="close" :size="16" />
-        </button>
+        </material-button>
       </div>
     </transition-group>
   </div>

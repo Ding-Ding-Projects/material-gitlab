@@ -12,7 +12,7 @@
         <h2 :id="titleId" class="rb-dialog__title">Regex builder</h2>
         <span class="rb-chip" :class="validState.cls">{{ validState.label }}</span>
         <div class="rb-flags">
-          <button
+          <material-text-button
             v-for="flag in flagChips"
             :key="flag.name"
             type="button"
@@ -21,22 +21,23 @@
             :aria-pressed="flag.on"
             :title="flag.tip"
             @click="toggleFlag(flag.name)"
-          >{{ flag.name }}</button>
+          >{{ flag.name }}</material-text-button>
         </div>
-        <button type="button" class="icon-btn" aria-label="Close regex builder" @click="close">
+        <material-icon-button type="button" class="icon-btn" aria-label="Close regex builder" @click="close">
           <icon name="close" />
-        </button>
+        </material-icon-button>
       </div>
 
       <label class="rb-field">
         <span class="visually-hidden">Pattern</span>
-        <input
+        <material-text-field
           ref="patternInput"
           v-model="draft"
           type="text"
           class="rb-pattern"
           spellcheck="false"
           autocomplete="off"
+          aria-label="Regex pattern"
           placeholder="pattern, e.g. (auth|login).*fail"
           :maxlength="patternLimit"
         />
@@ -46,21 +47,21 @@
       <div class="rb-snippets">
         <div v-for="group in snippetGroups" :key="group.name" class="rb-snippet-row">
           <span class="rb-snippet-label">{{ group.name }}</span>
-          <button
+          <material-text-button
             v-for="item in group.items"
             :key="item.text"
             type="button"
             class="rb-snippet"
             :title="item.tip"
             @click="insert(item.text)"
-          >{{ item.text }}</button>
+          >{{ item.text }}</material-text-button>
         </div>
       </div>
 
       <div class="rb-grid">
         <div class="rb-col">
           <span class="rb-col-label">Test string</span>
-          <textarea v-model="testText" rows="4" class="rb-textarea" :maxlength="sampleLimit"></textarea>
+          <material-text-field v-model="testText" type="textarea" rows="4" class="rb-textarea" aria-label="Regex test string" :maxlength="sampleLimit" />
           <div class="rb-highlight" aria-live="polite">
             <template v-for="(part, i) in highlightedParts">
               <mark v-if="part.match" :key="'m' + i">{{ part.text || '∅' }}</mark>
@@ -91,8 +92,8 @@
       </div>
 
       <div class="rb-actions">
-        <button type="button" class="btn btn--text" @click="close">Cancel</button>
-        <button type="button" class="btn btn--filled" :disabled="!isValid || !draft" @click="apply">Apply to search</button>
+        <material-button type="button" variant="text" class="btn btn--text" @click="close">Cancel</material-button>
+        <material-button type="button" class="btn btn--filled" :disabled="!isValid || !draft" @click="apply">Apply to search</material-button>
       </div>
     </div>
   </div>
@@ -101,6 +102,10 @@
 <script>
 import { REGEX_LIMITS } from '../../../regex-builder';
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextButton from '../../../components/material_text_button';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const EXPLAIN_DICT = [
   ['(?:', 'non-capturing group'], ['(?=', 'lookahead'], ['(?!', 'negative lookahead'],
@@ -126,7 +131,7 @@ let uid = 0;
 
 export default {
   name: 'RegexBuilderOverlay',
-  components: { Icon },
+  components: { Icon, MaterialButton, MaterialTextButton, MaterialIconButton, MaterialTextField },
   props: {
     initialPattern: { type: String, default: '' },
     corpus: { type: Array, default: () => [] },

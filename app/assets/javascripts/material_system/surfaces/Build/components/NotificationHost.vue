@@ -1,6 +1,6 @@
 <template>
   <div class="notify-host">
-    <button
+    <material-icon-button
       type="button"
       class="notify-host__bell"
       :aria-expanded="historyOpen"
@@ -10,15 +10,15 @@
     >
       <icon name="bell" />
       <span v-if="unreadCount" class="notify-host__count">{{ unreadCount }}</span>
-    </button>
+    </material-icon-button>
 
     <div v-if="historyOpen" class="notify-history" role="dialog" aria-label="Notification history" @keydown.esc="historyOpen = false">
       <div class="notify-history__header">
         <span>Notifications</span>
-        <button type="button" class="btn btn--text" @click="clearAll">Clear all</button>
-        <button type="button" class="icon-btn" aria-label="Close notification history" @click="historyOpen = false">
+        <material-button type="button" variant="text" class="btn btn--text" @click="clearAll">Clear all</material-button>
+        <material-icon-button type="button" class="icon-btn" aria-label="Close notification history" @click="historyOpen = false">
           <icon name="close" />
-        </button>
+        </material-icon-button>
       </div>
       <ul class="notify-history__list">
         <li v-for="item in history" :key="item.id" class="notify-history__item" :class="`notify--${item.severity}`">
@@ -35,9 +35,9 @@
           <div class="notify-toast__title">{{ item.title }}</div>
           <div v-if="item.message" class="notify-toast__message">{{ item.message }}</div>
         </div>
-        <button type="button" class="icon-btn" aria-label="Dismiss notification" @click="dismiss(item.id)">
+        <material-icon-button type="button" class="icon-btn" aria-label="Dismiss notification" @click="dismiss(item.id)">
           <icon name="close" />
-        </button>
+        </material-icon-button>
       </div>
     </div>
   </div>
@@ -46,10 +46,12 @@
 <script>
 import Icon from './Icon.vue';
 import { notificationCenter } from '../../../notifications';
+import MaterialButton from '../../../components/material_button';
+import MaterialIconButton from '../../../components/material_icon_button';
 
 export default {
   name: 'BuildNotificationHost',
-  components: { Icon },
+  components: { Icon, MaterialButton, MaterialIconButton },
   data() {
     return {
       history: [],

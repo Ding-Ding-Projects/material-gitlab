@@ -20,7 +20,7 @@
 
     <main id="gl-code-tabpanel" class="gl-code-main" role="tabpanel" tabindex="0" :aria-label="`${activeTab} panel`">
       <p v-if="loading" role="status">Loading live Code data...</p>
-      <p v-else-if="loadError" role="alert">{{ loadError }} <button type="button" @click="load">Retry</button></p>
+      <p v-else-if="loadError" role="alert">{{ loadError }} <material-button type="button" variant="text" @click="load">Retry</material-button></p>
       <compare-card
         v-else-if="activeTab === 'Compare'"
         :refs="compareRefs"
@@ -89,6 +89,7 @@ import CodeRowList from './components/CodeRowList.vue';
 import RegexBuilderPopover from './components/RegexBuilderPopover.vue';
 import CommandPalette from './components/CommandPalette.vue';
 import ConfirmDialog from './components/ConfirmDialog.vue';
+import MaterialButton from '../../components/material_button';
 
 const TAB_ICONS = {
   Branches: 'account_tree',
@@ -108,6 +109,7 @@ export default {
     RegexBuilderPopover,
     CommandPalette,
     ConfirmDialog,
+    MaterialButton,
   },
   props: {
     userInitials: { type: String, default: '' },

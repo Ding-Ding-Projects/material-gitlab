@@ -15,20 +15,22 @@
       <h2 :id="titleId" class="dp-confirm__title">{{ title }}</h2>
       <p :id="messageId" class="dp-confirm__message">{{ message }}</p>
       <div class="dp-confirm__actions">
-        <button type="button" class="dp-btn dp-btn--text" @click="$emit('cancel')">Cancel</button>
-        <button ref="confirmButton" type="button" class="dp-btn dp-btn--danger" @click="$emit('confirm')">
+        <material-button ref="cancelButton" type="button" variant="text" class="dp-btn dp-btn--text" @click="$emit('cancel')">Cancel</material-button>
+        <material-button ref="confirmButton" type="button" class="dp-btn dp-btn--danger" @click="$emit('confirm')">
           {{ confirmLabel }}
-        </button>
+        </material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 let uid = 0;
 
 export default {
   name: 'DeployConfirmDialog',
+  components: { MaterialButton },
   props: {
     title: { type: String, required: true },
     message: { type: String, required: true },
@@ -48,7 +50,7 @@ export default {
   },
   methods: {
     keepFocus(event) {
-      const buttons = [...this.$refs.panel.querySelectorAll('button:not([disabled])')];
+      const buttons = [this.$refs.cancelButton, this.$refs.confirmButton].filter((button) => button && !button.disabled).map((button) => button.$el);
       const first = buttons[0]; const last = buttons[buttons.length - 1];
       if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
       else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
@@ -57,7 +59,7 @@ export default {
   beforeDestroy() { if (this.previousFocus?.isConnected) this.previousFocus.focus(); },
   mounted() {
     this.previousFocus = document.activeElement;
-    this.$nextTick(() => this.$refs.panel?.querySelector('button')?.focus());
+    this.$nextTick(() => this.$refs.cancelButton?.focus());
   },
 };
 </script>

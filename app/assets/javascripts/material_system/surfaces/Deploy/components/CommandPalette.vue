@@ -4,13 +4,14 @@
       <div class="dp-palette__search">
         <DpIcon name="search" />
         <label class="dp-visually-hidden" for="dp-palette-input">Jump to an action</label>
-        <input
+        <material-text-field
           id="dp-palette-input"
           ref="input"
           v-model="query"
           class="dp-palette__input"
           type="text"
           placeholder="Jump to an action…"
+          aria-label="Jump to an action"
           role="combobox"
           aria-expanded="true"
           aria-controls="dp-palette-listbox"
@@ -20,7 +21,7 @@
         <span class="dp-palette__kbd">Ctrl+Shift+F</span>
       </div>
       <div id="dp-palette-listbox" class="dp-palette__list" role="listbox" aria-label="Command palette results">
-        <button
+        <material-text-button
           v-for="(result, idx) in results"
           :id="`dp-palette-opt-${idx}`"
           :key="result.label"
@@ -34,7 +35,7 @@
         >
           <DpIcon :name="result.icon" />
           <span>{{ result.label }}</span>
-        </button>
+        </material-text-button>
         <p v-if="!results.length" class="dp-palette__empty">No matches.</p>
       </div>
     </div>
@@ -43,10 +44,12 @@
 
 <script>
 import DpIcon from './DpIcon.vue';
+import MaterialTextButton from '../../../components/material_text_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'CommandPalette',
-  components: { DpIcon },
+  components: { DpIcon, MaterialTextButton, MaterialTextField },
   props: {
     actions: { type: Array, default: () => [] },
   },

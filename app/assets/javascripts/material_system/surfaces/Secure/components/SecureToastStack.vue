@@ -11,9 +11,9 @@
         <div v-if="item.title" class="secure-toast__title">{{ item.title }}</div>
         <div class="secure-toast__message">{{ item.message }}</div>
       </div>
-      <button type="button" class="secure-toast__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
+      <material-button variant="text" type="button" class="secure-toast__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
         <secure-icon name="close" :size="14" />
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
@@ -21,12 +21,13 @@
 <script>
 import SecureIcon from './SecureIcon.vue';
 import { notificationCenter } from '../../../notifications';
+import MaterialButton from '../../../components/material_button';
 
 const ICONS = { error: 'alert-triangle', warning: 'alert-triangle', success: 'check-circle', info: 'info' };
 
 export default {
   name: 'SecureToastStack',
-  components: { SecureIcon },
+  components: { SecureIcon, MaterialButton },
   data() {
     return { items: [] };
   },

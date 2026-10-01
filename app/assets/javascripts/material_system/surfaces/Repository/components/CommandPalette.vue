@@ -6,10 +6,12 @@
 // genuine action this surface itself can perform — a decorative dead link would
 // violate the "a control that looks operable must work" rule.
 import MIcon from './MIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'CommandPalette',
-  components: { MIcon },
+  components: { MIcon, MaterialButton, MaterialTextField },
   props: {
     actions: {
       type: Array,
@@ -36,8 +38,8 @@ export default {
     this.$nextTick(() => this.$refs.queryInput && this.$refs.queryInput.focus());
   },
   methods: {
-    setQuery(event) {
-      this.query = event.target.value;
+    setQuery(value) {
+      this.query = value;
     },
     close() {
       this.$emit('close');
@@ -53,7 +55,8 @@ export default {
       if (!this.results.length) return;
       this.activeIndex = (this.activeIndex + delta + this.results.length) % this.results.length;
       this.$nextTick(() => {
-        const el = this.$refs.optionEls && this.$refs.optionEls[this.activeIndex];
+        const component = this.$refs.optionEls && this.$refs.optionEls[this.activeIndex];
+        const el = component?.$el || component;
         if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest' });
       });
     },
@@ -81,8 +84,8 @@ export default {
       <div class="palette-dialog__search">
         <m-icon name="search" :size="18" decorative class="palette-dialog__search-icon" />
         <label class="visually-hidden" for="palette-query">Search actions</label>
-        <input
-          id="palette-query"
+        <material-text-field
+          id="palette-query" aria-label="Jump to a file, branch, or action"
           ref="queryInput"
           type="text"
           :value="query"
@@ -92,11 +95,11 @@ export default {
           aria-controls="palette-listbox"
           :aria-activedescendant="results.length ? `palette-option-${activeIndex}` : null"
           @input="setQuery"
-        />
+        ></material-text-field>
         <span class="palette-dialog__hint">Ctrl+Shift+F</span>
       </div>
       <div id="palette-listbox" class="palette-dialog__results" role="listbox">
-        <button
+        <material-button variant="text"
           v-for="(action, index) in results"
           :id="`palette-option-${index}`"
           :key="action.id"
@@ -112,7 +115,7 @@ export default {
           <m-icon :name="action.icon" :size="18" decorative class="palette-option__icon" />
           <span class="palette-option__label">{{ action.label }}</span>
           <span class="palette-option__kind">{{ action.kind }}</span>
-        </button>
+        </material-button>
         <p v-if="!results.length" class="palette-dialog__empty">No matches.</p>
       </div>
     </div>

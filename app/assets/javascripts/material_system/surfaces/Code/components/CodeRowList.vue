@@ -1,16 +1,15 @@
 <template>
   <div class="gl-code-card" role="region" :aria-label="`${entityLabelPlural} list`">
     <div v-if="rows.length" class="gl-code-listbar">
-      <input
-        type="checkbox"
+      <material-checkbox
         class="gl-code-checkbox"
         :checked="allSelected"
         :indeterminate.prop="partiallySelected"
         :aria-label="selectAllLabel"
         @change="toggleSelectAll"
-      >
+      ></material-checkbox>
       <span>{{ selectAllLabel }}</span>
-      <button type="button" class="gl-code-bulkbar__btn" @click="invertSelection">Invert selection</button>
+      <material-button type="button" variant="text" class="gl-code-bulkbar__btn" @click="invertSelection">Invert selection</material-button>
     </div>
 
     <code-row
@@ -38,10 +37,12 @@
 <script>
 import CodeRow from './CodeRow.vue';
 import BulkActionBar from './BulkActionBar.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'CodeRowList',
-  components: { CodeRow, BulkActionBar },
+  components: { CodeRow, BulkActionBar, MaterialButton, MaterialCheckbox },
   props: {
     rows: { type: Array, required: true },
     selectedIds: { type: Array, required: true },

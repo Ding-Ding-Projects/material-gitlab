@@ -10,8 +10,8 @@
       <div class="gl-code-palette__search">
         <material-icon name="search" :size="20" />
         <label class="gl-code-visually-hidden" for="gl-code-palette-input">Jump to a Code action</label>
-        <input
-          id="gl-code-palette-input"
+        <material-text-field
+          id="gl-code-palette-input" aria-label="Jump to an action"
           ref="input"
           class="gl-code-palette__input"
           type="text"
@@ -22,11 +22,11 @@
           aria-controls="gl-code-palette-list"
           :aria-activedescendant="results.length ? `gl-code-palette-opt-${activeIndex}` : null"
           @keydown="onKeydown"
-        >
+        ></material-text-field>
         <span class="gl-code-palette__kbd">Ctrl+Shift+F</span>
       </div>
       <div id="gl-code-palette-list" class="gl-code-palette__list" role="listbox" aria-label="Command palette results">
-        <button
+        <material-button variant="text"
           v-for="(result, idx) in results"
           :id="`gl-code-palette-opt-${idx}`"
           :key="result.label"
@@ -40,7 +40,7 @@
         >
           <material-icon :name="result.icon" :size="20" />{{ result.label }}
           <span class="gl-code-palette__kind">Action</span>
-        </button>
+        </material-button>
         <div v-if="!results.length" style="padding:20px;text-align:center;font-size:13px;color:var(--onsurfv)">
           No matches.
         </div>
@@ -51,10 +51,12 @@
 
 <script>
 import MaterialIcon from './MaterialIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'CommandPalette',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialButton, MaterialTextField },
   props: {
     actions: { type: Array, default: () => [] },
   },

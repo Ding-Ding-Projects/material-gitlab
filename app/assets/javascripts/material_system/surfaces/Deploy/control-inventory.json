@@ -1,0 +1,14 @@
+{
+  "surface": "Deploy",
+  "files": [
+    { "file": "Deploy.vue", "buttons": 5, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/CommandPalette.vue", "buttons": 0, "textFields": 1, "checkboxes": 0, "iconButtons": 0, "textButtons": 1, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/ConfirmDialog.vue", "buttons": 2, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/DeployRow.vue", "buttons": 1, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/DeployTabs.vue", "buttons": 0, "textFields": 0, "checkboxes": 0, "iconButtons": 0, "textButtons": 1, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/DeployTopBar.vue", "buttons": 0, "textFields": 1, "checkboxes": 0, "iconButtons": 3, "textButtons": 1, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/NotificationHost.vue", "buttons": 0, "textFields": 0, "checkboxes": 0, "iconButtons": 1, "textButtons": 1, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/RegexBuilderPopover.vue", "buttons": 2, "textFields": 1, "checkboxes": 1, "iconButtons": 1, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] },
+    { "file": "components/SelectionBar.vue", "buttons": 2, "textFields": 0, "checkboxes": 1, "iconButtons": 0, "textButtons": 0, "radios": 0, "switches": 0, "nativeControls": [] }
+  ]
+}

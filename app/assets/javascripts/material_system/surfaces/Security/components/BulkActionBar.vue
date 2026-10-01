@@ -1,10 +1,11 @@
 <script>
 import MaterialIcon from './icons/MaterialIcon.vue';
+import MaterialButton from '../../../components/material_button';
 
 /** Appears once at least one vulnerability is selected; every action states its exact count. */
 export default {
   name: 'BulkActionBar',
-  components: { MaterialIcon },
+  components: { MaterialIcon, MaterialButton },
   props: {
     canUpdate: { type: Boolean, default: false },
     selectedCount: {
@@ -19,15 +20,15 @@ export default {
   <div class="sec-bulk-bar" role="toolbar" :aria-label="`${selectedCount} vulnerabilities selected`">
     <span class="sec-bulk-bar__count">{{ selectedCount }} selected</span>
     <span class="sec-bulk-bar__divider" aria-hidden="true"></span>
-    <button type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Confirmed')">
+    <material-button variant="text" type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Confirmed')">
       Mark confirmed
-    </button>
-    <button type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Dismissed')">Dismiss</button>
-    <button type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Resolved')">Resolve</button>
-    <button type="button" class="sec-bulk-bar__action" @click="$emit('export')">
+    </material-button>
+    <material-button variant="text" type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Dismissed')">Dismiss</material-button>
+    <material-button variant="text" type="button" class="sec-bulk-bar__action" :disabled="!canUpdate" @click="$emit('set-status', 'Resolved')">Resolve</material-button>
+    <material-button variant="text" type="button" class="sec-bulk-bar__action" @click="$emit('export')">
       <material-icon name="download" :size="16" />
       Export selected
-    </button>
-    <button type="button" class="sec-bulk-bar__clear" @click="$emit('clear')">Clear selection</button>
+    </material-button>
+    <material-button variant="text" type="button" class="sec-bulk-bar__clear" @click="$emit('clear')">Clear selection</material-button>
   </div>
 </template>

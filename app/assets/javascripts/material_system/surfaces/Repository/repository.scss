@@ -5,6 +5,35 @@
 // `tokens-light` / `tokens-dark` to its root element.
 
 @mixin tokens-light {
+  --md-sys-color-primary: var(--prim);
+  --md-sys-color-on-primary: var(--onprim);
+  --md-sys-color-primary-container: var(--primc);
+  --md-sys-color-on-primary-container: var(--onprimc);
+  --md-sys-color-secondary-container: var(--sec);
+  --md-sys-color-on-secondary-container: var(--onsurf);
+  --md-sys-color-surface: var(--surf);
+  --md-sys-color-on-surface: var(--onsurf);
+  --md-sys-color-on-surface-variant: var(--onsurfv);
+  --md-sys-color-surface-container: var(--surfc);
+  --md-sys-color-surface-container-high: var(--surfch);
+  --md-sys-color-surface-container-highest: var(--surfch);
+  --md-sys-color-outline: var(--outl);
+  --md-sys-color-outline-variant: var(--outlv);
+  --md-sys-color-error: var(--err);
+  --md-sys-color-on-error: var(--onprim);
+  --md-sys-color-error-container: var(--errc);
+  --md-sys-color-on-error-container: var(--onsurf);
+  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
+  md-filled-text-field { min-width: 0; max-width: 100%; }
+  .btn-danger { --md-filled-button-container-color: var(--err); --md-filled-button-label-text-color: var(--onprim); }
+  --md-sys-color-primary: var(--prim);
+  --md-sys-color-on-primary: var(--onprim);
+  --md-sys-color-surface: var(--surf);
+  --md-sys-color-on-surface: var(--onsurf);
+  --md-sys-color-outline: var(--outl);
+  --md-sys-color-error: var(--err);
   --surf: #f4effa;
   --surfc: #ece4f6;
   --surfch: #e0d5f2;

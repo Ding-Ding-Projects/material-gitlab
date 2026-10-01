@@ -1,0 +1,22 @@
+{
+  "surface": "Analyze",
+  "files": [
+    {
+      "file": "Analyze.vue",
+      "buttons": 0,
+      "textFields": 3,
+      "checkboxes": 0,
+      "iconButtons": 3,
+      "textButtons": 4,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": [
+        {
+          "tag": "select",
+          "type": "",
+          "reason": "Configured Insights chart selector retains native option selection until an official select adapter is available."
+        }
+      ]
+    }
+  ]
+}

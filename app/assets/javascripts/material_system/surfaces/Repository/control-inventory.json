@@ -1,0 +1,181 @@
+{
+  "surface": "Repository",
+  "files": [
+    {
+      "file": "Repository.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/BlobViewer.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/BranchSwitcher.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/Breadcrumbs.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CloneOptionsPopover.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CommandPalette.vue",
+      "buttons": 1,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/CommitsPanel.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/DeleteConfirmDialog.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/FileTree.vue",
+      "buttons": 6,
+      "textFields": 0,
+      "checkboxes": 1,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/FileTreeRow.vue",
+      "buttons": 1,
+      "textFields": 0,
+      "checkboxes": 1,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/LanguageBar.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/MIcon.vue",
+      "buttons": 0,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/NotificationHost.vue",
+      "buttons": 2,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/RegexBuilderDialog.vue",
+      "buttons": 4,
+      "textFields": 2,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/RepositoryHeader.vue",
+      "buttons": 3,
+      "textFields": 0,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    },
+    {
+      "file": "components/RepositoryTopBar.vue",
+      "buttons": 4,
+      "textFields": 1,
+      "checkboxes": 0,
+      "iconButtons": 0,
+      "textButtons": 0,
+      "radios": 0,
+      "switches": 0,
+      "nativeControls": []
+    }
+  ]
+}

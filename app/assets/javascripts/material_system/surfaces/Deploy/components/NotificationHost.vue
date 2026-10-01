@@ -7,7 +7,7 @@
           <p v-if="item.title" class="dp-toasts__title">{{ item.title }}</p>
           <p class="dp-toasts__message">{{ item.message }}</p>
         </div>
-        <button
+        <material-text-button
           v-for="action in item.actions"
           :key="action.id"
           type="button"
@@ -15,10 +15,10 @@
           @click="runAction(item.id, action.id)"
         >
           {{ action.label }}
-        </button>
-        <button type="button" class="dp-toasts__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
+        </material-text-button>
+        <material-icon-button type="button" class="dp-toasts__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
           <DpIcon name="close" size="small" />
-        </button>
+        </material-icon-button>
       </div>
     </transition-group>
   </div>
@@ -27,10 +27,12 @@
 <script>
 import notificationCenter from '../../../notifications';
 import DpIcon from './DpIcon.vue';
+import MaterialIconButton from '../../../components/material_icon_button';
+import MaterialTextButton from '../../../components/material_text_button';
 
 export default {
   name: 'DeployNotificationHost',
-  components: { DpIcon },
+  components: { DpIcon, MaterialIconButton, MaterialTextButton },
   props: {
     // Allows a host app/test to inject its own centre; defaults to the shared singleton.
     notifications: { type: Object, default: () => notificationCenter },
@@ -144,8 +146,8 @@ export default {
 
 .dp-toasts__dismiss {
   flex-shrink: 0;
-  width: 24px;
-  height: 24px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
