@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "surface.analyze",
+  "kind": "reference",
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "tuple": {
+    "screen": "surface.analyze",
+    "state": "default",
+    "theme": "light",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scale": 1,
+    "locale": "en-US"
+  },
+  "target": "http://127.0.0.1:51316/design-reference/analyze?state=default&theme=light&scale=1&locale=en-US",
+  "shellSelector": "nav, header, [role=\"toolbar\"], input[type=\"search\"], [role=\"search\"], [class*=\"search\" i], [class*=\"regex\" i]",
+  "epsilonPx": 0.5,
+  "findings": [
+    {
+      "selector": "div#dc-root > div.sc-host > div > div.sc-host:nth-of-type(1) > nav",
+      "kind": "vertical-scroll-overflow",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 248,
+        "height": 800,
+        "top": 0,
+        "right": 248,
+        "bottom": 800,
+        "left": 0
+      },
+      "parentRect": null,
+      "computed": null,
+      "detail": {
+        "scrollHeight": 2635,
+        "clientHeight": 800
+      }
+    }
+  ],
+  "summary": {
+    "findings": 1,
+    "scanned": 2,
+    "mdHosts": 0,
+    "shellElements": 2,
+    "byKind": {
+      "vertical-scroll-overflow": 1
+    }
+  }
+}

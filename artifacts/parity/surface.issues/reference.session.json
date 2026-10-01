@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "id": "surface.issues",
+  "kind": "reference",
+  "target": "http://127.0.0.1:51316/design-reference/issues?state=default&theme=light&scale=1&locale=en-US via cdp 127.0.0.1:19334",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) material-gitlab-design-reference/0.1.0 Chrome/150.0.7871.224 Electron/43.4.1 Safari/537.36",
+  "timestamp": "2026-09-09T00:53:48.112Z"
+}
