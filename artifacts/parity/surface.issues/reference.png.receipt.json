@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 2,
+  "id": "surface.issues",
+  "kind": "reference",
+  "status": "verified",
+  "referenceFile": "design/Issues.dc.html",
+  "referenceHash": "f79ce46ad28fb2311f26ecf6234c14a4272888f812be6f35c2ae28c82961f0cd",
+  "route": "/design-reference/issues",
+  "tuple": {
+    "screen": "surface.issues",
+    "state": "default",
+    "theme": "light",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scale": 1,
+    "locale": "en-US"
+  },
+  "tupleHash": "66c3915a34a8d13a38f21efffbae6018beeb088b93f2234753b3b80f86b01a4a",
+  "deterministic": {
+    "fixture": "material-gitlab-reference-v1",
+    "time": "2026-01-01T00:00:00.000Z",
+    "randomSeed": 109,
+    "motion": "disabled",
+    "fonts": "local-only",
+    "network": "deny-external"
+  },
+  "artifact": {
+    "path": "tools/design-reference/src/main.cjs",
+    "sha256": "82ed20d732d790d66328c3dda44ac08df963b70bc0276534b4138157792e3bfc",
+    "manifest": {
+      "path": "artifacts/parity/reference-artifact-manifest.json",
+      "sha256": "f6fd2b8016f7b8d2908769c40c6474e0ed8ed788e170513f0268338c76c20ea2"
+    }
+  },
+  "sessionProvenance": {
+    "path": "artifacts/parity/surface.issues/reference.session.json",
+    "sha256": "229b9552846fc61f80714282d3ce36f4727a287009c1600a2d078b7a59e3d6cf"
+  },
+  "fontProof": {
+    "transport": "cheap Lowlevel headless route",
+    "availability": {
+      "Google Sans": true,
+      "Google Sans Text": true,
+      "Material Symbols Outlined": true
+    },
+    "loadedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "raw": {
+    "path": "artifacts/parity/surface.issues/reference.png",
+    "sha256": "2c4407dce151353dff889947588b422055fc1433d4a38acacd7e99e0b71e7f68",
+    "width": 1280,
+    "height": 800,
+    "bytes": 106090
+  },
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "transport": "cheap Lowlevel headless route",
+  "tool": "tools/design-reference/scripts/capture.mjs",
+  "network": "deny-external"
+}

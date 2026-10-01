@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "surface.login",
+  "kind": "reference",
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "tuple": {
+    "screen": "surface.login",
+    "state": "default",
+    "theme": "light",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scale": 1,
+    "locale": "en-US"
+  },
+  "target": "http://127.0.0.1:51316/design-reference/login?state=default&theme=light&scale=1&locale=en-US",
+  "shellSelector": "nav, header, [role=\"toolbar\"], input[type=\"search\"], [role=\"search\"], [class*=\"search\" i], [class*=\"regex\" i]",
+  "epsilonPx": 0.5,
+  "findings": [],
+  "summary": {
+    "findings": 0,
+    "scanned": 0,
+    "mdHosts": 0,
+    "shellElements": 0,
+    "byKind": {}
+  }
+}

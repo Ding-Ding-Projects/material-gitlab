@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "artifacts": [
+    {
+      "path": "tools/design-reference/src/main.cjs",
+      "sha256": "82ed20d732d790d66328c3dda44ac08df963b70bc0276534b4138157792e3bfc"
+    }
+  ]
+}

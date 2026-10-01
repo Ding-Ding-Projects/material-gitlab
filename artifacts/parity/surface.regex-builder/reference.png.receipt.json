@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 2,
+  "id": "surface.regex-builder",
+  "kind": "reference",
+  "status": "verified",
+  "referenceFile": "design/Regex Builder.dc.html",
+  "referenceHash": "435518ce2c98ab350eae624c88707911b93f1c0edc15be2bed7077a09a19db48",
+  "route": "/design-reference/regex-builder",
+  "tuple": {
+    "screen": "surface.regex-builder",
+    "state": "default",
+    "theme": "light",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scale": 1,
+    "locale": "en-US"
+  },
+  "tupleHash": "94028ec2dff5b8e2273a8214b8ccb55fc1c4c64e91658ae0844ab109c385b97d",
+  "deterministic": {
+    "fixture": "material-gitlab-reference-v1",
+    "time": "2026-01-01T00:00:00.000Z",
+    "randomSeed": 117,
+    "motion": "disabled",
+    "fonts": "local-only",
+    "network": "deny-external"
+  },
+  "artifact": {
+    "path": "tools/design-reference/src/main.cjs",
+    "sha256": "82ed20d732d790d66328c3dda44ac08df963b70bc0276534b4138157792e3bfc",
+    "manifest": {
+      "path": "artifacts/parity/reference-artifact-manifest.json",
+      "sha256": "f6fd2b8016f7b8d2908769c40c6474e0ed8ed788e170513f0268338c76c20ea2"
+    }
+  },
+  "sessionProvenance": {
+    "path": "artifacts/parity/surface.regex-builder/reference.session.json",
+    "sha256": "f349ee53187a35af5aa34faea0002b215d33aff815ae0f81a609ff987e6de796"
+  },
+  "fontProof": {
+    "transport": "cheap Lowlevel headless route",
+    "availability": {
+      "Google Sans": true,
+      "Google Sans Text": true,
+      "Material Symbols Outlined": false
+    },
+    "loadedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "raw": {
+    "path": "artifacts/parity/surface.regex-builder/reference.png",
+    "sha256": "0cf97cbc36ccfd63234801c02cc6f192207c85d559b92261ea7aef95be2b9ed5",
+    "width": 1280,
+    "height": 800,
+    "bytes": 51023
+  },
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "transport": "cheap Lowlevel headless route",
+  "tool": "tools/design-reference/scripts/capture.mjs",
+  "network": "deny-external"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 2,
+  "id": "surface.monitor",
+  "kind": "reference",
+  "status": "verified",
+  "referenceFile": "design/Monitor.dc.html",
+  "referenceHash": "e5046118974cac451f1eb902836bac20c597db896bf3459eee04697d2e261269",
+  "route": "/design-reference/monitor",
+  "tuple": {
+    "screen": "surface.monitor",
+    "state": "default",
+    "theme": "light",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scale": 1,
+    "locale": "en-US"
+  },
+  "tupleHash": "c45bc906bd08ed13a046b7c617d9345e92b39909346bc3b37480c27790a75155",
+  "deterministic": {
+    "fixture": "material-gitlab-reference-v1",
+    "time": "2026-01-01T00:00:00.000Z",
+    "randomSeed": 113,
+    "motion": "disabled",
+    "fonts": "local-only",
+    "network": "deny-external"
+  },
+  "artifact": {
+    "path": "tools/design-reference/src/main.cjs",
+    "sha256": "82ed20d732d790d66328c3dda44ac08df963b70bc0276534b4138157792e3bfc",
+    "manifest": {
+      "path": "artifacts/parity/reference-artifact-manifest.json",
+      "sha256": "f6fd2b8016f7b8d2908769c40c6474e0ed8ed788e170513f0268338c76c20ea2"
+    }
+  },
+  "sessionProvenance": {
+    "path": "artifacts/parity/surface.monitor/reference.session.json",
+    "sha256": "8163c43756e264cf813d9bca3d530211ffe7f8471e547cc8dc89900d76193fe7"
+  },
+  "fontProof": {
+    "transport": "cheap Lowlevel headless route",
+    "availability": {
+      "Google Sans": true,
+      "Google Sans Text": true,
+      "Material Symbols Outlined": true
+    },
+    "loadedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "raw": {
+    "path": "artifacts/parity/surface.monitor/reference.png",
+    "sha256": "75ec481346ac8c5e40e4eaf08cfb1dccc9262dca8d7522f7230b8a93c2a5e4ea",
+    "width": 1280,
+    "height": 800,
+    "bytes": 81573
+  },
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "transport": "cheap Lowlevel headless route",
+  "tool": "tools/design-reference/scripts/capture.mjs",
+  "network": "deny-external"
+}

@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 2,
+  "id": "surface.command-palette",
+  "kind": "reference",
+  "status": "verified",
+  "referenceFile": "design/Command Palette.dc.html",
+  "referenceHash": "d3e0884c22bab44e8723692cac1748aed6f0c42fe11425ed11ed95a290f46574",
+  "route": "/design-reference/command-palette",
+  "tuple": {
+    "screen": "surface.command-palette",
+    "state": "default",
+    "theme": "light",
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "scale": 1,
+    "locale": "en-US"
+  },
+  "tupleHash": "309a7c617b2cf45f47a44f68119d5fcdc3fc5c38be5952186d82e845f71227e6",
+  "deterministic": {
+    "fixture": "material-gitlab-reference-v1",
+    "time": "2026-01-01T00:00:00.000Z",
+    "randomSeed": 106,
+    "motion": "disabled",
+    "fonts": "local-only",
+    "network": "deny-external"
+  },
+  "artifact": {
+    "path": "tools/design-reference/src/main.cjs",
+    "sha256": "82ed20d732d790d66328c3dda44ac08df963b70bc0276534b4138157792e3bfc",
+    "manifest": {
+      "path": "artifacts/parity/reference-artifact-manifest.json",
+      "sha256": "f6fd2b8016f7b8d2908769c40c6474e0ed8ed788e170513f0268338c76c20ea2"
+    }
+  },
+  "sessionProvenance": {
+    "path": "artifacts/parity/surface.command-palette/reference.session.json",
+    "sha256": "e986ff30cc5046b319bae54e6b06f78f280a65d7a91436002f444eb3fdf4d459"
+  },
+  "fontProof": {
+    "transport": "cheap Lowlevel headless route",
+    "availability": {
+      "Google Sans": false,
+      "Google Sans Text": true,
+      "Material Symbols Outlined": true
+    },
+    "loadedAt": "1970-01-01T00:00:00.000Z"
+  },
+  "raw": {
+    "path": "artifacts/parity/surface.command-palette/reference.png",
+    "sha256": "072ce8017778ce82cb939d137e5ce8ad64f2bfb7b94fead6a106cbb7ed2c4c55",
+    "width": 1280,
+    "height": 800,
+    "bytes": 45601
+  },
+  "sourceCommit": "7d571637545e3bb7cc53c2f49c42fa2be7126fc6",
+  "transport": "cheap Lowlevel headless route",
+  "tool": "tools/design-reference/scripts/capture.mjs",
+  "network": "deny-external"
+}
