@@ -1,6 +1,8 @@
 <script>
 import MdIcon from './MdIcon.vue';
 import { RegexBuilder } from '../../../regex-builder';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 const FLAG_TIPS = { i: 'case-insensitive', g: 'global', m: 'multiline', s: 'dotall' };
 
@@ -51,7 +53,7 @@ function explainPattern(pattern) {
  */
 export default {
   name: 'RegexBuilderPopover',
-  components: { MdIcon },
+  components: { MdIcon, MaterialButton, MaterialTextField },
   props: {
     initialPattern: {
       type: String,
@@ -174,7 +176,7 @@ export default {
           {{ validityLabel }}
         </span>
         <div class="md-todos__flag-chips">
-          <button
+          <material-button
             v-for="flag in ['i', 'g', 'm', 's']"
             :key="flag"
             type="button"
@@ -186,20 +188,20 @@ export default {
             @click="toggleFlag(flag)"
           >
             {{ flag }}
-          </button>
+          </material-button>
         </div>
-        <button
+        <material-button
           type="button"
           class="md-todos__icon-button"
           aria-label="Close regex builder"
           @click="close"
         >
           <md-icon name="close" :size="18" />
-        </button>
+        </material-button>
       </div>
 
       <label class="md-todos__visually-hidden" for="regex-pattern-input">Regex pattern</label>
-      <input
+      <material-text-field
         id="regex-pattern-input"
         ref="patternInput"
         v-model="pattern"
@@ -213,7 +215,7 @@ export default {
       <div class="md-todos__snippet-groups">
         <div v-for="group in snippetGroups" :key="group.name" class="md-todos__snippet-row">
           <span class="md-todos__snippet-label">{{ group.name }}</span>
-          <button
+          <material-button
             v-for="snippet in group.items"
             :key="group.name + snippet.text"
             type="button"
@@ -222,7 +224,7 @@ export default {
             @click="insertSnippet(snippet.text)"
           >
             {{ snippet.text }}
-          </button>
+          </material-button>
         </div>
       </div>
 
@@ -230,7 +232,7 @@ export default {
         <div class="md-todos__regex-column">
           <div class="md-todos__snippet-label">Test string</div>
           <label class="md-todos__visually-hidden" for="regex-test-text">Test string</label>
-          <textarea id="regex-test-text" v-model="testText" class="md-todos__test-textarea" rows="4"></textarea>
+          <material-text-field id="regex-test-text" v-model="testText" type="textarea" rows="4" class="md-todos__test-textarea"></material-text-field>
           <div class="md-todos__highlighted" aria-live="polite">
             <template v-for="(segment, idx) in highlightedSegments">
               <mark v-if="segment.matched" :key="'m' + idx">{{ segment.text }}</mark>
@@ -265,8 +267,8 @@ export default {
       </div>
 
       <div class="md-todos__dialog-actions">
-        <button type="button" class="md-todos__text-action" @click="close">Cancel</button>
-        <button type="button" class="md-todos__filled-action" @click="apply">Apply to search</button>
+        <material-button variant="text" type="button" class="md-todos__text-action" @click="close">Cancel</material-button>
+        <material-button type="button" class="md-todos__filled-action" @click="apply">Apply to search</material-button>
       </div>
     </div>
   </div>

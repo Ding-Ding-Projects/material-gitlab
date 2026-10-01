@@ -9,16 +9,15 @@
       @clear="$emit('clear-selection')"
       @invert="$emit('invert-selection')"
     >
-      <button type="button" class="mg-btn mg-btn--danger" @click="$emit('request-delete', { mode: 'bulk', ids: selectedIds })">
+      <material-button type="button" variant="filled" class="mg-btn mg-btn--danger" @click="$emit('request-delete', { mode: 'bulk', ids: selectedIds })">
         <MgIcon name="delete" size="small" /> Delete selected
-      </button>
+      </material-button>
     </MgSelectionToolbar>
 
     <ul class="mg-list" role="list" aria-label="Labels">
       <li v-for="lb in labels" :key="lb.id" class="mg-label-row" :class="{ 'mg-label-row--selected': selectedIds.includes(lb.id) }">
         <label class="mg-label-row__select">
-          <input
-            type="checkbox"
+          <material-checkbox
             :checked="selectedIds.includes(lb.id)"
             :aria-label="`Select label: ${lb.name}`"
             @change="$emit('toggle-select', lb.id)"
@@ -27,14 +26,14 @@
         <span class="mg-label-row__chip" :style="{ background: lb.color, color: lb.textColor }">{{ lb.name }}</span>
         <span class="mg-label-row__desc">{{ lb.description }}</span>
         <span class="mg-label-row__count">{{ lb.openIssuesCount }} open issues</span>
-        <button
+        <material-button
           type="button"
           class="mg-label-row__delete"
           :aria-label="`Delete label ${lb.name}`"
           @click="$emit('request-delete', { mode: 'single', ids: [lb.id] })"
         >
           <MgIcon name="delete" size="small" />
-        </button>
+        </material-button>
       </li>
     </ul>
 
@@ -45,10 +44,12 @@
 <script>
 import MgIcon from './MgIcon.vue';
 import MgSelectionToolbar from './MgSelectionToolbar.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'LabelsList',
-  components: { MgIcon, MgSelectionToolbar },
+  components: { MgIcon, MgSelectionToolbar, MaterialButton, MaterialCheckbox },
   props: {
     labels: { type: Array, required: true },
     selectedIds: { type: Array, default: () => [] },

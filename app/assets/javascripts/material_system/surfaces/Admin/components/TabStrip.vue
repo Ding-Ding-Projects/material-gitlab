@@ -1,6 +1,6 @@
 <template>
   <div class="gl-mds-admin-tabs" role="tablist" aria-label="Admin area sections" @keydown="onKeydown">
-    <button
+    <material-button
       v-for="tab in tabs"
       :id="`gl-mds-admin-tab-${tab}`"
       :key="tab"
@@ -15,13 +15,15 @@
       @click="$emit('select', tab)"
     >
       {{ tab }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 export default {
   name: 'TabStrip',
+  components: { MaterialButton },
   props: {
     tabs: { type: Array, required: true },
     active: { type: String, required: true },

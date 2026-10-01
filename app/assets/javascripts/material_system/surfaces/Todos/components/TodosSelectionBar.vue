@@ -1,5 +1,7 @@
 <script>
 import { TODO_VIEWS } from '../data';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 /**
  * Multi-select toolbar shared by every list on this surface: a scope-honest
@@ -8,6 +10,7 @@ import { TODO_VIEWS } from '../data';
  */
 export default {
   name: 'TodosSelectionBar',
+  components: { MaterialButton, MaterialCheckbox },
   props: {
     view: {
       type: String,
@@ -39,8 +42,8 @@ export default {
     },
   },
   methods: {
-    onSelectAllChange(event) {
-      if (event.target.checked) this.$emit('select-all');
+    onSelectAllChange(value) {
+      if (value) this.$emit('select-all');
       else this.$emit('clear-selection');
     },
   },
@@ -50,10 +53,10 @@ export default {
 <template>
   <div class="md-todos__selection-bar">
     <label class="md-todos__select-all">
-      <input
+      <material-checkbox
         type="checkbox"
         :checked="allSelected && visibleCount > 0"
-        :indeterminate.prop="selectAllState === 'indeterminate'"
+        :indeterminate="selectAllState === 'indeterminate'"
         :disabled="visibleCount === 0"
         aria-label="Select all visible to-dos"
         @change="onSelectAllChange"
@@ -62,32 +65,32 @@ export default {
       <span v-else>Select all {{ visibleCount }} visible</span>
     </label>
 
-    <button
+    <material-button
       type="button"
       class="md-todos__link-button"
       :disabled="visibleCount === 0"
       @click="$emit('invert-selection')"
     >
       Invert selection
-    </button>
+    </material-button>
 
     <div class="md-todos__selection-actions">
-      <button
+      <material-button
         v-if="selectedCount > 0"
         type="button"
         class="md-todos__link-button"
         @click="$emit('clear-selection')"
       >
         Cancel selection
-      </button>
-      <button
+      </material-button>
+      <material-button
         type="button"
         class="md-todos__bulk-action"
         :disabled="selectedCount === 0"
         @click="view === 'pending' ? $emit('bulk-mark-done') : $emit('bulk-restore')"
       >
         {{ bulkActionLabel }}
-      </button>
+      </material-button>
     </div>
   </div>
 </template>

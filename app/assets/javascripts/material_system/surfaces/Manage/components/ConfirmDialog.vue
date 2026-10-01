@@ -15,18 +15,20 @@
         <li v-for="item in items" :key="item">{{ item }}</li>
       </ul>
       <div class="mg-confirm__actions">
-        <button ref="cancelBtn" type="button" class="mg-btn mg-btn--text" @click="cancel">Cancel</button>
-        <button type="button" class="mg-btn mg-btn--danger" @click="confirm">{{ confirmLabel }}</button>
+        <material-button ref="cancelBtn" variant="text" type="button" class="mg-btn mg-btn--text" @click="cancel">Cancel</material-button>
+        <material-button variant="filled" type="button" class="mg-btn mg-btn--danger" @click="confirm">{{ confirmLabel }}</material-button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
 let uid = 0;
 
 export default {
   name: 'ConfirmDialog',
+  components: { MaterialButton },
   props: {
     title: { type: String, required: true },
     description: { type: String, default: '' },

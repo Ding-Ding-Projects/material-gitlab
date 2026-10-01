@@ -8,6 +8,7 @@ import TodosSelectionBar from './components/TodosSelectionBar.vue';
 import TodoList from './components/TodoList.vue';
 import RegexBuilderPopover from './components/RegexBuilderPopover.vue';
 import CommandPalette from './components/CommandPalette.vue';
+import MaterialButton from '../../components/material_button';
 import {
   TODO_VIEWS,
   fetchTodos as defaultFetchTodos,
@@ -29,6 +30,7 @@ export default {
     TodoList,
     RegexBuilderPopover,
     CommandPalette,
+    MaterialButton,
   },
   props: {
     // Renders the full page including the navigation sidebar (matches the
@@ -357,7 +359,7 @@ export default {
         <div v-else-if="loadError" class="md-todos__empty" role="alert">
           <strong>To-dos could not be loaded.</strong>
           <span>{{ loadError.message }}</span>
-          <button type="button" class="md-todos__link-button" @click="loadTodos">Retry</button>
+          <material-button variant="text" type="button" class="md-todos__link-button" @click="loadTodos">Retry</material-button>
         </div>
         <todo-list
           v-else

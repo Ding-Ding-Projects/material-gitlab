@@ -1,9 +1,8 @@
 <template>
   <div class="mg-selection-toolbar">
     <label class="mg-selection-toolbar__all">
-      <input
+      <material-checkbox
         ref="selectAll"
-        type="checkbox"
         :checked="allSelected"
         :aria-label="`Select all ${visibleCount} visible ${itemNoun}`"
         @change="$emit(allSelected ? 'clear' : 'select-all')"
@@ -12,25 +11,28 @@
       <span v-else>{{ selectedCount }} selected of {{ visibleCount }} shown</span>
     </label>
 
-    <button
+    <material-button
       v-if="visibleCount > 0"
       type="button"
       class="mg-selection-toolbar__link"
       @click="$emit('invert')"
     >
       Invert selection
-    </button>
+    </material-button>
 
     <div v-if="selectedCount > 0" class="mg-selection-toolbar__actions">
       <slot />
-      <button type="button" class="mg-selection-toolbar__link" @click="$emit('clear')">Clear</button>
+      <material-button type="button" variant="text" class="mg-selection-toolbar__link" @click="$emit('clear')">Clear</material-button>
     </div>
   </div>
 </template>
 
 <script>
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 export default {
   name: 'MgSelectionToolbar',
+  components: { MaterialButton, MaterialCheckbox },
   props: {
     visibleCount: { type: Number, required: true },
     selectedCount: { type: Number, required: true },

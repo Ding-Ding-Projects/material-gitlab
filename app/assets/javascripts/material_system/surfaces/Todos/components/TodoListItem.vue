@@ -1,10 +1,12 @@
 <script>
 import MdIcon from './MdIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 import { resolveTodoTone } from '../data';
 
 export default {
   name: 'TodoListItem',
-  components: { MdIcon },
+  components: { MdIcon, MaterialButton, MaterialCheckbox },
   props: {
     todo: {
       type: Object,
@@ -28,8 +30,7 @@ export default {
 
 <template>
   <li class="md-todos__item">
-    <input
-      type="checkbox"
+    <material-checkbox
       class="md-todos__item-checkbox"
       :checked="selected"
       :aria-label="`Select to-do from ${todo.actor}`"
@@ -47,7 +48,7 @@ export default {
       <div class="md-todos__item-meta">{{ todo.project }} · {{ todo.when }}</div>
     </div>
 
-    <button
+    <material-button
       v-if="isPending"
       type="button"
       class="md-todos__item-action"
@@ -55,8 +56,8 @@ export default {
     >
       <md-icon name="check" :size="16" />
       Done
-    </button>
-    <button
+    </material-button>
+    <material-button
       v-else
       type="button"
       class="md-todos__item-action md-todos__item-action--quiet"
@@ -64,6 +65,6 @@ export default {
     >
       <md-icon name="undo" :size="16" />
       Restore
-    </button>
+    </material-button>
   </li>
 </template>

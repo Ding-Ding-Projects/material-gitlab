@@ -2,10 +2,11 @@
 import MdIcon from './MdIcon.vue';
 import TodoListItem from './TodoListItem.vue';
 import { TODO_VIEWS } from '../data';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'TodoList',
-  components: { MdIcon, TodoListItem },
+  components: { MdIcon, TodoListItem, MaterialButton },
   props: {
     todos: {
       type: Array,
@@ -58,7 +59,7 @@ export default {
     <div v-else-if="isEmptyFromSearch" class="md-todos__empty">
       <md-icon name="search" :size="36" class="md-todos__empty-icon" />
       <p>No to-dos match your search.</p>
-      <button type="button" class="md-todos__link-button" @click="$emit('clear-search')">Clear search</button>
+      <material-button variant="text" type="button" class="md-todos__link-button" @click="$emit('clear-search')">Clear search</material-button>
     </div>
 
     <div v-else-if="view === 'pending'" class="md-todos__empty">

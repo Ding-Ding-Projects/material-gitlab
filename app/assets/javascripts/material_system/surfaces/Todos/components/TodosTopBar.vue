@@ -1,9 +1,11 @@
 <script>
 import MdIcon from './MdIcon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 export default {
   name: 'TodosTopBar',
-  components: { MdIcon },
+  components: { MdIcon, MaterialButton, MaterialTextField },
   props: {
     search: {
       type: String,
@@ -35,7 +37,7 @@ export default {
     <div class="md-todos__search" role="search">
       <md-icon name="search" class="md-todos__search-icon" />
       <label class="md-todos__visually-hidden" for="todos-search-input">{{ placeholder }}</label>
-      <input
+      <material-text-field
         id="todos-search-input"
         class="md-todos__search-input"
         type="search"
@@ -43,12 +45,12 @@ export default {
         :placeholder="placeholder"
         :aria-invalid="regexMode && !regexValid"
         aria-describedby="todos-search-hint"
-        @input="$emit('update:search', $event.target.value)"
+        @input="$emit('update:search', $event)"
       />
       <span id="todos-search-hint" class="md-todos__visually-hidden">
         Plain text search by default. Toggle regex mode or open the regex builder for pattern matching.
       </span>
-      <button
+      <material-button
         type="button"
         class="md-todos__regex-chip"
         :class="{ 'md-todos__regex-chip--active': regexMode }"
@@ -57,8 +59,8 @@ export default {
         @click="$emit('toggle-regex-mode')"
       >
         .*
-      </button>
-      <button
+      </material-button>
+      <material-button
         type="button"
         class="md-todos__icon-button"
         title="Regex builder"
@@ -66,10 +68,10 @@ export default {
         @click="$emit('open-regex-builder')"
       >
         <md-icon name="construction" :size="18" />
-      </button>
+      </material-button>
     </div>
 
-    <button
+    <material-button
       type="button"
       class="md-todos__icon-button"
       title="Command palette (Ctrl+Shift+F)"
@@ -77,9 +79,9 @@ export default {
       @click="$emit('open-palette')"
     >
       <md-icon name="keyboard_command_key" />
-    </button>
+    </material-button>
 
-    <button
+    <material-button
       type="button"
       class="md-todos__icon-button"
       title="Toggle theme"
@@ -87,7 +89,7 @@ export default {
       @click="$emit('toggle-theme')"
     >
       <md-icon :name="isDark ? 'light_mode' : 'dark_mode'" />
-    </button>
+    </material-button>
 
     <div class="md-todos__avatar" title="Signed-in user" aria-hidden="true">JD</div>
   </header>

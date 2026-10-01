@@ -1,6 +1,6 @@
 <template>
   <div class="gl-mds-admin-account">
-    <button
+    <material-button
       ref="trigger"
       type="button"
       class="gl-mds-admin-account__avatar"
@@ -10,7 +10,7 @@
       @click="open = !open"
     >
       {{ initials }}
-    </button>
+    </material-button>
 
     <div
       v-if="open"
@@ -25,20 +25,21 @@
         <Icon name="person" :size="16" />
         Profile
       </a>
-      <button role="menuitem" type="button" class="gl-mds-admin-account__item gl-mds-admin-account__item--button" @click="signOut">
+      <material-button variant="text" role="menuitem" type="button" class="gl-mds-admin-account__item gl-mds-admin-account__item--button" @click="signOut">
         <Icon name="logout" :size="16" />
         Sign out
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
 
 <script>
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'AccountMenu',
-  components: { Icon },
+  components: { Icon, MaterialButton },
   props: {
     initials: { type: String, default: 'JD' },
     name: { type: String, default: 'Jordan Diaz' },
@@ -73,7 +74,7 @@ export default {
     },
     handleOutsideClick(event) {
       if (this.$refs.menu && this.$refs.menu.contains(event.target)) return;
-      if (this.$refs.trigger && this.$refs.trigger.contains(event.target)) return;
+      if (this.$refs.trigger?.$el?.contains(event.target)) return;
       this.close();
     },
   },

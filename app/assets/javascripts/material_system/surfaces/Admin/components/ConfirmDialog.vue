@@ -14,12 +14,12 @@
       <h2 :id="titleId" class="gl-mds-admin-dialog__title">{{ title }}</h2>
       <p :id="descId" class="gl-mds-admin-dialog__desc">{{ description }}</p>
       <div class="gl-mds-admin-dialog__actions">
-        <button ref="cancelBtn" type="button" class="gl-mds-admin-btn gl-mds-admin-btn--text" @click="cancel">
+        <material-button ref="cancelBtn" variant="text" type="button" class="gl-mds-admin-btn gl-mds-admin-btn--text" @click="cancel">
           {{ cancelLabel }}
-        </button>
-        <button ref="confirmBtn" type="button" class="gl-mds-admin-btn gl-mds-admin-btn--danger" @click="confirm">
+        </material-button>
+        <material-button ref="confirmBtn" variant="filled" type="button" class="gl-mds-admin-btn gl-mds-admin-btn--danger" @click="confirm">
           {{ confirmLabel }}
-        </button>
+        </material-button>
       </div>
     </div>
   </div>
@@ -27,12 +27,13 @@
 
 <script>
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
 
 let uid = 0;
 
 export default {
   name: 'ConfirmDialog',
-  components: { Icon },
+  components: { Icon, MaterialButton },
   props: {
     open: { type: Boolean, default: false },
     title: { type: String, required: true },

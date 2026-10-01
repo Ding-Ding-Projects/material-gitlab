@@ -1,8 +1,7 @@
 <template>
   <div class="gl-mds-admin-row" role="row">
     <label class="gl-mds-admin-row__select">
-      <input
-        type="checkbox"
+      <material-checkbox
         :checked="selected"
         :aria-label="`Select ${row.title}`"
         @change="$emit('toggle-select')"
@@ -15,7 +14,7 @@
     </div>
     <span v-if="row.badge" class="gl-mds-admin-chip" :class="`gl-mds-admin-chip--${row.badge.tone}`">{{ row.badge.label }}</span>
     <span v-if="row.meta" class="gl-mds-admin-row__meta">{{ row.meta }}</span>
-    <button
+    <material-button
       v-if="row.actionLabel"
       type="button"
       class="gl-mds-admin-row__action"
@@ -23,16 +22,18 @@
       @click="$emit('action', row.actionId)"
     >
       {{ row.actionLabel }}
-    </button>
+    </material-button>
   </div>
 </template>
 
 <script>
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialCheckbox from '../../../components/material_checkbox';
 
 export default {
   name: 'ListRow',
-  components: { Icon },
+  components: { Icon, MaterialButton, MaterialCheckbox },
   props: {
     row: { type: Object, required: true },
     selected: { type: Boolean, default: false },

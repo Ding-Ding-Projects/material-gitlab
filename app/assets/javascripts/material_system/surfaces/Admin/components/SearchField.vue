@@ -1,7 +1,7 @@
 <template>
   <div class="gl-mds-admin-search" :class="{ 'gl-mds-admin-search--regex': regexMode, 'gl-mds-admin-search--compact': compact }">
     <Icon :name="icon" :size="18" class="gl-mds-admin-search__icon" />
-    <input
+    <material-text-field
       v-bind="inputAttrs"
       :id="inputId"
       :value="value"
@@ -10,9 +10,9 @@
       :placeholder="placeholder"
       :aria-label="ariaLabel"
       autocomplete="off"
-      @input="$emit('input', $event.target.value)"
+      @input="$emit('input', $event)"
     />
-    <button
+    <material-button
       type="button"
       class="gl-mds-admin-search__chip"
       :aria-pressed="regexMode"
@@ -20,8 +20,8 @@
       @click="$emit('update:regex-mode', !regexMode)"
     >
       .*
-    </button>
-    <button
+    </material-button>
+    <material-button
       ref="trigger"
       type="button"
       data-gl-mds-admin-regex-trigger
@@ -32,7 +32,7 @@
       @click="builderOpen = !builderOpen"
     >
       <Icon name="regex" :size="17" />
-    </button>
+    </material-button>
     <RegexBuilderPopover
       :open="builderOpen"
       :initial-pattern="regexMode ? value : ''"
@@ -47,12 +47,14 @@
 <script>
 import Icon from './Icon.vue';
 import RegexBuilderPopover from './RegexBuilderPopover.vue';
+import MaterialButton from '../../../components/material_button';
+import MaterialTextField from '../../../components/material_text_field';
 
 let uid = 0;
 
 export default {
   name: 'SearchField',
-  components: { Icon, RegexBuilderPopover },
+  components: { Icon, RegexBuilderPopover, MaterialButton, MaterialTextField },
   props: {
     value: { type: String, default: '' },
     regexMode: { type: Boolean, default: false },

@@ -1,6 +1,6 @@
 <template>
   <div class="gl-mds-admin-bell">
-    <button
+    <material-button
       ref="trigger"
       type="button"
       class="gl-mds-admin-iconbtn"
@@ -11,7 +11,7 @@
     >
       <Icon name="bell" />
       <span v-if="unreadCount" class="gl-mds-admin-bell__dot" aria-hidden="true"></span>
-    </button>
+    </material-button>
 
     <div
       v-if="open"
@@ -24,14 +24,14 @@
     >
       <div class="gl-mds-admin-popover__header">
         <span class="gl-mds-admin-popover__title">Notifications</span>
-        <button
+        <material-button
           type="button"
           class="gl-mds-admin-btn gl-mds-admin-btn--text gl-mds-admin-btn--sm"
           :disabled="!items.length"
           @click="clearAll"
         >
           Clear all
-        </button>
+        </material-button>
       </div>
 
       <ul v-if="items.length" class="gl-mds-admin-bell__list">
@@ -46,7 +46,7 @@
             <div class="gl-mds-admin-bell__item-message">{{ item.message }}</div>
             <div class="gl-mds-admin-bell__item-time">{{ relativeTime(item.createdAt) }}</div>
           </div>
-          <button
+          <material-button
             v-if="!item.dismissed"
             type="button"
             class="gl-mds-admin-iconbtn gl-mds-admin-iconbtn--sm"
@@ -54,7 +54,7 @@
             @click="dismiss(item.id)"
           >
             <Icon name="close" :size="14" />
-          </button>
+          </material-button>
         </li>
       </ul>
       <p v-else class="gl-mds-admin-bell__empty">No notifications yet.</p>
@@ -64,10 +64,11 @@
 
 <script>
 import Icon from './Icon.vue';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'NotificationBell',
-  components: { Icon },
+  components: { Icon, MaterialButton },
   props: {
     center: { type: Object, required: true },
   },
@@ -111,7 +112,7 @@ export default {
     },
     handleOutsideClick(event) {
       if (this.$refs.panel && this.$refs.panel.contains(event.target)) return;
-      if (this.$refs.trigger && this.$refs.trigger.contains(event.target)) return;
+      if (this.$refs.trigger?.$el?.contains(event.target)) return;
       this.close();
     },
     relativeTime(iso) {

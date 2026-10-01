@@ -6,7 +6,7 @@
         <p class="mg-notify__message">{{ item.message }}</p>
       </div>
       <div v-if="item.actions.length" class="mg-notify__actions">
-        <button
+        <material-button
           v-for="action in item.actions"
           :key="action.id"
           type="button"
@@ -14,11 +14,11 @@
           @click="runAction(item.id, action.id)"
         >
           {{ action.label }}
-        </button>
+        </material-button>
       </div>
-      <button type="button" class="mg-notify__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
+      <material-button variant="text" type="button" class="mg-notify__dismiss" aria-label="Dismiss notification" @click="dismiss(item.id)">
         <MgIcon name="close" size="small" />
-      </button>
+      </material-button>
     </div>
   </div>
 </template>
@@ -26,10 +26,11 @@
 <script>
 import MgIcon from './MgIcon.vue';
 import notificationCenter from '../../../notifications';
+import MaterialButton from '../../../components/material_button';
 
 export default {
   name: 'NotificationHost',
-  components: { MgIcon },
+  components: { MgIcon, MaterialButton },
   data() {
     return { items: [] };
   },

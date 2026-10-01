@@ -1,11 +1,12 @@
 <script>
 import MdIcon from './MdIcon.vue';
 import { createPaletteDestinations } from '../data';
+import MaterialTextField from '../../../components/material_text_field';
 
 /** Ctrl+Shift+F command palette: static page destinations plus caller-supplied actions. */
 export default {
   name: 'CommandPalette',
-  components: { MdIcon },
+  components: { MdIcon, MaterialTextField },
   props: {
     actions: {
       type: Array,
@@ -81,7 +82,7 @@ export default {
       <div class="md-todos__palette-search">
         <md-icon name="search" />
         <label class="md-todos__visually-hidden" for="palette-query">Jump to page, setting, or action</label>
-        <input
+        <material-text-field
           id="palette-query"
           ref="queryInput"
           v-model="query"
