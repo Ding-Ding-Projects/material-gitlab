@@ -1,5 +1,27 @@
 # Material GitLab overlay handoff
 
+## Package output ownership repair, 2026-10-05
+
+The concrete checksum-write failure recorded below is repaired in `scripts/omnibus/build-package.sh`.
+An exit handler uses the same builder image to return only `pkg` and its contents to the invoking
+user's numeric UID and GID. It also runs after build failure, preserves the original failure code,
+and fails a successful build when the ownership handoff fails. A symlinked `pkg` directory is
+refused; recursive ownership changes do not follow nested symlink targets. The checkout and cache
+are not recursively changed.
+
+Local verification: `build-package.test.sh` reproduces the original line-74 `Permission denied`
+against the previous script after every synthetic package content check passes. With the repair,
+it verifies checksum replacement and creation, original build failure propagation, ownership-only
+failure, simultaneous failures, absent output, pull failure, and symlink refusal. The existing
+`verify-package.test.sh`, `retry.test.sh`, and `patch-build-retries.test.sh` also pass. Docker is
+mocked and the `.deb` is synthetic; no privileged container is needed for these tests.
+
+No full production Docker build was run for this repair because Docker is unavailable in the
+verification environment. The next packaging action is to run the existing manual Omnibus workflow
+at the integrated commit and inspect its package, checksum, and publication result. Issue #3 remains
+open for that result and its other outstanding work. Rootless, user-namespace-remapped, and remote
+Docker daemon ownership mappings are not verified by this change.
+
 ## Orchestration plan for the continuation pass, and the state it was written against, 2026-09-11
 
 This section supersedes older claims it contradicts. It records the repository state measured on

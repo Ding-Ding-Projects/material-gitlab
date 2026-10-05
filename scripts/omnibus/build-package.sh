@@ -37,6 +37,31 @@ fi
 
 docker pull "$builder"
 
+# Omnibus needs root inside the builder, but the next host-side step writes the checksum
+# beside the package. Return only the generated package directory to the invoking user,
+# including after a failed build so any partial output can still be inspected. A separate
+# container also handles a build container that exits before its own cleanup could run.
+output_owner="$(id -u):$(id -g)"
+return_package_output() {
+  local build_status=$? ownership_status=0
+  trap - EXIT
+  if [ -L "$omnibus_abs/pkg" ]; then
+    warn "Refusing to change ownership of a symlinked package directory: $omnibus_abs/pkg"
+    ownership_status=1
+  elif [ -d "$omnibus_abs/pkg" ]; then
+    docker run --rm \
+      -v "$omnibus_abs:/omnibus" \
+      "$builder" \
+      chown -hR -- "$output_owner" /omnibus/pkg || ownership_status=$?
+  fi
+  if [ "$ownership_status" -ne 0 ]; then
+    warn "Could not return package output to $output_owner (exit $ownership_status)."
+    if [ "$build_status" -eq 0 ]; then build_status="$ownership_status"; fi
+  fi
+  exit "$build_status"
+}
+trap return_package_output EXIT
+
 # Without COMPILE_ASSETS=true, the gitlab-rails definition takes its "copy the assets a CI
 # job already built" path and syncs "$CI_PROJECT_DIR/$ASSET_PATH" into public/assets.
 # Outside GitLab's own CI both variables are empty, so that path collapses to "/" and it

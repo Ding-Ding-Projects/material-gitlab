@@ -17,6 +17,33 @@ image is pulled, and needs `GITLAB_HOSTNAME`, `GITLAB_HTTP_PORT`, `GITLAB_SSH_PO
 `GITLAB_HOME` set in a local `.env` file. A missing or unpublished package is reported as a real
 failure by the install commands, never silently substituted with stock upstream GitLab.
 
+## Package output ownership
+
+The official Omnibus builder runs as root and can leave `omnibus-gitlab/pkg` owned by root.
+The next workflow step runs as the host user and must write `SHA256SUMS.txt` there. Run
+[34563358622](https://github.com/Ding-Ding-Projects/material-gitlab/actions/runs/34563358622)
+passed the package content checks, then failed at that checksum write with `Permission denied`.
+
+`scripts/omnibus/build-package.sh` now captures the invoking user's numeric UID and GID. On exit,
+it uses a separate run of the same builder image to change ownership only under `/omnibus/pkg`.
+This includes partial output from failed builds. A build failure keeps its original exit code;
+an ownership failure after a successful build makes the script fail rather than claiming usable
+output. A symlinked package directory is refused, and nested symlink targets are not followed.
+Neither checkout-wide nor cache-wide ownership changes are made, and file modes are not relaxed.
+
+This behavior assumes a local, rootful Linux Docker daemon with the host UID/GID mapping used by
+the Ubuntu workflow runner. Rootless, user-namespace-remapped, and remote Docker configurations
+need separate validation. A terminated host or unavailable Docker daemon can prevent cleanup;
+check the reported ownership error before rerunning the verifier.
+
+Local regression commands are listed in
+[BUILD.md](https://github.com/Ding-Ding-Projects/material-gitlab/blob/main/BUILD.md#building-the-omnibus-package-or-the-container-image).
+`build-package.test.sh` uses mocked Docker and a real synthetic `.deb` as a non-root user. Removing
+the ownership fix makes the host verifier fail at the checksum write; restoring it passes checksum
+creation and replacement. Failure-status and symlink-refusal cases also pass, as do the existing
+package-verifier and retry suites. These are local regression results, not evidence of a new full
+Omnibus compilation, container boot, or published release.
+
 ## Security and verification
 
 The container recipe is derived from upstream `omnibus-gitlab`'s own Docker assets (Apache-2.0,

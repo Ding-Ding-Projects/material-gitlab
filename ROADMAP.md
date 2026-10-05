@@ -5,11 +5,12 @@
 The continuation pass is planned in
 [`doc/development/material_orchestration_plan.md`](doc/development/material_orchestration_plan.md):
 the verified 11 September 2026 baseline, one card per lane with explicit allowed paths, the wave
-order, and what is deliberately out of scope. Nothing in it is done yet.
+order, and what is deliberately out of scope. Verified progress is recorded below.
 
-- [ ] Repair the package verifier's last step, which fails writing `SHA256SUMS.txt` into a
-      root-owned package directory, and publish the first `omnibus-*` release and container image
-      from the package the build already produces.
+- [x] Add a package-output ownership handoff so the host verifier can write `SHA256SUMS.txt`;
+      verified red then green with mocked Docker and a real synthetic `.deb` as a non-root user.
+- [ ] Verify that handoff in a full Docker build and publish the first `omnibus-*` release and
+      container image from the package the build already produces.
 - [ ] Replace all 25 design surfaces so each one is its contract, across thirteen surface lanes plus
       a shared shell foundation lane.
 - [ ] Integrate or honestly retain the four branches that carry commits `main` does not have.

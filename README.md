@@ -339,6 +339,13 @@ OPENSSL_VERSION=<value from read-toolchain.sh> \
 scripts/omnibus/verify-package.sh omnibus-gitlab/pkg "$(cat VERSION)"
 ```
 
+The builder runs as root, then returns `omnibus-gitlab/pkg` to the invoking user's numeric UID
+and GID so the host-side verifier can create or replace `SHA256SUMS.txt`. This also runs after a
+failed build without hiding its exit status. Only package output is changed, and symlink targets
+are not followed. The handoff assumes a local, rootful Linux Docker daemon like the workflow uses;
+rootless, user-namespace-remapped, and remote-daemon ownership mappings are not verified.
+See [deployment verification](site/docs/deployment.md#package-output-ownership) for the local checks.
+
 **Check:** `verify-package.sh` prints a SHA-256 and byte count and exits 0. It fails closed if the
 package is missing any of the tree's `app/helpers/material_*_helper.rb` files or the compiled fork-only
 `pages.agent_memory` entry (Omnibus never ships `app/assets` source, so the check uses what does ship), has fewer

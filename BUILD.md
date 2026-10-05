@@ -106,6 +106,19 @@ scripts under [`scripts/omnibus/`](scripts/omnibus/) inside the official Omnibus
 See [README.md](README.md), sections **Install with Docker** and **Build the package yourself**, for
 how to run that workflow or reproduce it locally on a Linux Docker host.
 
+Run the focused packaging regressions locally as a non-root Linux user:
+
+```bash
+bash scripts/omnibus/build-package.test.sh
+bash scripts/omnibus/verify-package.test.sh
+bash scripts/omnibus/retry.test.sh
+bash scripts/omnibus/patch-build-retries.test.sh
+```
+
+The ownership regression mocks Docker and verifies a synthetic `.deb` with `dpkg-deb`; it does
+not compile the production package. It skips when run as root or without `dpkg-deb`. These checks
+remain local and do not add a test gate to the release workflow.
+
 ## Overlay provenance validator
 
 Run [`scripts/verify-upstream-overlay.mjs`](scripts/verify-upstream-overlay.mjs) to confirm the
