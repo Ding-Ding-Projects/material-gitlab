@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Material features in depth 1",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 980,
+   "title": "Super confirmation: sliding",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "super_confirmation_authorized.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 980,
+   "title": "Super confirmation: authorized",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "lock_this_element_wizard.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Lock this element wizard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "unlock_prompt_and_support_tickets.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Unlock prompt and Support Tickets",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "unlock_ladder_dim_sum_rung.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Unlock ladder: dim sum rung",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "unlock_ladder_whack_a_mole.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Unlock ladder: whack-a-mole",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "dim_sum_surprise_switch.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Dim sum surprise switch",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "school_mode.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "School mode",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "narrator_and_action_sounds.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Narrator and action sounds",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "scheduled_settings.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Scheduled settings",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "personal_wording_upload_and_drop.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Personal wording: upload and drop",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "rename_and_logo.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Rename and logo",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "infinite_color_picker.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Infinite color picker",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "live_chart.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Live chart",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "guided_wizard_above_a_control.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Guided wizard above a control",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "super_confirmation_authorized.dc.html",
+  "lock_this_element_wizard.dc.html",
+  "unlock_prompt_and_support_tickets.dc.html",
+  "unlock_ladder_dim_sum_rung.dc.html",
+  "unlock_ladder_whack_a_mole.dc.html",
+  "dim_sum_surprise_switch.dc.html",
+  "school_mode.dc.html",
+  "narrator_and_action_sounds.dc.html",
+  "scheduled_settings.dc.html",
+  "personal_wording_upload_and_drop.dc.html",
+  "rename_and_logo.dc.html",
+  "infinite_color_picker.dc.html",
+  "live_chart.dc.html",
+  "guided_wizard_above_a_control.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Material features in depth 1",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
