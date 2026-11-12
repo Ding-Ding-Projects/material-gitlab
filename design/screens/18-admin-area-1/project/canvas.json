@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Admin area 1",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Runners",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_jobs.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Jobs",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_abuse_reports.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Abuse reports",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_abuse_report_detail.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Abuse report detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_spam_logs.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Spam logs",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_messages.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Messages",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_system_hooks.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: System hooks",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_applications.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Applications",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_deploy_keys.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Deploy keys",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_labels.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Labels",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_credentials.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Credentials",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_push_rules.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Push rules",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_geo_sites.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Geo sites",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_subscription.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Subscription",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_gitlab_duo.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: GitLab Duo",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "admin_jobs.dc.html",
+  "admin_abuse_reports.dc.html",
+  "admin_abuse_report_detail.dc.html",
+  "admin_spam_logs.dc.html",
+  "admin_messages.dc.html",
+  "admin_system_hooks.dc.html",
+  "admin_applications.dc.html",
+  "admin_deploy_keys.dc.html",
+  "admin_labels.dc.html",
+  "admin_credentials.dc.html",
+  "admin_push_rules.dc.html",
+  "admin_geo_sites.dc.html",
+  "admin_subscription.dc.html",
+  "admin_gitlab_duo.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Admin area 1",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
