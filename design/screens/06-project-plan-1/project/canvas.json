@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:07:44Z"
+ },
+ "title": "Material GitLab: Project: plan 1",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Issues",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "issues_bilingual.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Issues, bilingual",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "work_items.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Work items",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "issue_detail.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Issue detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "new_issue.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "New issue",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "issue_board.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Issue board",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "board_list_settings.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Board list settings",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "milestones.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Milestones",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "milestone_detail.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Milestone detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "iterations.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Iterations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "epics.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Epics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "roadmap.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Roadmap",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "epic_detail.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Epic detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "wiki_page.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Wiki page",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "wiki_edit.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Wiki edit",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "issues_bilingual.dc.html",
+  "work_items.dc.html",
+  "issue_detail.dc.html",
+  "new_issue.dc.html",
+  "issue_board.dc.html",
+  "board_list_settings.dc.html",
+  "milestones.dc.html",
+  "milestone_detail.dc.html",
+  "iterations.dc.html",
+  "epics.dc.html",
+  "roadmap.dc.html",
+  "epic_detail.dc.html",
+  "wiki_page.dc.html",
+  "wiki_edit.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: plan 1",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
