@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Group to settings",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group issue board",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_milestones.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group milestones",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_wiki.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group wiki",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_runners.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group runners",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_kubernetes.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group Kubernetes",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_package_registry.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group package registry",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "dependency_proxy.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Dependency proxy",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "customer_relations.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Customer relations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_security_dashboard.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group security dashboard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "devops_adoption.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "DevOps adoption",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_value_stream.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group value stream",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_settings_general.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group settings: General",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_settings_access_tokens.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group settings: Access tokens",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_settings_ci_cd.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group settings: CI/CD",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_settings_saml_sso.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group settings: SAML SSO",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "group_milestones.dc.html",
+  "group_wiki.dc.html",
+  "group_runners.dc.html",
+  "group_kubernetes.dc.html",
+  "group_package_registry.dc.html",
+  "dependency_proxy.dc.html",
+  "customer_relations.dc.html",
+  "group_security_dashboard.dc.html",
+  "devops_adoption.dc.html",
+  "group_value_stream.dc.html",
+  "group_settings_general.dc.html",
+  "group_settings_access_tokens.dc.html",
+  "group_settings_ci_cd.dc.html",
+  "group_settings_saml_sso.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Group to settings",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
