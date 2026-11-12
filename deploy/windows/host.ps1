@@ -105,13 +105,20 @@ function Ensure-EnvFile {
 }
 
 function Get-LatestDebUrl {
-  try {
-    $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases?per_page=30" -Headers @{ 'User-Agent' = 'material-gitlab-host' }
-  } catch { return $null }
-  foreach ($r in $releases) {
-    if ($r.draft) { continue }
-    $asset = $r.assets | Where-Object { $_.name -like '*.deb' } | Select-Object -First 1
-    if ($asset) { return @{ Url = $asset.browser_download_url; Tag = $r.tag_name } }
+  # Windows desktop releases are published far more often than Omnibus packages, so the
+  # newest .deb can sit many pages back. Walk the list newest first until one turns up.
+  for ($page = 1; $page -le 10; $page++) {
+    try {
+      # Not wrapped in @(): Windows PowerShell 5.1 hands back a JSON array as one object, and
+      # wrapping it would nest the whole page inside a single element.
+      $releases = Invoke-RestMethod -Uri "https://api.github.com/repos/$Repo/releases?per_page=100&page=$page" -Headers @{ 'User-Agent' = 'material-gitlab-host' }
+    } catch { return $null }
+    if (-not $releases -or $releases.Count -eq 0) { return $null }
+    foreach ($r in $releases) {
+      if ($r.draft) { continue }
+      $asset = $r.assets | Where-Object { $_.name -like '*.deb' } | Select-Object -First 1
+      if ($asset) { return @{ Url = $asset.browser_download_url; Tag = $r.tag_name } }
+    }
   }
   return $null
 }
