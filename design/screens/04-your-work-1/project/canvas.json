@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:07:44Z"
+ },
+ "title": "Material GitLab: Your work 1",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Projects",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "groups.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Groups",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "organizations.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organizations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "work_items.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Work items",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "merge_requests.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Merge requests",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "to_do_list.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "To-Do List",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "milestones.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Milestones",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "snippets.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Snippets",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "activity.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Activity",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "workspaces.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Workspaces",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "environments_dashboard.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Environments dashboard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "operations_dashboard.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Operations dashboard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "security_dashboard.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Security dashboard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "vulnerability_report.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Vulnerability report",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "security_settings.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Security settings",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "groups.dc.html",
+  "organizations.dc.html",
+  "work_items.dc.html",
+  "merge_requests.dc.html",
+  "to_do_list.dc.html",
+  "milestones.dc.html",
+  "snippets.dc.html",
+  "activity.dc.html",
+  "workspaces.dc.html",
+  "environments_dashboard.dc.html",
+  "operations_dashboard.dc.html",
+  "security_dashboard.dc.html",
+  "vulnerability_report.dc.html",
+  "security_settings.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Your work 1",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
