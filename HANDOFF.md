@@ -25,8 +25,9 @@ This section supersedes older claims it contradicts.
   Verified in the isolated harness (26 cases across the three new specs, guards watched failing)
   and with real render captures; the GitLab Jest suite and a running instance were not available.
 - The feature hub also has School mode (PIN), personal wording upload, display name, the color
-  translator and the built-in extensions manager. Still design-only: element locks, Support
-  Tickets, the unlock ladder, scheduled settings and logo upload.
+  translator and the built-in extensions manager. Element locks (six mixes,
+  local QR authenticator pairing), the unlock ladder, Support Tickets, schedules and logo upload
+  now ship too, so every feature screen from the design canvas has a working counterpart.
 - Design canvas: `design/screens/` holds 322 screens in 23 sections.
 
 ## Material 3 Expressive redesign, 2026-11-11

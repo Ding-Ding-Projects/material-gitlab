@@ -763,3 +763,118 @@ html[data-m3-large-targets='on'] {
     cursor: pointer;
   }
 }
+
+// ---------- Locks, unlock ladder, Support Tickets, schedules, logo ----------
+.m3-unlock__note {
+  color: var(--gl-md3-onsurfv);
+  font-size: 0.8125rem;
+}
+
+.m3-pair__qr {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+}
+
+.m3-ladder {
+  &__rungs {
+    display: flex;
+    gap: 6px;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--gl-md3-surfch);
+      font-weight: 800;
+
+      &.done {
+        background: var(--gl-md3-prim);
+        color: var(--gl-md3-onprim);
+      }
+
+      &.current {
+        background: var(--gl-md3-tertc);
+        color: var(--gl-md3-ontertc);
+      }
+    }
+  }
+
+  &__dish {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 24px;
+    margin-bottom: 12px;
+  }
+
+  &__sums {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 8px;
+
+    input {
+      width: 64px;
+    }
+  }
+
+  &__holes {
+    display: grid;
+    grid-template-columns: repeat(3, 72px);
+    gap: 10px;
+  }
+
+  &__hole {
+    height: 72px;
+    border: 0;
+    border-radius: 999px 999px 18px 18px;
+    background: var(--gl-md3-surfch);
+    cursor: pointer;
+
+    &.up {
+      background: var(--gl-md3-tert);
+      animation: m3-pop 0.3s $m3-spring both;
+    }
+  }
+}
+
+.m3-schedule-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 12px;
+  align-items: end;
+}
+
+.m3-logo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.m3-logo-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px 18px 18px 18px;
+  object-fit: contain;
+  background: var(--gl-md3-surfch);
+
+  &--default {
+    display: grid;
+    place-items: center;
+    background: var(--gl-md3-prim);
+    color: var(--gl-md3-onprim);
+    font-weight: 800;
+    font-family: var(--default-mono-font, 'GitLab Mono', monospace);
+  }
+}
+
+.material-sidebar__lock {
+  margin-left: auto;
+  color: var(--gl-md3-tert);
+}

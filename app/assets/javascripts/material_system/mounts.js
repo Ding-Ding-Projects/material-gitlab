@@ -59,7 +59,7 @@ const resolveTheme = (settings) => settings.theme === 'system'
 export function mountSidebar(el = document.querySelector('.m3-shell-sidebar-host'), options = {}) {
   if (!el || el.__materialMount) return el?.__materialMount || null;
   const payload = options.data || parseJson(el.dataset.sidebar, {});
-  const vm = mount(el, Sidebar, { sections: options.sections || toSections(payload), active: options.active || payload.current_context_header || '', project: options.project || payload.current_context?.item || {}, theme: resolveTheme(loadSettings()) });
+  const vm = mount(el, Sidebar, { sections: options.sections || toSections(payload), active: options.active || payload.current_context_header || '', project: options.project || payload.current_context?.item || {}, theme: resolveTheme(loadSettings()), feature: options.feature || null });
   const unsubscribe = subscribeSettings((next) => { vm.surfaceProps.theme = resolveTheme(next); });
   vm.$once('hook:beforeDestroy', unsubscribe);
   // The display name from the feature hub renames the sidebar brand, never the install.

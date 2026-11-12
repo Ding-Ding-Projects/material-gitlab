@@ -4,6 +4,9 @@ import { rollDimSum, dimSumCount } from '../../features/dim-sum';
 import notificationCenter from '../../notifications';
 import SetupWizard from './SetupWizard.vue';
 import MoreFeatures from './MoreFeatures.vue';
+import LocksPanel from './LocksPanel.vue';
+import UnlockPanel from './UnlockPanel.vue';
+import SchedulesPanel from './SchedulesPanel.vue';
 
 const HUB_TABS = [
   'setup',
@@ -17,6 +20,8 @@ const HUB_TABS = [
   'name',
   'color',
   'extensions',
+  'schedules',
+  'locks',
   'export',
 ];
 const MORE_TABS = ['school', 'wording', 'name', 'color', 'extensions'];
@@ -27,7 +32,7 @@ const MORE_TABS = ['school', 'wording', 'name', 'color', 'extensions'];
 // surprise and the Momentum mode on the To-Do List.
 export default {
   name: 'MaterialFeatureLayer',
-  components: { SetupWizard, MoreFeatures },
+  components: { SetupWizard, MoreFeatures, LocksPanel, UnlockPanel, SchedulesPanel },
   props: {
     feature: { type: Object, required: true },
     notifications: { type: Object, default: () => notificationCenter },
@@ -41,6 +46,7 @@ export default {
       dimSumNotice: '',
       inbox: this.notifications.review(),
       exportUrl: '',
+      locksView: 'locks',
     };
   },
   computed: {
@@ -107,6 +113,16 @@ export default {
     },
     onHubKeydown(event) {
       if (event.key === 'Escape') this.feature.closeHub();
+    },
+    onUnlocked() {
+      const href = this.s.unlockRequest?.href;
+      this.feature.clearUnlockRequest();
+      if (href) window.location.assign(href);
+    },
+    openTickets() {
+      this.feature.clearUnlockRequest();
+      this.locksView = 'tickets';
+      this.feature.openHub('locks');
     },
     finishSetup() {
       this.feature.closeHub();
@@ -199,6 +215,41 @@ export default {
       </button>
     </aside>
 
+    <div
+      v-if="s.unlockRequest && !s.hubOpen"
+      class="m3-hub-scrim"
+      @click.self="feature.clearUnlockRequest()"
+    >
+      <section
+        class="m3-hub"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="t('unlock')"
+        data-testid="unlock-dialog"
+        @keydown.esc="feature.clearUnlockRequest()"
+      >
+        <header class="m3-hub__head">
+          <h2>{{ t('locked') }}</h2>
+          <button
+            type="button"
+            class="m3-icon-btn"
+            :aria-label="t('close')"
+            @click="feature.clearUnlockRequest()"
+          >
+            ×
+          </button>
+        </header>
+        <div class="m3-hub__body">
+          <unlock-panel
+            :feature="feature"
+            :target="s.unlockRequest.target"
+            @unlocked="onUnlocked"
+            @tickets="openTickets"
+          />
+        </div>
+      </section>
+    </div>
+
     <div v-if="s.hubOpen" class="m3-hub-scrim" @click.self="feature.closeHub()">
       <section
         class="m3-hub"
@@ -245,6 +296,8 @@ export default {
                   name: 'nameLogo',
                   color: 'color',
                   extensions: 'extensions',
+                  schedules: 'schedules',
+                  locks: 'locks',
                   export: 'exportSettings',
                 }[tab],
               )
@@ -254,7 +307,24 @@ export default {
         <p v-if="s.error" class="m3-hub__error" role="alert">{{ t(s.error) }}</p>
 
         <div class="m3-hub__body" role="tabpanel">
-          <setup-wizard v-if="s.hubTab === 'setup'" :feature="feature" @finish="finishSetup" />
+          <unlock-panel
+            v-if="feature.isLocked(`hub:${s.hubTab}`)"
+            :key="`hub:${s.hubTab}`"
+            :feature="feature"
+            :target="`hub:${s.hubTab}`"
+            @tickets="openTickets"
+          />
+
+          <setup-wizard v-else-if="s.hubTab === 'setup'" :feature="feature" @finish="finishSetup" />
+
+          <locks-panel
+            v-else-if="s.hubTab === 'locks'"
+            :key="locksView"
+            :feature="feature"
+            :view="locksView"
+          />
+
+          <schedules-panel v-else-if="s.hubTab === 'schedules'" :feature="feature" />
 
           <more-features
             v-else-if="moreTabs.includes(s.hubTab)"

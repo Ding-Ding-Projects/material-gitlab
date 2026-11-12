@@ -60,6 +60,46 @@ display name, seed color, extensions and settings export. The last five live in
 
 ![Feature hub on the Extensions tab in bilingual mode](img/feature_layer_extensions.png)
 
+### Element locks, unlock ladder and Support Tickets
+
+`LocksPanel.vue`, `UnlockPanel.vue` and `features/locks.js`.
+
+- **Lock something**: pick a tab from the tab strip or a feature hub panel, pick one of six
+  mixes (PIN; password; PIN and password; password and authenticator code; PIN and
+  authenticator code; password, PIN and authenticator code), then set the values. PINs and
+  passwords are stored as salted SHA-256 digests.
+- **Authenticator pairing**: the secret is generated locally and shown as a QR code drawn by
+  `features/qr.js` (no web service) and as copyable text. The lock is only saved after you type
+  the current code back (RFC 6238, `features/totp.js`).
+- **Unlocking**: a locked tab asks to unlock instead of navigating; a locked hub panel shows the
+  unlock prompt in its place. After two wrong tries a wait starts at 30 seconds and doubles
+  with each further miss, up to an hour.
+- **Unlock ladder**: four rungs (name the dim sum, ten sums, 15 moles in 30 seconds, read the
+  clock). Clearing all four skips the current wait only. It never unlocks, never refunds tries
+  and never lowers the next wait, and it can be climbed at most three times an hour. The
+  challenges are generated in the page, so this is a speed bump, not a defense.
+- **Support Tickets**: a pretend help desk kept on this device. Every reply points to the real
+  fix: deleting this site's data in the browser, which clears every lock.
+
+Locks are just for fun, not security, and the panel says so where locks are offered.
+
+![Lock wizard pairing an authenticator with a locally drawn QR code](img/feature_layer_lock_authenticator.png)
+
+### Schedules
+
+`SchedulesPanel.vue` and `features/schedules.js` add rules that change motion, language, density
+or the seed color during a time window on chosen weekdays, using this computer's clock. Overnight
+windows such as 22:00 to 07:00 work. Each rule shows whether it is active now or waiting, can be
+switched off, and can be removed. Only local rules are offered in the browser build.
+
+![Schedules tab with one rule](img/feature_layer_schedules.png)
+
+### Logo
+
+On the Name tab, upload a PNG, JPEG, WebP or SVG (up to 5 MB). It is redrawn to a 128 px PNG in
+the browser (which also drops any script or animation in an SVG), kept in site storage, and used
+for the sidebar mark and the favicon. Reset returns to the shipped mark.
+
 The setup wizard (`SetupWizard.vue`) opens on first run. It has four steps: language and funny
 levels, appearance (optional), comfort (optional), then a summary. Each step applies its
 setting immediately. Back, Next, Skip and **Save and finish later** are available, progress is
@@ -118,12 +158,16 @@ All motion is removed under reduced motion.
 | `material-system.personal-vocabulary.v1` | Personal wording |
 | `material-system.display-name.v1` | Display name |
 | `material-system.extensions.v1` | Which built-in extensions are on |
+| `material-system.element-locks.v1`, `material-system.unlock-ladder.v1`, `material-system.support-tickets.v1` | Locks (digests, secrets, waits), ladder climbs, tickets |
+| `material-system.scheduled-settings.v1` | Schedule rules |
+| `material-system.logo-image.v1` | Custom logo PNG |
 
 Export (in the hub) downloads settings, ADHD modes and accessibility tools as UTF-8 JSON.
 
 ## Tests
 
 - `spec/frontend/material_system/feature_layer_spec.js`
+- `spec/frontend/material_system/locks_schedules_spec.js` (includes the RFC 6238 test vectors)
 
 ## Known limitations
 
@@ -131,5 +175,3 @@ Export (in the hub) downloads settings, ADHD modes and accessibility tools as UT
   follows the user preference on the server.
 - Third-party, out-of-process extensions are not available in the browser build. Only the
   built-in extensions run.
-- Element locks, Support Tickets, the unlock ladder, scheduled settings and logo upload from the
-  design canvas have models in `material_system/` but no in-app screens yet.

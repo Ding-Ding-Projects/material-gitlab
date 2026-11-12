@@ -196,7 +196,9 @@ describe('FeatureLayer', () => {
   });
 });
 
-const flush = () => new Promise((r) => setTimeout(r, 0));
+const flush = async () => {
+  for (let i = 0; i < 20; i += 1) await new Promise((r) => setTimeout(r, 5));
+};
 const more = (feature, tab) => mount(MoreFeatures, { propsData: { feature, tab } });
 
 describe('MoreFeatures', () => {

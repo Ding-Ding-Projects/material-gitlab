@@ -11,6 +11,8 @@
 - Dim sum surprise from the public catalog, about 1 in 10 page loads, always on.
 - Feature hub tabs for School mode (PIN), personal wording, display name, the seed color
   translator, and a built-in extensions manager with two default extensions.
+- Element locks with six credential mixes and local authenticator pairing (in-browser QR,
+  RFC 6238), the four-rung unlock ladder, Support Tickets, schedules and logo upload.
 - Settings now change the live page (motion, density, text size, focus, contrast, targets), and
   GitLab pages carry the canvas signature details. See `doc/development/ux/feature-layer.md`.
 

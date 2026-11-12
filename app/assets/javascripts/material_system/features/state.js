@@ -6,6 +6,9 @@ import { createSchoolModeAdapter } from '../school-mode';
 import { createPersonalVocabularyLoader } from '../vocabulary';
 import { createExtensionHost } from './extensions';
 import { setWordingOverride } from './i18n';
+import { createLockStore } from './locks';
+import { createScheduleStore } from './schedules';
+import { LOGO_IMAGE_STORAGE_KEY } from './logo-file';
 
 export const SETUP_STORAGE_KEY = 'material-system.setup-wizard.v1';
 export const SCHOOL_PIN_STORAGE_KEY = 'material-system.school-mode-pin.v1';
@@ -67,6 +70,8 @@ export function createFeatureState({
   });
   const wording = createPersonalVocabularyLoader({ storage });
   const extensions = createExtensionHost({ storage, target });
+  const lockStore = createLockStore({ storage });
+  const scheduleStore = createScheduleStore({ storage });
 
   const state = Vue.observable({
     settings: loadSettings(storage),
@@ -82,10 +87,20 @@ export function createFeatureState({
     displayName: readJson(DISPLAY_NAME_STORAGE_KEY) || SHIPPED_NAME,
     extensions: extensions.list(),
     lang: 'en',
+    effective: null,
+    matchedRules: [],
+    rules: scheduleStore.rules(),
+    locks: lockStore.list(),
+    tabTargets: [],
+    unlockRequest: null,
+    logo: readJson(LOGO_IMAGE_STORAGE_KEY),
   });
 
   const apply = () => {
-    state.lang = state.school.enabled ? 'en' : state.settings.language;
+    const resolved = scheduleStore.resolve(state.settings);
+    state.effective = resolved.value;
+    state.matchedRules = resolved.matchedRuleIds;
+    state.lang = state.school.enabled ? 'en' : state.effective.language;
     setWordingOverride(
       state.school.enabled || state.wording.status !== 'loaded'
         ? null
@@ -95,11 +110,25 @@ export function createFeatureState({
       const doc = root.ownerDocument;
       doc.title = doc.title.replace(/(GitLab|Material GitLab)\s*$/, state.displayName);
     }
+    if (root?.ownerDocument) {
+      const doc = root.ownerDocument;
+      let icon = doc.querySelector('link[data-material-logo]');
+      if (state.logo && !icon) {
+        icon = doc.createElement('link');
+        icon.rel = 'icon';
+        icon.setAttribute('data-material-logo', '');
+        doc.head?.appendChild(icon);
+      }
+      if (icon && state.logo) icon.href = state.logo;
+      if (icon && !state.logo) icon.remove();
+    }
     return applyToDocument(
-      { ...state, settings: { ...state.settings, language: state.lang } },
+      { ...state, settings: { ...state.effective, language: state.lang } },
       root,
     );
   };
+  // Scheduled settings change on the minute.
+  const scheduleTimer = setInterval(apply, 60 * 1000);
   const unsubscribers = [
     subscribeSettings((next) => {
       state.settings = next;
@@ -215,7 +244,74 @@ export function createFeatureState({
       state.extensions = extensions.list();
       return ok;
     },
+    // Element locks, unlock ladder and Support Tickets.
+    isLocked: (target) => state.locks.some((lock) => lock.target === target),
+    async lockTarget(targetId, options) {
+      const result = await lockStore.lock(targetId, options);
+      state.locks = lockStore.list();
+      return result;
+    },
+    async unlockTarget(targetId, values) {
+      const result = await lockStore.unlock(targetId, values);
+      state.locks = lockStore.list();
+      return result;
+    },
+    waitRemaining: (targetId) => lockStore.waitRemaining(targetId),
+    skipWait(targetId) {
+      const ok = lockStore.skipWait(targetId);
+      state.locks = lockStore.list();
+      return ok;
+    },
+    climbsLeft: () => lockStore.climbsLeft(),
+    tickets: () => lockStore.tickets(),
+    fileTicket: (subject) => lockStore.fileTicket(subject),
+    resolveTicket: (id) => lockStore.resolveTicket(id),
+    requestUnlock(targetId, href = null) {
+      state.hubOpen = false;
+      state.unlockRequest = { target: targetId, href };
+    },
+    clearUnlockRequest() {
+      state.unlockRequest = null;
+    },
+    setTabTargets(items) {
+      state.tabTargets = items.map(({ id, label }) => ({ id, label }));
+    },
+    // Scheduled settings.
+    addRule(rule) {
+      const result = scheduleStore.add(rule);
+      state.rules = scheduleStore.rules();
+      apply();
+      return result;
+    },
+    toggleRule(id, enabled) {
+      const result = scheduleStore.toggle(id, enabled);
+      state.rules = scheduleStore.rules();
+      apply();
+      return result;
+    },
+    removeRule(id) {
+      const result = scheduleStore.remove(id);
+      state.rules = scheduleStore.rules();
+      apply();
+      return result;
+    },
+    // Custom logo (already converted to a small PNG data URL).
+    setLogo(dataUrl) {
+      if (!writeJson(LOGO_IMAGE_STORAGE_KEY, dataUrl)) {
+        state.error = 'saveFailed';
+        return false;
+      }
+      state.logo = dataUrl;
+      apply();
+      return true;
+    },
+    clearLogo() {
+      writeJson(LOGO_IMAGE_STORAGE_KEY, null);
+      state.logo = null;
+      apply();
+    },
     dispose() {
+      clearInterval(scheduleTimer);
       unsubscribers.forEach((unsubscribe) => unsubscribe());
       adhdStore.dispose();
       a11yStore.dispose();

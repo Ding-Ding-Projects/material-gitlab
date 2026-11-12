@@ -1,6 +1,7 @@
 <script>
 import { t } from '../../features/i18n';
 import { SHIPPED_NAME } from '../../features/state';
+import { logoFileToPng, LOGO_ACCEPT } from '../../features/logo-file';
 
 const hexToRgb = (hex) => {
   const value = hex.replace('#', '').slice(0, 6);
@@ -45,6 +46,7 @@ export default {
       nameDraft: this.feature.state.displayName,
       hexDraft: this.feature.state.settings.accentColor.slice(0, 7),
       extensionQuery: '',
+      logoError: '',
     };
   },
   computed: {
@@ -71,6 +73,7 @@ export default {
       );
     },
     shippedName: () => SHIPPED_NAME,
+    logoAccept: () => LOGO_ACCEPT.join(','),
   },
   methods: {
     t(key, vars) {
@@ -95,6 +98,14 @@ export default {
       this.feature.clearWording();
       this.wordingResult = '';
       this.wordingErrors = [];
+    },
+    async onLogoFile(event) {
+      const [file] = event.target.files || [];
+      event.target.value = '';
+      if (!file) return;
+      const result = await logoFileToPng(file);
+      this.logoError = result.ok ? '' : this.t('logoFailed');
+      if (result.ok) this.feature.setLogo(result.dataUrl);
     },
     applyHex() {
       const value = this.hexDraft.trim();
@@ -193,6 +204,38 @@ export default {
       <button type="button" class="m3-btn" @click="(feature.rename(''), (nameDraft = shippedName))">
         {{ t('reset') }}
       </button>
+      <h3>{{ t('logo') }}</h3>
+      <div class="m3-logo-row">
+        <img
+          v-if="s.logo"
+          class="m3-logo-preview"
+          :src="s.logo"
+          :alt="t('logo')"
+          data-testid="logo-preview"
+        />
+        <span v-else class="m3-logo-preview m3-logo-preview--default" aria-hidden="true">m/</span>
+        <label class="m3-btn m3-btn--outline m3-file">
+          {{ t('uploadLogo') }}
+          <input
+            type="file"
+            :accept="logoAccept"
+            class="sr-only"
+            data-testid="logo-file"
+            @change="onLogoFile"
+          />
+        </label>
+        <button
+          v-if="s.logo"
+          type="button"
+          class="m3-btn"
+          data-testid="logo-reset"
+          @click="feature.clearLogo()"
+        >
+          {{ t('reset') }}
+        </button>
+      </div>
+      <small>{{ t('logoHelp') }}</small>
+      <p v-if="logoError" class="m3-hub__error" role="alert">{{ logoError }}</p>
     </template>
 
     <template v-else-if="tab === 'color'">

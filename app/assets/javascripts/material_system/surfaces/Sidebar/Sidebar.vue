@@ -7,7 +7,13 @@
     :class="{ 'material-sidebar--collapsed': collapsed }"
   >
     <a class="material-sidebar__brand" :href="homeHref" aria-label="GitLab home">
-      <span class="material-sidebar__mark" aria-hidden="true">G</span>
+      <img
+        v-if="feature && feature.state.logo"
+        class="material-sidebar__mark"
+        :src="feature.state.logo"
+        alt=""
+      />
+      <span v-else class="material-sidebar__mark" aria-hidden="true">G</span>
       <span v-if="!collapsed">{{ brand }}</span>
     </a>
 
@@ -109,10 +115,25 @@
               :aria-current="isActive(item) ? 'page' : undefined"
               :tabindex="isActive(item) ? 0 : -1"
               :data-tab-id="tabId(item)"
-              @click="$emit('navigate', item, $event)"
+              @click="onTabClick(item, $event)"
             >
               <span class="material-sidebar__icon" aria-hidden="true">{{ item.icon || '•' }}</span>
               <span v-if="!collapsed">{{ item.label }}</span>
+              <svg
+                v-if="isTabLocked(item)"
+                class="material-sidebar__lock"
+                viewBox="0 0 24 24"
+                width="14"
+                height="14"
+                role="img"
+                :aria-label="`${item.label} is locked`"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
               <span v-if="item.count != null && !collapsed" class="material-sidebar__count">{{
                 item.count
               }}</span>
@@ -195,6 +216,8 @@ export default {
     homeHref: { type: String, default: '/' },
     brand: { type: String, default: 'GitLab M3' },
     storage: { type: Object, default: () => globalThis.localStorage },
+    // Optional shared feature state: enables element locks on tabs and the custom logo.
+    feature: { type: Object, default: null },
   },
   data() {
     return {
@@ -275,12 +298,26 @@ export default {
     },
   },
   created() {
+    this.feature?.setTabTargets(
+      this.allItems.map((item) => ({ id: this.tabId(item), label: item.label })),
+    );
     this.tabState = createTabStripState(
       this.allItems.map((item) => this.tabId(item)),
       { storage: this.storage },
     );
   },
   methods: {
+    isTabLocked(item) {
+      return Boolean(this.feature?.isLocked(`tab:${this.tabId(item)}`));
+    },
+    onTabClick(item, event) {
+      if (this.isTabLocked(item)) {
+        event.preventDefault();
+        this.feature.requestUnlock(`tab:${this.tabId(item)}`, item.href || null);
+        return;
+      }
+      this.$emit('navigate', item, event);
+    },
     tabId(item) {
       return item.id || item.href || item.label;
     },
