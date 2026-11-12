@@ -1,0 +1,20 @@
+# Overlay used by host.bat on Windows (Docker Desktop). It replaces the three bind mounts in
+# the root docker-compose.yml with named volumes. GitLab's bundled PostgreSQL and Gitaly need
+# POSIX ownership and permissions that a Windows folder mounted into the container cannot
+# give them, so a bind mount under C:\ boots into permission errors. Named volumes live inside
+# Docker Desktop's own Linux disk, where those permissions work. Compose merges volumes by
+# container path, so each entry below replaces the matching bind mount instead of adding one.
+#
+# Back the data up with:   docker run --rm -v material-gitlab-data:/d -v "%CD%":/out alpine tar czf /out/gitlab-data.tgz -C /d .
+
+services:
+  gitlab:
+    volumes:
+      - 'material-gitlab-config:/etc/gitlab'
+      - 'material-gitlab-logs:/var/log/gitlab'
+      - 'material-gitlab-data:/var/opt/gitlab'
+
+volumes:
+  material-gitlab-config:
+  material-gitlab-logs:
+  material-gitlab-data:

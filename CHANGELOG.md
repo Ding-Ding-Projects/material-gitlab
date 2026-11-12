@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### One-click hosting
+
+- Add `host.bat` and `deploy/windows/host.ps1`: one double-click installs Docker Desktop if needed,
+  writes a LAN-ready `.env`, pulls the image (or builds it from the newest release `.deb`), starts
+  it on named volumes, waits for health, offers the firewall rule and opens the browser.
+- Run the Omnibus package workflow on every push to `main` as well as on dispatch, with the
+  dispatch defaults, so every change to `main` builds the hostable `.deb` and container image.
+- Ignore `.env` and `gitlab-data/` so local hosting configuration is never committed.
+
 ### Material 3 Expressive redesign
 
 - Add [`design/expressive/`](design/expressive/), a 28-artboard Material 3 Expressive canvas that

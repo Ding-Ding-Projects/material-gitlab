@@ -4,9 +4,13 @@ name: Omnibus package
 # rather than stock upstream GitLab, then builds the official-layout container image from
 # that package and pushes it to GHCR.
 #
-# Deliberately manual. A full Omnibus build compiles Ruby, PostgreSQL, Redis, nginx and
-# the Go components from source. It is enormous, and running it on every push would be
-# both useless and rude to the runner pool.
+# Runs on every push to main and on manual dispatch, so every change to main produces a
+# hostable container (the one docker-compose.yml and host.bat pull). A full Omnibus build
+# compiles Ruby, PostgreSQL, Redis, nginx and the Go components from source and takes about
+# two hours. The concurrency group below never cancels a running build; GitHub keeps at
+# most one pending run per group, so a burst of pushes queues one build of the newest
+# commit instead of one build per push. Push runs use the same defaults as a dispatch:
+# omnibus-gitlab 19.3.0+ce.0, publish the release, push the image.
 #
 # Every shell step calls a committed script under scripts/omnibus/. The scripts are the
 # single implementation, so a local run on a Linux Docker host and this workflow cannot
@@ -26,6 +30,8 @@ name: Omnibus package
 # a failed attempt's log actually looks like a transient network problem.
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       omnibus_ref:
@@ -56,6 +62,10 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  # Push events carry no inputs; these resolve to the dispatch defaults in that case.
+  OMNIBUS_REF: ${{ inputs.omnibus_ref || '19.3.0+ce.0' }}
+  ATTACH_TO_RELEASE: ${{ github.event_name == 'push' || inputs.attach_to_release }}
+  PUSH_IMAGE_INPUT: ${{ github.event_name == 'push' || inputs.push_image }}
   GH_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.ORG_TOKEN || secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -113,7 +123,7 @@ jobs:
             echo "image_latest=ghcr.io/${owner}/material-gitlab:latest"
           } >> "$GITHUB_OUTPUT"
           echo "Packaging $sha at declared version $version"
-          echo "Building with omnibus-gitlab ${{ inputs.omnibus_ref }}"
+          echo "Building with omnibus-gitlab ${{ env.OMNIBUS_REF }}"
 
       - name: Reclaim runner disk before starting
         shell: bash
@@ -138,7 +148,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          git clone --depth 1 --branch "${{ inputs.omnibus_ref }}" \
+          git clone --depth 1 --branch "${{ env.OMNIBUS_REF }}" \
             https://gitlab.com/gitlab-org/omnibus-gitlab.git omnibus-gitlab
           git -C omnibus-gitlab log -1 --format='omnibus-gitlab at %H %s'
 
@@ -171,7 +181,7 @@ jobs:
         shell: bash
         env:
           OMNIBUS_DIR: omnibus-gitlab
-          OMNIBUS_REF: ${{ inputs.omnibus_ref }}
+          OMNIBUS_REF: ${{ env.OMNIBUS_REF }}
           GITLAB_VERSION: ${{ steps.target.outputs.sha }}
           BUILD_VERSION: ${{ steps.target.outputs.version }}
           OPENSSL_VERSION: ${{ steps.omnibusvars.outputs.openssl_version }}
@@ -196,7 +206,7 @@ jobs:
 
       - name: Count the lines this release ships
         id: linecount
-        if: ${{ steps.verify.outcome == 'success' && inputs.attach_to_release }}
+        if: ${{ steps.verify.outcome == 'success' && env.ATTACH_TO_RELEASE == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
@@ -212,7 +222,7 @@ jobs:
 
       - name: Resolve a published dim-sum code name and photo
         id: dimsum
-        if: ${{ steps.verify.outcome == 'success' && inputs.attach_to_release }}
+        if: ${{ steps.verify.outcome == 'success' && env.ATTACH_TO_RELEASE == 'true' }}
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -262,20 +272,20 @@ jobs:
 
       - name: Prepare release notes and verify timing
         id: notes
-        if: ${{ steps.verify.outcome == 'success' && inputs.attach_to_release && steps.dimsum.outcome == 'success' }}
+        if: ${{ steps.verify.outcome == 'success' && env.ATTACH_TO_RELEASE == 'true' && steps.dimsum.outcome == 'success' }}
         shell: bash
         env:
           WORKFLOW_STARTED: ${{ steps.timing.outputs.workflow_started }}
           SHA: ${{ steps.target.outputs.sha }}
           SHA12: ${{ steps.target.outputs.sha12 }}
           VERSION: ${{ steps.target.outputs.version }}
-          OMNIBUS_REF: ${{ inputs.omnibus_ref }}
+          OMNIBUS_REF: ${{ env.OMNIBUS_REF }}
           DEB_NAME: ${{ steps.verify.outputs.deb_name }}
           DEB_SHA256: ${{ steps.verify.outputs.deb_sha256 }}
           DEB_BYTES: ${{ steps.verify.outputs.deb_bytes }}
           WEBPACK_FILES: ${{ steps.verify.outputs.webpack_files }}
           IMAGE_REF: ${{ steps.target.outputs.image_ref }}
-          PUSH_IMAGE: ${{ inputs.push_image }}
+          PUSH_IMAGE: ${{ env.PUSH_IMAGE_INPUT }}
           DIM_SUM_CODE: ${{ steps.dimsum.outputs.code_name }}
           DIM_SUM_PHOTO_URL: ${{ steps.dimsum.outputs.photo_url }}
           LINE_COUNT_PATH: ${{ steps.linecount.outputs.line_count_path }}
@@ -437,7 +447,7 @@ jobs:
     # image installs the package from the uploaded artifact, not from the release, so a
     # release-only failure (GitHub refuses assets of 2 GiB or more, for example) must not
     # also cost the container image after a two hour build.
-    if: ${{ always() && inputs.push_image && needs.build-package.outputs.deb_sha256 != '' }}
+    if: ${{ always() && (github.event_name == 'push' || inputs.push_image) && needs.build-package.outputs.deb_sha256 != '' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     env:

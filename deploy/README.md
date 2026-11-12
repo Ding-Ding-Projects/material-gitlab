@@ -8,6 +8,8 @@ is a short index of what is under this directory and why.
 | --- | --- |
 | [`docker/`](docker/) | The container image recipe for **this fork**. Installs the `.deb` built by [`omnibus-package.yml`](../.github/workflows/omnibus-package.yml) into the official Omnibus container layout. |
 | [`upstream-baseline/`](upstream-baseline/) | A Compose file for **stock upstream** `gitlab/gitlab-ce`. Runs the product this fork exists to replace, kept only as a comparison baseline for design parity. |
+| [`windows/host.ps1`](windows/host.ps1) and [`../host.bat`](../host.bat) | One-click host on Windows: installs Docker Desktop if needed, writes `.env` with the LAN address, pulls or builds the image, starts it on named volumes and waits for health. |
+| [`windows/docker-compose.windows.yml`](windows/docker-compose.windows.yml) | Overlay that swaps the bind mounts for named volumes, because PostgreSQL and Gitaly need POSIX permissions a Windows folder cannot give. |
 | [`scripts/remote-up.sh`](scripts/remote-up.sh) | One command that copies the Compose file and image recipe to a remote Docker host over SSH, builds or pulls the image, starts the container and waits for its health check. |
 | [`scripts/wsl-install.sh`](scripts/wsl-install.sh) | Installs the `.deb` natively inside a WSL Ubuntu 24.04 distro on Windows, the route used here for local verification. |
 

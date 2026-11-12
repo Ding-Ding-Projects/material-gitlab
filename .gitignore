@@ -168,3 +168,7 @@ CLAUDE.local.md
 
 # Design-parity built artifact fetched from a release for strict verification; never tracked.
 /artifacts/parity/_local/
+
+# Local hosting configuration and data written by host.bat or docker compose; never commit.
+.env
+gitlab-data/

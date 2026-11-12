@@ -72,6 +72,19 @@ a narrative to read straight through.
 
 ## 1. Install with Docker
 
+**One click on Windows.** Double-click [`host.bat`](host.bat) at the repository root (or run
+`host.bat /s` for a silent run). It installs Docker Desktop with winget if it is missing (Windows asks
+you for administrator approval; nothing answers that prompt for you), writes a `.env` with this PC's
+LAN address on first run, pulls the published image or builds it from the newest release `.deb`,
+starts the container on named volumes ([`deploy/windows/docker-compose.windows.yml`](deploy/windows/docker-compose.windows.yml)),
+waits for GitLab's own health check, offers to open ports 8929 and 2229 in Windows Firewall for
+private networks, and opens the instance in your browser. `host.bat status`, `host.bat stop` and
+`host.bat logs` do what they say. It never prints a password and never deletes a volume. The
+[Omnibus package workflow](.github/workflows/omnibus-package.yml) now runs on every push to `main`,
+so each change to `main` produces the `.deb` and container image `host.bat` installs.
+
+The manual route on any Docker host follows.
+
 This builds or pulls the container image for **this fork** and runs it with the root
 [`docker-compose.yml`](docker-compose.yml). It does not work yet against a published image or a
 published `.deb`, because neither has published from this branch; see
