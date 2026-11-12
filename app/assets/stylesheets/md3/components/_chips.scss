@@ -31,7 +31,7 @@
   // chips onto new lines as a group, so an individual chip keeps its own
   // label on one line rather than breaking mid-pill.
   white-space: nowrap;
-  @include gl-md3-shape('xs');
+  @include gl-md3-shape('s');
   @include gl-md3-label-large;
   @include gl-md3-motion-standard(unquote('background-color, border-color, color'));
 

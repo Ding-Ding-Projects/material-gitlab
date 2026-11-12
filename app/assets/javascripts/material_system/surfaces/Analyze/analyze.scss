@@ -1,15 +1,15 @@
 .material-analyze {
   color: var(--m3-on-surface);
-  --m3-surface: #f4effa;
+  --m3-surface: #f2ebfa;
   --m3-surface-container: #ffffff;
-  --m3-surface-container-high: #e0d5f2;
-  --m3-primary: #6750c4;
+  --m3-surface-container-high: #e7e0ef;
+  --m3-primary: #6e1aff;
 }
 .material-analyze[data-theme='dark'] {
-  --m3-surface: #141218;
-  --m3-surface-container: #211f26;
-  --m3-surface-container-high: #2b2831;
-  --m3-primary: #cfbdfe;
+  --m3-surface: #15121c;
+  --m3-surface-container: #211e28;
+  --m3-surface-container-high: #2c2833;
+  --m3-primary: #cfbdff;
 }
 .material-analyze__range, .material-analyze__links { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 8px 24px; }
 .material-analyze__range label { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
@@ -43,9 +43,9 @@
   --md-sys-color-surface-container-highest: var(--m3-surface-container-high);
   --md-sys-color-outline: var(--m3-outline);
   --md-sys-color-outline-variant: var(--m3-outline);
-  --md-sys-color-error: var(--m3-error, #b3261e);
-  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
-  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-sys-color-error: var(--m3-error, #ba1a1a);
+  --md-ref-typeface-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
+  --md-ref-typeface-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
 }
 
-.material-analyze[data-theme="dark"] { --m3-error: #f2b8b5; }
+.material-analyze[data-theme="dark"] { --m3-error: #ffb4ab; }

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Merge request</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#6e1aff}a:hover{color:#5300cc}
+.th-light{--primary:#6e1aff;--on-primary:#ffffff;--primary-container:#e9ddff;--on-primary-container:#5300cc;--secondary:#6b5778;--on-secondary:#ffffff;--secondary-container:#f2daff;--on-secondary-container:#523f5f;--tertiary:#a53d00;--on-tertiary:#ffffff;--tertiary-container:#ffdbcd;--on-tertiary-container:#7e2c00;--error:#ba1a1a;--on-error:#ffffff;--error-container:#ffdad6;--on-error-container:#93000a;--background:#fdf7ff;--on-background:#1d1a24;--surface:#fdf7ff;--surface-dim:#ded7e6;--surface-bright:#fdf7ff;--surface-container-lowest:#ffffff;--surface-container-low:#f8f1ff;--surface-container:#f2ebfa;--surface-container-high:#ede5f4;--surface-container-highest:#e7e0ef;--on-surface:#1d1a24;--surface-variant:#e7dff2;--on-surface-variant:#494453;--outline:#7a7484;--outline-variant:#cbc3d5;--scrim:#000000;--shadow:#000000;--inverse-surface:#322f3a;--inverse-on-surface:#f5eefd;--inverse-primary:#cfbdff;--success:#006d39;--success-container:#b4ffc5;--on-success-container:#005229;--warning:#855300;--warning-container:#ffddb7;--on-warning-container:#653e00;--bg:var(--surface-container);--pane:var(--surface-container-lowest);--row:var(--surface-container-low);--shadow-1:0 1px 2px rgb(29 26 36/.10),0 1px 3px 1px rgb(29 26 36/.06);--shadow-3:0 4px 8px 3px rgb(29 26 36/.10),0 1px 3px rgb(29 26 36/.14);}
+.th-dark{--primary:#cfbdff;--on-primary:#3a0093;--primary-container:#5300cc;--on-primary-container:#e9ddff;--secondary:#d6bee4;--on-secondary:#3b2948;--secondary-container:#523f5f;--on-secondary-container:#f2daff;--tertiary:#ffb597;--on-tertiary:#591d00;--tertiary-container:#7e2c00;--on-tertiary-container:#ffdbcd;--error:#ffb4ab;--on-error:#690005;--error-container:#93000a;--on-error-container:#ffdad6;--background:#15121c;--on-background:#e7e0ef;--surface:#15121c;--surface-dim:#15121c;--surface-bright:#3b3743;--surface-container-lowest:#0f0d16;--surface-container-low:#1d1a24;--surface-container:#211e28;--surface-container-high:#2c2833;--surface-container-highest:#37333e;--on-surface:#e7e0ef;--surface-variant:#494453;--on-surface-variant:#cbc3d5;--outline:#948e9f;--outline-variant:#494453;--scrim:#000000;--shadow:#000000;--inverse-surface:#e7e0ef;--inverse-on-surface:#322f3a;--inverse-primary:#6e1aff;--success:#75db94;--success-container:#005229;--on-success-container:#91f8ae;--warning:#ffb95e;--warning-container:#653e00;--on-warning-container:#ffddb7;--bg:var(--surface);--pane:var(--surface-container-low);--row:var(--surface-container);--shadow-1:0 1px 2px rgb(0 0 0/.30),0 1px 3px 1px rgb(0 0 0/.15);--shadow-3:0 4px 8px 3px rgb(0 0 0/.15),0 1px 3px rgb(0 0 0/.30);}
+.root{font-family:Inter,system-ui,sans-serif;font-size:14px;line-height:20px;color:var(--on-surface);background:var(--bg);-webkit-font-smoothing:antialiased;font-feature-settings:'cv11','ss01'}
+.root *{box-sizing:border-box}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+.ico{width:20px;height:20px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ico-s{width:16px;height:16px}
+.app{display:flex;flex-wrap:wrap;align-items:stretch;min-height:960px}
+.side{flex:0 0 272px;display:flex;flex-direction:column;gap:2px;padding:12px 12px 16px}
+.brand{display:flex;align-items:center;gap:12px;padding:6px 8px 14px;font-weight:750;font-size:17px;letter-spacing:-.01em}
+.mark{width:36px;height:36px;border-radius:12px 12px 12px 4px;background:var(--primary);color:var(--on-primary);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px}
+.ctx{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:20px;background:var(--pane);border:0;color:inherit;font:inherit;text-align:left;margin-bottom:10px;box-shadow:var(--shadow-1);width:100%;cursor:pointer}
+.ctx-av{width:36px;height:36px;border-radius:10px;background:var(--tertiary-container);color:var(--on-tertiary-container);display:flex;align-items:center;justify-content:center;font-weight:750}
+.ctx-t{font-weight:650;font-size:14px;line-height:18px}
+.ctx-s{font-size:12px;line-height:16px;color:var(--on-surface-variant)}
+.sec{margin:12px 16px 4px;font-size:11.5px;font-weight:650;letter-spacing:.04em;color:var(--on-surface-variant)}
+.nav{display:flex;align-items:center;gap:12px;min-height:40px;padding:0 14px;border-radius:999px;color:var(--on-surface-variant);text-decoration:none;font-weight:500}
+.nav:hover{background:var(--surface-container-highest);color:var(--on-surface)}
+.nav.on{background:var(--secondary-container);color:var(--on-secondary-container);font-weight:700}
+.nav .n{margin-left:auto;min-width:24px;height:20px;padding:0 7px;border-radius:999px;background:var(--surface-container-highest);font-size:11.5px;font-weight:650;display:flex;align-items:center;justify-content:center}
+.nav.on .n{background:var(--primary);color:var(--on-primary)}
+.main{flex:999 1 640px;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:12px 16px 12px 8px}
+.search{flex:1 1 320px;max-width:720px;display:flex;align-items:center;gap:10px;height:48px;padding:0 6px 0 18px;border-radius:999px;background:var(--surface-container-highest);color:var(--on-surface-variant)}
+.search input{flex:1;min-width:0;border:0;background:transparent;font:inherit;color:var(--on-surface);outline:0}
+.rx{height:32px;padding:0 12px;border-radius:999px;border:1px solid var(--outline-variant);background:transparent;color:var(--on-surface-variant);font:600 12px/1 'JetBrains Mono',monospace;cursor:pointer}
+.kbd{font:500 11px/1 'JetBrains Mono',monospace;padding:4px 6px;border-radius:6px;background:var(--surface-container);color:var(--on-surface-variant)}
+.ib{width:44px;height:44px;border-radius:999px;border:0;background:transparent;color:var(--on-surface-variant);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.ib:hover{background:var(--surface-container-highest)}
+.av{width:36px;height:36px;border-radius:999px;background:var(--primary-container);color:var(--on-primary-container);display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto}
+.av-s{width:24px;height:24px;font-size:10.5px}
+.pane{flex:1;margin:0 12px 12px 0;padding:24px 32px 40px;border-radius:28px;background:var(--pane);box-shadow:var(--shadow-1);min-width:0}
+.crumb{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:12.5px;color:var(--on-surface-variant);margin-bottom:10px}
+.crumb a{color:inherit;text-decoration:none}
+.hd{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;margin-bottom:20px}
+.h1{margin:0;font-size:32px;line-height:40px;font-weight:720;letter-spacing:-.025em}
+.h2{margin:0;font-size:20px;line-height:28px;font-weight:680;letter-spacing:-.01em}
+.h3{margin:0;font-size:15px;line-height:22px;font-weight:650}
+.sub{color:var(--on-surface-variant)}
+.acts{margin-left:auto;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.b{height:40px;padding:0 20px;border-radius:999px;border:0;font:inherit;font-weight:650;display:inline-flex;align-items:center;gap:8px;cursor:pointer;text-decoration:none;transition:border-radius .35s cubic-bezier(.42,1.67,.21,.9)}
+.b:active{border-radius:12px}
+.b-f{background:var(--primary);color:var(--on-primary)}
+.b-t{background:var(--secondary-container);color:var(--on-secondary-container)}
+.b-o{background:transparent;color:var(--on-surface-variant);box-shadow:inset 0 0 0 1px var(--outline-variant)}
+.b-x{background:transparent;color:var(--primary);padding:0 12px}
+.b-e{background:var(--error);color:var(--on-error)}
+.b-l{height:56px;padding:0 28px;font-size:16px;border-radius:999px}
+.bg{display:inline-flex;gap:2px}
+.bg .b{border-radius:6px}
+.bg .b:first-child{border-radius:999px 6px 6px 999px}
+.bg .b:last-child{border-radius:6px 999px 999px 6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{height:32px;padding:0 12px;border-radius:8px;border:0;box-shadow:inset 0 0 0 1px var(--outline-variant);background:transparent;color:var(--on-surface-variant);font:inherit;font-weight:550;font-size:13px;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
+.chip.on{box-shadow:none;background:var(--secondary-container);color:var(--on-secondary-container)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--outline-variant);margin-bottom:16px}
+.tab{position:relative;height:48px;padding:0 16px;display:inline-flex;align-items:center;gap:8px;color:var(--on-surface-variant);font-weight:600;text-decoration:none;border:0;background:transparent;font:inherit;font-weight:600;cursor:pointer}
+.tab.on{color:var(--primary)}
+.tab.on::after{content:'';position:absolute;left:12px;right:12px;bottom:-1px;height:3px;border-radius:3px 3px 0 0;background:var(--primary)}
+.tab .n{font-size:12px;padding:1px 8px;border-radius:999px;background:var(--surface-container-high)}
+.list{display:flex;flex-direction:column;gap:2px}
+.row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:14px 18px;background:var(--row);border-radius:6px;min-height:64px}
+.list .row:first-child{border-radius:20px 20px 6px 6px}
+.list .row:last-child{border-radius:6px 6px 20px 20px}
+.list .row:only-child{border-radius:20px}
+.row:hover{background:var(--surface-container-high)}
+.rt{font-weight:620;font-size:14.5px;line-height:20px}
+.rm{font-size:12.5px;color:var(--on-surface-variant);display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin-top:2px}
+.grow{flex:1 1 280px;min-width:0}
+.st{height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:650;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.st-ok{background:var(--success-container);color:var(--on-success-container)}
+.st-run{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.st-err{background:var(--error-container);color:var(--on-error-container)}
+.st-warn{background:var(--warning-container);color:var(--on-warning-container)}
+.st-p{background:var(--primary-container);color:var(--on-primary-container)}
+.st-n{background:var(--surface-container-highest);color:var(--on-surface-variant)}
+.lbl{height:22px;padding:0 8px;border-radius:6px;font-size:11.5px;font-weight:650;display:inline-flex;align-items:center}
+.card{background:var(--row);border-radius:24px;padding:20px}
+.card-o{background:transparent;border-radius:24px;padding:20px;box-shadow:inset 0 0 0 1px var(--outline-variant)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px}
+.kpi{font-size:36px;line-height:44px;font-weight:760;letter-spacing:-.03em}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:12.5px;font-weight:600;color:var(--on-surface-variant)}
+.input{height:48px;padding:0 16px;border-radius:12px;border:0;box-shadow:inset 0 0 0 1px var(--outline);background:transparent;color:var(--on-surface);font:inherit;outline:0}
+.input:focus{box-shadow:inset 0 0 0 2px var(--primary)}
+.sw{position:relative;width:52px;height:32px;border-radius:999px;background:var(--surface-container-highest);box-shadow:inset 0 0 0 2px var(--outline);flex:0 0 auto;border:0;cursor:pointer}
+.sw::after{content:'';position:absolute;left:8px;top:8px;width:16px;height:16px;border-radius:999px;background:var(--outline)}
+.sw.on{background:var(--primary);box-shadow:none}
+.sw.on::after{left:24px;top:4px;width:24px;height:24px;background:var(--on-primary)}
+.divider{height:1px;background:var(--outline-variant);margin:16px 0}
+.dot{width:10px;height:10px;border-radius:999px;flex:0 0 auto}
+.bar{height:8px;border-radius:999px;background:var(--surface-container-highest);overflow:hidden;display:flex}
+.scrim{position:absolute;inset:0;background:rgb(0 0 0/.32)}
+.dlg{position:relative;background:var(--surface-container-high);border-radius:28px;box-shadow:var(--shadow-3);padding:24px}
+.tbl{width:100%;border-collapse:separate;border-spacing:0 2px;font-size:13.5px}
+.tbl th{text-align:left;font-size:12px;font-weight:650;color:var(--on-surface-variant);padding:6px 16px}
+.tbl td{background:var(--row);padding:12px 16px}
+.tbl tr td:first-child{border-radius:10px 0 0 10px}
+.tbl tr td:last-child{border-radius:0 10px 10px 0}
+.scroll{overflow-x:auto}
+.fab{height:56px;padding:0 20px;border-radius:16px;border:0;background:var(--primary-container);color:var(--on-primary-container);font:inherit;font-weight:700;display:inline-flex;align-items:center;gap:10px;box-shadow:var(--shadow-3)}
+</style>
+</helmet>
+<div class="root {{themeClass}}" style="width:100%;min-height:100%;position:relative">
+<div class="app">
+<nav class="side" aria-label="Primary">
+<div class="brand"><span class="mark" aria-hidden="true">M</span><span>Material GitLab</span></div>
+<button class="ctx" type="button"><span class="ctx-av">MG</span><span style="flex:1;min-width:0"><span class="ctx-t" style="display:block">Material GitLab</span><span class="ctx-s" style="display:block">Ding-Ding-Projects</span></span><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>Project overview</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg><span>Issues</span><span class="n">24</span></a>
+<a class="nav on" href="#" aria-current="page"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="M6 7.2v9.6"/><path d="M18 16.8V10a3 3 0 0 0-3-3h-4"/><path d="M13 4.5L10.5 7 13 9.5"/></svg><span>Merge requests</span><span class="n">7</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/></svg><span>To-Do list</span><span class="n">5</span></a>
+<div class="sec">Plan</div>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="5" height="16" rx="2"/><rect x="9.5" y="4" width="5" height="10" rx="2"/><rect x="16" y="4" width="5" height="13" rx="2"/></svg><span>Issue boards</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7l8-4 8 4-8 4z"/><path d="M4 12l8 4 8-4"/><path d="M4 17l8 4 8-4"/></svg><span>Epics</span></a>
+<div class="sec">Code</div>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9A1.5 1.5 0 0 1 19.5 19h-15A1.5 1.5 0 0 1 3 17.5z"/></svg><span>Repository</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5"/><path d="M15 7l5 5-5 5"/></svg><span>Code</span></a>
+<div class="sec">Build</div>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="19" cy="12" r="2.4"/><path d="M7.4 12h2.2M14.4 12h2.2"/></svg><span>Pipelines</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l4 4-9 9H5v-4z"/><path d="M12.5 7.5l4 4"/></svg><span>Jobs</span></a>
+<div class="sec">Ship</div>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/></svg><span>Secure</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 15c-1 1-1.5 3.5-1.5 5.5 2 0 4.5-.5 5.5-1.5"/><path d="M9 15l-2-2c1.5-5 5-9.5 13-10-.5 8-5 11.5-10 13z"/><circle cx="15" cy="9" r="1.6"/></svg><span>Deploy</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .5-8 6 6 0 0 0-11.5 1.5A3.3 3.3 0 0 0 7 18z"/></svg><span>Operate</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h4l2-5 4 10 2-5h6"/></svg><span>Monitor</span></a>
+<div class="sec">Insight</div>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Analyze</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.8-3.4 3.2-5 6-5s5.2 1.6 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14c2.2 0 3.6 1.4 4 4"/></svg><span>Manage</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/></svg><span>Agent memory</span></a>
+<a class="nav" href="#"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg><span>Settings</span></a>
+</nav>
+<div class="main">
+<header class="top">
+<button class="ib" type="button" aria-label="Collapse sidebar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<label class="search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input type="search" placeholder="Search or jump to…" aria-label="Search"><button class="rx" type="button" aria-pressed="false" title="Regex builder">.*</button><span class="kbd">Ctrl Shift F</span></label>
+<span style="margin-left:auto"></span>
+<button class="ib" type="button" aria-label="Command palette"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z"/></svg></button>
+<button class="ib" type="button" aria-label="Notifications"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg></button>
+<button class="ib" type="button" aria-label="Switch theme"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg></button>
+<span class="av" aria-label="Signed in as DingDingChae">DC</span>
+</header>
+<main class="pane">
+<div class="crumb"><a href="#">Ding-Ding-Projects</a> <span aria-hidden="true">/</span> <a href="#">Material GitLab</a> <span aria-hidden="true">/</span> <a href="#">Merge requests</a> <span aria-hidden="true">/</span> <a href="#">![id]</a></div>
+<div class="hd"><div style="max-width:760px"><div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><span class="st st-p"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="M6 7.2v9.6"/><path d="M18 16.8V10a3 3 0 0 0-3-3h-4"/><path d="M13 4.5L10.5 7 13 9.5"/></svg>Open</span><span class="mono sub">![id]</span><span class="sub">DingDingChae wants to merge</span><span class="mono" style="padding:2px 8px;border-radius:6px;background:var(--surface-container-high)">feature/expressive-chrome</span><span class="sub">into</span><span class="mono" style="padding:2px 8px;border-radius:6px;background:var(--surface-container-high)">main</span></div><h1 class="h1">Adopt Material 3 Expressive tokens across the shell</h1></div><div class="acts"><button class="b b-o" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7l-5 5 5 5"/><path d="M15 7l5 5-5 5"/></svg>Code</button><button class="b b-t" type="button">Mark as draft</button></div></div><div class="tabs" role="tablist"><button class="tab on" type="button" role="tab" aria-selected="true">Overview</button><button class="tab" type="button" role="tab" aria-selected="false">Commits<span class="n">[n]</span></button><button class="tab" type="button" role="tab" aria-selected="false">Pipelines<span class="n">[n]</span></button><button class="tab" type="button" role="tab" aria-selected="false">Changes<span class="n">[n]</span></button></div><div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+<div style="flex:999 1 520px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<section class="card" style="padding:0;overflow:hidden">
+<div class="list" style="padding:8px">
+<div class="row"><span style="width:36px;height:36px;border-radius:999px;background:var(--success-container);color:var(--on-success-container);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.4"/><circle cx="12" cy="12" r="2.4"/><circle cx="19" cy="12" r="2.4"/><path d="M7.4 12h2.2M14.4 12h2.2"/></svg></span><div class="grow"><div class="rt">Pipeline passed</div><div class="rm"><span class="mono">#[id]</span><span>[n] jobs, [duration]</span></div></div><button class="b b-x" type="button">View</button></div>
+<div class="row"><span style="width:36px;height:36px;border-radius:999px;background:var(--primary-container);color:var(--on-primary-container);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><div class="grow"><div class="rt">Approved by 1 of 1 required reviewers</div><div class="rm"><span>Code owners satisfied</span></div></div><span class="av av-s">DC</span></div>
+<div class="row"><span style="width:36px;height:36px;border-radius:999px;background:var(--surface-container-highest);color:var(--on-surface-variant);display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6z"/></svg></span><div class="grow"><div class="rt">Security scan: no new findings</div><div class="rm"><span>Compared with main</span></div></div></div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;padding:16px 20px;background:var(--surface-container-high)">
+<label style="display:flex;gap:10px;align-items:center"><button class="sw on" type="button" role="switch" aria-checked="true" aria-label="Delete source branch"></button>Delete source branch</label>
+<label style="display:flex;gap:10px;align-items:center"><button class="sw" type="button" role="switch" aria-checked="false" aria-label="Squash commits"></button>Squash commits</label>
+<div class="acts"><button class="b b-f b-l" type="button"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="5" r="2.2"/><circle cx="6" cy="19" r="2.2"/><circle cx="18" cy="19" r="2.2"/><path d="M6 7.2v9.6"/><path d="M18 16.8V10a3 3 0 0 0-3-3h-4"/><path d="M13 4.5L10.5 7 13 9.5"/></svg>Merge</button></div>
+</div>
+</section>
+<section class="card"><h2 class="h3" style="margin-bottom:12px">Activity</h2>
+<div style="display:flex;gap:12px"><span class="av">DC</span><div style="flex:1;background:var(--pane);border-radius:4px 20px 20px 20px;padding:14px 16px"><div style="font-weight:650">DingDingChae <span class="sub" style="font-weight:400">commented</span></div><div style="margin-top:6px">Contrast checks pass in both themes. The shape morph on press respects reduced motion.</div></div></div>
+<div style="display:flex;gap:12px;margin-top:12px"><span class="av">DC</span><label style="flex:1"><span class="sub" style="font-size:12.5px">Reply</span><textarea class="input" style="width:100%;height:96px;padding:12px 16px;resize:vertical;margin-top:6px" aria-label="Reply"></textarea></label></div>
+</section>
+</div>
+<aside style="flex:1 1 260px;display:flex;flex-direction:column;gap:2px">
+<div style="background:var(--row);padding:14px 16px;border-radius:20px 20px 6px 6px"><div class="sub" style="font-size:12px;font-weight:650">Assignee</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center"><span class="av av-s">DC</span>DingDingChae</div></div><div style="background:var(--row);padding:14px 16px;border-radius:6px"><div class="sub" style="font-size:12px;font-weight:650">Reviewers</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center"><span class="av av-s">DC</span>DingDingChae</div></div><div style="background:var(--row);padding:14px 16px;border-radius:6px"><div class="sub" style="font-size:12px;font-weight:650">Labels</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center"><span class="lbl" style="background:var(--primary-container);color:var(--on-primary-container)">frontend</span><span class="lbl" style="background:var(--tertiary-container);color:var(--on-tertiary-container)">design</span></div></div><div style="background:var(--row);padding:14px 16px;border-radius:6px"><div class="sub" style="font-size:12px;font-weight:650">Milestone</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center">Expressive refresh</div></div><div style="background:var(--row);padding:14px 16px;border-radius:6px 6px 20px 20px"><div class="sub" style="font-size:12px;font-weight:650">Time tracking</div><div style="margin-top:4px;display:flex;gap:8px;align-items:center">No estimate</div></div></aside></div>
+</main>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark": {"editor": "boolean", "default": false}, "$preview": {"width": 1440, "height": 1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    return { themeClass: dark ? 'th-dark' : 'th-light' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,45 +1,73 @@
-// Material 3 color token contract for the MD3 prototype layer.
-// Values below are the light-mode column of the authoritative token table
-// and must be copied verbatim - never invented, rounded, or "improved".
-// Dark-mode overrides live in _tokens_dark.scss and restate only the
-// custom properties whose value actually changes.
+// Material 3 Expressive color token contract for the MD3 layer.
+// Generated from one seed (#6E49CB) with the vibrant dynamic scheme of
+// @material/material-color-utilities 0.3.0. Tertiary is the tonal palette of
+// GitLab orange (#FC6D26); success and warning are tonal palettes of GitLab's
+// own green and amber. Values must stay in step with design/Tokens.dc.html
+// and app/assets/javascripts/material_system/tokens.js. Dark-mode overrides
+// live in _tokens_dark.scss.
+//
+// The short names predate the Expressive refresh and keep their meaning:
+// `surf` is the app background, `surfc`/`surfch` are the raised container
+// tiers, `card` is the content pane, `outl` is the divider color. The names
+// added by the refresh (`tert*`, `onsec`, `surfcst`, `inv*`, ...) fill the
+// roles the old palette never had.
 
 :root {
   // Base tokens
-  --gl-md3-surf: #f4effa;
-  --gl-md3-surfc: #ece4f6;
-  --gl-md3-surfch: #e0d5f2;
-  --gl-md3-surfcl: #faf6ff;
-  --gl-md3-onsurf: #1d1b20;
-  --gl-md3-onsurfv: #49454f;
-  --gl-md3-prim: #6750c4;
+  --gl-md3-surf: #f2ebfa;
+  --gl-md3-surfc: #ede5f4;
+  --gl-md3-surfch: #e7e0ef;
+  --gl-md3-surfcl: #f8f1ff;
+  --gl-md3-onsurf: #1d1a24;
+  --gl-md3-onsurfv: #494453;
+  --gl-md3-prim: #6e1aff;
   --gl-md3-onprim: #ffffff;
-  --gl-md3-primc: #e8def8;
-  --gl-md3-onprimc: #4f378b;
-  --gl-md3-sec: #d6c9f0;
-  --gl-md3-outl: #cac4d0;
-  --gl-md3-outlv: #e7e0ec;
-  --gl-md3-err: #b3261e;
-  --gl-md3-errc: #f9dedc;
-  --gl-md3-good: #1a7f37;
-  --gl-md3-goodc: #dcf2e3;
-  --gl-md3-warn: #9a6700;
-  --gl-md3-warnc: #fff3d0;
+  --gl-md3-primc: #e9ddff;
+  --gl-md3-onprimc: #5300cc;
+  --gl-md3-sec: #f2daff;
+  --gl-md3-onsec: #523f5f;
+  --gl-md3-tert: #a53d00;
+  --gl-md3-ontert: #ffffff;
+  --gl-md3-tertc: #ffdbcd;
+  --gl-md3-ontertc: #7e2c00;
+  --gl-md3-outl: #cbc3d5;
+  --gl-md3-outlv: #e7dff2;
+  --gl-md3-outls: #7a7484;
+  --gl-md3-err: #ba1a1a;
+  --gl-md3-onerr: #ffffff;
+  --gl-md3-errc: #ffdad6;
+  --gl-md3-onerrc: #93000a;
+  --gl-md3-good: #006d39;
+  --gl-md3-goodc: #b4ffc5;
+  --gl-md3-ongoodc: #005229;
+  --gl-md3-warn: #855300;
+  --gl-md3-warnc: #ffddb7;
+  --gl-md3-onwarnc: #653e00;
   --gl-md3-card: #ffffff;
-  --gl-md3-scrim: rgba(29, 27, 32, 0.35);
-  --gl-md3-addbg: #dcf2e3;
-  --gl-md3-addfg: #0f5223;
-  --gl-md3-delbg: #f9dedc;
-  --gl-md3-delfg: #8c1d18;
+  --gl-md3-surfbase: #fdf7ff;
+  --gl-md3-surfcst: #ffffff;
+  --gl-md3-surfdim: #ded7e6;
+  --gl-md3-inv: #322f3a;
+  --gl-md3-oninv: #f5eefd;
+  --gl-md3-invprim: #cfbdff;
+  --gl-md3-addbg: #d1ffd8;
+  --gl-md3-addfg: #005229;
+  --gl-md3-delbg: #ffe9e6;
+  --gl-md3-delfg: #93000a;
+  --gl-md3-scrim: rgba(0, 0, 0, 0.32);
+  // Rows and cards placed on the content pane. Light: one step below the
+  // pane; dark: one step above it, so rows never vanish into the pane.
+  --gl-md3-row: var(--gl-md3-surfcl);
 
   // Semantic aliases: components should read these, not the short names
-  // above, so intent stays legible at the call site. Because custom
-  // properties resolve at used-value time, each alias automatically
-  // tracks its underlying token through the dark-mode overrides too.
+  // above, so intent stays legible at the call site.
   --gl-md3-surface: var(--gl-md3-surf);
   --gl-md3-surface-container: var(--gl-md3-surfc);
   --gl-md3-surface-container-high: var(--gl-md3-surfch);
   --gl-md3-surface-container-low: var(--gl-md3-surfcl);
+  --gl-md3-surface-container-lowest: var(--gl-md3-surfcst);
+  --gl-md3-surface-base: var(--gl-md3-surfbase);
+  --gl-md3-surface-dim: var(--gl-md3-surfdim);
   --gl-md3-on-surface: var(--gl-md3-onsurf);
   --gl-md3-on-surface-variant: var(--gl-md3-onsurfv);
   --gl-md3-primary: var(--gl-md3-prim);
@@ -47,14 +75,29 @@
   --gl-md3-primary-container: var(--gl-md3-primc);
   --gl-md3-on-primary-container: var(--gl-md3-onprimc);
   --gl-md3-secondary-container: var(--gl-md3-sec);
+  --gl-md3-on-secondary-container: var(--gl-md3-onsec);
+  --gl-md3-tertiary: var(--gl-md3-tert);
+  --gl-md3-on-tertiary: var(--gl-md3-ontert);
+  --gl-md3-tertiary-container: var(--gl-md3-tertc);
+  --gl-md3-on-tertiary-container: var(--gl-md3-ontertc);
   --gl-md3-outline: var(--gl-md3-outl);
   --gl-md3-outline-variant: var(--gl-md3-outlv);
+  --gl-md3-outline-strong: var(--gl-md3-outls);
   --gl-md3-error: var(--gl-md3-err);
+  --gl-md3-on-error: var(--gl-md3-onerr);
   --gl-md3-error-container: var(--gl-md3-errc);
+  --gl-md3-on-error-container: var(--gl-md3-onerrc);
   --gl-md3-success: var(--gl-md3-good);
   --gl-md3-success-container: var(--gl-md3-goodc);
+  --gl-md3-on-success-container: var(--gl-md3-ongoodc);
   --gl-md3-warning: var(--gl-md3-warn);
   --gl-md3-warning-container: var(--gl-md3-warnc);
+  --gl-md3-on-warning-container: var(--gl-md3-onwarnc);
+  --gl-md3-card: var(--gl-md3-card);
+  --gl-md3-row-container: var(--gl-md3-row);
+  --gl-md3-inverse-surface: var(--gl-md3-inv);
+  --gl-md3-inverse-on-surface: var(--gl-md3-oninv);
+  --gl-md3-inverse-primary: var(--gl-md3-invprim);
   --gl-md3-diff-addition-background: var(--gl-md3-addbg);
   --gl-md3-diff-addition-foreground: var(--gl-md3-addfg);
   --gl-md3-diff-deletion-background: var(--gl-md3-delbg);
@@ -63,34 +106,49 @@
 
 // SCSS-side mirrors of the light values above, for math/functions that need
 // a compile-time color rather than a runtime custom property.
-$gl-md3-surf: #f4effa;
-$gl-md3-surfc: #ece4f6;
-$gl-md3-surfch: #e0d5f2;
-$gl-md3-surfcl: #faf6ff;
-$gl-md3-onsurf: #1d1b20;
-$gl-md3-onsurfv: #49454f;
-$gl-md3-prim: #6750c4;
+$gl-md3-surf: #f2ebfa;
+$gl-md3-surfc: #ede5f4;
+$gl-md3-surfch: #e7e0ef;
+$gl-md3-surfcl: #f8f1ff;
+$gl-md3-onsurf: #1d1a24;
+$gl-md3-onsurfv: #494453;
+$gl-md3-prim: #6e1aff;
 $gl-md3-onprim: #ffffff;
-$gl-md3-primc: #e8def8;
-$gl-md3-onprimc: #4f378b;
-$gl-md3-sec: #d6c9f0;
-$gl-md3-outl: #cac4d0;
-$gl-md3-outlv: #e7e0ec;
-$gl-md3-err: #b3261e;
-$gl-md3-errc: #f9dedc;
-$gl-md3-good: #1a7f37;
-$gl-md3-goodc: #dcf2e3;
-$gl-md3-warn: #9a6700;
-$gl-md3-warnc: #fff3d0;
+$gl-md3-primc: #e9ddff;
+$gl-md3-onprimc: #5300cc;
+$gl-md3-sec: #f2daff;
+$gl-md3-onsec: #523f5f;
+$gl-md3-tert: #a53d00;
+$gl-md3-ontert: #ffffff;
+$gl-md3-tertc: #ffdbcd;
+$gl-md3-ontertc: #7e2c00;
+$gl-md3-outl: #cbc3d5;
+$gl-md3-outlv: #e7dff2;
+$gl-md3-outls: #7a7484;
+$gl-md3-err: #ba1a1a;
+$gl-md3-onerr: #ffffff;
+$gl-md3-errc: #ffdad6;
+$gl-md3-onerrc: #93000a;
+$gl-md3-good: #006d39;
+$gl-md3-goodc: #b4ffc5;
+$gl-md3-ongoodc: #005229;
+$gl-md3-warn: #855300;
+$gl-md3-warnc: #ffddb7;
+$gl-md3-onwarnc: #653e00;
 $gl-md3-card: #ffffff;
-$gl-md3-scrim: rgba(29, 27, 32, 0.35);
-$gl-md3-addbg: #dcf2e3;
-$gl-md3-addfg: #0f5223;
-$gl-md3-delbg: #f9dedc;
-$gl-md3-delfg: #8c1d18;
+$gl-md3-surfbase: #fdf7ff;
+$gl-md3-surfcst: #ffffff;
+$gl-md3-surfdim: #ded7e6;
+$gl-md3-inv: #322f3a;
+$gl-md3-oninv: #f5eefd;
+$gl-md3-invprim: #cfbdff;
+$gl-md3-addbg: #d1ffd8;
+$gl-md3-addfg: #005229;
+$gl-md3-delbg: #ffe9e6;
+$gl-md3-delfg: #93000a;
+$gl-md3-scrim: rgba(0, 0, 0, 0.32);
 
-// Iterable map of the same tokens keyed by short name, so other MD3
-// stylesheets can loop over the full set instead of hand-copying it.
+// Iterable map of the same tokens keyed by short name.
 $gl-md3-tokens: (
   'surf': $gl-md3-surf,
   'surfc': $gl-md3-surfc,
@@ -103,18 +161,34 @@ $gl-md3-tokens: (
   'primc': $gl-md3-primc,
   'onprimc': $gl-md3-onprimc,
   'sec': $gl-md3-sec,
+  'onsec': $gl-md3-onsec,
+  'tert': $gl-md3-tert,
+  'ontert': $gl-md3-ontert,
+  'tertc': $gl-md3-tertc,
+  'ontertc': $gl-md3-ontertc,
   'outl': $gl-md3-outl,
   'outlv': $gl-md3-outlv,
+  'outls': $gl-md3-outls,
   'err': $gl-md3-err,
+  'onerr': $gl-md3-onerr,
   'errc': $gl-md3-errc,
+  'onerrc': $gl-md3-onerrc,
   'good': $gl-md3-good,
   'goodc': $gl-md3-goodc,
+  'ongoodc': $gl-md3-ongoodc,
   'warn': $gl-md3-warn,
   'warnc': $gl-md3-warnc,
+  'onwarnc': $gl-md3-onwarnc,
   'card': $gl-md3-card,
-  'scrim': $gl-md3-scrim,
+  'surfbase': $gl-md3-surfbase,
+  'surfcst': $gl-md3-surfcst,
+  'surfdim': $gl-md3-surfdim,
+  'inv': $gl-md3-inv,
+  'oninv': $gl-md3-oninv,
+  'invprim': $gl-md3-invprim,
   'addbg': $gl-md3-addbg,
   'addfg': $gl-md3-addfg,
   'delbg': $gl-md3-delbg,
   'delfg': $gl-md3-delfg,
+  'scrim': $gl-md3-scrim,
 );

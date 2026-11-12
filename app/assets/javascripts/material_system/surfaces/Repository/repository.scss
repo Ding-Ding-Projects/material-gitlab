@@ -23,8 +23,8 @@
   --md-sys-color-on-error: var(--onprim);
   --md-sys-color-error-container: var(--errc);
   --md-sys-color-on-error-container: var(--onsurf);
-  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
-  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
+  --md-ref-typeface-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
   :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
   md-filled-text-field { min-width: 0; max-width: 100%; }
   .btn-danger { --md-filled-button-container-color: var(--err); --md-filled-button-label-text-color: var(--onprim); }
@@ -34,50 +34,50 @@
   --md-sys-color-on-surface: var(--onsurf);
   --md-sys-color-outline: var(--outl);
   --md-sys-color-error: var(--err);
-  --surf: #f4effa;
-  --surfc: #ece4f6;
-  --surfch: #e0d5f2;
-  --surfcl: #faf6ff;
-  --onsurf: #1d1b20;
-  --onsurfv: #49454f;
-  --prim: #6750c4;
+  --surf: #f2ebfa;
+  --surfc: #ede5f4;
+  --surfch: #e7e0ef;
+  --surfcl: #f8f1ff;
+  --onsurf: #1d1a24;
+  --onsurfv: #494453;
+  --prim: #6e1aff;
   --onprim: #ffffff;
-  --primc: #e8def8;
-  --onprimc: #4f378b;
-  --sec: #d6c9f0;
-  --outl: #cac4d0;
-  --outlv: #e7e0ec;
-  --err: #b3261e;
-  --errc: #f9dedc;
-  --good: #1a7f37;
-  --goodc: #dcf2e3;
-  --warn: #9a6700;
-  --warnc: #fff3d0;
+  --primc: #e9ddff;
+  --onprimc: #5300cc;
+  --sec: #f2daff;
+  --outl: #cbc3d5;
+  --outlv: #e7dff2;
+  --err: #ba1a1a;
+  --errc: #ffdad6;
+  --good: #006d39;
+  --goodc: #b4ffc5;
+  --warn: #855300;
+  --warnc: #ffddb7;
   --card: #ffffff;
   --scrim: rgba(29, 27, 32, 0.35);
 }
 
 @mixin tokens-dark {
-  --surf: #141218;
-  --surfc: #211f26;
-  --surfch: #2b2831;
-  --surfcl: #1b1922;
-  --onsurf: #e6e0e9;
-  --onsurfv: #cac4d0;
-  --prim: #cfbdfe;
-  --onprim: #381e72;
-  --primc: #4f378b;
-  --onprimc: #e8def8;
-  --sec: #4a4458;
-  --outl: #49454f;
-  --outlv: #332f3a;
-  --err: #f2b8b5;
-  --errc: #5c1a17;
-  --good: #7fd79a;
-  --goodc: #1c3a27;
-  --warn: #e2c46d;
-  --warnc: #3d3012;
-  --card: #211f26;
+  --surf: #15121c;
+  --surfc: #211e28;
+  --surfch: #2c2833;
+  --surfcl: #1d1a24;
+  --onsurf: #e7e0ef;
+  --onsurfv: #cbc3d5;
+  --prim: #cfbdff;
+  --onprim: #3a0093;
+  --primc: #5300cc;
+  --onprimc: #e9ddff;
+  --sec: #523f5f;
+  --outl: #494453;
+  --outlv: #37333e;
+  --err: #ffb4ab;
+  --errc: #93000a;
+  --good: #75db94;
+  --goodc: #005229;
+  --warn: #ffb95e;
+  --warnc: #653e00;
+  --card: #211e28;
   --scrim: rgba(0, 0, 0, 0.5);
 }
 

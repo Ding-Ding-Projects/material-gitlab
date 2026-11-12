@@ -58,7 +58,7 @@ export default {
 
 .gl-mds-plan__wikidoc-title {
   margin: 0;
-  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 19px;
   font-weight: 500;
   flex: 1;

@@ -3,39 +3,60 @@
 // Keep the GitLab UI tokens as the source of truth so CE, EE, and JH themes
 // can continue to override their existing aliases without forking shell CSS.
 :root {
-  --m3-color-surface: var(--gl-background-color-default, var(--gl-color-neutral-0));
-  --m3-color-surface-container: var(--gl-application-chrome-background-color, var(--gl-background-color-section, var(--gl-color-neutral-50)));
-  --m3-color-surface-container-high: var(--gl-background-color-overlap, var(--gl-color-neutral-100));
-  --m3-color-on-surface: var(--gl-text-color-default, var(--gl-color-neutral-950));
-  --m3-color-on-surface-variant: var(--gl-text-color-subtle, var(--gl-color-neutral-600));
-  --m3-color-outline: var(--gl-border-color-default, var(--gl-color-neutral-200));
-  --m3-color-primary: var(--gl-color-blue-500);
-  --m3-color-on-primary: var(--gl-color-neutral-0);
-  --m3-color-primary-container: var(--gl-color-blue-100);
-  --m3-color-on-primary-container: var(--gl-color-blue-900);
-  --m3-color-surface-variant: var(--gl-background-color-subtle, var(--gl-color-neutral-100));
-  --m3-color-scrim: var(--gl-color-alpha-dark-32, rgb(0 0 0 / 32%));
-  --m3-state-hover: var(--gl-color-alpha-dark-8, rgb(0 0 0 / 8%));
-  --m3-state-focus: var(--gl-color-alpha-dark-12, rgb(0 0 0 / 12%));
-  --m3-state-pressed: var(--gl-color-alpha-dark-12, rgb(0 0 0 / 12%));
-  --m3-shape-corner-small: var(--gl-border-radius-base, 0.25rem);
-  --m3-shape-corner-medium: var(--gl-border-radius-lg, 0.5rem);
-  --m3-shape-corner-large: 1rem;
-  --m3-typescale-body-medium: var(--gl-font-size-300, 0.875rem);
-  --m3-typescale-body-small: var(--gl-font-size-200, 0.75rem);
-  --m3-typescale-label-large: var(--gl-font-size-300, 0.875rem);
-  --m3-typescale-title-large: var(--gl-font-size-500, 1.375rem);
+  // Material 3 Expressive roles. The values come from the MD3 token contract
+  // in app/assets/stylesheets/md3/_tokens.scss (light) and _tokens_dark.scss
+  // (dark), which is generated from one seed color and kept in step with
+  // design/Tokens.dc.html. The GitLab UI semantic tokens are re-pointed at the
+  // same roles in md3/components/_gitlab_expressive.scss, so CE, EE and JH
+  // pages and this shell all read one palette.
+  --m3-color-surface: var(--gl-md3-card, #ffffff);
+  --m3-color-surface-container: var(--gl-md3-surf, #f2ebfa);
+  --m3-color-surface-container-low: var(--gl-md3-surfcl, #f8f1ff);
+  --m3-color-surface-container-high: var(--gl-md3-surfc, #ede5f4);
+  --m3-color-surface-container-highest: var(--gl-md3-surfch, #e7e0ef);
+  --m3-color-on-surface: var(--gl-md3-onsurf, #1d1a24);
+  --m3-color-on-surface-variant: var(--gl-md3-onsurfv, #494453);
+  --m3-color-outline: var(--gl-md3-outl, #cbc3d5);
+  --m3-color-outline-strong: var(--gl-md3-outls, #7a7484);
+  --m3-color-primary: var(--gl-md3-prim, #6e1aff);
+  --m3-color-on-primary: var(--gl-md3-onprim, #ffffff);
+  --m3-color-primary-container: var(--gl-md3-primc, #e9ddff);
+  --m3-color-on-primary-container: var(--gl-md3-onprimc, #5300cc);
+  --m3-color-secondary-container: var(--gl-md3-sec, #f2daff);
+  --m3-color-on-secondary-container: var(--gl-md3-onsec, #523f5f);
+  --m3-color-tertiary: var(--gl-md3-tert, #a53d00);
+  --m3-color-tertiary-container: var(--gl-md3-tertc, #ffdbcd);
+  --m3-color-on-tertiary-container: var(--gl-md3-ontertc, #7e2c00);
+  --m3-color-surface-variant: var(--gl-md3-surfcl, #f8f1ff);
+  --m3-color-scrim: var(--gl-md3-scrim, rgb(0 0 0 / 32%));
+  --m3-state-hover: color-mix(in srgb, var(--m3-color-on-surface) 8%, transparent);
+  --m3-state-focus: color-mix(in srgb, var(--m3-color-on-surface) 10%, transparent);
+  --m3-state-pressed: color-mix(in srgb, var(--m3-color-on-surface) 10%, transparent);
+  --m3-shape-corner-extra-small: 4px;
+  --m3-shape-corner-small: 8px;
+  --m3-shape-corner-medium: 12px;
+  --m3-shape-corner-large: 16px;
+  --m3-shape-corner-large-increased: 20px;
+  --m3-shape-corner-extra-large: 28px;
+  --m3-shape-corner-full: 999px;
+  --m3-typescale-body-medium: 0.875rem;
+  --m3-typescale-body-small: 0.78125rem;
+  --m3-typescale-label-large: 0.875rem;
+  --m3-typescale-title-large: 1.25rem;
+  --m3-typescale-headline-large: 2rem;
   --m3-space-1: var(--gl-spacing-scale-1, 2px);
   --m3-space-2: var(--gl-spacing-scale-2, 4px);
   --m3-space-3: var(--gl-spacing-scale-3, 8px);
   --m3-space-4: var(--gl-spacing-scale-4, 12px);
   --m3-space-5: var(--gl-spacing-scale-5, 16px);
   --m3-space-6: var(--gl-spacing-scale-6, 24px);
-  --m3-shell-elevation: var(--gl-shadow-sm, 0 1px 2px rgb(0 0 0 / 12%));
+  --m3-shell-elevation: var(--gl-md3-elevation-1, 0 1px 2px rgb(29 26 36 / 10%));
   --m3-shell-min-target: 2.75rem;
-  --m3-motion-duration-short: 100ms;
-  --m3-motion-duration-medium: 250ms;
+  --m3-motion-duration-short: 200ms;
+  --m3-motion-duration-medium: 350ms;
   --m3-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --m3-motion-easing-spatial: cubic-bezier(0.42, 1.67, 0.21, 0.9);
+  --m3-motion-easing-effects: cubic-bezier(0.34, 0.8, 0.34, 1);
 }
 
 // The shell owns only semantic presentation. Existing CE/EE class names and
@@ -49,10 +70,13 @@ body {
   background-color: var(--m3-color-surface-container);
 }
 
+// Expressive shell: the sidebar and top bar sit directly on the app
+// background (surface container); only the content pane is raised, as one
+// rounded card. Borders between chrome regions are gone; tone separates them.
 .super-sidebar {
-  background-color: var(--m3-color-surface);
-  border-inline-end: 1px solid var(--m3-color-outline);
-  box-shadow: var(--m3-shell-elevation);
+  background-color: var(--m3-color-surface-container);
+  border-inline-end: 0;
+  box-shadow: none;
 }
 
 .panels-container {
@@ -60,14 +84,14 @@ body {
 }
 
 .broadcast-wrapper {
-  border: 1px solid var(--m3-color-outline);
-  border-radius: var(--m3-shape-corner-medium);
-  background-color: var(--m3-color-surface);
+  border: 0;
+  border-radius: var(--m3-shape-corner-large-increased);
+  background-color: var(--m3-color-surface-container-high);
 }
 
 .top-bar {
-  background-color: var(--m3-color-surface);
-  border-block-end: 1px solid var(--m3-color-outline);
+  background-color: var(--m3-color-surface-container);
+  border-block-end: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -81,11 +105,21 @@ body {
 // consuming surface; these selectors only expose shared semantic behavior.
 [data-material-system-theme='dark'] {
   color-scheme: dark;
-  --m3-color-surface: #1c1b1f;
-  --m3-color-surface-container: #211f26;
-  --m3-color-on-surface: #e6e1e5;
-  --m3-color-on-surface-variant: #cac4d0;
-  --m3-color-outline: #938f99;
+  --m3-color-surface: #1d1a24;
+  --m3-color-surface-container: #15121c;
+  --m3-color-surface-container-low: #1d1a24;
+  --m3-color-surface-container-high: #211e28;
+  --m3-color-surface-container-highest: #2c2833;
+  --m3-color-on-surface: #e7e0ef;
+  --m3-color-on-surface-variant: #cbc3d5;
+  --m3-color-outline: #494453;
+  --m3-color-outline-strong: #948e9f;
+  --m3-color-primary: #cfbdff;
+  --m3-color-on-primary: #3a0093;
+  --m3-color-primary-container: #5300cc;
+  --m3-color-on-primary-container: #e9ddff;
+  --m3-color-secondary-container: #523f5f;
+  --m3-color-on-secondary-container: #f2daff;
 }
 
 [data-material-system-density='compact'] {

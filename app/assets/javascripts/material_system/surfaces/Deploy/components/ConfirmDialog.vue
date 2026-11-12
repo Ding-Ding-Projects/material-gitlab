@@ -82,7 +82,7 @@ export default {
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   background: var(--dp-card, #fff);
-  color: var(--dp-onsurf, #1d1b20);
+  color: var(--dp-onsurf, #1d1a24);
   border-radius: 20px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
   padding: 24px;
@@ -98,7 +98,7 @@ export default {
   margin: 0 0 20px;
   font-size: 13.5px;
   line-height: 1.5;
-  color: var(--dp-onsurfv, #49454f);
+  color: var(--dp-onsurfv, #494453);
 }
 
 .dp-confirm__actions {
@@ -117,22 +117,22 @@ export default {
   border: none;
 
   &:focus-visible {
-    outline: 2px solid var(--dp-prim, #6750a4);
+    outline: 2px solid var(--dp-prim, #6e1aff);
     outline-offset: 2px;
   }
 }
 
 .dp-btn--text {
   background: transparent;
-  color: var(--dp-onsurfv, #49454f);
+  color: var(--dp-onsurfv, #494453);
 
   &:hover {
-    background: var(--dp-surfch, #e6e0e9);
+    background: var(--dp-surfch, #e7e0ef);
   }
 }
 
 .dp-btn--danger {
-  background: var(--dp-err, #b3261e);
+  background: var(--dp-err, #ba1a1a);
   color: var(--dp-onprim, #fff);
 
   &:hover {

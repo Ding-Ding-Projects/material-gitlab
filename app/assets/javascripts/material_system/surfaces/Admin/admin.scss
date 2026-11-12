@@ -6,75 +6,75 @@
 // can absorb every surface's copy without a rename.
 
 .gl-mds-admin {
-  --gl-mds-surf: #f4effa;
-  --gl-mds-surfc: #ece4f6;
-  --gl-mds-surfch: #e0d5f2;
-  --gl-mds-surfcl: #faf6ff;
-  --gl-mds-onsurf: #1d1b20;
-  --gl-mds-onsurfv: #49454f;
-  --gl-mds-prim: #6750c4;
+  --gl-mds-surf: #f2ebfa;
+  --gl-mds-surfc: #ede5f4;
+  --gl-mds-surfch: #e7e0ef;
+  --gl-mds-surfcl: #f8f1ff;
+  --gl-mds-onsurf: #1d1a24;
+  --gl-mds-onsurfv: #494453;
+  --gl-mds-prim: #6e1aff;
   --gl-mds-onprim: #ffffff;
-  --gl-mds-primc: #e8def8;
-  --gl-mds-onprimc: #4f378b;
-  --gl-mds-sec: #d6c9f0;
-  --gl-mds-outl: #cac4d0;
-  --gl-mds-outlv: #e7e0ec;
-  --gl-mds-err: #b3261e;
-  --gl-mds-errc: #f9dedc;
-  --gl-mds-good: #1a7f37;
-  --gl-mds-goodc: #dcf2e3;
-  --gl-mds-warn: #9a6700;
-  --gl-mds-warnc: #fff3d0;
+  --gl-mds-primc: #e9ddff;
+  --gl-mds-onprimc: #5300cc;
+  --gl-mds-sec: #f2daff;
+  --gl-mds-outl: #cbc3d5;
+  --gl-mds-outlv: #e7dff2;
+  --gl-mds-err: #ba1a1a;
+  --gl-mds-errc: #ffdad6;
+  --gl-mds-good: #006d39;
+  --gl-mds-goodc: #b4ffc5;
+  --gl-mds-warn: #855300;
+  --gl-mds-warnc: #ffddb7;
   --gl-mds-card: #ffffff;
   --gl-mds-scrim: rgba(29, 27, 32, 0.35);
 
   &[data-theme='dark'] {
-    --gl-mds-surf: #141218;
-    --gl-mds-surfc: #211f26;
-    --gl-mds-surfch: #2b2831;
-    --gl-mds-surfcl: #1b1922;
-    --gl-mds-onsurf: #e6e0e9;
-    --gl-mds-onsurfv: #cac4d0;
-    --gl-mds-prim: #cfbdfe;
-    --gl-mds-onprim: #381e72;
-    --gl-mds-primc: #4f378b;
-    --gl-mds-onprimc: #e8def8;
-    --gl-mds-sec: #4a4458;
-    --gl-mds-outl: #49454f;
-    --gl-mds-outlv: #332f3a;
-    --gl-mds-err: #f2b8b5;
-    --gl-mds-errc: #5c1a17;
-    --gl-mds-good: #7fd79a;
-    --gl-mds-goodc: #1c3a27;
-    --gl-mds-warn: #e2c46d;
-    --gl-mds-warnc: #3d3012;
-    --gl-mds-card: #211f26;
+    --gl-mds-surf: #15121c;
+    --gl-mds-surfc: #211e28;
+    --gl-mds-surfch: #2c2833;
+    --gl-mds-surfcl: #1d1a24;
+    --gl-mds-onsurf: #e7e0ef;
+    --gl-mds-onsurfv: #cbc3d5;
+    --gl-mds-prim: #cfbdff;
+    --gl-mds-onprim: #3a0093;
+    --gl-mds-primc: #5300cc;
+    --gl-mds-onprimc: #e9ddff;
+    --gl-mds-sec: #523f5f;
+    --gl-mds-outl: #494453;
+    --gl-mds-outlv: #37333e;
+    --gl-mds-err: #ffb4ab;
+    --gl-mds-errc: #93000a;
+    --gl-mds-good: #75db94;
+    --gl-mds-goodc: #005229;
+    --gl-mds-warn: #ffb95e;
+    --gl-mds-warnc: #653e00;
+    --gl-mds-card: #211e28;
     --gl-mds-scrim: rgba(0, 0, 0, 0.5);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .gl-mds-admin:not([data-theme='light']) {
-    --gl-mds-surf: #141218;
-    --gl-mds-surfc: #211f26;
-    --gl-mds-surfch: #2b2831;
-    --gl-mds-surfcl: #1b1922;
-    --gl-mds-onsurf: #e6e0e9;
-    --gl-mds-onsurfv: #cac4d0;
-    --gl-mds-prim: #cfbdfe;
-    --gl-mds-onprim: #381e72;
-    --gl-mds-primc: #4f378b;
-    --gl-mds-onprimc: #e8def8;
-    --gl-mds-sec: #4a4458;
-    --gl-mds-outl: #49454f;
-    --gl-mds-outlv: #332f3a;
-    --gl-mds-err: #f2b8b5;
-    --gl-mds-errc: #5c1a17;
-    --gl-mds-good: #7fd79a;
-    --gl-mds-goodc: #1c3a27;
-    --gl-mds-warn: #e2c46d;
-    --gl-mds-warnc: #3d3012;
-    --gl-mds-card: #211f26;
+    --gl-mds-surf: #15121c;
+    --gl-mds-surfc: #211e28;
+    --gl-mds-surfch: #2c2833;
+    --gl-mds-surfcl: #1d1a24;
+    --gl-mds-onsurf: #e7e0ef;
+    --gl-mds-onsurfv: #cbc3d5;
+    --gl-mds-prim: #cfbdff;
+    --gl-mds-onprim: #3a0093;
+    --gl-mds-primc: #5300cc;
+    --gl-mds-onprimc: #e9ddff;
+    --gl-mds-sec: #523f5f;
+    --gl-mds-outl: #494453;
+    --gl-mds-outlv: #37333e;
+    --gl-mds-err: #ffb4ab;
+    --gl-mds-errc: #93000a;
+    --gl-mds-good: #75db94;
+    --gl-mds-goodc: #005229;
+    --gl-mds-warn: #ffb95e;
+    --gl-mds-warnc: #653e00;
+    --gl-mds-card: #211e28;
     --gl-mds-scrim: rgba(0, 0, 0, 0.5);
   }
 }
@@ -121,7 +121,7 @@
 }
 
 .gl-mds-admin__heading-font {
-  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 // --- Top bar -----------------------------------------------------------
@@ -190,7 +190,7 @@
   border: none;
   border-radius: 999px;
   padding: 5px 10px;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -274,7 +274,7 @@
 }
 
 .gl-mds-admin-popover__title {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
 }
 
@@ -287,7 +287,7 @@
 
 .gl-mds-admin-popover__label {
   color: var(--gl-mds-onsurfv);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-mds-admin-popover__flags {
@@ -304,7 +304,7 @@
   align-items: center;
   gap: 5px;
   font-size: 12.5px;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   cursor: pointer;
 }
 
@@ -342,7 +342,7 @@
 }
 
 .gl-mds-admin-popover__preview-item {
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   padding: 3px 6px;
   border-radius: 6px;
@@ -368,7 +368,7 @@
   @include gl-mds-admin-focus-ring;
 
   &--mono {
-    font-family: monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   }
 }
 
@@ -384,7 +384,7 @@
   padding: 9px 16px;
   font: inherit;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   @include gl-mds-admin-focus-ring;
 
@@ -485,7 +485,7 @@
 
 .gl-mds-admin-bell__item-title {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-mds-admin-bell__item-message {
@@ -532,7 +532,7 @@
 .gl-mds-admin-account__name {
   padding: 6px 10px 8px;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--gl-mds-onsurfv);
   border-bottom: 1px solid var(--gl-mds-outlv);
   margin-bottom: 4px;
@@ -574,9 +574,9 @@
 
 .gl-mds-admin__heading {
   margin: 0;
-  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-mds-admin__scope-badge {
@@ -602,7 +602,7 @@
   padding: 7px 16px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   border: none;
   background: transparent;
@@ -641,7 +641,7 @@
 
 .gl-mds-admin-card {
   background: var(--gl-mds-card);
-  border-radius: 20px;
+  border-radius: 24px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 
@@ -657,7 +657,7 @@
 }
 
 .gl-mds-admin-stat__value {
-  font-family: 'Google Sans', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 22px;
   font-weight: 700;
 }
@@ -679,7 +679,7 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--gl-mds-onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
 }
 
@@ -708,7 +708,7 @@
   margin-left: auto;
   font-size: 12px;
   color: var(--gl-mds-onsurfv);
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
 }
 
 // --- List filter bar -------------------------------------------------------
@@ -775,7 +775,7 @@
 
 .gl-mds-admin-toolbar__count {
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--gl-mds-onsurf);
 }
 
@@ -823,14 +823,14 @@
 }
 
 .gl-mds-admin-row__title {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   &--mono {
-    font-family: monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   }
 }
 
@@ -851,7 +851,7 @@
 
 .gl-mds-admin-row__action {
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--gl-mds-outl);
   border-radius: 999px;
@@ -878,7 +878,7 @@
 
 .gl-mds-admin-chip {
   font-size: 11.5px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 3px 12px;
   border-radius: 999px;
   white-space: nowrap;
@@ -952,7 +952,7 @@
   width: min(420px, 100%);
   background: var(--gl-mds-card);
   color: var(--gl-mds-onsurf);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 24px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
   display: flex;
@@ -967,7 +967,7 @@
 .gl-mds-admin-dialog__title {
   margin: 0;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-mds-admin-dialog__desc {
@@ -991,7 +991,7 @@
   max-height: 70vh;
   background: var(--gl-mds-card);
   color: var(--gl-mds-onsurf);
-  border-radius: 20px;
+  border-radius: 24px;
   padding: 14px;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
   display: flex;
@@ -1077,7 +1077,7 @@
 
 .gl-mds-admin-toast__title {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-mds-admin-toast__message {

@@ -66,7 +66,7 @@ a narrative to read straight through.
 | [Build the package yourself](#3-build-the-package-yourself) | The workflow and its scripts reach real compilation; a dispatch is in progress as this is written. See that section for the exact run and its state. |
 | [Build the GitLab frontend from source on Windows](#4-build-from-source-on-windows) | Works today. Produces compiled frontend assets and a source archive, not a full running instance by itself. |
 | The two desktop tools (Deployer, Instant) | Configuration and preview shells by explicit design; they install and provision nothing. Both publish unsigned Squirrel.Windows installers on every push to `main` — 34 tagged releases as of this writing. |
-| [Design parity](#5-design-parity) | All 25 contracts are checked in and their production routes are `known`; **zero** rows have real capture evidence yet. The application still renders as stock GitLab today. |
+| [Design parity](#5-design-parity) | All 25 contracts are checked in and their production routes are `known`; **zero** rows have real capture evidence yet. The application shell and every GitLab UI component now render in the Material 3 Expressive scheme (see [`doc/development/ux/material-expressive.md`](doc/development/ux/material-expressive.md)); per-surface parity captures are still outstanding. |
 
 ---
 

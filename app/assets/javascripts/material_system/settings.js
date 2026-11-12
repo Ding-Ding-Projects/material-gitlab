@@ -19,7 +19,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   showDialogEmojis: true,
   theme: 'system',
   density: 'comfortable',
-  accentColor: '#6750A4',
+  accentColor: '#6E49CB',
   fontFamily: 'system-ui',
   fontScale: 1,
   motion: 'full',

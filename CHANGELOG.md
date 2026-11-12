@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+### Material 3 Expressive redesign
+
+- Add [`design/expressive/`](design/expressive/), a 28-artboard Material 3 Expressive canvas that
+  redraws every surface of the legacy canvas, adds a dark shell, two phone layouts and a token sheet,
+  and ships the generator and color scripts that produced it.
+- Regenerate the MD3 token contract from seed `#6E49CB` (vibrant scheme), with GitLab orange as
+  tertiary and tonal success and warning palettes, and widen the shape, type and motion scales.
+- Add `md3/components/_gitlab_expressive.scss`, which re-points GitLab UI's design tokens at the MD3
+  roles so every CE and EE page uses the new scheme in light and dark, and applies Expressive shapes
+  (pill buttons with a press morph, connected button groups and lists, large card and dialog radii).
+- Move the shell's primary role off GitLab blue, put the sidebar and top bar on the app background
+  and raise only the content pane.
+- Swap every material-system surface palette role for role to the new scheme, raise card radii,
+  drop uppercase labels, and use the vendored GitLab Sans and GitLab Mono fonts.
+- Details and verification: [`doc/development/ux/material-expressive.md`](doc/development/ux/material-expressive.md).
+
 ### Orchestration plan for the continuation pass
 
 - Add [`doc/development/material_orchestration_plan.md`](doc/development/material_orchestration_plan.md),

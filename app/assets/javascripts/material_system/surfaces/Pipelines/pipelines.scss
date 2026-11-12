@@ -5,77 +5,77 @@
  */
 
 .mgl-pipelines {
-  --surf: #f4effa;
-  --surfc: #ece4f6;
-  --surfch: #e0d5f2;
-  --surfcl: #faf6ff;
-  --onsurf: #1d1b20;
-  --onsurfv: #49454f;
-  --prim: #6750c4;
+  --surf: #f2ebfa;
+  --surfc: #ede5f4;
+  --surfch: #e7e0ef;
+  --surfcl: #f8f1ff;
+  --onsurf: #1d1a24;
+  --onsurfv: #494453;
+  --prim: #6e1aff;
   --onprim: #ffffff;
-  --primc: #e8def8;
-  --onprimc: #4f378b;
-  --sec: #d6c9f0;
-  --outl: #cac4d0;
-  --outlv: #e7e0ec;
-  --err: #b3261e;
-  --errc: #f9dedc;
-  --good: #1a7f37;
-  --goodc: #dcf2e3;
-  --warn: #9a6700;
-  --warnc: #fff3d0;
+  --primc: #e9ddff;
+  --onprimc: #5300cc;
+  --sec: #f2daff;
+  --outl: #cbc3d5;
+  --outlv: #e7dff2;
+  --err: #ba1a1a;
+  --errc: #ffdad6;
+  --good: #006d39;
+  --goodc: #b4ffc5;
+  --warn: #855300;
+  --warnc: #ffddb7;
   --card: #ffffff;
   --scrim: rgba(29, 27, 32, 0.35);
   --card-r: 20px;
   --dlg-r: 28px;
 
   &[data-mgl-theme='dark'] {
-    --surf: #141218;
-    --surfc: #211f26;
-    --surfch: #2b2831;
-    --surfcl: #1b1922;
-    --onsurf: #e6e0e9;
-    --onsurfv: #cac4d0;
-    --prim: #cfbdfe;
-    --onprim: #381e72;
-    --primc: #4f378b;
-    --onprimc: #e8def8;
-    --sec: #4a4458;
-    --outl: #49454f;
-    --outlv: #332f3a;
-    --err: #f2b8b5;
-    --errc: #5c1a17;
-    --good: #7fd79a;
-    --goodc: #1c3a27;
-    --warn: #e2c46d;
-    --warnc: #3d3012;
-    --card: #211f26;
+    --surf: #15121c;
+    --surfc: #211e28;
+    --surfch: #2c2833;
+    --surfcl: #1d1a24;
+    --onsurf: #e7e0ef;
+    --onsurfv: #cbc3d5;
+    --prim: #cfbdff;
+    --onprim: #3a0093;
+    --primc: #5300cc;
+    --onprimc: #e9ddff;
+    --sec: #523f5f;
+    --outl: #494453;
+    --outlv: #37333e;
+    --err: #ffb4ab;
+    --errc: #93000a;
+    --good: #75db94;
+    --goodc: #005229;
+    --warn: #ffb95e;
+    --warnc: #653e00;
+    --card: #211e28;
     --scrim: rgba(0, 0, 0, 0.5);
   }
 }
 
 @media (prefers-color-scheme: dark) {
   .mgl-pipelines:not([data-mgl-theme='light']):not([data-mgl-theme='dark']) {
-    --surf: #141218;
-    --surfc: #211f26;
-    --surfch: #2b2831;
-    --surfcl: #1b1922;
-    --onsurf: #e6e0e9;
-    --onsurfv: #cac4d0;
-    --prim: #cfbdfe;
-    --onprim: #381e72;
-    --primc: #4f378b;
-    --onprimc: #e8def8;
-    --sec: #4a4458;
-    --outl: #49454f;
-    --outlv: #332f3a;
-    --err: #f2b8b5;
-    --errc: #5c1a17;
-    --good: #7fd79a;
-    --goodc: #1c3a27;
-    --warn: #e2c46d;
-    --warnc: #3d3012;
-    --card: #211f26;
+    --surf: #15121c;
+    --surfc: #211e28;
+    --surfch: #2c2833;
+    --surfcl: #1d1a24;
+    --onsurf: #e7e0ef;
+    --onsurfv: #cbc3d5;
+    --prim: #cfbdff;
+    --onprim: #3a0093;
+    --primc: #5300cc;
+    --onprimc: #e9ddff;
+    --sec: #523f5f;
+    --outl: #494453;
+    --outlv: #37333e;
+    --err: #ffb4ab;
+    --errc: #93000a;
+    --good: #75db94;
+    --goodc: #005229;
+    --warn: #ffb95e;
+    --warnc: #653e00;
+    --card: #211e28;
     --scrim: rgba(0, 0, 0, 0.5);
   }
 }
@@ -87,7 +87,7 @@
   min-width: 0;
   background: var(--surf);
   color: var(--onsurf);
-  font-family: 'Google Sans Text', 'Segoe UI', sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   * {
     box-sizing: border-box;
@@ -185,7 +185,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   border: none;
 }
 
@@ -236,9 +236,9 @@
 
   h1 {
     margin: 0;
-    font-family: 'Google Sans', sans-serif;
+    font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 24px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .mgl-pl-count {
@@ -257,7 +257,7 @@
   border: none;
   border-radius: 999px;
   padding: 10px 20px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
@@ -318,7 +318,7 @@
   border-radius: 999px;
   padding: 7px 14px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: var(--surf);
   color: var(--onsurf);
@@ -398,7 +398,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 4px 12px;
   border-radius: 999px;
   flex-shrink: 0;
@@ -410,7 +410,7 @@
   min-width: 0;
 
   .mgl-pl-row-title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
     white-space: nowrap;
     overflow: hidden;
@@ -426,7 +426,7 @@
     text-overflow: ellipsis;
 
     .mgl-pl-sha {
-      font-family: monospace;
+      font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
     }
   }
 }
@@ -494,9 +494,9 @@
 
   h1 {
     margin: 0;
-    font-family: 'Google Sans', sans-serif;
+    font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 21px;
-    font-weight: 500;
+    font-weight: 600;
     flex: 1;
     min-width: 0;
     white-space: nowrap;
@@ -513,7 +513,7 @@
   border-radius: 999px;
   padding: 8px 16px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: transparent;
   color: var(--onprimc);
@@ -547,7 +547,7 @@
   font-size: 12px;
   font-weight: 700;
   color: var(--onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   padding-left: 4px;
 }
@@ -576,7 +576,7 @@
 
   .mgl-pl-job-name {
     font-size: 13px;
-    font-family: monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
     flex: 1;
     min-width: 0;
     white-space: nowrap;
@@ -596,10 +596,10 @@
   background: #16131c;
   border-radius: 16px;
   padding: 16px 18px;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   line-height: 1.8;
-  color: #cac4d0;
+  color: #cbc3d5;
   max-width: 900px;
 }
 
@@ -608,7 +608,7 @@
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-  color: #e6e0e9;
+  color: #e7e0ef;
 
   .mgl-pl-log-name {
     font-weight: 700;
@@ -616,7 +616,7 @@
 
   .mgl-pl-log-duration {
     font-size: 11.5px;
-    color: #938f99;
+    color: #948e9f;
   }
 }
 
@@ -627,7 +627,7 @@
   gap: 5px;
   font-size: 12px;
   cursor: pointer;
-  color: #cfbdfe;
+  color: #cfbdff;
   background: transparent;
   border: none;
 }
@@ -659,7 +659,7 @@
   background: var(--surf);
   border-radius: var(--dlg-r);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-  font-family: 'Google Sans Text', sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: var(--onsurf);
   max-height: 88vh;
   overflow-y: auto;
@@ -693,9 +693,9 @@
 
   h2 {
     margin: 0;
-    font-family: 'Google Sans', sans-serif;
+    font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     font-size: 19px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   p {
@@ -730,7 +730,7 @@
   padding: 10px 22px;
   border-radius: 999px;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: var(--prim);
   color: var(--onprim);
@@ -830,8 +830,8 @@
   --md-sys-color-on-error: var(--onprim);
   --md-sys-color-error-container: var(--errc);
   --md-sys-color-on-error-container: var(--onsurf);
-  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
-  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
+  --md-ref-typeface-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
   md-filled-text-field { min-width: 0; }
   md-text-button, md-filled-button { min-height: 40px; height: auto; min-width: 40px; }
   md-text-button { --md-text-button-label-text-color: var(--onsurf); }

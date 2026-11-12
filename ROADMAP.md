@@ -1,5 +1,15 @@
 # Material GitLab overlay roadmap
 
+## Material 3 Expressive redesign (November 2026)
+
+- [x] Redraw all 25 surfaces, plus a dark shell, two phone layouts and a token sheet, as one
+      Material 3 Expressive canvas in [`design/expressive/`](design/expressive/).
+- [x] Regenerate the light and dark token contract from one seed and apply it to the real
+      application through GitLab UI's design tokens, the shell, the MD3 layer, `tokens.js` and every
+      surface stylesheet. Compiled with Dart Sass; contrast checked; harness rendered in both schemes.
+- [ ] Verify the redesign in a full asset compile and capture it from the built application.
+- [ ] Retarget `design/parity-inventory.json` from the legacy contracts to the Expressive artboards.
+
 ## Next pass
 
 The continuation pass is planned in

@@ -1,41 +1,43 @@
-// Material 3 type scale for the MD3 prototype layer.
-// Sizes, weights and tracking below are read from the design prototypes
-// (page H1s at 24px/500, dialog titles at 20px/500, body text at 13-14px,
-// uppercase section labels at 11px/700/.6px tracking, etc.) rather than
-// the generic spec figures - the rest of the scale is interpolated to stay
-// internally consistent with those anchors.
+// Material 3 Expressive type scale for the MD3 layer.
+// Families are GitLab's own vendored fonts (GitLab Sans is built on Inter,
+// which is what design/Tokens.dc.html renders with), so nothing is fetched
+// from a font CDN. The Expressive refresh uses heavier weights and tighter
+// tracking for display and headline steps, and drops the uppercase section
+// labels of the old prototype in favor of sentence-case labels.
 
-$gl-md3-font-brand: 'Google Sans', 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-$gl-md3-font-plain: 'Google Sans Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+$gl-md3-font-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+$gl-md3-font-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+$gl-md3-font-mono: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
 
 // Iterable definition of the full scale, keyed by style name, so the
 // custom-property block and the utility classes below are generated from
 // one source instead of two hand-kept lists drifting apart.
 $gl-md3-type-scale: (
-  'display-large': (family: $gl-md3-font-brand, size: 45px, line-height: 52px, weight: 500, tracking: 0, transform: none),
-  'display-medium': (family: $gl-md3-font-brand, size: 36px, line-height: 44px, weight: 500, tracking: 0, transform: none),
-  'display-small': (family: $gl-md3-font-brand, size: 30px, line-height: 38px, weight: 500, tracking: 0, transform: none),
+  'display-large': (family: $gl-md3-font-brand, size: 57px, line-height: 64px, weight: 780, tracking: -0.035em, transform: none),
+  'display-medium': (family: $gl-md3-font-brand, size: 45px, line-height: 52px, weight: 760, tracking: -0.03em, transform: none),
+  'display-small': (family: $gl-md3-font-brand, size: 36px, line-height: 44px, weight: 740, tracking: -0.03em, transform: none),
 
-  'headline-large': (family: $gl-md3-font-brand, size: 26px, line-height: 32px, weight: 500, tracking: 0, transform: none),
-  'headline-medium': (family: $gl-md3-font-brand, size: 24px, line-height: 30px, weight: 500, tracking: 0, transform: none),
-  'headline-small': (family: $gl-md3-font-brand, size: 21px, line-height: 27px, weight: 500, tracking: 0, transform: none),
+  'headline-large': (family: $gl-md3-font-brand, size: 32px, line-height: 40px, weight: 720, tracking: -0.025em, transform: none),
+  'headline-medium': (family: $gl-md3-font-brand, size: 28px, line-height: 36px, weight: 700, tracking: -0.02em, transform: none),
+  'headline-small': (family: $gl-md3-font-brand, size: 24px, line-height: 32px, weight: 690, tracking: -0.015em, transform: none),
 
-  'title-large': (family: $gl-md3-font-brand, size: 20px, line-height: 26px, weight: 500, tracking: 0, transform: none),
-  'title-medium': (family: $gl-md3-font-brand, size: 18px, line-height: 24px, weight: 500, tracking: 0.15px, transform: none),
-  'title-small': (family: $gl-md3-font-brand, size: 16px, line-height: 22px, weight: 500, tracking: 0.1px, transform: none),
+  'title-large': (family: $gl-md3-font-brand, size: 20px, line-height: 28px, weight: 680, tracking: -0.01em, transform: none),
+  'title-medium': (family: $gl-md3-font-brand, size: 16px, line-height: 24px, weight: 650, tracking: 0, transform: none),
+  'title-small': (family: $gl-md3-font-brand, size: 15px, line-height: 22px, weight: 650, tracking: 0, transform: none),
 
-  'body-large': (family: $gl-md3-font-plain, size: 14px, line-height: 20px, weight: 400, tracking: 0.15px, transform: none),
-  'body-medium': (family: $gl-md3-font-plain, size: 13px, line-height: 18px, weight: 400, tracking: 0.2px, transform: none),
-  'body-small': (family: $gl-md3-font-plain, size: 12px, line-height: 16px, weight: 400, tracking: 0.3px, transform: none),
+  'body-large': (family: $gl-md3-font-plain, size: 16px, line-height: 24px, weight: 400, tracking: 0, transform: none),
+  'body-medium': (family: $gl-md3-font-plain, size: 14px, line-height: 20px, weight: 400, tracking: 0, transform: none),
+  'body-small': (family: $gl-md3-font-plain, size: 12.5px, line-height: 16px, weight: 400, tracking: 0, transform: none),
 
-  'label-large': (family: $gl-md3-font-plain, size: 12.5px, line-height: 16px, weight: 500, tracking: 0.1px, transform: none),
-  'label-medium': (family: $gl-md3-font-plain, size: 12px, line-height: 15px, weight: 700, tracking: 0.5px, transform: uppercase),
-  'label-small': (family: $gl-md3-font-plain, size: 11px, line-height: 13px, weight: 700, tracking: 0.6px, transform: uppercase),
+  'label-large': (family: $gl-md3-font-plain, size: 14px, line-height: 20px, weight: 650, tracking: 0, transform: none),
+  'label-medium': (family: $gl-md3-font-plain, size: 12.5px, line-height: 16px, weight: 650, tracking: 0, transform: none),
+  'label-small': (family: $gl-md3-font-plain, size: 11.5px, line-height: 16px, weight: 650, tracking: 0.04em, transform: none),
 );
 
 :root {
   --gl-md3-font-family-brand: #{$gl-md3-font-brand};
   --gl-md3-font-family-plain: #{$gl-md3-font-plain};
+  --gl-md3-font-family-mono: #{$gl-md3-font-mono};
 
   @each $name, $props in $gl-md3-type-scale {
     --gl-md3-type-#{$name}-family: #{map-get($props, family)};

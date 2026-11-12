@@ -18,15 +18,16 @@ $md3-sidebar-overlay-z: 900;
   flex-direction: column;
   flex-shrink: 0;
   gap: 2px;
-  width: 248px;
+  width: 272px;
   height: 100%;
-  padding: 12px 10px;
+  padding: 12px 12px 16px;
   box-sizing: border-box;
   overflow-y: auto;
-  background-color: var(--gl-md3-surfc);
+  // Expressive: the drawer sits on the app background with no edge of its
+  // own; only the content pane beside it is raised.
+  background-color: var(--gl-md3-surf);
   color: var(--gl-md3-onsurf);
-  // Right corners only; the drawer sits flush against the viewport edge.
-  border-radius: 0 var(--gl-md3-shape-l) var(--gl-md3-shape-l) 0;
+  border-radius: 0;
   @include gl-md3-motion-standard(transform);
 }
 
@@ -70,12 +71,13 @@ $md3-sidebar-overlay-z: 900;
   align-items: center;
   gap: 10px;
   margin-bottom: 8px;
-  padding: 8px 12px;
-  background-color: var(--gl-md3-surfcl);
+  padding: 10px 12px;
+  background-color: var(--gl-md3-card);
   color: inherit;
   text-decoration: none;
   cursor: pointer;
-  @include gl-md3-shape('m');
+  box-shadow: var(--gl-md3-elevation-1);
+  @include gl-md3-shape('l-plus');
   @include gl-md3-motion-standard(background-color);
 
   &:hover {
@@ -101,7 +103,7 @@ $md3-sidebar-overlay-z: 900;
   color: var(--gl-md3-warn);
   font-size: 12px;
   font-weight: 700;
-  @include gl-md3-shape('xs');
+  @include gl-md3-shape('s');
 }
 
 .md3-sidebar__context-body {
@@ -210,7 +212,9 @@ $md3-sidebar-overlay-z: 900;
 }
 
 .md3-sidebar__item--active {
+  color: var(--gl-md3-onsec);
   background-color: var(--gl-md3-sec);
+  font-weight: 700;
 }
 
 // Icon color stays constant on active per the design; only the pill

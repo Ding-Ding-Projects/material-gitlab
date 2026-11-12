@@ -7,54 +7,54 @@
 @import 'md3/material_web_geometry';
 
 @mixin st-dark-tokens {
-  --st-surf: #141218;
-  --st-surfc: #211f26;
-  --st-surfch: #2b2831;
-  --st-surfcl: #1b1922;
-  --st-onsurf: #e6e0e9;
-  --st-onsurfv: #cac4d0;
-  --st-prim: #cfbdfe;
-  --st-onprim: #381e72;
-  --st-primc: #4f378b;
-  --st-onprimc: #e8def8;
-  --st-sec: #4a4458;
-  --st-outl: #49454f;
-  --st-outlv: #332f3a;
-  --st-err: #f2b8b5;
-  --st-errc: #5c1a17;
-  --st-good: #7fd79a;
-  --st-goodc: #1c3a27;
-  --st-warn: #e2c46d;
-  --st-warnc: #3d3012;
-  --st-card: #211f26;
+  --st-surf: #15121c;
+  --st-surfc: #211e28;
+  --st-surfch: #2c2833;
+  --st-surfcl: #1d1a24;
+  --st-onsurf: #e7e0ef;
+  --st-onsurfv: #cbc3d5;
+  --st-prim: #cfbdff;
+  --st-onprim: #3a0093;
+  --st-primc: #5300cc;
+  --st-onprimc: #e9ddff;
+  --st-sec: #523f5f;
+  --st-outl: #494453;
+  --st-outlv: #37333e;
+  --st-err: #ffb4ab;
+  --st-errc: #93000a;
+  --st-good: #75db94;
+  --st-goodc: #005229;
+  --st-warn: #ffb95e;
+  --st-warnc: #653e00;
+  --st-card: #211e28;
   --st-scrim: rgba(0, 0, 0, 0.5);
 }
 
 .st-surface {
-  --st-surf: #f4effa;
-  --st-surfc: #ece4f6;
-  --st-surfch: #e0d5f2;
-  --st-surfcl: #faf6ff;
-  --st-onsurf: #1d1b20;
-  --st-onsurfv: #49454f;
-  --st-prim: #6750c4;
+  --st-surf: #f2ebfa;
+  --st-surfc: #ede5f4;
+  --st-surfch: #e7e0ef;
+  --st-surfcl: #f8f1ff;
+  --st-onsurf: #1d1a24;
+  --st-onsurfv: #494453;
+  --st-prim: #6e1aff;
   --st-onprim: #ffffff;
-  --st-primc: #e8def8;
-  --st-onprimc: #4f378b;
-  --st-sec: #d6c9f0;
-  --st-outl: #cac4d0;
-  --st-outlv: #e7e0ec;
-  --st-err: #b3261e;
-  --st-errc: #f9dedc;
-  --st-good: #1a7f37;
-  --st-goodc: #dcf2e3;
-  --st-warn: #9a6700;
-  --st-warnc: #fff3d0;
+  --st-primc: #e9ddff;
+  --st-onprimc: #5300cc;
+  --st-sec: #f2daff;
+  --st-outl: #cbc3d5;
+  --st-outlv: #e7dff2;
+  --st-err: #ba1a1a;
+  --st-errc: #ffdad6;
+  --st-good: #006d39;
+  --st-goodc: #b4ffc5;
+  --st-warn: #855300;
+  --st-warnc: #ffddb7;
   --st-card: #ffffff;
   --st-scrim: rgba(29, 27, 32, 0.35);
 
   --st-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --st-radius-card: 20px;
+  --st-radius-card: 24px;
   --st-radius-pill: 999px;
   --st-radius-field: 12px;
   --st-touch: 40px;
@@ -178,7 +178,7 @@
 
   .st-card__title {
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .st-empty {

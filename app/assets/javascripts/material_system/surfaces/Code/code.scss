@@ -18,57 +18,57 @@
   --md-sys-color-on-surface: var(--onsurf);
   --md-sys-color-outline: var(--outl);
   --md-sys-color-error: var(--err);
-  --surf: #f4effa;
-  --surfc: #ece4f6;
-  --surfch: #e0d5f2;
-  --surfcl: #faf6ff;
-  --onsurf: #1d1b20;
-  --onsurfv: #49454f;
-  --prim: #6750c4;
+  --surf: #f2ebfa;
+  --surfc: #ede5f4;
+  --surfch: #e7e0ef;
+  --surfcl: #f8f1ff;
+  --onsurf: #1d1a24;
+  --onsurfv: #494453;
+  --prim: #6e1aff;
   --onprim: #ffffff;
-  --primc: #e8def8;
-  --onprimc: #4f378b;
-  --sec: #d6c9f0;
-  --outl: #cac4d0;
-  --outlv: #e7e0ec;
-  --err: #b3261e;
-  --errc: #f9dedc;
-  --good: #1a7f37;
-  --goodc: #dcf2e3;
-  --warn: #9a6700;
-  --warnc: #fff3d0;
+  --primc: #e9ddff;
+  --onprimc: #5300cc;
+  --sec: #f2daff;
+  --outl: #cbc3d5;
+  --outlv: #e7dff2;
+  --err: #ba1a1a;
+  --errc: #ffdad6;
+  --good: #006d39;
+  --goodc: #b4ffc5;
+  --warn: #855300;
+  --warnc: #ffddb7;
   --card: #ffffff;
   --scrim: rgba(29, 27, 32, 0.35);
   --card-r: 20px;
   --dlg-r: 28px;
 
   &[data-theme='dark'] {
-    --surf: #141218;
-    --surfc: #211f26;
-    --surfch: #2b2831;
-    --surfcl: #1b1922;
-    --onsurf: #e6e0e9;
-    --onsurfv: #cac4d0;
-    --prim: #cfbdfe;
-    --onprim: #381e72;
-    --primc: #4f378b;
-    --onprimc: #e8def8;
-    --sec: #4a4458;
-    --outl: #49454f;
-    --outlv: #332f3a;
-    --err: #f2b8b5;
-    --errc: #5c1a17;
-    --good: #7fd79a;
-    --goodc: #1c3a27;
-    --warn: #e2c46d;
-    --warnc: #3d3012;
-    --card: #211f26;
+    --surf: #15121c;
+    --surfc: #211e28;
+    --surfch: #2c2833;
+    --surfcl: #1d1a24;
+    --onsurf: #e7e0ef;
+    --onsurfv: #cbc3d5;
+    --prim: #cfbdff;
+    --onprim: #3a0093;
+    --primc: #5300cc;
+    --onprimc: #e9ddff;
+    --sec: #523f5f;
+    --outl: #494453;
+    --outlv: #37333e;
+    --err: #ffb4ab;
+    --errc: #93000a;
+    --good: #75db94;
+    --goodc: #005229;
+    --warn: #ffb95e;
+    --warnc: #653e00;
+    --card: #211e28;
     --scrim: rgba(0, 0, 0, 0.5);
   }
 }
 
 .gl-material-code {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -149,7 +149,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   border: none;
   background: var(--surfch);
   color: var(--onsurfv);
@@ -211,7 +211,7 @@
 .gl-code-heading {
   margin: 0;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-code-tablist {
@@ -227,7 +227,7 @@
   padding: 7px 16px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   border: none;
   background: transparent;
@@ -293,7 +293,7 @@
   border: none;
   border-radius: 999px;
   padding: 9px 20px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13px;
   cursor: pointer;
 
@@ -360,14 +360,14 @@
 }
 
 .gl-code-row__title {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 
   &--mono {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   }
 }
 
@@ -382,7 +382,7 @@
 
 .gl-code-badge {
   font-size: 11.5px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 3px 12px;
   border-radius: 999px;
   flex-shrink: 0;
@@ -397,7 +397,7 @@
 
 .gl-code-row__action {
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   border: 1px solid var(--outl);
   background: transparent;
@@ -440,7 +440,7 @@
   border-radius: 999px;
   padding: 7px 16px;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: var(--card);
   color: var(--onsurf);
@@ -505,7 +505,7 @@
 .gl-code-dialog__title {
   margin: 0;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .gl-code-dialog__head {
@@ -521,7 +521,7 @@
 }
 
 .gl-code-flagchip {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 13px;
   font-weight: 700;
   width: 32px;
@@ -543,7 +543,7 @@
 
 .gl-code-status-chip {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 3px 12px;
   border-radius: 999px;
 }
@@ -552,7 +552,7 @@
   border: 1px solid var(--outl);
   border-radius: 12px;
   padding: 12px 14px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 15px;
   background: transparent;
   color: var(--onsurf);
@@ -563,7 +563,7 @@
 .gl-code-error {
   font-size: 12.5px;
   color: var(--err);
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
 }
 
 .gl-code-snippet-groups {
@@ -583,14 +583,14 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   width: 86px;
   flex-shrink: 0;
 }
 
 .gl-code-snippet-chip {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   padding: 5px 11px;
   border-radius: 8px;
@@ -618,7 +618,7 @@
   font-size: 11.5px;
   font-weight: 700;
   color: var(--onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
 }
 
@@ -626,7 +626,7 @@
   border: 1px solid var(--outl);
   border-radius: 12px;
   padding: 10px 12px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   background: transparent;
   color: var(--onsurf);
@@ -643,7 +643,7 @@
 }
 
 .gl-code-highlight {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   line-height: 1.7;
   word-break: break-word;
@@ -670,7 +670,7 @@
 }
 
 .gl-code-capture__n {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   color: var(--onprimc);
   font-weight: 700;
   width: 36px;
@@ -692,7 +692,7 @@
 }
 
 .gl-code-explain__tok {
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   color: var(--onprimc);
   flex-shrink: 0;
   min-width: 52px;
@@ -709,7 +709,7 @@
   font-size: 11.5px;
   font-weight: 700;
   color: var(--onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
 }
@@ -816,8 +816,8 @@
   --md-sys-color-on-error: var(--onprim);
   --md-sys-color-error-container: var(--errc);
   --md-sys-color-on-error-container: var(--onsurf);
-  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
-  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
+  --md-ref-typeface-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
   :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
   md-filled-text-field { min-width: 0; max-width: 100%; }
 }

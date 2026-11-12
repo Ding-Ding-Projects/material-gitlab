@@ -5,26 +5,26 @@
 // surface sharing this bundle.
 
 @mixin dp-dark-tokens {
-  --dp-surf: #141218;
-  --dp-surfc: #211f26;
-  --dp-surfch: #2b2831;
-  --dp-surfcl: #1b1922;
-  --dp-onsurf: #e6e0e9;
-  --dp-onsurfv: #cac4d0;
-  --dp-prim: #cfbdfe;
-  --dp-onprim: #381e72;
-  --dp-primc: #4f378b;
-  --dp-onprimc: #e8def8;
-  --dp-sec: #4a4458;
-  --dp-outl: #49454f;
-  --dp-outlv: #332f3a;
-  --dp-err: #f2b8b5;
-  --dp-errc: #5c1a17;
-  --dp-good: #7fd79a;
-  --dp-goodc: #1c3a27;
-  --dp-warn: #e2c46d;
-  --dp-warnc: #3d3012;
-  --dp-card: #211f26;
+  --dp-surf: #15121c;
+  --dp-surfc: #211e28;
+  --dp-surfch: #2c2833;
+  --dp-surfcl: #1d1a24;
+  --dp-onsurf: #e7e0ef;
+  --dp-onsurfv: #cbc3d5;
+  --dp-prim: #cfbdff;
+  --dp-onprim: #3a0093;
+  --dp-primc: #5300cc;
+  --dp-onprimc: #e9ddff;
+  --dp-sec: #523f5f;
+  --dp-outl: #494453;
+  --dp-outlv: #37333e;
+  --dp-err: #ffb4ab;
+  --dp-errc: #93000a;
+  --dp-good: #75db94;
+  --dp-goodc: #005229;
+  --dp-warn: #ffb95e;
+  --dp-warnc: #653e00;
+  --dp-card: #211e28;
   --dp-scrim: rgba(0, 0, 0, 0.5);
 }
 
@@ -39,25 +39,25 @@
   --md-sys-color-surface-container: var(--dp-surfc);
   --md-sys-color-outline: var(--dp-outl);
   --md-sys-color-error: var(--dp-err);
-  --dp-surf: #f4effa;
-  --dp-surfc: #ece4f6;
-  --dp-surfch: #e0d5f2;
-  --dp-surfcl: #faf6ff;
-  --dp-onsurf: #1d1b20;
-  --dp-onsurfv: #49454f;
-  --dp-prim: #6750c4;
+  --dp-surf: #f2ebfa;
+  --dp-surfc: #ede5f4;
+  --dp-surfch: #e7e0ef;
+  --dp-surfcl: #f8f1ff;
+  --dp-onsurf: #1d1a24;
+  --dp-onsurfv: #494453;
+  --dp-prim: #6e1aff;
   --dp-onprim: #ffffff;
-  --dp-primc: #e8def8;
-  --dp-onprimc: #4f378b;
-  --dp-sec: #d6c9f0;
-  --dp-outl: #cac4d0;
-  --dp-outlv: #e7e0ec;
-  --dp-err: #b3261e;
-  --dp-errc: #f9dedc;
-  --dp-good: #1a7f37;
-  --dp-goodc: #dcf2e3;
-  --dp-warn: #9a6700;
-  --dp-warnc: #fff3d0;
+  --dp-primc: #e9ddff;
+  --dp-onprimc: #5300cc;
+  --dp-sec: #f2daff;
+  --dp-outl: #cbc3d5;
+  --dp-outlv: #e7dff2;
+  --dp-err: #ba1a1a;
+  --dp-errc: #ffdad6;
+  --dp-good: #006d39;
+  --dp-goodc: #b4ffc5;
+  --dp-warn: #855300;
+  --dp-warnc: #ffddb7;
   --dp-card: #ffffff;
   --dp-scrim: rgba(29, 27, 32, 0.35);
 
@@ -148,7 +148,7 @@
 .dp-heading {
   margin: 0;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .dp-bulk-btn {
@@ -162,7 +162,7 @@
   color: var(--dp-onsurf);
   font: inherit;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
 
   &:hover {
@@ -208,8 +208,8 @@
   --md-sys-color-on-error: var(--dp-onprim);
   --md-sys-color-error-container: var(--dp-errc);
   --md-sys-color-on-error-container: var(--dp-onsurf);
-  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
-  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
+  --md-ref-typeface-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
   :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
   md-filled-text-field { min-width: 0; max-width: 100%; }
 }

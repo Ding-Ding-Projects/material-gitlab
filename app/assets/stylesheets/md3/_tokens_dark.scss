@@ -1,70 +1,104 @@
 /* stylelint-disable gitlab/no-gl-class */
-// Dark-mode overrides for the MD3 color token contract. Only the custom
-// properties whose value actually changes between light and dark are
-// restated here; every semantic alias in _tokens.scss resolves through
-// these automatically because custom properties resolve at used-value time.
+// Dark-mode values for the MD3 Expressive color token contract (see
+// _tokens.scss for provenance). Every base token is restated so the dark
+// scheme is complete on its own; the semantic aliases in _tokens.scss resolve
+// through these at used-value time.
 //
 // Applied on both of GitLab's dark paths:
 //   1. The explicit `.gl-dark` color mode class set by the user's chosen
 //      theme preference.
 //   2. `prefers-color-scheme: dark`, for users who have not made an
-//      explicit color mode choice - guarded with `:not(.gl-light)` so an
+//      explicit color mode choice, guarded with `:not(.gl-light)` so an
 //      explicit light selection always wins over the OS preference.
 
 :root.gl-dark {
-  --gl-md3-surf: #141218;
-  --gl-md3-surfc: #211f26;
-  --gl-md3-surfch: #2b2831;
-  --gl-md3-surfcl: #1b1922;
-  --gl-md3-onsurf: #e6e0e9;
-  --gl-md3-onsurfv: #cac4d0;
-  --gl-md3-prim: #cfbdfe;
-  --gl-md3-onprim: #381e72;
-  --gl-md3-primc: #4f378b;
-  --gl-md3-onprimc: #e8def8;
-  --gl-md3-sec: #4a4458;
-  --gl-md3-outl: #49454f;
-  --gl-md3-outlv: #332f3a;
-  --gl-md3-err: #f2b8b5;
-  --gl-md3-errc: #5c1a17;
-  --gl-md3-good: #7fd79a;
-  --gl-md3-goodc: #1c3a27;
-  --gl-md3-warn: #e2c46d;
-  --gl-md3-warnc: #3d3012;
-  --gl-md3-card: #211f26;
+  --gl-md3-surf: #15121c;
+  --gl-md3-surfc: #211e28;
+  --gl-md3-surfch: #2c2833;
+  --gl-md3-surfcl: #1d1a24;
+  --gl-md3-onsurf: #e7e0ef;
+  --gl-md3-onsurfv: #cbc3d5;
+  --gl-md3-prim: #cfbdff;
+  --gl-md3-onprim: #3a0093;
+  --gl-md3-primc: #5300cc;
+  --gl-md3-onprimc: #e9ddff;
+  --gl-md3-sec: #523f5f;
+  --gl-md3-onsec: #f2daff;
+  --gl-md3-tert: #ffb597;
+  --gl-md3-ontert: #591d00;
+  --gl-md3-tertc: #7e2c00;
+  --gl-md3-ontertc: #ffdbcd;
+  --gl-md3-outl: #494453;
+  --gl-md3-outlv: #37333e;
+  --gl-md3-outls: #948e9f;
+  --gl-md3-err: #ffb4ab;
+  --gl-md3-onerr: #690005;
+  --gl-md3-errc: #93000a;
+  --gl-md3-onerrc: #ffdad6;
+  --gl-md3-good: #75db94;
+  --gl-md3-goodc: #005229;
+  --gl-md3-ongoodc: #91f8ae;
+  --gl-md3-warn: #ffb95e;
+  --gl-md3-warnc: #653e00;
+  --gl-md3-onwarnc: #ffddb7;
+  --gl-md3-card: #1d1a24;
+  --gl-md3-surfbase: #15121c;
+  --gl-md3-surfcst: #0f0d16;
+  --gl-md3-surfdim: #15121c;
+  --gl-md3-inv: #e7e0ef;
+  --gl-md3-oninv: #322f3a;
+  --gl-md3-invprim: #6e1aff;
+  --gl-md3-addbg: #003216;
+  --gl-md3-addfg: #91f8ae;
+  --gl-md3-delbg: #5c0004;
+  --gl-md3-delfg: #ffcfc9;
   --gl-md3-scrim: rgba(0, 0, 0, 0.5);
-  --gl-md3-addbg: #1c3a27;
-  --gl-md3-addfg: #a5e8b8;
-  --gl-md3-delbg: #5c1a17;
-  --gl-md3-delfg: #f5c0bd;
+  --gl-md3-row: var(--gl-md3-surfc);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not(.gl-light) {
-    --gl-md3-surf: #141218;
-    --gl-md3-surfc: #211f26;
-    --gl-md3-surfch: #2b2831;
-    --gl-md3-surfcl: #1b1922;
-    --gl-md3-onsurf: #e6e0e9;
-    --gl-md3-onsurfv: #cac4d0;
-    --gl-md3-prim: #cfbdfe;
-    --gl-md3-onprim: #381e72;
-    --gl-md3-primc: #4f378b;
-    --gl-md3-onprimc: #e8def8;
-    --gl-md3-sec: #4a4458;
-    --gl-md3-outl: #49454f;
-    --gl-md3-outlv: #332f3a;
-    --gl-md3-err: #f2b8b5;
-    --gl-md3-errc: #5c1a17;
-    --gl-md3-good: #7fd79a;
-    --gl-md3-goodc: #1c3a27;
-    --gl-md3-warn: #e2c46d;
-    --gl-md3-warnc: #3d3012;
-    --gl-md3-card: #211f26;
+    --gl-md3-surf: #15121c;
+    --gl-md3-surfc: #211e28;
+    --gl-md3-surfch: #2c2833;
+    --gl-md3-surfcl: #1d1a24;
+    --gl-md3-onsurf: #e7e0ef;
+    --gl-md3-onsurfv: #cbc3d5;
+    --gl-md3-prim: #cfbdff;
+    --gl-md3-onprim: #3a0093;
+    --gl-md3-primc: #5300cc;
+    --gl-md3-onprimc: #e9ddff;
+    --gl-md3-sec: #523f5f;
+    --gl-md3-onsec: #f2daff;
+    --gl-md3-tert: #ffb597;
+    --gl-md3-ontert: #591d00;
+    --gl-md3-tertc: #7e2c00;
+    --gl-md3-ontertc: #ffdbcd;
+    --gl-md3-outl: #494453;
+    --gl-md3-outlv: #37333e;
+    --gl-md3-outls: #948e9f;
+    --gl-md3-err: #ffb4ab;
+    --gl-md3-onerr: #690005;
+    --gl-md3-errc: #93000a;
+    --gl-md3-onerrc: #ffdad6;
+    --gl-md3-good: #75db94;
+    --gl-md3-goodc: #005229;
+    --gl-md3-ongoodc: #91f8ae;
+    --gl-md3-warn: #ffb95e;
+    --gl-md3-warnc: #653e00;
+    --gl-md3-onwarnc: #ffddb7;
+    --gl-md3-card: #1d1a24;
+    --gl-md3-surfbase: #15121c;
+    --gl-md3-surfcst: #0f0d16;
+    --gl-md3-surfdim: #15121c;
+    --gl-md3-inv: #e7e0ef;
+    --gl-md3-oninv: #322f3a;
+    --gl-md3-invprim: #6e1aff;
+    --gl-md3-addbg: #003216;
+    --gl-md3-addfg: #91f8ae;
+    --gl-md3-delbg: #5c0004;
+    --gl-md3-delfg: #ffcfc9;
     --gl-md3-scrim: rgba(0, 0, 0, 0.5);
-    --gl-md3-addbg: #1c3a27;
-    --gl-md3-addfg: #a5e8b8;
-    --gl-md3-delbg: #5c1a17;
-    --gl-md3-delfg: #f5c0bd;
+  --gl-md3-row: var(--gl-md3-surfc);
   }
 }

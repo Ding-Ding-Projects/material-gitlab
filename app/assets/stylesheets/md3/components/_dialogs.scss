@@ -332,7 +332,7 @@ $md3-z-menu: 1200;
   text-decoration: none;
   cursor: pointer;
   white-space: nowrap;
-  border-radius: var(--gl-md3-shape-xs);
+  border-radius: var(--gl-md3-shape-s);
   @include gl-md3-body-medium;
   @include gl-md3-motion-standard(background-color);
 

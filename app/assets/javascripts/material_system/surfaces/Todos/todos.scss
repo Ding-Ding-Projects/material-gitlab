@@ -10,49 +10,49 @@
 
 .md-todos {
   // Light theme (default)
-  --md-surf: #f4effa;
-  --md-surfc: #ece4f6;
-  --md-surfch: #e0d5f2;
-  --md-surfcl: #faf6ff;
-  --md-onsurf: #1d1b20;
-  --md-onsurfv: #49454f;
-  --md-prim: #6750c4;
+  --md-surf: #f2ebfa;
+  --md-surfc: #ede5f4;
+  --md-surfch: #e7e0ef;
+  --md-surfcl: #f8f1ff;
+  --md-onsurf: #1d1a24;
+  --md-onsurfv: #494453;
+  --md-prim: #6e1aff;
   --md-onprim: #ffffff;
-  --md-primc: #e8def8;
-  --md-onprimc: #4f378b;
-  --md-sec: #d6c9f0;
-  --md-outl: #cac4d0;
-  --md-outlv: #e7e0ec;
-  --md-err: #b3261e;
-  --md-errc: #f9dedc;
-  --md-good: #1a7f37;
-  --md-goodc: #dcf2e3;
-  --md-warn: #9a6700;
-  --md-warnc: #fff3d0;
+  --md-primc: #e9ddff;
+  --md-onprimc: #5300cc;
+  --md-sec: #f2daff;
+  --md-outl: #cbc3d5;
+  --md-outlv: #e7dff2;
+  --md-err: #ba1a1a;
+  --md-errc: #ffdad6;
+  --md-good: #006d39;
+  --md-goodc: #b4ffc5;
+  --md-warn: #855300;
+  --md-warnc: #ffddb7;
   --md-card: #ffffff;
   --md-scrim: rgba(29, 27, 32, 0.35);
 
   &[data-md-theme='dark'] {
-    --md-surf: #141218;
-    --md-surfc: #211f26;
-    --md-surfch: #2b2831;
-    --md-surfcl: #1b1922;
-    --md-onsurf: #e6e0e9;
-    --md-onsurfv: #cac4d0;
-    --md-prim: #cfbdfe;
-    --md-onprim: #381e72;
-    --md-primc: #4f378b;
-    --md-onprimc: #e8def8;
-    --md-sec: #4a4458;
-    --md-outl: #49454f;
-    --md-outlv: #332f3a;
-    --md-err: #f2b8b5;
-    --md-errc: #5c1a17;
-    --md-good: #7fd79a;
-    --md-goodc: #1c3a27;
-    --md-warn: #e2c46d;
-    --md-warnc: #3d3012;
-    --md-card: #211f26;
+    --md-surf: #15121c;
+    --md-surfc: #211e28;
+    --md-surfch: #2c2833;
+    --md-surfcl: #1d1a24;
+    --md-onsurf: #e7e0ef;
+    --md-onsurfv: #cbc3d5;
+    --md-prim: #cfbdff;
+    --md-onprim: #3a0093;
+    --md-primc: #5300cc;
+    --md-onprimc: #e9ddff;
+    --md-sec: #523f5f;
+    --md-outl: #494453;
+    --md-outlv: #37333e;
+    --md-err: #ffb4ab;
+    --md-errc: #93000a;
+    --md-good: #75db94;
+    --md-goodc: #005229;
+    --md-warn: #ffb95e;
+    --md-warnc: #653e00;
+    --md-card: #211e28;
     --md-scrim: rgba(0, 0, 0, 0.5);
   }
 
@@ -62,7 +62,7 @@
   overflow: hidden;
   background: var(--md-surf);
   color: var(--md-onsurf);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.4;
 
@@ -177,7 +177,7 @@
 }
 
 .md-todos__project-name {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
   white-space: nowrap;
   overflow: hidden;
@@ -235,7 +235,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.6px;
-  text-transform: uppercase;
+  text-transform: none;
   color: var(--md-onsurfv);
 }
 
@@ -325,7 +325,7 @@
   padding: 5px 10px;
   border: none;
   border-radius: 999px;
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
@@ -388,7 +388,7 @@
 .md-todos__title {
   margin: 0;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .md-todos__tabs {
@@ -404,7 +404,7 @@
   border: none;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: transparent;
   color: var(--md-onsurfv);
@@ -424,7 +424,7 @@
   min-height: 40px;
   border: 1px solid var(--md-outl);
   border-radius: 999px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
   background: transparent;
@@ -487,7 +487,7 @@
   background: none;
   color: var(--md-onprimc);
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
 
   &:hover:not(:disabled) {
@@ -506,7 +506,7 @@
   border: none;
   border-radius: 999px;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: var(--md-prim);
   color: var(--md-onprim);
@@ -522,7 +522,7 @@
 .md-todos__card {
   max-width: 920px;
   overflow: hidden;
-  border-radius: 20px;
+  border-radius: 24px;
   background: var(--md-card);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
@@ -596,7 +596,7 @@
   border: 1px solid var(--md-outl);
   border-radius: 999px;
   font-size: 12.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: transparent;
   color: var(--md-onprimc);
@@ -677,14 +677,14 @@
 .md-todos__dialog-title {
   margin: 0;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .md-todos__pill {
   padding: 3px 12px;
   border-radius: 999px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
 
   &--good {
     background: var(--md-goodc);
@@ -708,7 +708,7 @@
   height: 32px;
   border: none;
   border-radius: 8px;
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -727,7 +727,7 @@
   padding: 12px 14px;
   border: 1px solid var(--md-outl);
   border-radius: 12px;
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 15px;
   background: transparent;
   color: var(--md-onsurf);
@@ -739,7 +739,7 @@
 }
 
 .md-todos__regex-error {
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   color: var(--md-err);
 }
@@ -762,7 +762,7 @@
   width: 86px;
   font-size: 11px;
   font-weight: 700;
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   color: var(--md-onsurfv);
 }
@@ -771,7 +771,7 @@
   padding: 5px 11px;
   border: none;
   border-radius: 8px;
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   cursor: pointer;
   background: var(--md-surfc);
@@ -804,7 +804,7 @@
   padding: 10px 12px;
   border: 1px solid var(--md-outl);
   border-radius: 12px;
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   background: transparent;
   color: var(--md-onsurf);
@@ -817,7 +817,7 @@
   padding: 10px 12px;
   border-radius: 12px;
   background: var(--md-surfcl);
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   line-height: 1.7;
   word-break: break-word;
@@ -856,7 +856,7 @@
 .md-todos__capture-name {
   flex-shrink: 0;
   min-width: 36px;
-  font-family: 'SFMono-Regular', Consolas, Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 700;
   color: var(--md-onprimc);
 }
@@ -907,7 +907,7 @@
   border: none;
   border-radius: 999px;
   font-size: 13.5px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: var(--md-prim);
   color: var(--md-onprim);

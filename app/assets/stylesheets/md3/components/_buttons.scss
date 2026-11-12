@@ -60,7 +60,17 @@
   text-decoration: none;
   @include gl-md3-shape('full');
   @include gl-md3-label-large;
-  @include gl-md3-motion-standard(unquote('box-shadow, background-color, border-color'));
+  // Expressive: color changes ride the effects curve, while the pressed
+  // shape morph (pill into a rounded square) rides the spatial spring.
+  transition:
+    box-shadow var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-effects),
+    background-color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-effects),
+    border-color var(--gl-md3-motion-duration-short4) var(--gl-md3-motion-easing-effects),
+    border-radius var(--gl-md3-motion-duration-medium3) var(--gl-md3-motion-easing-spatial-fast);
+
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    border-radius: var(--gl-md3-shape-m);
+  }
   @include md3-btn-focus-ring;
   @include md3-btn-disabled;
 

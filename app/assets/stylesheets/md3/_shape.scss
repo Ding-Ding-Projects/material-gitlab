@@ -1,16 +1,19 @@
-// Material 3 shape scale for the MD3 prototype layer.
-// The six non-zero radii below are exactly the values used throughout the
-// design prototypes (avatar/icon squares at 8px, chip-style buttons at 9px,
-// cards and menus at 12px, dialogs and panels at 16px, larger sheets at
-// 20px, pill shapes at 999px) - nothing here is invented or rounded.
+// Material 3 Expressive shape scale for the MD3 layer.
+// The Expressive refresh widens the ladder: small controls and list rows sit
+// on 4-12px, cards and panes on 16-28px, hero surfaces on 32-48px, and every
+// action button and navigation indicator is a pill. Values match
+// design/Tokens.dc.html exactly.
 
 $gl-md3-shape-scale: (
   'none': 0,
-  'xs': 8px,
-  's': 9px,
+  'xs': 4px,
+  's': 8px,
   'm': 12px,
   'l': 16px,
-  'xl': 20px,
+  'l-plus': 20px,
+  'xl': 28px,
+  'xl-plus': 32px,
+  'xxl': 48px,
   'full': 999px,
 );
 

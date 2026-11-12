@@ -1,5 +1,10 @@
 # Build inventory — GitLab CE/EE → Material Design 3
 
+> **Superseded visually (November 2026).** The current design is the Material 3 Expressive canvas in
+> [`expressive/`](expressive/), documented in
+> [`doc/development/ux/material-expressive.md`](../doc/development/ux/material-expressive.md). The
+> files listed below stay as the behavioral contracts the surfaces and parity tooling reference.
+
 Status: ☐ planned ◐ in progress ☑ delivered (as interactive front-end prototype, mock data)
 
 ## Shell (in every screen)

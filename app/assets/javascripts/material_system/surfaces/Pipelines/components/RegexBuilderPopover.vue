@@ -309,7 +309,7 @@ export default {
 
 .mgl-pl-regex-head h2 {
   margin: 0;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 20px;
   font-weight: 500;
 }

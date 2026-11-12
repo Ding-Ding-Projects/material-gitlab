@@ -1,16 +1,18 @@
-// Material 3 motion tokens for the MD3 prototype layer.
-// Duration is anchored to the one real transition the design specifies -
-// the settings toggle knob's `transition:left .15s` / `transition:background
-// .15s` - which lines up exactly with MD3's short3 (150ms) step, so the
-// rest of the duration ladder is built around that anchor. The design has
-// no custom easing curves of its own, so the four curves below are the
-// published MD3 system easing tokens.
+// Material 3 motion tokens for the MD3 layer.
+// The classic easing and duration ladders stay for existing components. The
+// Expressive refresh adds the spring-derived curves from design/Tokens.dc.html:
+// `spatial-fast` for shape morphs and small moves (it overshoots slightly),
+// `spatial-default` for drawers and sheets, and `effects` for color and
+// opacity, which must never overshoot.
 
 $gl-md3-motion-easing-scale: (
   'standard': cubic-bezier(0.2, 0, 0, 1),
   'emphasized': cubic-bezier(0.3, 0, 0.1, 1),
   'decelerate': cubic-bezier(0, 0, 0, 1),
   'accelerate': cubic-bezier(0.3, 0, 1, 1),
+  'spatial-fast': cubic-bezier(0.42, 1.67, 0.21, 0.9),
+  'spatial-default': cubic-bezier(0.38, 1.21, 0.22, 1),
+  'effects': cubic-bezier(0.34, 0.8, 0.34, 1),
 );
 
 $gl-md3-motion-duration-scale: (
@@ -71,4 +73,15 @@ $gl-md3-motion-duration-scale: (
 
 @mixin gl-md3-motion-exit($properties) {
   @include gl-md3-motion($properties, var(--gl-md3-motion-duration-short4), var(--gl-md3-motion-easing-accelerate));
+}
+
+// Expressive presets. Shape morphs (a pill pressing into a rounded square)
+// ride the overshooting spatial curve; color and opacity ride the effects
+// curve so a background never "bounces" past its target.
+@mixin gl-md3-motion-spatial($properties) {
+  @include gl-md3-motion($properties, var(--gl-md3-motion-duration-medium3), var(--gl-md3-motion-easing-spatial-fast));
+}
+
+@mixin gl-md3-motion-effects($properties) {
+  @include gl-md3-motion($properties, var(--gl-md3-motion-duration-short4), var(--gl-md3-motion-easing-effects));
 }

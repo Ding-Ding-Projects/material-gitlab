@@ -1,0 +1,316 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T03:06:38Z"
+ },
+ "title": "Material GitLab Expressive",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1180,
+   "title": "Shell and project overview",
+   "expand": "fill"
+  },
+  "Shell-Dark.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1180,
+   "title": "Shell and project overview, dark",
+   "expand": "fill"
+  },
+  "Sidebar.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1180,
+   "h": 1080,
+   "title": "Sidebar states"
+  },
+  "Login.dc.html": {
+   "x": 4300,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Sign in",
+   "expand": "fill"
+  },
+  "Command-Palette.dc.html": {
+   "x": 0,
+   "y": 1560,
+   "w": 1440,
+   "h": 900,
+   "title": "Command palette",
+   "expand": "fill"
+  },
+  "Regex-Builder.dc.html": {
+   "x": 1520,
+   "y": 1560,
+   "w": 1440,
+   "h": 900,
+   "title": "Regex builder",
+   "expand": "fill"
+  },
+  "Issues.dc.html": {
+   "x": 3040,
+   "y": 1560,
+   "w": 1440,
+   "h": 1000,
+   "title": "Issues list",
+   "expand": "fill"
+  },
+  "Plan.dc.html": {
+   "x": 4560,
+   "y": 1560,
+   "w": 1440,
+   "h": 1000,
+   "title": "Issue boards",
+   "expand": "fill"
+  },
+  "Epics.dc.html": {
+   "x": 0,
+   "y": 2940,
+   "w": 1440,
+   "h": 1000,
+   "title": "Epics roadmap",
+   "expand": "fill"
+  },
+  "Merge-Requests.dc.html": {
+   "x": 1520,
+   "y": 2940,
+   "w": 1440,
+   "h": 1180,
+   "title": "Merge request",
+   "expand": "fill"
+  },
+  "Code.dc.html": {
+   "x": 3040,
+   "y": 2940,
+   "w": 1440,
+   "h": 1000,
+   "title": "Code viewer",
+   "expand": "fill"
+  },
+  "Repository.dc.html": {
+   "x": 4560,
+   "y": 2940,
+   "w": 1440,
+   "h": 1000,
+   "title": "Repository commits",
+   "expand": "fill"
+  },
+  "Pipelines.dc.html": {
+   "x": 0,
+   "y": 4500,
+   "w": 1440,
+   "h": 1100,
+   "title": "Pipelines",
+   "expand": "fill"
+  },
+  "Build.dc.html": {
+   "x": 1520,
+   "y": 4500,
+   "w": 1440,
+   "h": 1000,
+   "title": "Job log",
+   "expand": "fill"
+  },
+  "Deploy.dc.html": {
+   "x": 3040,
+   "y": 4500,
+   "w": 1440,
+   "h": 1180,
+   "title": "Deploy environments",
+   "expand": "fill"
+  },
+  "Operate.dc.html": {
+   "x": 4560,
+   "y": 4500,
+   "w": 1440,
+   "h": 1000,
+   "title": "Operate",
+   "expand": "fill"
+  },
+  "Monitor.dc.html": {
+   "x": 0,
+   "y": 6060,
+   "w": 1440,
+   "h": 1000,
+   "title": "Monitor alerts",
+   "expand": "fill"
+  },
+  "Secure.dc.html": {
+   "x": 1520,
+   "y": 6060,
+   "w": 1440,
+   "h": 1000,
+   "title": "Vulnerability report",
+   "expand": "fill"
+  },
+  "Security.dc.html": {
+   "x": 3040,
+   "y": 6060,
+   "w": 1440,
+   "h": 1000,
+   "title": "Security dashboard",
+   "expand": "fill"
+  },
+  "Analyze.dc.html": {
+   "x": 4560,
+   "y": 6060,
+   "w": 1440,
+   "h": 1000,
+   "title": "Value stream",
+   "expand": "fill"
+  },
+  "Manage.dc.html": {
+   "x": 0,
+   "y": 7440,
+   "w": 1440,
+   "h": 1000,
+   "title": "Members",
+   "expand": "fill"
+  },
+  "Settings.dc.html": {
+   "x": 1520,
+   "y": 7440,
+   "w": 1440,
+   "h": 1180,
+   "title": "Settings",
+   "expand": "fill"
+  },
+  "Admin.dc.html": {
+   "x": 3040,
+   "y": 7440,
+   "w": 1440,
+   "h": 1000,
+   "title": "Admin area",
+   "expand": "fill"
+  },
+  "Todos.dc.html": {
+   "x": 4560,
+   "y": 7440,
+   "w": 1440,
+   "h": 1000,
+   "title": "To-Do list",
+   "expand": "fill"
+  },
+  "Agent-Memory.dc.html": {
+   "x": 0,
+   "y": 9000,
+   "w": 1440,
+   "h": 1100,
+   "title": "Agent memory",
+   "expand": "fill"
+  },
+  "Tokens.dc.html": {
+   "x": 1520,
+   "y": 9000,
+   "w": 1440,
+   "h": 2200,
+   "title": "Material 3 Expressive tokens"
+  },
+  "Mobile-Issues.dc.html": {
+   "x": 3040,
+   "y": 9000,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile issues"
+  },
+  "Mobile-MR.dc.html": {
+   "x": 3510,
+   "y": 9000,
+   "w": 390,
+   "h": 844,
+   "title": "Mobile merge request"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Shell-Dark.dc.html",
+  "Sidebar.dc.html",
+  "Login.dc.html",
+  "Command-Palette.dc.html",
+  "Regex-Builder.dc.html",
+  "Issues.dc.html",
+  "Plan.dc.html",
+  "Epics.dc.html",
+  "Merge-Requests.dc.html",
+  "Code.dc.html",
+  "Repository.dc.html",
+  "Pipelines.dc.html",
+  "Build.dc.html",
+  "Deploy.dc.html",
+  "Operate.dc.html",
+  "Monitor.dc.html",
+  "Secure.dc.html",
+  "Security.dc.html",
+  "Analyze.dc.html",
+  "Manage.dc.html",
+  "Settings.dc.html",
+  "Admin.dc.html",
+  "Todos.dc.html",
+  "Agent-Memory.dc.html",
+  "Tokens.dc.html",
+  "Mobile-Issues.dc.html",
+  "Mobile-MR.dc.html"
+ ],
+ "notes": {
+  "row0": {
+   "x": 0,
+   "y": -260,
+   "text": "Shell, sidebar, sign in",
+   "kind": "title1",
+   "maxW": 5000
+  },
+  "row1": {
+   "x": 0,
+   "y": 1300,
+   "text": "Overlays and issues",
+   "kind": "title1",
+   "maxW": 5000
+  },
+  "row2": {
+   "x": 0,
+   "y": 2680,
+   "text": "Plan, merge, code",
+   "kind": "title1",
+   "maxW": 5000
+  },
+  "row3": {
+   "x": 0,
+   "y": 4240,
+   "text": "Build and ship",
+   "kind": "title1",
+   "maxW": 5000
+  },
+  "row4": {
+   "x": 0,
+   "y": 5800,
+   "text": "Monitor, secure, insight",
+   "kind": "title1",
+   "maxW": 5000
+  },
+  "row5": {
+   "x": 0,
+   "y": 7180,
+   "text": "Manage, settings, admin, memory",
+   "kind": "title1",
+   "maxW": 5000
+  },
+  "row6": {
+   "x": 0,
+   "y": 8740,
+   "text": "Tokens and mobile",
+   "kind": "title1",
+   "maxW": 5000
+  }
+ },
+ "designSystems": []
+}

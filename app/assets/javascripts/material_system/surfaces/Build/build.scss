@@ -17,54 +17,54 @@
   --md-sys-color-outline: var(--outl);
   --md-sys-color-error: var(--err);
   // ---- Design tokens (light) ------------------------------------------
-  --surf: #f4effa;
-  --surfc: #ece4f6;
-  --surfch: #e0d5f2;
-  --surfcl: #faf6ff;
-  --onsurf: #1d1b20;
-  --onsurfv: #49454f;
-  --prim: #6750c4;
+  --surf: #f2ebfa;
+  --surfc: #ede5f4;
+  --surfch: #e7e0ef;
+  --surfcl: #f8f1ff;
+  --onsurf: #1d1a24;
+  --onsurfv: #494453;
+  --prim: #6e1aff;
   --onprim: #ffffff;
-  --primc: #e8def8;
-  --onprimc: #4f378b;
-  --sec: #d6c9f0;
-  --outl: #cac4d0;
-  --outlv: #e7e0ec;
-  --err: #b3261e;
-  --errc: #f9dedc;
-  --good: #1a7f37;
-  --goodc: #dcf2e3;
-  --warn: #9a6700;
-  --warnc: #fff3d0;
+  --primc: #e9ddff;
+  --onprimc: #5300cc;
+  --sec: #f2daff;
+  --outl: #cbc3d5;
+  --outlv: #e7dff2;
+  --err: #ba1a1a;
+  --errc: #ffdad6;
+  --good: #006d39;
+  --goodc: #b4ffc5;
+  --warn: #855300;
+  --warnc: #ffddb7;
   --card: #ffffff;
   --scrim: rgba(29, 27, 32, 0.35);
 
-  --build-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --build-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Consolas, 'Liberation Mono', monospace;
-  --build-radius-card: 20px;
+  --build-font-sans: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --build-font-mono: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
+  --build-radius-card: 24px;
   --build-radius-dialog: 28px;
 
   &.build-surface--dark {
-    --surf: #141218;
-    --surfc: #211f26;
-    --surfch: #2b2831;
-    --surfcl: #1b1922;
-    --onsurf: #e6e0e9;
-    --onsurfv: #cac4d0;
-    --prim: #cfbdfe;
-    --onprim: #381e72;
-    --primc: #4f378b;
-    --onprimc: #e8def8;
-    --sec: #4a4458;
-    --outl: #49454f;
-    --outlv: #332f3a;
-    --err: #f2b8b5;
-    --errc: #5c1a17;
-    --good: #7fd79a;
-    --goodc: #1c3a27;
-    --warn: #e2c46d;
-    --warnc: #3d3012;
-    --card: #211f26;
+    --surf: #15121c;
+    --surfc: #211e28;
+    --surfch: #2c2833;
+    --surfcl: #1d1a24;
+    --onsurf: #e7e0ef;
+    --onsurfv: #cbc3d5;
+    --prim: #cfbdff;
+    --onprim: #3a0093;
+    --primc: #5300cc;
+    --onprimc: #e9ddff;
+    --sec: #523f5f;
+    --outl: #494453;
+    --outlv: #37333e;
+    --err: #ffb4ab;
+    --errc: #93000a;
+    --good: #75db94;
+    --goodc: #005229;
+    --warn: #ffb95e;
+    --warnc: #653e00;
+    --card: #211e28;
     --scrim: rgba(0, 0, 0, 0.5);
   }
 
@@ -130,7 +130,7 @@
     border: none;
     border-radius: 999px;
     font: inherit;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13.5px;
     padding: 10px 20px;
     cursor: pointer;
@@ -186,7 +186,7 @@
 .build-surface__title {
   margin: 0;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .build-surface__main {
@@ -298,7 +298,7 @@
     border-radius: 999px;
     font: inherit;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     color: var(--onsurfv);
     min-height: 40px;
@@ -326,7 +326,7 @@
     font-size: 11.5px;
     font-weight: 700;
     color: var(--onsurfv);
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.5px;
   }
 
@@ -360,7 +360,7 @@
     font-size: 12px;
     font-weight: 700;
     color: var(--onsurfv);
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.5px;
   }
 
@@ -393,7 +393,7 @@
     border-radius: 999px;
     padding: 11px;
     text-align: center;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13.5px;
     cursor: pointer;
     min-height: 40px;
@@ -453,7 +453,7 @@
     padding: 6px 14px;
     font: inherit;
     font-size: 12.5px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
 
     &:hover { background: var(--surfch); }
@@ -494,7 +494,7 @@
   &__main { flex: 1; min-width: 160px; }
 
   &__title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13.5px;
 
     &--mono { font-family: var(--build-font-mono); }
@@ -506,7 +506,7 @@
 
   &__action {
     font-size: 12.5px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     border: 1px solid var(--outl);
     border-radius: 999px;
@@ -520,7 +520,7 @@
 
 .status-badge {
   font-size: 11.5px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 3px 12px;
   border-radius: 999px;
   white-space: nowrap;
@@ -540,7 +540,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
   &__icon { width: 28px; height: 28px; opacity: 0.6; }
-  &__title { margin: 0; font-weight: 500; }
+  &__title { margin: 0; font-weight: 600; }
   &__message { margin: 0; }
 }
 
@@ -579,12 +579,12 @@
   color: var(--onsurf);
 
   &__header { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  &__title { margin: 0; font-size: 20px; font-weight: 500; flex-shrink: 0; }
+  &__title { margin: 0; font-size: 20px; font-weight: 600; flex-shrink: 0; }
 }
 
 .rb-chip {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 3px 12px;
   border-radius: 999px;
 
@@ -651,7 +651,7 @@
   font-size: 11px;
   font-weight: 700;
   color: var(--onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
   width: 86px;
   flex-shrink: 0;
@@ -684,7 +684,7 @@
   font-size: 11.5px;
   font-weight: 700;
   color: var(--onsurfv);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.5px;
 }
 
@@ -749,7 +749,7 @@
     font-size: 11.5px;
     font-weight: 700;
     color: var(--onsurfv);
-    text-transform: uppercase;
+    text-transform: none;
     letter-spacing: 0.5px;
     margin-bottom: 8px;
   }
@@ -831,7 +831,7 @@
 
   &__header { display: flex; align-items: center; gap: 10px; }
   &__icon { color: var(--err); flex-shrink: 0; }
-  &__title { margin: 0; font-size: 18px; font-weight: 500; }
+  &__title { margin: 0; font-size: 18px; font-weight: 600; }
   &__message { margin: 0; font-size: 13.5px; color: var(--onsurfv); line-height: 1.5; }
   &__actions { display: flex; gap: 10px; justify-content: flex-end; }
 }
@@ -892,10 +892,10 @@
   flex-direction: column;
   gap: 8px;
 
-  &__header { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  &__header { display: flex; align-items: center; gap: 8px; font-weight: 600; }
   &__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
   &__item { padding: 8px 10px; border-radius: 10px; background: var(--surfc); border-left: 3px solid var(--onsurfv); }
-  &__title { font-size: 13px; font-weight: 500; }
+  &__title { font-size: 13px; font-weight: 600; }
   &__message { font-size: 12px; color: var(--onsurfv); }
   &__empty { font-size: 12.5px; color: var(--onsurfv); padding: 8px 0; }
 }
@@ -923,7 +923,7 @@
   border-left: 4px solid var(--onsurfv);
 
   &__body { flex: 1; min-width: 0; }
-  &__title { font-size: 13px; font-weight: 500; }
+  &__title { font-size: 13px; font-weight: 600; }
   &__message { font-size: 12px; color: var(--onsurfv); margin-top: 2px; }
 }
 
@@ -978,8 +978,8 @@
   --md-sys-color-on-error: var(--onprim);
   --md-sys-color-error-container: var(--errc);
   --md-sys-color-on-error-container: var(--onsurf);
-  --md-ref-typeface-brand: "Google Sans Text", "Segoe UI", sans-serif;
-  --md-ref-typeface-plain: "Google Sans Text", "Segoe UI", sans-serif;
+  --md-ref-typeface-brand: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
+  --md-ref-typeface-plain: var(--default-regular-font, 'GitLab Sans'), 'Inter', sans-serif;
   :is(md-filled-button, md-outlined-button, md-text-button, md-icon-button) { min-height: 40px; min-width: 40px; height: auto; }
   md-filled-text-field { min-width: 0; max-width: 100%; }
 }

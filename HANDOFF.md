@@ -1,5 +1,28 @@
 # Material GitLab overlay handoff
 
+## Material 3 Expressive redesign, 2026-11-11
+
+This section supersedes older claims it contradicts about how the application looks.
+
+The legacy canvas (`design/*.dc.html`) was redrawn as a Material 3 Expressive canvas in
+`design/expressive/` (28 artboards: all 25 legacy surfaces, a dark shell, two phone layouts and a
+token sheet) and the design was applied to the running application, not only the prototype layer:
+GitLab UI's design tokens are re-pointed at a regenerated MD3 scheme in
+`app/assets/stylesheets/md3/components/_gitlab_expressive.scss`, the shell's `--m3-color-*` roles no
+longer read GitLab blue, and every material-system surface stylesheet uses the new palette. Full
+details: `doc/development/ux/material-expressive.md`.
+
+Verification actually run: Dart Sass 1.77.8 compiles `md3/index.scss`,
+`framework/material_design_tokens.scss` and all 21 surface stylesheets without errors; the
+accessibility spec's contrast checks pass against the new `tokens.js` when run as a standalone script
+(lowest ratio 6.45:1); a static class-name harness rendered in Chrome in light and dark, which caught
+and fixed rows that vanished against the pane in dark mode. Not run: the full asset compile, Jest,
+and built-application captures.
+
+Next action: compile the assets in the full build, capture the shell and a few surfaces from the
+built application in both schemes, then retarget `design/parity-inventory.json` at the Expressive
+artboards.
+
 ## Package output ownership repair, 2026-10-05
 
 The concrete checksum-write failure recorded below is repaired in `scripts/omnibus/build-package.sh`.

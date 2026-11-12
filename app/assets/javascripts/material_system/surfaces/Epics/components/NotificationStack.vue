@@ -106,20 +106,20 @@ export default {
   max-width: 360px;
   padding: 12px 14px;
   border-radius: 16px;
-  background: var(--gl-mds-surfcl, #faf6ff);
-  color: var(--gl-mds-onsurf, #1d1b20);
+  background: var(--gl-mds-surfcl, #f8f1ff);
+  color: var(--gl-mds-onsurf, #1d1a24);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.22);
 
   &--error {
-    color: var(--gl-mds-err, #b3261e);
+    color: var(--gl-mds-err, #ba1a1a);
   }
 
   &--warning {
-    color: var(--gl-mds-warn, #9a6700);
+    color: var(--gl-mds-warn, #855300);
   }
 
   &--success {
-    color: var(--gl-mds-good, #1a7f37);
+    color: var(--gl-mds-good, #006d39);
   }
 }
 
@@ -132,13 +132,13 @@ export default {
   margin: 0;
   font-weight: 500;
   font-size: 13.5px;
-  color: var(--gl-mds-onsurf, #1d1b20);
+  color: var(--gl-mds-onsurf, #1d1a24);
 }
 
 .gl-mds-toasts__message {
   margin: 2px 0 0;
   font-size: 12.5px;
-  color: var(--gl-mds-onsurfv, #49454f);
+  color: var(--gl-mds-onsurfv, #494453);
   line-height: 1.4;
 }
 
@@ -146,7 +146,7 @@ export default {
   align-self: center;
   background: none;
   border: none;
-  color: var(--gl-mds-onprimc, #4f378b);
+  color: var(--gl-mds-onprimc, #5300cc);
   font: inherit;
   font-size: 12.5px;
   font-weight: 500;
@@ -155,7 +155,7 @@ export default {
   border-radius: 8px;
 
   &:hover {
-    background: var(--gl-mds-surfch, #e0d5f2);
+    background: var(--gl-mds-surfch, #e7e0ef);
   }
 }
 
@@ -169,11 +169,11 @@ export default {
   border-radius: 999px;
   border: none;
   background: none;
-  color: var(--gl-mds-onsurfv, #49454f);
+  color: var(--gl-mds-onsurfv, #494453);
   cursor: pointer;
 
   &:hover {
-    background: var(--gl-mds-surfch, #e0d5f2);
+    background: var(--gl-mds-surfch, #e7e0ef);
   }
 }
 

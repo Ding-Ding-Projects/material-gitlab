@@ -1,76 +1,76 @@
 // Agent Memory surface — tokens ported verbatim from design/Agent Memory.dc.html's
 // own <style> block. Scoped under .am-root so nothing here leaks onto sibling surfaces.
 .am-root {
-  --am-surf: #f4effa;
-  --am-surfc: #ece4f6;
-  --am-surfch: #e0d5f2;
-  --am-surfcl: #faf6ff;
-  --am-onsurf: #1d1b20;
-  --am-onsurfv: #49454f;
-  --am-prim: #6750c4;
+  --am-surf: #f2ebfa;
+  --am-surfc: #ede5f4;
+  --am-surfch: #e7e0ef;
+  --am-surfcl: #f8f1ff;
+  --am-onsurf: #1d1a24;
+  --am-onsurfv: #494453;
+  --am-prim: #6e1aff;
   --am-onprim: #ffffff;
-  --am-primc: #e8def8;
-  --am-onprimc: #4f378b;
-  --am-sec: #d6c9f0;
-  --am-outl: #cac4d0;
-  --am-outlv: #e7e0ec;
-  --am-err: #b3261e;
-  --am-errc: #f9dedc;
-  --am-good: #1a7f37;
-  --am-goodc: #dcf2e3;
-  --am-warn: #9a6700;
-  --am-warnc: #fff3d0;
+  --am-primc: #e9ddff;
+  --am-onprimc: #5300cc;
+  --am-sec: #f2daff;
+  --am-outl: #cbc3d5;
+  --am-outlv: #e7dff2;
+  --am-err: #ba1a1a;
+  --am-errc: #ffdad6;
+  --am-good: #006d39;
+  --am-goodc: #b4ffc5;
+  --am-warn: #855300;
+  --am-warnc: #ffddb7;
   --am-card: #ffffff;
   --am-scrim: rgba(29, 27, 32, 0.35);
-  --am-card-radius: 20px;
+  --am-card-radius: 24px;
 
   @media (prefers-color-scheme: dark) {
     &:not([data-theme='light']) {
-      --am-surf: #141218;
-      --am-surfc: #211f26;
-      --am-surfch: #2b2831;
-      --am-surfcl: #1b1922;
-      --am-onsurf: #e6e0e9;
-      --am-onsurfv: #cac4d0;
-      --am-prim: #cfbdfe;
-      --am-onprim: #381e72;
-      --am-primc: #4f378b;
-      --am-onprimc: #e8def8;
-      --am-sec: #4a4458;
-      --am-outl: #49454f;
-      --am-outlv: #332f3a;
-      --am-err: #f2b8b5;
-      --am-errc: #5c1a17;
-      --am-good: #7fd79a;
-      --am-goodc: #1c3a27;
-      --am-warn: #e2c46d;
-      --am-warnc: #3d3012;
-      --am-card: #211f26;
+      --am-surf: #15121c;
+      --am-surfc: #211e28;
+      --am-surfch: #2c2833;
+      --am-surfcl: #1d1a24;
+      --am-onsurf: #e7e0ef;
+      --am-onsurfv: #cbc3d5;
+      --am-prim: #cfbdff;
+      --am-onprim: #3a0093;
+      --am-primc: #5300cc;
+      --am-onprimc: #e9ddff;
+      --am-sec: #523f5f;
+      --am-outl: #494453;
+      --am-outlv: #37333e;
+      --am-err: #ffb4ab;
+      --am-errc: #93000a;
+      --am-good: #75db94;
+      --am-goodc: #005229;
+      --am-warn: #ffb95e;
+      --am-warnc: #653e00;
+      --am-card: #211e28;
       --am-scrim: rgba(0, 0, 0, 0.5);
     }
   }
 
   &[data-theme='dark'] {
-    --am-surf: #141218;
-    --am-surfc: #211f26;
-    --am-surfch: #2b2831;
-    --am-surfcl: #1b1922;
-    --am-onsurf: #e6e0e9;
-    --am-onsurfv: #cac4d0;
-    --am-prim: #cfbdfe;
-    --am-onprim: #381e72;
-    --am-primc: #4f378b;
-    --am-onprimc: #e8def8;
-    --am-sec: #4a4458;
-    --am-outl: #49454f;
-    --am-outlv: #332f3a;
-    --am-err: #f2b8b5;
-    --am-errc: #5c1a17;
-    --am-good: #7fd79a;
-    --am-goodc: #1c3a27;
-    --am-warn: #e2c46d;
-    --am-warnc: #3d3012;
-    --am-card: #211f26;
+    --am-surf: #15121c;
+    --am-surfc: #211e28;
+    --am-surfch: #2c2833;
+    --am-surfcl: #1d1a24;
+    --am-onsurf: #e7e0ef;
+    --am-onsurfv: #cbc3d5;
+    --am-prim: #cfbdff;
+    --am-onprim: #3a0093;
+    --am-primc: #5300cc;
+    --am-onprimc: #e9ddff;
+    --am-sec: #523f5f;
+    --am-outl: #494453;
+    --am-outlv: #37333e;
+    --am-err: #ffb4ab;
+    --am-errc: #93000a;
+    --am-good: #75db94;
+    --am-goodc: #005229;
+    --am-warn: #ffb95e;
+    --am-warnc: #653e00;
+    --am-card: #211e28;
     --am-scrim: rgba(0, 0, 0, 0.5);
   }
 
@@ -79,7 +79,7 @@
   display: flex;
   background: var(--am-surf);
   color: var(--am-onsurf);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
   line-height: 1.4;
 
@@ -187,7 +187,7 @@
   }
 
   &__project-name {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13.5px;
     white-space: nowrap;
     overflow: hidden;
@@ -246,7 +246,7 @@
     letter-spacing: 0.6px;
     color: var(--am-onsurfv);
     padding: 10px 14px 4px;
-    text-transform: uppercase;
+    text-transform: none;
   }
 
   &__item {
@@ -338,7 +338,7 @@
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   background: var(--am-surfch);
   color: var(--am-onsurfv);
   border: none;
@@ -400,7 +400,7 @@
 .am-page-title {
   margin: 0;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .am-tabstrip {
@@ -415,7 +415,7 @@
     padding: 7px 16px;
     border-radius: 999px;
     font-size: 13px;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
     background: transparent;
     color: var(--am-onsurfv);
@@ -485,7 +485,7 @@
   }
 
   &__title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13.5px;
   }
 
@@ -502,7 +502,7 @@
   }
 
   &__rev {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   }
 
   &.am-flash {
@@ -522,7 +522,7 @@
 .am-badge {
   align-self: flex-start;
   font-size: 11.5px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 3px 12px;
   border-radius: 999px;
   background: var(--am-surfch);
@@ -567,7 +567,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
   }
 
@@ -576,7 +576,7 @@
   }
 
   &__path {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
     font-size: 11.5px;
     color: var(--am-onsurfv);
   }
@@ -608,7 +608,7 @@
   }
 
   &__name {
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
     font-size: 13px;
     font-weight: 700;
   }
@@ -638,7 +638,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   &__dot {
@@ -706,7 +706,7 @@
   }
 
   &__agent {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 14px;
   }
 
@@ -799,7 +799,7 @@
   }
 
   &__title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 15px;
   }
 
@@ -835,7 +835,7 @@
     margin-left: auto;
     font-size: 11.5px;
     color: var(--am-onsurfv);
-    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   }
 }
 
@@ -895,7 +895,7 @@
   gap: 6px;
   border-radius: 999px;
   font: inherit;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
   border: none;
@@ -989,7 +989,7 @@
   &__title {
     margin: 0;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   &__message {
@@ -1023,7 +1023,7 @@
     gap: 8px;
     padding: 12px 16px;
     border-bottom: 1px solid var(--am-outlv);
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13.5px;
 
     span {
@@ -1101,7 +1101,7 @@
 
   &__label {
     font-size: 11.5px;
-    font-weight: 500;
+    font-weight: 600;
     color: var(--am-onsurfv);
   }
 
@@ -1121,7 +1121,7 @@
     }
 
     &--mono {
-      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
     }
 
     &--textarea {
@@ -1286,7 +1286,7 @@
   }
 
   &__title {
-    font-weight: 500;
+    font-weight: 600;
     font-size: 13px;
   }
 

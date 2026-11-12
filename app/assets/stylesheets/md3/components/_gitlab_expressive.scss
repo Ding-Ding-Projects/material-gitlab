@@ -1,0 +1,611 @@
+/* stylelint-disable gitlab/no-gl-class */
+// Material 3 Expressive skin for the real GitLab application.
+//
+// Every CE, EE and JH page renders GitLab UI components (gl-button, gl-card,
+// gl-form-input, gl-badge, gl-alert, gl-modal, dropdown panels, tabs, the
+// super sidebar and top bar). Those components read GitLab UI's design-token
+// custom properties at runtime, so re-pointing the tokens here re-skins every
+// page at once without forking a single component. Structural rules below
+// then apply the Expressive shape language (pills, connected lists, large
+// pane radii, shape morph on press) to the same components.
+//
+// Source of truth: design/Tokens.dc.html and the rest of the design canvas.
+// Colors come from md3/_tokens.scss and md3/_tokens_dark.scss.
+//
+// Specificity: GitLab UI declares its tokens on `:root` and its dark tokens on
+// `.gl-dark`. The overrides below use `:root:root` (light) and
+// `:root:root.gl-dark` (dark) so they win regardless of stylesheet order.
+
+// ---------------------------------------------------------------------------
+// 1. Palette scales. Semantic tokens in GitLab UI resolve through these, so
+//    remapping the brand blue to the violet primary palette and the neutral
+//    ramp to the violet-tinted neutral palette carries the scheme into every
+//    surface that has no explicit override below. Data hues (green, orange,
+//    red, purple and friends) are left alone because labels and charts use
+//    them as data, not chrome.
+// ---------------------------------------------------------------------------
+:root:root {
+  --gl-color-blue-50: #fdf7ff;
+  --gl-color-blue-100: #f6eeff;
+  --gl-color-blue-200: #e9ddff;
+  --gl-color-blue-300: #cfbdff;
+  --gl-color-blue-400: #9d79ff;
+  --gl-color-blue-500: #6e1aff;
+  --gl-color-blue-600: #6100ea;
+  --gl-color-blue-700: #5300cc;
+  --gl-color-blue-800: #4600af;
+  --gl-color-blue-900: #3a0093;
+  --gl-color-blue-950: #22005d;
+  --gl-color-neutral-0: #ffffff;
+  --gl-color-neutral-10: #fdf7ff;
+  --gl-color-neutral-50: #f5eefd;
+  --gl-color-neutral-100: #ede5f4;
+  --gl-color-neutral-200: #ded7e6;
+  --gl-color-neutral-300: #cac4d2;
+  --gl-color-neutral-400: #afa9b7;
+  --gl-color-neutral-500: #87818f;
+  --gl-color-neutral-600: #6d6875;
+  --gl-color-neutral-700: #55505d;
+  --gl-color-neutral-800: #494551;
+  --gl-color-neutral-900: #322f3a;
+  --gl-color-neutral-950: #1d1a24;
+}
+
+// ---------------------------------------------------------------------------
+// 2. Semantic tokens. Written once against the MD3 roles; because the roles
+//    themselves switch in _tokens_dark.scss, the same block serves both
+//    schemes. It is repeated under `.gl-dark` only to outrank GitLab UI's own
+//    dark declarations.
+// ---------------------------------------------------------------------------
+@mixin gl-md3-expressive-semantic-tokens {
+  // Surfaces and text
+  --gl-application-chrome-background-color: var(--gl-md3-surf);
+  --gl-background-color-default: var(--gl-md3-card);
+  --gl-background-color-subtle: var(--gl-md3-surfcl);
+  --gl-background-color-section: var(--gl-md3-surfcl);
+  --gl-background-color-strong: var(--gl-md3-surfch);
+  --gl-background-color-overlap: var(--gl-md3-surfc);
+  --gl-text-color-default: var(--gl-md3-onsurf);
+  --gl-text-color-strong: var(--gl-md3-onsurf);
+  --gl-text-color-heading: var(--gl-md3-onsurf);
+  --gl-text-color-subtle: var(--gl-md3-onsurfv);
+  --gl-text-color-link: var(--gl-md3-prim);
+  --gl-color-text-link: var(--gl-md3-prim);
+  --gl-text-color-danger: var(--gl-md3-err);
+  --gl-border-color-default: var(--gl-md3-outl);
+  --gl-border-color-subtle: var(--gl-md3-outlv);
+  --gl-border-color-strong: var(--gl-md3-outls);
+
+  // Focus and highlight
+  --gl-focus-ring-color: var(--gl-md3-prim);
+  --gl-focus-ring-outer-color: var(--gl-md3-prim);
+  --gl-focus-ring-inner-color: var(--gl-md3-card);
+  --gl-highlight-target-background-color: var(--gl-md3-primc);
+  --gl-highlight-target-border-color: var(--gl-md3-prim);
+  --gl-highlight-match-background-color: var(--gl-md3-tertc);
+  --gl-highlight-match-text-color: var(--gl-md3-ontertc);
+  --gl-link-mention-background-color-default: var(--gl-md3-primc);
+  --gl-link-mention-text-color-default: var(--gl-md3-onprimc);
+  --gl-link-mention-background-color-current: var(--gl-md3-tertc);
+  --gl-link-mention-text-color-current: var(--gl-md3-ontertc);
+
+  // Navigation: secondary-container pill for the current item
+  --gl-nav-item-foreground-color-default: var(--gl-md3-onsurfv);
+  --gl-nav-item-foreground-color-hover: var(--gl-md3-onsurf);
+  --gl-nav-item-foreground-color-focus: var(--gl-md3-onsurf);
+  --gl-nav-item-foreground-color-active: var(--gl-md3-onsurf);
+  --gl-nav-item-background-color-hover: var(--gl-md3-surfch);
+  --gl-nav-item-background-color-focus: var(--gl-md3-surfch);
+  --gl-nav-item-background-color-active: var(--gl-md3-surfch);
+  --gl-nav-item-selected-background-color-default: var(--gl-md3-sec);
+  --gl-nav-item-selected-background-color-hover: var(--gl-md3-sec);
+  --gl-nav-item-selected-background-color-focus: var(--gl-md3-sec);
+  --gl-nav-item-selected-foreground-color-default: var(--gl-md3-onsec);
+  --gl-nav-item-selected-foreground-color-hover: var(--gl-md3-onsec);
+  --gl-nav-item-selected-foreground-color-focus: var(--gl-md3-onsec);
+  --gl-nav-item-selected-font-weight: 700;
+  --super-sidebar-theme-accent-color: var(--gl-md3-prim);
+  --gl-tab-selected-indicator-color-default: var(--gl-md3-prim);
+
+  // Buttons: confirm = filled, confirm secondary = tonal, default = outlined
+  --gl-button-confirm-primary-background-color-default: var(--gl-md3-prim);
+  --gl-button-confirm-primary-background-color-hover: color-mix(in srgb, var(--gl-md3-onprim) 8%, var(--gl-md3-prim));
+  --gl-button-confirm-primary-background-color-focus: color-mix(in srgb, var(--gl-md3-onprim) 10%, var(--gl-md3-prim));
+  --gl-button-confirm-primary-background-color-active: color-mix(in srgb, var(--gl-md3-onprim) 10%, var(--gl-md3-prim));
+  --gl-button-confirm-primary-foreground-color-default: var(--gl-md3-onprim);
+  --gl-button-confirm-primary-foreground-color-hover: var(--gl-md3-onprim);
+  --gl-button-confirm-primary-foreground-color-focus: var(--gl-md3-onprim);
+  --gl-button-confirm-primary-foreground-color-active: var(--gl-md3-onprim);
+  --gl-button-confirm-primary-border-color-default: transparent;
+  --gl-button-confirm-primary-border-color-hover: transparent;
+  --gl-button-confirm-primary-border-color-focus: transparent;
+  --gl-button-confirm-primary-border-color-active: transparent;
+  --gl-button-confirm-secondary-background-color-default: var(--gl-md3-sec);
+  --gl-button-confirm-secondary-background-color-hover: color-mix(in srgb, var(--gl-md3-onsec) 8%, var(--gl-md3-sec));
+  --gl-button-confirm-secondary-background-color-focus: color-mix(in srgb, var(--gl-md3-onsec) 10%, var(--gl-md3-sec));
+  --gl-button-confirm-secondary-background-color-active: color-mix(in srgb, var(--gl-md3-onsec) 10%, var(--gl-md3-sec));
+  --gl-button-confirm-secondary-foreground-color-default: var(--gl-md3-onsec);
+  --gl-button-confirm-secondary-foreground-color-hover: var(--gl-md3-onsec);
+  --gl-button-confirm-secondary-foreground-color-focus: var(--gl-md3-onsec);
+  --gl-button-confirm-secondary-foreground-color-active: var(--gl-md3-onsec);
+  --gl-button-confirm-secondary-border-color-default: transparent;
+  --gl-button-confirm-secondary-border-color-hover: transparent;
+  --gl-button-confirm-secondary-border-color-focus: transparent;
+  --gl-button-confirm-secondary-border-color-active: transparent;
+  --gl-button-default-primary-background-color-default: transparent;
+  --gl-button-default-primary-background-color-hover: color-mix(in srgb, var(--gl-md3-onsurf) 8%, transparent);
+  --gl-button-default-primary-background-color-focus: color-mix(in srgb, var(--gl-md3-onsurf) 10%, transparent);
+  --gl-button-default-primary-background-color-active: color-mix(in srgb, var(--gl-md3-onsurf) 10%, transparent);
+  --gl-button-default-primary-foreground-color-default: var(--gl-md3-onsurfv);
+  --gl-button-default-primary-foreground-color-hover: var(--gl-md3-onsurf);
+  --gl-button-default-primary-foreground-color-focus: var(--gl-md3-onsurf);
+  --gl-button-default-primary-foreground-color-active: var(--gl-md3-onsurf);
+  --gl-button-default-primary-border-color-default: var(--gl-md3-outl);
+  --gl-button-default-primary-border-color-hover: var(--gl-md3-outls);
+  --gl-button-default-primary-border-color-focus: var(--gl-md3-outls);
+  --gl-button-default-primary-border-color-active: var(--gl-md3-outls);
+  --gl-button-default-tertiary-foreground-color-default: var(--gl-md3-onsurfv);
+  --gl-button-default-tertiary-background-color-hover: color-mix(in srgb, var(--gl-md3-onsurf) 8%, transparent);
+  --gl-button-danger-primary-background-color-default: var(--gl-md3-err);
+  --gl-button-danger-primary-background-color-hover: color-mix(in srgb, var(--gl-md3-onerr) 8%, var(--gl-md3-err));
+  --gl-button-danger-primary-background-color-focus: color-mix(in srgb, var(--gl-md3-onerr) 10%, var(--gl-md3-err));
+  --gl-button-danger-primary-background-color-active: color-mix(in srgb, var(--gl-md3-onerr) 10%, var(--gl-md3-err));
+  --gl-button-danger-primary-foreground-color-default: var(--gl-md3-onerr);
+  --gl-button-danger-primary-foreground-color-hover: var(--gl-md3-onerr);
+  --gl-button-danger-primary-foreground-color-focus: var(--gl-md3-onerr);
+  --gl-button-danger-primary-foreground-color-active: var(--gl-md3-onerr);
+  --gl-button-danger-primary-border-color-default: transparent;
+  --gl-button-danger-primary-border-color-hover: transparent;
+  --gl-button-danger-primary-border-color-focus: transparent;
+  --gl-button-danger-primary-border-color-active: transparent;
+
+  // Form controls
+  --gl-control-background-color-default: transparent;
+  --gl-control-background-color-disabled: color-mix(in srgb, var(--gl-md3-onsurf) 4%, transparent);
+  --gl-control-background-color-selected-default: var(--gl-md3-prim);
+  --gl-control-background-color-selected-hover: var(--gl-md3-prim);
+  --gl-control-background-color-selected-focus: var(--gl-md3-prim);
+  --gl-control-border-color-default: var(--gl-md3-outls);
+  --gl-control-border-color-hover: var(--gl-md3-onsurf);
+  --gl-control-border-color-focus: var(--gl-md3-prim);
+  --gl-control-border-color-error: var(--gl-md3-err);
+  --gl-control-border-color-disabled: var(--gl-md3-outl);
+  --gl-control-border-color-selected-default: var(--gl-md3-prim);
+  --gl-control-border-color-selected-hover: var(--gl-md3-prim);
+  --gl-control-border-color-selected-focus: var(--gl-md3-prim);
+  --gl-control-indicator-color-selected: var(--gl-md3-onprim);
+  --gl-control-placeholder-color: var(--gl-md3-onsurfv);
+  --gl-control-border-radius: var(--gl-md3-shape-m);
+
+  // Menus and dropdowns
+  --gl-dropdown-background-color: var(--gl-md3-surfc);
+  --gl-dropdown-border-color: transparent;
+  --gl-dropdown-search-background-color: var(--gl-md3-surfc);
+  --gl-dropdown-option-background-color-unselected-hover: var(--gl-md3-surfch);
+  --gl-dropdown-option-text-color-hover: var(--gl-md3-onsurf);
+  --gl-dropdown-option-indicator-color-selected-default: var(--gl-md3-prim);
+
+  // Filtered search tokens become tonal chips
+  --gl-filtered-search-token-type-background-color-default: var(--gl-md3-sec);
+  --gl-filtered-search-token-type-background-color-hover: var(--gl-md3-surfch);
+  --gl-filtered-search-token-operator-background-color-default: var(--gl-md3-surfch);
+  --gl-filtered-search-token-operator-background-color-hover: var(--gl-md3-surfch);
+  --gl-filtered-search-token-data-background-color-default: var(--gl-md3-primc);
+  --gl-filtered-search-token-data-background-color-hover: var(--gl-md3-primc);
+
+  // Status, feedback and badges map onto the container roles
+  --gl-status-success-background-color: var(--gl-md3-goodc);
+  --gl-status-success-icon-color: var(--gl-md3-good);
+  --gl-status-warning-background-color: var(--gl-md3-warnc);
+  --gl-status-warning-icon-color: var(--gl-md3-warn);
+  --gl-status-danger-background-color: var(--gl-md3-errc);
+  --gl-status-danger-icon-color: var(--gl-md3-err);
+  --gl-status-info-background-color: var(--gl-md3-primc);
+  --gl-status-info-icon-color: var(--gl-md3-prim);
+  --gl-status-neutral-background-color: var(--gl-md3-surfch);
+  --gl-status-neutral-icon-color: var(--gl-md3-onsurfv);
+  --gl-status-brand-icon-color: var(--gl-md3-tert);
+  --gl-feedback-success-text-color: var(--gl-md3-ongoodc);
+  --gl-feedback-success-icon-color: var(--gl-md3-good);
+  --gl-feedback-success-background-color: var(--gl-md3-goodc);
+  --gl-feedback-warning-text-color: var(--gl-md3-onwarnc);
+  --gl-feedback-warning-icon-color: var(--gl-md3-warn);
+  --gl-feedback-warning-background-color: var(--gl-md3-warnc);
+  --gl-feedback-warning-border-color: transparent;
+  --gl-feedback-danger-text-color: var(--gl-md3-onerrc);
+  --gl-feedback-danger-icon-color: var(--gl-md3-err);
+  --gl-feedback-danger-background-color: var(--gl-md3-errc);
+  --gl-feedback-danger-border-color: transparent;
+  --gl-feedback-info-text-color: var(--gl-md3-onprimc);
+  --gl-feedback-info-icon-color: var(--gl-md3-prim);
+  --gl-feedback-info-background-color: var(--gl-md3-primc);
+  --gl-badge-neutral-background-color-default: var(--gl-md3-surfch);
+  --gl-badge-neutral-text-color-default: var(--gl-md3-onsurfv);
+  --gl-badge-info-background-color-default: var(--gl-md3-primc);
+  --gl-badge-info-text-color-default: var(--gl-md3-onprimc);
+  --gl-badge-success-background-color-default: var(--gl-md3-goodc);
+  --gl-badge-success-text-color-default: var(--gl-md3-ongoodc);
+  --gl-badge-warning-background-color-default: var(--gl-md3-warnc);
+  --gl-badge-warning-text-color-default: var(--gl-md3-onwarnc);
+  --gl-badge-danger-background-color-default: var(--gl-md3-errc);
+  --gl-badge-danger-text-color-default: var(--gl-md3-onerrc);
+  --gl-badge-tier-background-color-default: var(--gl-md3-tertc);
+  --gl-badge-tier-text-color-default: var(--gl-md3-ontertc);
+
+  // Radii: GitLab UI's ladder moves up to the Expressive one
+  --gl-border-radius-base: var(--gl-md3-shape-s);
+  --gl-border-radius-lg: var(--gl-md3-shape-m);
+  --gl-border-radius-xl: var(--gl-md3-shape-l-plus);
+  --gl-button-border-radius: var(--gl-md3-shape-full);
+  --gl-alert-border-radius: var(--gl-md3-shape-l-plus);
+}
+
+:root:root,
+:root:root.gl-dark {
+  @include gl-md3-expressive-semantic-tokens;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:root:not(.gl-light) {
+    @include gl-md3-expressive-semantic-tokens;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 3. Application shell
+// ---------------------------------------------------------------------------
+body.page-with-super-sidebar,
+.m3-shell-layout {
+  background-color: var(--gl-md3-surf);
+}
+
+// The content pane is the one raised card on the page.
+.m3-shell-content-panels > .content-panel,
+.m3-shell-content-panels > .panel,
+.m3-shell-content-panels > .js-static-panel {
+  background-color: var(--gl-md3-card);
+  border: 0;
+  border-radius: var(--gl-md3-shape-xl);
+  box-shadow: var(--gl-md3-elevation-1);
+}
+
+.super-sidebar.m3-shell-sidebar {
+  background: var(--gl-md3-surf);
+  border-inline-end: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.m3-shell-sidebar-brand {
+  min-height: 3rem;
+  font-weight: 760;
+  letter-spacing: -0.01em;
+}
+
+// Asymmetric brand mark: three rounded corners and one tight one.
+.m3-shell-sidebar-brand-mark {
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-basis: 2.25rem;
+  color: var(--gl-md3-onprim);
+  background: var(--gl-md3-prim);
+  border-radius: var(--gl-md3-shape-m) var(--gl-md3-shape-m) var(--gl-md3-shape-m) var(--gl-md3-shape-xs);
+  font-weight: 800;
+}
+
+.m3-shell-sidebar-context-card {
+  background: var(--gl-md3-card);
+  border-radius: var(--gl-md3-shape-l-plus);
+  box-shadow: var(--gl-md3-elevation-1);
+  @include gl-md3-motion-effects(background-color);
+
+  &:hover,
+  &:focus-visible {
+    background: var(--gl-md3-surfcl);
+  }
+}
+
+.m3-shell-sidebar-context-card-static:hover {
+  background: var(--gl-md3-card);
+}
+
+.m3-shell-sidebar-search {
+  min-height: 3rem;
+  padding-inline: var(--m3-space-5) var(--m3-space-3);
+  background: var(--gl-md3-surfch);
+  border: 0;
+}
+
+.m3-shell-sidebar-search-shortcut {
+  background: var(--gl-md3-surf);
+  border: 0;
+  border-radius: var(--gl-md3-shape-xs);
+}
+
+.m3-shell-nav-item {
+  min-height: 2.5rem;
+  border-radius: var(--gl-md3-shape-full);
+  color: var(--gl-md3-onsurfv);
+  font-weight: 500;
+  @include gl-md3-motion-effects((background-color, color));
+}
+
+.m3-shell-nav-item-active,
+.m3-shell-nav-item.m3-shell-nav-item-active {
+  color: var(--gl-md3-onsec);
+  background: var(--gl-md3-sec);
+  font-weight: 700;
+
+  .m3-shell-nav-item-icon {
+    color: var(--gl-md3-onsec);
+  }
+
+  .m3-shell-nav-item-badge {
+    color: var(--gl-md3-onprim);
+    background: var(--gl-md3-prim);
+  }
+}
+
+// Section headings read as sentence-case labels, not shouted caps.
+.m3-shell-nav-section {
+  font-size: 0.71875rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.m3-shell-nav-item-badge {
+  min-width: 1.5rem;
+  padding: 0 var(--m3-space-3);
+  border-radius: var(--gl-md3-shape-full);
+  background: var(--gl-md3-surfch);
+  font-size: 0.71875rem;
+  font-weight: 650;
+  line-height: 1.25rem;
+  text-align: center;
+}
+
+.super-topbar.m3-shell-topbar {
+  background: var(--gl-md3-surf);
+  border: 0;
+  box-shadow: none;
+}
+
+// ---------------------------------------------------------------------------
+// 4. Components
+// ---------------------------------------------------------------------------
+
+// Buttons are pills that morph toward a rounded square while pressed.
+.gl-button.btn:not(.btn-link):not(.gl-button-link) {
+  border-radius: var(--gl-md3-shape-full);
+  font-weight: 650;
+  @include gl-md3-motion-spatial(border-radius);
+
+  &:active,
+  &.active:not(.gl-toggle) {
+    border-radius: var(--gl-md3-shape-m);
+  }
+}
+
+// Connected button groups: tight inner corners, pill ends.
+.btn-group > .gl-button.btn:not(.btn-link) {
+  border-radius: var(--gl-md3-shape-xs);
+
+  &:first-child {
+    border-start-start-radius: var(--gl-md3-shape-full);
+    border-end-start-radius: var(--gl-md3-shape-full);
+  }
+
+  &:last-child {
+    border-start-end-radius: var(--gl-md3-shape-full);
+    border-end-end-radius: var(--gl-md3-shape-full);
+  }
+}
+
+.btn-group > .gl-button.btn + .gl-button.btn {
+  margin-inline-start: 2px;
+}
+
+.gl-card,
+.card {
+  background-color: var(--gl-md3-row);
+  border: 0;
+  border-radius: var(--gl-md3-shape-l-plus);
+}
+
+.gl-card-header,
+.card-header {
+  background-color: transparent;
+  border-block-end: 1px solid var(--gl-md3-outlv);
+}
+
+.gl-card-footer,
+.card-footer {
+  background-color: transparent;
+  border-block-start: 1px solid var(--gl-md3-outlv);
+}
+
+.gl-form-input.form-control,
+.gl-form-select,
+.gl-form-textarea,
+.form-control {
+  border-radius: var(--gl-md3-shape-m);
+}
+
+.gl-filtered-search-scrollable-container,
+.gl-search-box-by-type-input,
+.gl-search-box-by-click-input {
+  border-radius: var(--gl-md3-shape-full);
+}
+
+.gl-badge {
+  border-radius: var(--gl-md3-shape-full);
+  font-weight: 650;
+}
+
+.gl-label {
+  border-radius: var(--gl-md3-shape-s);
+}
+
+.gl-label .gl-label-link,
+.gl-label .gl-label-text,
+.gl-label .gl-label-text-scoped {
+  border-radius: var(--gl-md3-shape-s);
+}
+
+.gl-alert {
+  border: 0;
+  border-radius: var(--gl-md3-shape-l-plus);
+}
+
+.gl-new-dropdown-panel,
+.dropdown-menu,
+.gl-popover.popover,
+.popover {
+  background-color: var(--gl-md3-surfc);
+  border: 0;
+  border-radius: var(--gl-md3-shape-l);
+  box-shadow: var(--gl-md3-elevation-3);
+}
+
+.gl-new-dropdown-item-content {
+  border-radius: var(--gl-md3-shape-s);
+}
+
+.gl-modal .modal-content,
+.modal-content {
+  background-color: var(--gl-md3-surfc);
+  border: 0;
+  border-radius: var(--gl-md3-shape-xl);
+  box-shadow: var(--gl-md3-elevation-3);
+}
+
+.modal-header,
+.modal-footer {
+  border: 0;
+}
+
+.modal-backdrop.show {
+  background-color: #000;
+  opacity: 0.32;
+}
+
+.gl-toast,
+.gl-toast.b-toast .toast {
+  background-color: var(--gl-md3-inv);
+  color: var(--gl-md3-oninv);
+  border-radius: var(--gl-md3-shape-l);
+}
+
+// Tabs: rounded 3px indicator inset from the tab edges.
+.gl-tabs-nav .nav-link.active,
+.gl-tabs-nav .gl-tab-nav-item-active {
+  color: var(--gl-md3-prim);
+  box-shadow: inset 0 -3px 0 0 var(--gl-md3-prim);
+  border-start-start-radius: var(--gl-md3-shape-xs);
+  border-start-end-radius: var(--gl-md3-shape-xs);
+}
+
+// Connected lists: rows separated by a 2px gap instead of a border, outer
+// corners large, inner corners small. Applies to GitLab's issuable,
+// pipeline and generic content lists.
+.content-list,
+.issuable-list,
+.mr-list,
+.ci-table .gl-table tbody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 0;
+}
+
+.content-list > li,
+.issuable-list > li,
+.mr-list > li {
+  background-color: var(--gl-md3-row);
+  border: 0;
+  border-radius: var(--gl-md3-shape-xs);
+
+  &:first-child {
+    border-start-start-radius: var(--gl-md3-shape-l-plus);
+    border-start-end-radius: var(--gl-md3-shape-l-plus);
+  }
+
+  &:last-child {
+    border-end-start-radius: var(--gl-md3-shape-l-plus);
+    border-end-end-radius: var(--gl-md3-shape-l-plus);
+  }
+
+  &:hover {
+    background-color: var(--gl-md3-surfch);
+  }
+}
+
+.gl-avatar {
+  border-radius: var(--gl-md3-shape-full);
+}
+
+.gl-avatar.gl-avatar-s16:not(.gl-avatar-circle),
+.gl-avatar.gl-avatar-s24:not(.gl-avatar-circle),
+.gl-avatar.gl-avatar-s32:not(.gl-avatar-circle),
+.gl-avatar.gl-avatar-s48:not(.gl-avatar-circle),
+.gl-avatar.gl-avatar-s64:not(.gl-avatar-circle),
+.gl-avatar.gl-avatar-s96:not(.gl-avatar-circle) {
+  border-radius: var(--gl-md3-shape-m);
+}
+
+.gl-breadcrumbs,
+.breadcrumbs {
+  font-size: 0.78125rem;
+}
+
+h1.page-title,
+.page-title.gl-heading-1,
+.gl-heading-1 {
+  font-weight: 720;
+  letter-spacing: -0.025em;
+}
+
+// Toggles: M3 switch proportions (52 x 32 track, handle grows when on).
+.gl-toggle {
+  border-radius: var(--gl-md3-shape-full);
+}
+
+// Code: rounded viewer frame with a toned header.
+.file-holder,
+.diff-file .file-title-flex-parent,
+.diff-file {
+  border-radius: var(--gl-md3-shape-l-plus);
+}
+
+.file-title,
+.js-file-title {
+  background-color: var(--gl-md3-row);
+}
+
+// Pipeline graph job pills.
+.ci-job-component,
+.gl-ci-job-item,
+.pipeline-graph .ci-job-component {
+  border-radius: var(--gl-md3-shape-full);
+}
+
+// Login page: one large card on the tonal background.
+.login-page .login-box,
+.login-page .gl-card {
+  background-color: var(--gl-md3-card);
+  border-radius: var(--gl-md3-shape-xl);
+  box-shadow: var(--gl-md3-elevation-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-button.btn,
+  .m3-shell-nav-item,
+  .m3-shell-sidebar-context-card {
+    transition-duration: 0.01ms !important;
+  }
+
+  .gl-button.btn:active {
+    border-radius: var(--gl-md3-shape-full);
+  }
+}

@@ -12,32 +12,32 @@
 @import 'md3/material_web_geometry';
 
 .mr-app {
-  --mr-surf: #f4effa;
-  --mr-surfc: #ece4f6;
-  --mr-surfch: #e0d5f2;
-  --mr-surfcl: #faf6ff;
-  --mr-onsurf: #1d1b20;
-  --mr-onsurfv: #49454f;
-  --mr-prim: #6750c4;
+  --mr-surf: #f2ebfa;
+  --mr-surfc: #ede5f4;
+  --mr-surfch: #e7e0ef;
+  --mr-surfcl: #f8f1ff;
+  --mr-onsurf: #1d1a24;
+  --mr-onsurfv: #494453;
+  --mr-prim: #6e1aff;
   --mr-onprim: #ffffff;
-  --mr-primc: #e8def8;
-  --mr-onprimc: #4f378b;
-  --mr-sec: #d6c9f0;
-  --mr-outl: #cac4d0;
-  --mr-outlv: #e7e0ec;
-  --mr-err: #b3261e;
-  --mr-errc: #f9dedc;
-  --mr-good: #1a7f37;
-  --mr-goodc: #dcf2e3;
-  --mr-warn: #9a6700;
-  --mr-warnc: #fff3d0;
+  --mr-primc: #e9ddff;
+  --mr-onprimc: #5300cc;
+  --mr-sec: #f2daff;
+  --mr-outl: #cbc3d5;
+  --mr-outlv: #e7dff2;
+  --mr-err: #ba1a1a;
+  --mr-errc: #ffdad6;
+  --mr-good: #006d39;
+  --mr-goodc: #b4ffc5;
+  --mr-warn: #855300;
+  --mr-warnc: #ffddb7;
   --mr-card: #ffffff;
   --mr-scrim: rgba(29, 27, 32, 0.35);
-  --mr-addbg: #dcf2e3;
+  --mr-addbg: #b4ffc5;
   --mr-addfg: #0f5223;
-  --mr-delbg: #f9dedc;
+  --mr-delbg: #ffdad6;
   --mr-delfg: #8c1d18;
-  --mr-card-radius: 20px;
+  --mr-card-radius: 24px;
 
   display: flex;
   flex-direction: column;
@@ -46,7 +46,6 @@
   background: var(--mr-surf);
   color: var(--mr-onsurf);
   font-family:
-    'Google Sans Text',
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
@@ -58,30 +57,30 @@
   overflow: hidden;
 
   &[data-theme='dark'] {
-    --mr-surf: #141218;
-    --mr-surfc: #211f26;
-    --mr-surfch: #2b2831;
-    --mr-surfcl: #1b1922;
-    --mr-onsurf: #e6e0e9;
-    --mr-onsurfv: #cac4d0;
-    --mr-prim: #cfbdfe;
-    --mr-onprim: #381e72;
-    --mr-primc: #4f378b;
-    --mr-onprimc: #e8def8;
-    --mr-sec: #4a4458;
-    --mr-outl: #49454f;
-    --mr-outlv: #332f3a;
-    --mr-err: #f2b8b5;
-    --mr-errc: #5c1a17;
-    --mr-good: #7fd79a;
-    --mr-goodc: #1c3a27;
-    --mr-warn: #e2c46d;
-    --mr-warnc: #3d3012;
-    --mr-card: #211f26;
+    --mr-surf: #15121c;
+    --mr-surfc: #211e28;
+    --mr-surfch: #2c2833;
+    --mr-surfcl: #1d1a24;
+    --mr-onsurf: #e7e0ef;
+    --mr-onsurfv: #cbc3d5;
+    --mr-prim: #cfbdff;
+    --mr-onprim: #3a0093;
+    --mr-primc: #5300cc;
+    --mr-onprimc: #e9ddff;
+    --mr-sec: #523f5f;
+    --mr-outl: #494453;
+    --mr-outlv: #37333e;
+    --mr-err: #ffb4ab;
+    --mr-errc: #93000a;
+    --mr-good: #75db94;
+    --mr-goodc: #005229;
+    --mr-warn: #ffb95e;
+    --mr-warnc: #653e00;
+    --mr-card: #211e28;
     --mr-scrim: rgba(0, 0, 0, 0.5);
-    --mr-addbg: #1c3a27;
+    --mr-addbg: #005229;
     --mr-addfg: #a5e8b8;
-    --mr-delbg: #5c1a17;
+    --mr-delbg: #93000a;
     --mr-delfg: #f5c0bd;
   }
 
@@ -250,9 +249,9 @@
 
 .mr-list-header__title {
   margin: 0;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 24px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .mr-list-header__count {
@@ -270,7 +269,7 @@
   color: var(--mr-onprim);
   border: none;
   border-radius: 999px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   @include mw-button-size(40px, 20px, 20px);
@@ -328,7 +327,7 @@
 
 .mr-bulk-bar__scope {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .mr-bulk-bar__actions {
@@ -343,7 +342,7 @@
   background: transparent;
   color: var(--mr-onprimc);
   border-radius: 999px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   @include mw-button-size(32px, 16px, 16px, $label-size: 13px, $label-line-height: 18px);
 
@@ -396,7 +395,7 @@
   background: transparent;
   border: none;
   color: var(--mr-onprimc);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   @include mw-button-size(24px, 8px, 8px, $label-size: 12.5px, $label-line-height: 16px);
 }
@@ -462,7 +461,7 @@
 }
 
 .mr-list-item__title {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -530,9 +529,9 @@
 
 .mr-detail__title {
   margin: 0;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 21px;
-  font-weight: 500;
+  font-weight: 600;
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -542,7 +541,7 @@
 
 .mr-detail__state-badge {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 4px 14px;
   border-radius: 999px;
   flex-shrink: 0;
@@ -574,7 +573,7 @@
 }
 
 .mr-detail__ref {
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   background: var(--mr-surfc);
   border-radius: 6px;
   padding: 2px 8px;
@@ -594,7 +593,7 @@
   padding: 7px 18px;
   border-radius: 999px;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   border: none;
   background: transparent;
@@ -673,7 +672,7 @@
   border: none;
   border-radius: 999px;
   padding: 10px 22px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   cursor: pointer;
   background: var(--mr-prim);
@@ -699,7 +698,7 @@
   border: 1px solid var(--mr-outl);
   border-radius: 999px;
   padding: 9px 18px;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 13.5px;
   cursor: pointer;
   background: transparent;
@@ -770,7 +769,7 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
 }
 
 .mr-diff-tree__stat-add {
@@ -798,7 +797,7 @@
 .mr-diff-pane__header {
   padding: 10px 16px;
   border-bottom: 1px solid var(--mr-outlv);
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   color: var(--mr-onsurfv);
   flex-shrink: 0;
@@ -811,7 +810,7 @@
 
 .mr-diff-line {
   display: flex;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12px;
   line-height: 1.9;
   background: transparent;
@@ -891,7 +890,7 @@
 }
 
 .mr-thread__author {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .mr-thread__when {
@@ -901,7 +900,7 @@
 
 .mr-thread__resolved-badge {
   font-size: 11px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 2px 10px;
   border-radius: 999px;
   background: var(--mr-goodc);
@@ -916,7 +915,7 @@
 
 .mr-thread__resolve-btn {
   margin-top: 8px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--mr-onprimc);
   cursor: pointer;
   background: transparent;
@@ -950,7 +949,7 @@
   color: var(--mr-onprim);
   border: none;
   border-radius: 999px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   flex-shrink: 0;
   @include mw-button-size(40px, 20px, 20px, $label-size: 13.5px, $label-line-height: 20px);
@@ -989,7 +988,7 @@
 
 .mr-regex-popover__label {
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--mr-onsurfv);
 }
 
@@ -1000,7 +999,7 @@
   border-radius: 8px;
   padding: 7px 10px;
   font: inherit;
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   font-size: 12.5px;
   background: var(--mr-surf);
   color: var(--mr-onsurf);
@@ -1034,7 +1033,7 @@
 }
 
 .mr-regex-popover__match {
-  font-family: monospace;
+  font-family: var(--default-mono-font, 'GitLab Mono'), 'JetBrains Mono', ui-monospace, monospace;
   background: var(--mr-addbg);
   color: var(--mr-addfg);
   border-radius: 6px;
@@ -1051,7 +1050,7 @@
 .mr-btn {
   border: none;
   border-radius: 999px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   background: var(--mr-surfch);
   color: var(--mr-onsurf);
@@ -1162,9 +1161,9 @@
 
 .mr-confirm-dialog__title {
   margin: 0;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--default-regular-font, 'GitLab Sans'), 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 18px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .mr-confirm-dialog__message {
@@ -1231,7 +1230,7 @@
 
 .mr-toast__title {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .mr-toast__message {
