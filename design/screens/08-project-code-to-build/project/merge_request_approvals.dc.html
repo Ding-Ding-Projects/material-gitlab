@@ -163,6 +163,86 @@ textarea.input{padding:12px 16px;min-height:120px;resize:vertical}
 .th-dark .add{background:rgb(117 219 148/.12)}.th-dark .del{background:rgb(255 180 171/.12)}
 .term{border-radius:22px 22px 22px 6px;background:#15121c;color:#e7e0ef;overflow:hidden}
 .ghost{border:2px dashed var(--outline-variant);border-radius:24px;padding:32px;text-align:center;color:var(--on-surface-variant)}
+
+/* ---- Motion: Expressive springs on every screen (all off under reduced motion) ---- */
+@keyframes paneIn{from{opacity:0;transform:translateY(18px) scale(.985);border-radius:40px}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}60%{opacity:1;transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+@keyframes draw{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes accent{from{width:0}to{width:44px}}
+@keyframes slideL{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes toastIn{0%{opacity:0;transform:translateY(40px) scale(.9)}70%{transform:translateY(-4px) scale(1.01)}100%{opacity:1;transform:none}}
+@keyframes drain{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes blink{50%{opacity:.25}}
+@keyframes shimmer{from{background-position:-200px 0}to{background-position:200px 0}}
+@keyframes ring{from{stroke-dashoffset:113}to{stroke-dashoffset:40}}
+@keyframes dlgIn{0%{opacity:0;transform:translateY(24px) scale(.94)}60%{transform:translateY(-3px) scale(1.01)}100%{opacity:1;transform:none}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes tabIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes wobble{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+.pane{animation:paneIn .6s cubic-bezier(.38,1.21,.22,1) both}
+.pane>*{animation:rise .5s cubic-bezier(.38,1.21,.22,1) both}
+.pane>*:nth-child(2){animation-delay:.05s}.pane>*:nth-child(3){animation-delay:.1s}.pane>*:nth-child(4){animation-delay:.15s}.pane>*:nth-child(5){animation-delay:.2s}.pane>*:nth-child(6){animation-delay:.25s}
+.rail .row,.list .row,.tbl tbody tr,.grid4>*,.grid3>*,.grid2>*{animation:rise .5s cubic-bezier(.38,1.21,.22,1) both}
+.rail .row:nth-child(2),.list .row:nth-child(2),.tbl tr:nth-child(2),.grid4>*:nth-child(2),.grid3>*:nth-child(2),.grid2>*:nth-child(2){animation-delay:.06s}
+.rail .row:nth-child(3),.list .row:nth-child(3),.tbl tr:nth-child(3),.grid4>*:nth-child(3),.grid3>*:nth-child(3){animation-delay:.12s}
+.rail .row:nth-child(4),.list .row:nth-child(4),.tbl tr:nth-child(4),.grid4>*:nth-child(4){animation-delay:.18s}
+.rail .row:nth-child(n+5),.list .row:nth-child(n+5),.tbl tr:nth-child(n+5){animation-delay:.24s}
+.rail::before{transform-origin:top;animation:grow .7s .1s cubic-bezier(.34,.8,.34,1) both}
+.row{transition:background-color .2s cubic-bezier(.34,.8,.34,1),transform .35s cubic-bezier(.42,1.67,.21,.9),border-radius .35s cubic-bezier(.42,1.67,.21,.9)}
+.row:hover{transform:translateX(4px);border-radius:16px}
+.card,.card-o{transition:transform .35s cubic-bezier(.42,1.67,.21,.9),box-shadow .2s,border-radius .35s cubic-bezier(.42,1.67,.21,.9)}
+.card:hover,.card-o:hover{transform:translateY(-3px);box-shadow:var(--shadow-3);border-radius:28px 28px 28px 10px}
+.nav,.secbtn,.chip,.tab,.tab-b,.ib,.seg button{transition:background-color .2s cubic-bezier(.34,.8,.34,1),color .2s,border-radius .35s cubic-bezier(.42,1.67,.21,.9),transform .35s cubic-bezier(.42,1.67,.21,.9),box-shadow .2s}
+.nav:active,.chip:active,.ib:active{transform:scale(.94);border-radius:12px}
+.nav.on{animation:pop .5s cubic-bezier(.42,1.67,.21,.9) both}
+.tab.on::after{animation:accent .45s cubic-bezier(.42,1.67,.21,.9) both;width:auto}
+.tab-b{animation:tabIn .4s cubic-bezier(.38,1.21,.22,1) both}
+.tab-b:nth-child(2){animation-delay:.04s}.tab-b:nth-child(3){animation-delay:.08s}.tab-b:nth-child(4){animation-delay:.12s}.tab-b:nth-child(5){animation-delay:.16s}.tab-b:nth-child(6){animation-delay:.2s}
+.accent{animation:accent .6s .25s cubic-bezier(.42,1.67,.21,.9) both}
+.kick{animation:slideL .5s cubic-bezier(.38,1.21,.22,1) both}
+.sg svg{transition:transform .35s cubic-bezier(.42,1.67,.21,.9)}
+.sg:hover svg{transform:rotate(25deg) scale(1.12)}
+.sg-run svg{animation:spin 6s linear infinite}
+.sg-ok svg{animation:breathe 3.2s ease-in-out infinite}
+.sg-err svg{animation:wobble .6s .4s cubic-bezier(.42,1.67,.21,.9) 2}
+polyline{stroke-dasharray:1400;animation:draw 1.4s .2s cubic-bezier(.34,.8,.34,1) both}
+.barsv span{transform-origin:bottom;animation:grow .7s cubic-bezier(.38,1.21,.22,1) both}
+.barsv span:nth-child(2n){animation-delay:.05s}.barsv span:nth-child(3n){animation-delay:.1s}.barsv span:nth-child(4n){animation-delay:.15s}
+.bar span{transform-origin:left;animation:grow .8s .2s cubic-bezier(.38,1.21,.22,1) both}
+.kpi{animation:rise .6s .15s cubic-bezier(.42,1.67,.21,.9) both}
+.toast{animation:toastIn .6s .8s cubic-bezier(.38,1.21,.22,1) both}
+.toast .drain{position:absolute;left:12px;right:12px;bottom:4px;height:3px;border-radius:3px;background:var(--inverse-primary);transform-origin:left;animation:drain 6s 1.4s linear both}
+.dimsum{animation:pop .7s 1.2s cubic-bezier(.42,1.67,.21,.9) both}
+.dlg{animation:dlgIn .55s cubic-bezier(.38,1.21,.22,1) both}
+.scrim{animation:fade .3s both}
+.timer .colon{animation:blink 1s steps(1) infinite}
+.badge{animation:pop .5s .6s cubic-bezier(.42,1.67,.21,.9) both}
+.b{transition:border-radius .35s cubic-bezier(.42,1.67,.21,.9),transform .35s cubic-bezier(.42,1.67,.21,.9),box-shadow .2s,filter .2s}
+.b:hover{transform:translateY(-1px);box-shadow:var(--shadow-1)}
+.sw::after{transition:all .35s cubic-bezier(.42,1.67,.21,.9)}
+.side .ctx{transition:transform .35s cubic-bezier(.42,1.67,.21,.9)}
+.side .ctx:hover{transform:translateY(-2px) rotate(-.4deg)}
+.mark{animation:pop .7s cubic-bezier(.42,1.67,.21,.9) both}
+.skel{background:linear-gradient(90deg,var(--row) 0,var(--surface-container-high) 50%,var(--row) 100%);background-size:400px 100%;animation:shimmer 1.4s linear infinite}
+@media (prefers-reduced-motion: reduce){.root *,.root *::before,.root *::after{animation:none!important;transition:none!important}}
+/* ---- Material features rail on every screen ---- */
+.uhbar{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 12px 10px 4px}
+.uhbar .pill{height:30px;padding:0 10px;border-radius:999px;border:0;background:var(--surface-container-high);color:var(--on-surface-variant);font:600 11.5px 'JetBrains Mono',monospace;display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.uhbar .pill.hot{background:var(--primary-container);color:var(--on-primary-container)}
+.uhbar .pill.warm{background:var(--tertiary-container);color:var(--on-tertiary-container)}
+.uhbar .dial{display:inline-flex;gap:2px}
+.uhbar .dial i{width:6px;height:14px;border-radius:3px;background:var(--outline-variant);display:block}
+.uhbar .dial i.f{background:var(--primary)}
+.ringc{width:22px;height:22px}
+.ringc circle{fill:none;stroke-width:3.5}
+.ringc .t{stroke:var(--outline-variant)}.ringc .p{stroke:var(--tertiary);stroke-dasharray:113;stroke-linecap:round;transform:rotate(-90deg);transform-origin:center;animation:ring 1.2s .3s cubic-bezier(.34,.8,.34,1) both}
+.tabgrp{height:24px;padding:0 9px;border-radius:8px 8px 8px 3px;font:700 11px Inter,sans-serif;display:inline-flex;align-items:center;gap:5px;margin:0 2px 8px;white-space:nowrap}
+.peek{position:absolute;z-index:3;width:260px;padding:10px;border-radius:18px 18px 18px 6px;background:var(--surface-container-high);box-shadow:var(--shadow-3);animation:dlgIn .5s 1s cubic-bezier(.38,1.21,.22,1) both}
+
 .helpdot{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--on-surface-variant)}
 </style>
 </helmet>
@@ -191,7 +271,7 @@ textarea.input{padding:12px 16px;min-height:120px;resize:vertical}
 <header class="top">
 <button class="ib" type="button" aria-label="Collapse sidebar"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
 <label class="search"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input type="search" placeholder="Search or go to" aria-label="Search"><button class="rx" type="button" aria-pressed="false" title="Regex builder (off: plain text search)">.*</button><span class="kbd">/</span></label>
-<sc-if value="{{focus}}" hint-placeholder-val="{{false}}"><span class="timer" title="Elapsed time on this task"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2.5h6"/></svg>00:24:10</span><button class="next" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span class="en">What&#39;s next: review !42</span><span class="yue">下一步：審查 !42</span></button></sc-if>
+<sc-if value="{{focus}}" hint-placeholder-val="{{false}}"><span class="timer" title="Elapsed time on this task"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2.5h6"/></svg>00<span class="colon">:</span>24<span class="colon">:</span>10</span><button class="next" type="button"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg><span class="en">What&#39;s next: review !42</span><span class="yue">下一步：審查 !42</span></button></sc-if>
 <span style="margin-left:auto"></span>
 <div class="seg" role="group" aria-label="Language mode"><button type="button" class="{{langEn}}" onClick="{{setEn}}">EN</button><button type="button" class="{{langYue}}" onClick="{{setYue}}">粵</button><button type="button" class="{{langBoth}}" onClick="{{setBoth}}">EN+粵</button></div>
 <button class="ib" type="button" aria-label="Command palette, Ctrl Shift F"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z"/></svg></button>
@@ -199,13 +279,14 @@ textarea.input{padding:12px 16px;min-height:120px;resize:vertical}
 <button class="ib" type="button" aria-label="Notifications"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg><span class="badge"></span></button>
 <span class="av" aria-label="Signed in as DingDingChae">DC</span>
 </header>
-<div class="tabstrip" role="tablist" aria-label="Open tabs"><button class="tab-b pin" type="button" aria-label="Pinned tab: Home, locked"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg></button><button class="tab-b pin" type="button" aria-label="Pinned tab: To-Do List"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/></svg></button><button class="tab-b on" type="button" aria-current="page"><span class="grp" style="background:var(--primary)"></span><span class="tt">Merge request approvals</span><span class="x" aria-label="Close Merge request approvals"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button><button class="tab-b" type="button"><span class="grp" style="background:var(--primary)"></span><span class="tt">Issues</span><span class="x" aria-label="Close Issues"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button><button class="tab-b" type="button"><span class="grp" style="background:var(--tertiary)"></span><span class="tt">Pipeline #[id]</span><span class="x" aria-label="Close Pipeline #[id]"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button><button class="tab-b" type="button"><span class="grp" style="background:var(--success)"></span><span class="tt">feature/expressive</span><span class="x" aria-label="Close feature/expressive"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
+<div class="tabstrip" role="tablist" aria-label="Open tabs"><button class="tab-b pin" type="button" aria-label="Pinned tab: Home, locked"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span class="lock" style="position:absolute;right:4px;top:6px"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></span></button><button class="tab-b pin" type="button" aria-label="Pinned tab: To-Do List"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M8.5 12.2l2.4 2.4 4.6-5"/></svg></button><span class="tabgrp" style="background:var(--primary-container);color:var(--on-primary-container)">Planning · 4</span><button class="tab-b on" type="button" aria-current="page"><span class="grp" style="background:var(--primary)"></span><span class="tt">Merge request approvals</span><span class="x" aria-label="Close Merge request approvals"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button><button class="tab-b" type="button"><span class="grp" style="background:var(--primary)"></span><span class="tt">Issues</span><span class="x" aria-label="Close Issues"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button><button class="tab-b" type="button"><span class="grp" style="background:var(--tertiary)"></span><span class="tt">Pipeline #[id]</span><span class="x" aria-label="Close Pipeline #[id]"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button><button class="tab-b" type="button"><span class="grp" style="background:var(--success)"></span><span class="tt">feature/expressive</span><span class="x" aria-label="Close feature/expressive"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></span></button>
 <div class="tabtools"><button class="overflow" type="button" aria-label="9 more tabs">+9</button><button class="ib" type="button" aria-label="Search open tabs" style="width:36px;height:36px"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button><button class="ib" type="button" aria-label="Close tabs containing text" style="width:36px;height:36px"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="3"/><path d="M7 7V5a1 1 0 0 1 1-1h5a1 1 0 0 1 1 1v2"/></svg></button></div></div>
 <main class="pane">
 <div class="kick">~/ding-ding-projects<span>/</span>material-gitlab<span>/</span>-<span>/</span>settings<span>/</span>merge_requests#approvals</div>
 <div class="hd"><div style="min-width:0"><h1 class="h1">Merge request approvals</h1><div class="sub" style="margin-top:6px">Who must approve before a merge.</div><span class="accent" aria-hidden="true"></span></div><div class="acts"><label class="fsearch" style="height:44px;width:300px"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input type="search" placeholder="Search settings" aria-label="Search settings"></label></div></div><section style="margin-bottom:18px"><div style="display:flex;align-items:flex-end;gap:12px;margin:0 4px 10px"><div><h2 class="h2">Approval rules</h2><div class="sub" style="font-size:13px">Each rule names who and how many.</div></div><button class="b b-x" type="button" style="margin-left:auto">Collapse</button></div><div class="list"><div class="row"><div class="grow"><div class="rt">All eligible users <button class="info" type="button" aria-label="What All eligible users does"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg></button></div><div class="rm"><span>1 approval required</span><span class="src">default</span></div></div><input class="input" style="max-width:280px" value="1" aria-label="Value"></div><div class="row"><div class="grow"><div class="rt">Code owners: design/ <button class="info" type="button" aria-label="What Code owners: design/ does"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg></button></div><div class="rm"><span>1 approval from code owners</span><span class="src">default</span></div></div><input class="input" style="max-width:280px" value="1" aria-label="Value"></div><div class="row"><div class="grow"><div class="rt">Prevent approval by author <button class="info" type="button" aria-label="What Prevent approval by author does"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg></button></div><div class="rm"><span>Authors cannot approve their own changes</span><span class="src set">set by you</span></div></div><button class="sw on" type="button" role="switch" aria-checked="true" aria-label="Toggle"></button></div><div class="row"><div class="grow"><div class="rt">Remove approvals on new push <button class="info" type="button" aria-label="What Remove approvals on new push does"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg></button></div><div class="rm"><span></span><span class="src set">set by you</span></div></div><button class="sw on" type="button" role="switch" aria-checked="true" aria-label="Toggle"></button></div></div></section>
 
 </main>
+<footer class="uhbar" aria-label="Material features status"><button class="pill hot" type="button" title="Shared instructions are in sync"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7a8 8 0 0 0-14.5 1M4 17a8 8 0 0 0 14.5-1"/><path d="M20 3v4h-4M4 21v-4h4"/></svg>synced 2 min ago</button><button class="pill" type="button" aria-label="Undo, local version 13"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 7L4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 0 12"/></svg>v13</button><button class="pill" type="button" aria-label="English funny level 5, Cantonese funny level 5">EN <span class="dial" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span> 粵 <span class="dial" aria-hidden="true"><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i><i class="f"></i></span></button><button class="pill warm" type="button" aria-label="Focus session 24 minutes"><svg class="ringc" viewBox="0 0 44 44" aria-hidden="true"><circle class="t" cx="22" cy="22" r="18"/><circle class="p" cx="22" cy="22" r="18"/></svg>24 min</button><button class="pill" type="button" aria-label="2 element locks"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="3"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>2 locks</button><button class="pill" type="button" aria-label="Seed color #6E49CB"><span style="width:12px;height:12px;border-radius:4px;background:#6e49cb"></span>#6E49CB</button><button class="pill" type="button" aria-label="Export this page"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>export</button><span style="margin-left:auto"></span><span class="pill" style="cursor:default"><svg class="ico ico-s" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3z"/></svg>Ctrl Shift F</span><span class="pill" style="cursor:default">dim sum 1/10</span></footer>
 </div>
 </div>
 </div>
