@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:07:44Z"
+ },
+ "title": "Material GitLab: Project: plan to code",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Requirements",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "service_desk.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Service Desk",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "incidents.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Incidents",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "incident_detail.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Incident detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "design_management.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Design management",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "repository_files.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Repository files",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "file_view.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "File view",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "blame.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Blame",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "file_history.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "File history",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "web_ide.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1000,
+   "title": "Web IDE",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "edit_single_file.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Edit single file",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "commits.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Commits",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "commit_detail.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Commit detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "branches.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Branches",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "tags.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Tags",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "service_desk.dc.html",
+  "incidents.dc.html",
+  "incident_detail.dc.html",
+  "design_management.dc.html",
+  "repository_files.dc.html",
+  "file_view.dc.html",
+  "blame.dc.html",
+  "file_history.dc.html",
+  "web_ide.dc.html",
+  "edit_single_file.dc.html",
+  "commits.dc.html",
+  "commit_detail.dc.html",
+  "branches.dc.html",
+  "tags.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: plan to code",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
