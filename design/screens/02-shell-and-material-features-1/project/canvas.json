@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:04:46Z"
+ },
+ "title": "Material GitLab: Shell and Material features 1",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Home",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "home_bilingual_and_focus_mode.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Home, bilingual and focus mode",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "home_dark.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Home, dark",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "command_palette.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 980,
+   "title": "Command palette",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "regex_builder.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Regex builder",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "tab_strip_overflow_and_bulk_close.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Tab strip: overflow and bulk close",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "edit_appearance.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Edit appearance",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "language_and_funny_levels.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Language and funny levels",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "focus_tools.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Focus tools",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "notifications.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Notifications",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "changelog.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Changelog",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "local_version_history.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Local version history",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "element_lock.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Element lock",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "built_in_authenticator.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Built-in authenticator",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "pair_an_authenticator.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Pair an authenticator",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "home_bilingual_and_focus_mode.dc.html",
+  "home_dark.dc.html",
+  "command_palette.dc.html",
+  "regex_builder.dc.html",
+  "tab_strip_overflow_and_bulk_close.dc.html",
+  "edit_appearance.dc.html",
+  "language_and_funny_levels.dc.html",
+  "focus_tools.dc.html",
+  "notifications.dc.html",
+  "changelog.dc.html",
+  "local_version_history.dc.html",
+  "element_lock.dc.html",
+  "built_in_authenticator.dc.html",
+  "pair_an_authenticator.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Shell and Material features 1",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
