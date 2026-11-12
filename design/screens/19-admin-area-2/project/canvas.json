@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Admin area 2",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Kubernetes",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_general.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: General",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_search.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: Search",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_ci_cd.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: CI/CD",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_network.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: Network",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_appearance.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: Appearance",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_preferences.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: Preferences",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_system_information.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: System information",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_background_migrations.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Background migrations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_background_jobs.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Background jobs",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_health_check.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Health check",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_database_diagnostics.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Database diagnostics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_usage_trends.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Usage trends",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_devops_adoption.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: DevOps adoption",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_settings_service_accounts.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin settings: Service accounts",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "admin_settings_general.dc.html",
+  "admin_settings_search.dc.html",
+  "admin_settings_ci_cd.dc.html",
+  "admin_settings_network.dc.html",
+  "admin_settings_appearance.dc.html",
+  "admin_settings_preferences.dc.html",
+  "admin_system_information.dc.html",
+  "admin_background_migrations.dc.html",
+  "admin_background_jobs.dc.html",
+  "admin_health_check.dc.html",
+  "admin_database_diagnostics.dc.html",
+  "admin_usage_trends.dc.html",
+  "admin_devops_adoption.dc.html",
+  "admin_settings_service_accounts.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Admin area 2",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
