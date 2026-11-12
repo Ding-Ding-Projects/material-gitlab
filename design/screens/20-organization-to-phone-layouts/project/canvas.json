@@ -1,0 +1,169 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Organization to Phone layouts",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organization overview",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "organization_users.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organization users",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "organization_settings.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organization settings",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "artifact_registry.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Artifact registry",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "organization_environments.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organization environments",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "organization_applications.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organization applications",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "organization_security_dashboard.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Organization security dashboard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "policy_store.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Policy store",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "phone_home.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: Home",
+   "is_interactive": true
+  },
+  "phone_issues.dc.html": {
+   "x": 5030,
+   "y": 1160,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: Issues",
+   "is_interactive": true
+  },
+  "phone_issues_bilingual.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: Issues, bilingual",
+   "is_interactive": true
+  },
+  "phone_merge_request.dc.html": {
+   "x": 470,
+   "y": 2320,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: Merge request",
+   "is_interactive": true
+  },
+  "phone_pipeline.dc.html": {
+   "x": 940,
+   "y": 2320,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: Pipeline",
+   "is_interactive": true
+  },
+  "phone_job_log.dc.html": {
+   "x": 1410,
+   "y": 2320,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: Job log",
+   "is_interactive": true
+  },
+  "phone_to_do.dc.html": {
+   "x": 1880,
+   "y": 2320,
+   "w": 390,
+   "h": 844,
+   "title": "Phone: To-Do",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "organization_users.dc.html",
+  "organization_settings.dc.html",
+  "artifact_registry.dc.html",
+  "organization_environments.dc.html",
+  "organization_applications.dc.html",
+  "organization_security_dashboard.dc.html",
+  "policy_store.dc.html",
+  "phone_home.dc.html",
+  "phone_issues.dc.html",
+  "phone_issues_bilingual.dc.html",
+  "phone_merge_request.dc.html",
+  "phone_pipeline.dc.html",
+  "phone_job_log.dc.html",
+  "phone_to_do.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Organization to Phone layouts",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
