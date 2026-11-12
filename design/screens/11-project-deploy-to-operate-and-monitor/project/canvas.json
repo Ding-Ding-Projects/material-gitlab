@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:17:51Z"
+ },
+ "title": "Material GitLab: Project: deploy to operate and monitor",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Edit feature flag",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "pages.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Pages",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "package_registry.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Package registry",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "package_detail.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Package detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "container_registry.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Container registry",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "image_tags.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Image tags",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "terraform_modules.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Terraform modules",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "model_registry.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Model registry",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "model_experiments.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Model experiments",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "kubernetes_clusters.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Kubernetes clusters",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "agent_detail.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Agent detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "terraform_states.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Terraform states",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "google_cloud.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Google Cloud",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "aws.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "AWS",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "error_tracking.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Error tracking",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "pages.dc.html",
+  "package_registry.dc.html",
+  "package_detail.dc.html",
+  "container_registry.dc.html",
+  "image_tags.dc.html",
+  "terraform_modules.dc.html",
+  "model_registry.dc.html",
+  "model_experiments.dc.html",
+  "kubernetes_clusters.dc.html",
+  "agent_detail.dc.html",
+  "terraform_states.dc.html",
+  "google_cloud.dc.html",
+  "aws.dc.html",
+  "error_tracking.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: deploy to operate and monitor",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
