@@ -1,18 +1,18 @@
 {
   "name": "material-gitlab-deployer",
   "private": true,
-  "version": "0.1.0",
-  "description": "Material 3-inspired deployment plan preview shell for GitLab installations.",
+  "version": "0.2.0",
+  "description": "One-click Windows host for the Material GitLab Docker container.",
   "author": "Material GitLab Contributors",
   "repository": {
     "type": "git",
     "url": "https://github.com/Ding-Ding-Projects/material-gitlab.git"
   },
-  "productName": "Material GitLab Deployer",
+  "productName": "Material GitLab Host",
   "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.json && node scripts/copy-assets.mjs",
-    "test": "node --test test/*.test.mjs",
+    "test": "npm run build && node --test test/*.test.mjs",
     "start": "electron .",
     "package:squirrel": "electron-builder --win squirrel --publish never"
   },
@@ -54,6 +54,28 @@
       "artifactName": "Setup.exe",
       "iconUrl": "https://raw.githubusercontent.com/Ding-Ding-Projects/material-gitlab/main/tools/material-gitlab-deployer/build/icon.ico",
       "msi": false
-    }
+    },
+    "productName": "Material GitLab Host",
+    "extraResources": [
+      {
+        "from": "../../docker-compose.yml",
+        "to": "host/docker-compose.yml"
+      },
+      {
+        "from": "../../deploy/windows",
+        "to": "host/deploy/windows",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../../deploy/docker",
+        "to": "host/deploy/docker",
+        "filter": [
+          "**/*",
+          "!packages/*.deb"
+        ]
+      }
+    ]
   }
 }

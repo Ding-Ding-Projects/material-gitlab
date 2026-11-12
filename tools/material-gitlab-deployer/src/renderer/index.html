@@ -1,13 +1,44 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="system" data-density="comfortable">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GitLab deployer</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data: https:; connect-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Material GitLab Host</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main id="app"></main>
-    <script type="module" src="./app.js"></script>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="titlebar" id="titlebar">
+      <img class="titlebar__logo" src="icon.png" alt="" width="20" height="20" />
+      <span class="titlebar__name" id="display-name">Material GitLab Host</span>
+      <button class="titlebar__search" id="palette-open" type="button" aria-keyshortcuts="Control+Shift+F">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>
+        <span class="titlebar__search-label" data-t="palette.open">Search everything</span><kbd>Ctrl+Shift+F</kbd>
+      </button>
+      <div class="titlebar__controls">
+        <button type="button" class="wc" data-wc="minimize" data-t-label="window.minimize" aria-label="Minimize">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 5h8" /></svg>
+        </button>
+        <button type="button" class="wc" data-wc="maximize" data-t-label="window.maximize" aria-label="Maximize">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="1.5" width="7" height="7" /></svg>
+        </button>
+        <button type="button" class="wc wc--close" data-wc="close" data-t-label="window.close" aria-label="Close">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7" /></svg>
+        </button>
+      </div>
+    </header>
+    <div class="update" id="update-banner" role="status" hidden></div>
+    <div class="shell">
+      <nav class="strip" id="strip" aria-label="Tabs"></nav>
+      <main class="main" id="main" tabindex="-1"></main>
+    </div>
+    <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+    <div class="palette" id="palette" hidden></div>
+    <div class="timer" id="timer" hidden aria-live="off"></div>
+    <script src="app.js"></script>
   </body>
 </html>

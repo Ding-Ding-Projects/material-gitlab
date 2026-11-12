@@ -1,7 +1,7 @@
 @echo off
 setlocal EnableExtensions
 
-rem Always package from this package directory. This script builds and verifies
+rem Always package from this package directory.
 rem unsigned local artifacts only; it never deploys, publishes, tags, or signs.
 pushd "%~dp0" || (echo Could not enter the deployer package directory. & exit /b 1)
 
@@ -11,7 +11,7 @@ if /I "%~1"=="/s" set "SILENT=1"
 if /I "%~1"=="--silent" set "SILENT=1"
 if /I "%REQUESTED_SILENT%"=="1" set "SILENT=1"
 
-if "%SILENT%"=="0" echo [1/3] Building the deployer package...
+if "%SILENT%"=="0" echo [1/3] Building Material GitLab Host...
 call "%~dp0build.bat" /s
 if errorlevel 1 (
   echo Build failed; no installer assets were accepted.
