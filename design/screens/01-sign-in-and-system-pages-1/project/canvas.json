@@ -1,0 +1,146 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:04:46Z"
+ },
+ "title": "Material GitLab: Sign in and system pages 1",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Sign in",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "register.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 980,
+   "title": "Register",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "two_factor_challenge.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Two-factor challenge",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "forgot_password.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Forgot password",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "account_locked.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 900,
+   "title": "Account locked",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "confirm_email.dc.html": {
+   "x": 0,
+   "y": 1100,
+   "w": 1440,
+   "h": 900,
+   "title": "Confirm email",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "welcome.dc.html": {
+   "x": 1520,
+   "y": 1100,
+   "w": 1440,
+   "h": 900,
+   "title": "Welcome",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "terms_of_service.dc.html": {
+   "x": 3040,
+   "y": 1100,
+   "w": 1440,
+   "h": 900,
+   "title": "Terms of service",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "not_found_404.dc.html": {
+   "x": 4560,
+   "y": 1100,
+   "w": 1440,
+   "h": 900,
+   "title": "Not found (404)",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "server_error_500.dc.html": {
+   "x": 6080,
+   "y": 1100,
+   "w": 1440,
+   "h": 900,
+   "title": "Server error (500)",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "maintenance_503.dc.html": {
+   "x": 0,
+   "y": 2120,
+   "w": 1440,
+   "h": 900,
+   "title": "Maintenance (503)",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "session_expired.dc.html": {
+   "x": 1520,
+   "y": 2120,
+   "w": 1440,
+   "h": 900,
+   "title": "Session expired",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "register.dc.html",
+  "two_factor_challenge.dc.html",
+  "forgot_password.dc.html",
+  "account_locked.dc.html",
+  "confirm_email.dc.html",
+  "welcome.dc.html",
+  "terms_of_service.dc.html",
+  "not_found_404.dc.html",
+  "server_error_500.dc.html",
+  "maintenance_503.dc.html",
+  "session_expired.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Sign in and system pages 1",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
