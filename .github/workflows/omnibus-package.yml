@@ -510,7 +510,15 @@ jobs:
             docker logs smoke 2>&1 | tail -120
             exit 1
           fi
-          code="$(curl -s -o /tmp/sign_in.html -w '%{http_code}' http://127.0.0.1:8929/users/sign_in)"
+          # The healthcheck can pass before the first reconfigure has started nginx and Puma, and
+          # a bare curl then fails the whole step with exit 56 (connection reset). Retry until the
+          # sign-in page answers, for up to 10 minutes.
+          code=000
+          for i in $(seq 1 60); do
+            code="$(curl -s -m 15 -o /tmp/sign_in.html -w '%{http_code}' http://127.0.0.1:8929/users/sign_in || true)"
+            if [ "$code" = "200" ]; then break; fi
+            sleep 10
+          done
           if [ "$code" != "200" ]; then
             echo "::error::The sign-in page answered HTTP $code."
             docker logs smoke 2>&1 | tail -80
