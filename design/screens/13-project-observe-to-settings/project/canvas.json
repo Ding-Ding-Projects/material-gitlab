@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Project: observe to settings",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Notification channels",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "observe_setup.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Observe setup",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "value_stream.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Value stream",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "ci_cd_analytics.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "CI/CD analytics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "code_review_analytics.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Code review analytics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "issue_analytics.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Issue analytics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "insights.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Insights",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "repository_analytics.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Repository analytics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_general.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: General",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_advanced.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Advanced",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_integrations.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Integrations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "edit_integration.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Edit integration",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_webhooks.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Webhooks",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "edit_webhook.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Edit webhook",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_access_tokens.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Access tokens",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "observe_setup.dc.html",
+  "value_stream.dc.html",
+  "ci_cd_analytics.dc.html",
+  "code_review_analytics.dc.html",
+  "issue_analytics.dc.html",
+  "insights.dc.html",
+  "repository_analytics.dc.html",
+  "settings_general.dc.html",
+  "settings_advanced.dc.html",
+  "settings_integrations.dc.html",
+  "edit_integration.dc.html",
+  "settings_webhooks.dc.html",
+  "edit_webhook.dc.html",
+  "settings_access_tokens.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: observe to settings",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
