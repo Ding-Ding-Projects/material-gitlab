@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:15:01Z"
+ },
+ "title": "Material GitLab: Project: secure to deploy",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Dependency list",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "security_configuration.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Security configuration",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "security_policies.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Security policies",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "policy_editor.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Policy editor",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "compliance_center.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Compliance center",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "audit_events.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Audit events",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "secrets_manager.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Secrets manager",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "on_demand_scans.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "On-demand scans",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "environments.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Environments",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "environment_detail.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Environment detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "deployment_approval.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Deployment approval",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "releases.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Releases",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "release_detail.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Release detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "new_release.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "New release",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "feature_flags.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Feature flags",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "security_configuration.dc.html",
+  "security_policies.dc.html",
+  "policy_editor.dc.html",
+  "compliance_center.dc.html",
+  "audit_events.dc.html",
+  "secrets_manager.dc.html",
+  "on_demand_scans.dc.html",
+  "environments.dc.html",
+  "environment_detail.dc.html",
+  "deployment_approval.dc.html",
+  "releases.dc.html",
+  "release_detail.dc.html",
+  "new_release.dc.html",
+  "feature_flags.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: secure to deploy",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
