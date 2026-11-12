@@ -2,6 +2,13 @@
 
 set -e
 
+# Compose passes an unset GITLAB_ROOT_PASSWORD through as an empty string. Omnibus reads
+# that as a supplied password and refuses it as too short, so drop it and let the package
+# generate one into /etc/gitlab/initial_root_password instead.
+if [ -z "${GITLAB_ROOT_PASSWORD}" ]; then
+    unset GITLAB_ROOT_PASSWORD
+fi
+
 function sigterm_handler() {
     echo "SIGTERM signal received, try to gracefully shutdown all services..."
     gitlab-ctl stop
