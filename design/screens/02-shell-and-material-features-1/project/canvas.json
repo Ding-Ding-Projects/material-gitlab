@@ -2,7 +2,7 @@
  "v": 3,
  "createdOnFiles": {
   "v": 1,
-  "at": "2026-11-12T04:17:51Z"
+  "at": "2026-11-12T04:30:20Z"
  },
  "title": "Material GitLab: Shell and Material features 1",
  "launch": {
@@ -82,12 +82,12 @@
    "expand": "fill",
    "is_interactive": true
   },
-  "focus_tools.dc.html": {
+  "adhd_modes.dc.html": {
    "x": 4560,
    "y": 1160,
    "w": 1440,
    "h": 1040,
-   "title": "Focus tools",
+   "title": "ADHD modes",
    "expand": "fill",
    "is_interactive": true
   },
@@ -155,7 +155,7 @@
   "tab_strip_overflow_and_bulk_close.dc.html",
   "edit_appearance.dc.html",
   "language_and_funny_levels.dc.html",
-  "focus_tools.dc.html",
+  "adhd_modes.dc.html",
   "notifications.dc.html",
   "changelog.dc.html",
   "local_version_history.dc.html",
