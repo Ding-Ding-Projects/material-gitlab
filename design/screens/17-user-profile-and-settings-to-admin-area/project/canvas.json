@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: User profile and settings to Admin area",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Password",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "two_factor_authentication.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Two-factor authentication",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "personal_access_tokens.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Personal access tokens",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "ssh_keys.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "SSH keys",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "gpg_keys.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "GPG keys",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "active_sessions.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Active sessions",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "authentication_log.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Authentication log",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_dashboard.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin dashboard",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_projects.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Projects",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_users.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Users",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_user_detail.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: User detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_groups.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Groups",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_organizations.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Organizations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_topics.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Topics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "admin_gitaly_servers.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Admin: Gitaly servers",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "two_factor_authentication.dc.html",
+  "personal_access_tokens.dc.html",
+  "ssh_keys.dc.html",
+  "gpg_keys.dc.html",
+  "active_sessions.dc.html",
+  "authentication_log.dc.html",
+  "admin_dashboard.dc.html",
+  "admin_projects.dc.html",
+  "admin_users.dc.html",
+  "admin_user_detail.dc.html",
+  "admin_groups.dc.html",
+  "admin_organizations.dc.html",
+  "admin_topics.dc.html",
+  "admin_gitaly_servers.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: User profile and settings to Admin area",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
