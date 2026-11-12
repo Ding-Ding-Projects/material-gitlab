@@ -22,6 +22,9 @@ $Silent = ($Command -in @('/s', '--silent', '-s')) -or ($env:SILENT -eq '1')
 if ($Command -in @('/s', '--silent', '-s')) { $Command = 'up' }
 
 $Root = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
+# The Host app runs this script from its own data folder so .env and the compose files survive
+# app updates. It points the script there explicitly.
+if ($env:MATERIAL_GITLAB_HOST_ROOT -and (Test-Path -LiteralPath $env:MATERIAL_GITLAB_HOST_ROOT)) { $Root = (Resolve-Path $env:MATERIAL_GITLAB_HOST_ROOT).Path }
 $EnvFile = Join-Path $Root '.env'
 $Compose = @('compose', '-f', (Join-Path $Root 'docker-compose.yml'), '-f', (Join-Path $PSScriptRoot 'docker-compose.windows.yml'), '--project-directory', $Root)
 $Repo = 'Ding-Ding-Projects/material-gitlab'
@@ -29,7 +32,12 @@ $Repo = 'Ding-Ding-Projects/material-gitlab'
 function Say($msg) { Write-Host "  $msg" }
 function Step($msg) { Write-Host ""; Write-Host "== $msg" -ForegroundColor Magenta }
 function Fail($msg) { Write-Host ""; Write-Host "  FAILED: $msg" -ForegroundColor Red; exit 1 }
+# The Material GitLab Host app asks its own consent questions in its window and passes the
+# answer here, so the script does not prompt on a console nobody can see.
+$AssumeYes = $env:MATERIAL_GITLAB_ASSUME_YES -eq '1'
+$NoBrowser = $env:MATERIAL_GITLAB_NO_BROWSER -eq '1'
 function Ask($question) {
+  if ($AssumeYes) { Say "$question yes (approved in the Host app)"; return $true }
   if ($Silent) { return $false }
   $a = Read-Host "  $question [y/N]"
   return $a -match '^(y|yes)$'
@@ -169,6 +177,17 @@ function Open-Firewall($http, $ssh) {
 switch ($Command.ToLower()) {
   'stop' { & docker @Compose stop gitlab; exit $LASTEXITCODE }
   'logs' { & docker @Compose logs -f gitlab; exit $LASTEXITCODE }
+  'logs-tail' { & docker @Compose logs --no-color --tail 400 gitlab; exit $LASTEXITCODE }
+  'health' {
+    if (-not (Test-DockerEngine)) { Say 'docker: not running'; exit 0 }
+    Say 'docker: running'
+    $state = (& docker inspect --format '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' material-gitlab 2>$null)
+    if (-not $state) { $state = 'absent' }
+    Say "container: $state"
+    $h = Read-EnvValue 'GITLAB_HOSTNAME' 'localhost'; $p = Read-EnvValue 'GITLAB_HTTP_PORT' '8929'
+    Say "address: http://${h}:$p"
+    exit 0
+  }
   'status' {
     & docker @Compose ps
     $h = Read-EnvValue 'GITLAB_HOSTNAME' 'localhost'; $p = Read-EnvValue 'GITLAB_HTTP_PORT' '8929'
@@ -196,8 +215,8 @@ switch ($Command.ToLower()) {
     Say 'first sign-in: user root. The generated password is in the container; read it with:'
     Say '  docker exec material-gitlab grep "Password:" /etc/gitlab/initial_root_password'
     Say 'GitLab deletes that file 24 hours after first boot, so change the password once signed in.'
-    if (-not $Silent) { Start-Process $url | Out-Null }
+    if (-not $Silent -and -not $NoBrowser) { Start-Process $url | Out-Null }
     exit 0
   }
-  default { Fail "unknown command '$Command'. Use: host.bat, host.bat /s, host.bat status, host.bat stop, host.bat logs" }
+  default { Fail "unknown command '$Command'. Use: host.bat, host.bat /s, host.bat status, host.bat health, host.bat stop, host.bat logs, host.bat logs-tail" }
 }
