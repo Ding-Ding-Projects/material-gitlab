@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Group: settings to User profile and settings",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group usage quotas",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_billing.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group billing",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "user_profile.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "User profile",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "user_activity.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "User activity",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "followers.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Followers",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "edit_profile.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Edit profile",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "account.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Account",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "billing.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Billing",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "applications.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Applications",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "integration_accounts.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Integration accounts",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "emails.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Emails",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "notifications.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Notifications",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "preferences.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Preferences",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "comment_templates.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Comment templates",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "usage_quotas.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Usage quotas",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "group_billing.dc.html",
+  "user_profile.dc.html",
+  "user_activity.dc.html",
+  "followers.dc.html",
+  "edit_profile.dc.html",
+  "account.dc.html",
+  "billing.dc.html",
+  "applications.dc.html",
+  "integration_accounts.dc.html",
+  "emails.dc.html",
+  "notifications.dc.html",
+  "preferences.dc.html",
+  "comment_templates.dc.html",
+  "usage_quotas.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Group: settings to User profile and settings",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
