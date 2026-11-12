@@ -2,3 +2,6 @@ VERSION merge=ours
 Dangerfile gitlab-language=ruby
 *.rb diff=ruby
 workhorse/testdata/*.pdf -filter -diff -merge
+# Files copied into the Linux container image must keep LF endings on every checkout,
+# including Windows clones with core.autocrlf=true, or their shebangs fail with "not found".
+deploy/docker/** text eol=lf
