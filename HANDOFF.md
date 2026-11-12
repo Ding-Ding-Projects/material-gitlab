@@ -19,6 +19,13 @@ This section supersedes older claims it contradicts.
   plus a deliberate break that turned 2 red) and a real render capture.
 - Not done yet: Rails-rendered (HAML) danger forms; pinning, drag reorder, the four separate tab
   searches and the dock-edge picker in the live sidebar.
+- Feature layer (latest): top bar language, accessibility and ADHD controls, the features rail,
+  the feature hub with the setup wizard, the dim sum surprise, page-wide setting effects and the
+  signature page styling now ship in the real app. See `doc/development/ux/feature-layer.md`.
+  Verified in the isolated harness (26 cases across the three new specs, guards watched failing)
+  and with real render captures; the GitLab Jest suite and a running instance were not available.
+- Still design-only: extensions manager, Support Tickets, unlock ladder, school mode, schedules,
+  personal wording, logo and color translator screens.
 - Design canvas: `design/screens/` holds 322 screens in 23 sections.
 
 ## Material 3 Expressive redesign, 2026-11-11

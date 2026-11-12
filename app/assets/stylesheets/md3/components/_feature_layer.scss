@@ -1,0 +1,716 @@
+// Material feature layer: top bar controls, features rail, feature hub, setup wizard and the
+// dim sum card, plus the page-wide effects of the settings, ADHD modes and accessibility tools
+// that `material_system/features/document.js` writes onto <html>.
+
+$m3-spring: cubic-bezier(0.42, 1.67, 0.21, 0.9);
+$m3-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
+$m3-effects: cubic-bezier(0.34, 0.8, 0.34, 1);
+
+:root {
+  --m3-rail-height: 40px;
+}
+
+// ---------- Shared bits ----------
+.m3-seg {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px;
+  gap: 2px;
+  border-radius: 999px;
+  background: var(--gl-md3-surfch);
+
+  button {
+    min-height: 32px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--gl-md3-onsurfv);
+    font: inherit;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s $m3-effects;
+
+    &.is-on {
+      background: var(--gl-md3-primc);
+      color: var(--gl-md3-onprimc);
+    }
+  }
+
+  &__value {
+    min-width: 3.5em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.m3-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  font-size: 20px;
+  cursor: pointer;
+  transition: border-radius 0.35s $m3-spring, background-color 0.2s;
+
+  &:hover,
+  &.is-on {
+    background: var(--gl-md3-surfch);
+  }
+
+  &.is-on {
+    color: var(--gl-md3-prim);
+  }
+}
+
+.m3-btn {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gl-md3-prim);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-radius 0.35s $m3-spring, background-color 0.2s;
+
+  &:active {
+    border-radius: 12px;
+  }
+
+  &--outline {
+    box-shadow: inset 0 0 0 1px var(--gl-md3-outl);
+  }
+
+  &--filled {
+    background: var(--gl-md3-prim);
+    color: var(--gl-md3-onprim);
+  }
+}
+
+.m3-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-decoration: none;
+
+  &--time {
+    background: var(--gl-md3-tertc);
+    color: var(--gl-md3-ontertc);
+    font-family: var(--default-mono-font, 'GitLab Mono', monospace);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &--next {
+    background: var(--gl-md3-prim);
+    color: var(--gl-md3-onprim) !important;
+  }
+}
+
+// ---------- Top bar ----------
+.m3-features-topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.m3-menu-anchor {
+  position: relative;
+}
+
+.m3-a11y-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 0 14px 0 10px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--gl-md3-tertc);
+  color: var(--gl-md3-ontertc);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-radius 0.35s $m3-spring;
+
+  &:hover {
+    border-radius: 20px;
+  }
+}
+
+.m3-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 320px;
+  max-height: min(70vh, 520px);
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 16px;
+  background: var(--gl-md3-surfc);
+  color: var(--gl-md3-onsurf);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22);
+  animation: m3-pop 0.35s $m3-spring both;
+
+  &--wide {
+    width: 380px;
+  }
+
+  &__intro {
+    margin: 4px 8px 8px;
+    font-size: 0.8125rem;
+    color: var(--gl-md3-onsurfv);
+  }
+
+  &__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 44px;
+    padding: 4px 10px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--gl-md3-surfch);
+    }
+
+    &--tall {
+      align-items: flex-start;
+      padding-block: 10px;
+    }
+
+    strong,
+    small {
+      display: block;
+    }
+
+    small {
+      color: var(--gl-md3-onsurfv);
+      font-size: 0.75rem;
+    }
+  }
+
+  &__link {
+    color: var(--gl-md3-err);
+  }
+}
+
+// ---------- Features rail ----------
+.m3-rail {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 1040;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--m3-rail-height);
+  padding: 0 12px;
+  overflow-x: auto;
+  background: var(--gl-md3-surfc);
+  border-top: 1px solid var(--gl-md3-outlv);
+  font-size: 0.75rem;
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    min-height: 28px;
+    padding: 0 10px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--gl-md3-onsurfv);
+    font: inherit;
+    font-weight: 650;
+    font-family: var(--default-mono-font, 'GitLab Mono', monospace);
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover {
+      background: var(--gl-md3-surfch);
+    }
+
+    &--static {
+      cursor: default;
+    }
+
+    &--primary {
+      background: var(--gl-md3-primc);
+      color: var(--gl-md3-onprimc);
+    }
+
+    kbd {
+      padding: 0 4px;
+      font-size: 0.6875rem;
+    }
+  }
+
+  &__spacer {
+    flex: 1 1 auto;
+  }
+
+  &__count {
+    min-width: 18px;
+    padding: 0 5px;
+    border-radius: 999px;
+    background: var(--gl-md3-surfch);
+    text-align: center;
+  }
+}
+
+body:has(.m3-rail) {
+  padding-bottom: var(--m3-rail-height);
+}
+
+.m3-dial {
+  display: inline-flex;
+  gap: 2px;
+
+  i {
+    width: 5px;
+    height: 12px;
+    border-radius: 2px;
+    background: var(--gl-md3-outlv);
+
+    &.on {
+      background: var(--gl-md3-prim);
+    }
+  }
+}
+
+.m3-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+// ---------- Dim sum ----------
+.m3-dimsum {
+  position: fixed;
+  right: 16px;
+  bottom: calc(var(--m3-rail-height) + 16px);
+  z-index: 1045;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  padding: 10px;
+  border-radius: 24px 24px 24px 8px;
+  background: var(--gl-md3-surfc);
+  color: var(--gl-md3-onsurf);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: m3-pop 0.6s $m3-spring both;
+
+  &__photo {
+    flex: 0 0 76px;
+    height: 76px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--gl-md3-surfch);
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  &__placeholder {
+    display: block;
+    padding: 6px;
+    font-size: 0.625rem;
+    line-height: 1.2;
+    color: var(--gl-md3-onsurfv);
+  }
+
+  &__copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+
+    small {
+      color: var(--gl-md3-tert);
+      font-weight: 700;
+    }
+  }
+}
+
+// ---------- Feature hub ----------
+.m3-hub-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1060;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.32);
+  animation: m3-fade 0.2s $m3-effects both;
+}
+
+.m3-hub {
+  display: flex;
+  flex-direction: column;
+  width: min(760px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+  border-radius: 28px;
+  background: var(--gl-md3-surfc);
+  color: var(--gl-md3-onsurf);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
+  animation: m3-pop 0.45s $m3-spring both;
+
+  &__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 16px 4px 24px;
+
+    h2 {
+      margin: 0;
+      font-size: 1.375rem;
+      font-weight: 800;
+    }
+  }
+
+  &__tabs {
+    display: flex;
+    gap: 4px;
+    padding: 4px 16px 8px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--gl-md3-outlv);
+
+    button {
+      flex: 0 0 auto;
+      min-height: 36px;
+      padding: 0 14px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--gl-md3-onsurfv);
+      font: inherit;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      cursor: pointer;
+
+      &.is-on {
+        background: var(--gl-md3-secondary-container, var(--gl-md3-primc));
+        color: var(--gl-md3-onsec, var(--gl-md3-onprimc));
+      }
+    }
+  }
+
+  &__error {
+    margin: 8px 24px 0;
+    color: var(--gl-md3-err);
+  }
+
+  &__body {
+    padding: 16px 24px 24px;
+    overflow-y: auto;
+  }
+}
+
+.m3-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+
+  &__label {
+    font-weight: 700;
+  }
+
+  small {
+    color: var(--gl-md3-onsurfv);
+  }
+
+  &--row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 52px;
+    padding: 6px 12px;
+    border-radius: 14px;
+    background: var(--gl-md3-row, var(--gl-md3-surfch));
+
+    strong,
+    small {
+      display: block;
+    }
+  }
+
+  input[type='range'] {
+    accent-color: var(--gl-md3-prim);
+  }
+}
+
+.m3-list {
+  display: grid;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+
+  &__row {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: var(--gl-md3-row, var(--gl-md3-surfch));
+  }
+}
+
+// ---------- Setup wizard ----------
+.m3-wizard {
+  &__count {
+    margin: 0;
+    color: var(--gl-md3-onsurfv);
+    font-size: 0.75rem;
+    font-family: var(--default-mono-font, 'GitLab Mono', monospace);
+  }
+
+  &__progress {
+    display: flex;
+    gap: 6px;
+    margin: 8px 0 16px;
+
+    span {
+      flex: 1;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--gl-md3-surfch);
+      transition: background-color 0.3s $m3-effects;
+
+      &.done {
+        background: var(--gl-md3-prim);
+      }
+
+      &.current {
+        background: var(--gl-md3-tert);
+      }
+    }
+  }
+
+  h3 {
+    margin: 0 0 16px;
+    font-size: 1.5rem;
+    font-weight: 800;
+
+    &:focus {
+      outline: none;
+    }
+  }
+
+  &__body {
+    min-height: 180px;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  &__spacer {
+    flex: 1;
+  }
+}
+
+.m3-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.m3-choice {
+  min-height: 64px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--gl-md3-row, var(--gl-md3-surfch));
+  color: inherit;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-radius 0.35s $m3-spring;
+
+  &.is-on {
+    background: var(--gl-md3-primc);
+    color: var(--gl-md3-onprimc);
+    box-shadow: inset 0 0 0 3px var(--gl-md3-prim);
+  }
+
+  &:hover {
+    border-radius: 28px;
+  }
+}
+
+@keyframes m3-pop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.96);
+  }
+}
+
+@keyframes m3-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+// ---------- Page-wide effects ----------
+html[data-m3-motion='reduced'] *,
+html[data-m3-motion='reduced'] *::before,
+html[data-m3-motion='reduced'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-m3-density='compact'] {
+  --m3-density-gap: 4px;
+}
+
+html[data-m3-density='spacious'] {
+  --m3-density-gap: 14px;
+
+  .gl-new-card-body,
+  .content-list > li,
+  .gl-table td {
+    padding-block: 14px;
+  }
+}
+
+html[data-m3-focus='on'] {
+  .m3-shell-sidebar-host,
+  .m3-shell-topbar-host,
+  .m3-rail {
+    opacity: 0.35;
+    transition: opacity 0.2s;
+
+    &:hover,
+    &:focus-within {
+      opacity: 1;
+    }
+  }
+}
+
+html[data-m3-low-stimulation='on'] {
+  .badge:not(.badge-danger):not(.badge-success):not(.badge-warning),
+  .gl-badge.badge-info,
+  .gl-badge.badge-neutral {
+    background: transparent !important;
+    box-shadow: inset 0 0 0 1px var(--gl-md3-outlv);
+  }
+}
+
+html[data-m3-high-contrast='on'] {
+  --gl-md3-onsurfv: var(--gl-md3-onsurf);
+  --gl-md3-outlv: var(--gl-md3-outl);
+
+  a {
+    text-decoration: underline;
+  }
+}
+
+html[data-m3-focus-ring='always'] :focus {
+  outline: 3px solid var(--gl-md3-prim) !important;
+  outline-offset: 2px !important;
+}
+
+html[data-m3-large-targets='on'] {
+  .btn,
+  .gl-button,
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-popover,
+  .m3-dimsum,
+  .m3-hub,
+  .m3-hub-scrim {
+    animation: none;
+  }
+}
+
+// M3 switch look for the feature layer's role="switch" checkboxes.
+.m3-features-topbar,
+.m3-feature-layer {
+  input[type='checkbox'][role='switch'] {
+    appearance: none;
+    position: relative;
+    flex: 0 0 auto;
+    width: 52px;
+    height: 32px;
+    margin: 0;
+    border-radius: 999px;
+    background: var(--gl-md3-surfch);
+    box-shadow: inset 0 0 0 2px var(--gl-md3-outl);
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: 16px;
+      height: 16px;
+      border-radius: 999px;
+      background: var(--gl-md3-outl);
+      transition: transform 0.35s $m3-spring, width 0.2s, height 0.2s, top 0.2s;
+    }
+
+    &:checked {
+      background: var(--gl-md3-prim);
+      box-shadow: none;
+
+      &::after {
+        top: 4px;
+        width: 24px;
+        height: 24px;
+        background: var(--gl-md3-onprim);
+        transform: translateX(20px);
+      }
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--gl-md3-prim);
+      outline-offset: 2px;
+    }
+  }
+}

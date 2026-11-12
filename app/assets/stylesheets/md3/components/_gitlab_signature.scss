@@ -1,0 +1,194 @@
+// Signature details from the design canvas, applied to GitLab's own pages so every screen
+// carries them: notched content pane, dot-grid backdrop, mono "~/path" breadcrumb kicker,
+// orange accent bar under page titles, shape-coded CI status icons, branch rail on lists,
+// tabular numbers on counts, and the staggered rise of the pane and its rows. All motion
+// is removed under reduced motion (system setting or the Material motion setting).
+
+$m3-spring: cubic-bezier(0.42, 1.67, 0.21, 0.9);
+$m3-spatial: cubic-bezier(0.38, 1.21, 0.22, 1);
+
+// Dot-grid backdrop behind the pane.
+body.page-with-super-sidebar,
+.m3-shell-layout {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--gl-md3-outlv) 70%, transparent) 1px,
+    transparent 1.2px
+  );
+  background-size: 22px 22px;
+}
+
+// Notched pane: one small corner where the tab strip meets it.
+.m3-shell-content-panels > .content-panel,
+.m3-shell-content-panels > .panel,
+.m3-shell-content-panels > .js-static-panel {
+  border-radius: 6px var(--gl-md3-shape-xl) var(--gl-md3-shape-xl) var(--gl-md3-shape-xl);
+  animation: m3-pane-rise 0.5s $m3-spatial both;
+}
+
+// Breadcrumb kicker in mono with a "~/" prompt.
+.gl-breadcrumbs,
+.breadcrumbs {
+  font-family: var(--default-mono-font, 'GitLab Mono', monospace);
+
+  .gl-breadcrumb-list::before,
+  ol::before {
+    content: '~/';
+    margin-inline-end: 2px;
+    color: var(--gl-md3-tert);
+    font-weight: 700;
+  }
+}
+
+// Orange accent bar under the page title.
+h1.page-title,
+.page-title.gl-heading-1,
+.page-heading .gl-heading-1,
+[data-testid='page-heading'] h1 {
+  position: relative;
+  padding-bottom: 10px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 44px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--gl-color-orange-500, #fc6d26);
+  }
+}
+
+// Mono tabular numbers on counts and SHAs.
+.gl-badge,
+.badge-pill,
+.gl-tab-counter-badge,
+.commit-sha,
+.gl-tab-nav-item .gl-badge {
+  font-variant-numeric: tabular-nums;
+}
+
+.commit-sha,
+.commit-sha-group .label,
+.gl-link.commit-sha {
+  font-family: var(--default-mono-font, 'GitLab Mono', monospace);
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--gl-md3-row);
+}
+
+// Shape-coded CI status icons: each status gets its own Material shape, so status reads
+// without relying on color alone.
+.ci-icon-gl-icon-wrapper {
+  display: inline-grid;
+  place-items: center;
+  transition: border-radius 0.3s $m3-spring;
+}
+
+.ci-icon-variant-success .ci-icon-gl-icon-wrapper {
+  border-radius: 38%; // cookie-like squircle
+
+  .gl-icon {
+    animation: m3-breathe 3s ease-in-out infinite;
+  }
+}
+
+.ci-icon-variant-danger .ci-icon-gl-icon-wrapper {
+  border-radius: 4px; // diamond
+  transform: rotate(45deg);
+  animation: m3-wobble 2.4s ease-in-out infinite;
+
+  .gl-icon {
+    transform: rotate(-45deg);
+  }
+}
+
+.ci-icon-variant-info .ci-icon-gl-icon-wrapper .gl-icon {
+  animation: m3-spin 2.2s linear infinite;
+}
+
+// Branch rail: a thin connector running down connected lists.
+.content-list,
+.issuable-list,
+.mr-list {
+  position: relative;
+
+  > li {
+    position: relative;
+    animation: m3-row-rise 0.45s $m3-spatial both;
+
+    @for $i from 1 through 12 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.03}s;
+      }
+    }
+  }
+}
+
+.issuable-list,
+.mr-list {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    bottom: 18px;
+    left: 9px;
+    width: 2px;
+    border-radius: 2px;
+    background: color-mix(in srgb, var(--gl-md3-prim) 30%, transparent);
+    pointer-events: none;
+  }
+}
+
+// Buttons morph shape on press.
+.gl-button.btn:not(.btn-icon):active {
+  border-radius: var(--gl-md3-shape-s, 8px);
+  transition: border-radius 0.2s $m3-spring;
+}
+
+@keyframes m3-pane-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@keyframes m3-row-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes m3-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes m3-breathe {
+  50% {
+    transform: scale(0.88);
+  }
+}
+
+@keyframes m3-wobble {
+  0%,
+  100% {
+    transform: rotate(45deg);
+  }
+  50% {
+    transform: rotate(53deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m3-shell-content-panels > *,
+  .content-list > li,
+  .issuable-list > li,
+  .mr-list > li,
+  .ci-icon-gl-icon-wrapper,
+  .ci-icon-gl-icon-wrapper .gl-icon {
+    animation: none !important;
+  }
+}

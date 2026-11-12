@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Material feature layer
+
+- Top bar: EN / 粵 / EN+粵 language toggle, an always visible accessibility tools menu, the five
+  separate ADHD modes with the elapsed-time and next-step chips.
+- Features rail along the bottom, a feature hub (setup, language, accessibility, ADHD modes, dim
+  sum, notification centre, export) and a first-run setup wizard with resume and skip.
+- Dim sum surprise from the public catalog, about 1 in 10 page loads, always on.
+- Settings now change the live page (motion, density, text size, focus, contrast, targets), and
+  GitLab pages carry the canvas signature details. See `doc/development/ux/feature-layer.md`.
+
 ### Destructive super confirmation and left tab strip
 
 - The Material sidebar is a left-docked vertical tab strip with every tab open by default,

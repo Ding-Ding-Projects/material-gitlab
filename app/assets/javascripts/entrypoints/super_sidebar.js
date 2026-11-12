@@ -12,11 +12,14 @@ import {
   getSuperSidebarData,
   initSuperTopbar,
 } from '~/super_sidebar/super_sidebar_bundle';
-import { mountAuthenticatedShell, mountSidebar } from '~/material_system/mounts';
+import { mountAuthenticatedShell, mountFeatureLayer, mountSidebar } from '~/material_system/mounts';
 
 const superSidebarData = getSuperSidebarData();
 const materialSidebarHost = document.querySelector('.m3-shell-sidebar-host[data-material-shell]');
 const materialTopbarHost = document.querySelector('.m3-shell-topbar-host[data-material-shell]');
+
+// The feature layer only joins the Material shell, never the stock GitLab layout.
+const { feature } = materialSidebarHost ? mountFeatureLayer() : {};
 
 if (materialSidebarHost && superSidebarData) {
   mountSidebar(materialSidebarHost, { data: superSidebarData.sidebarData });
@@ -24,12 +27,16 @@ if (materialSidebarHost && superSidebarData) {
   initSuperSidebar(superSidebarData);
 }
 
-const pageOwnsTopbar = Boolean(document.querySelector('#js-material-admin, #js-material-build, #js-material-pipelines, [data-material-topbar-owner]'));
+const pageOwnsTopbar = Boolean(
+  document.querySelector(
+    '#js-material-admin, #js-material-build, #js-material-pipelines, [data-material-topbar-owner]',
+  ),
+);
 if (materialTopbarHost && superSidebarData) {
   if (pageOwnsTopbar) {
     materialTopbarHost.hidden = true;
   } else {
-    mountAuthenticatedShell(materialTopbarHost, { data: superSidebarData.sidebarData });
+    mountAuthenticatedShell(materialTopbarHost, { data: superSidebarData.sidebarData, feature });
   }
 } else if (superSidebarData) {
   initSuperTopbar(superSidebarData);

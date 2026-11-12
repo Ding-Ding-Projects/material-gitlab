@@ -4,6 +4,9 @@ import CommandPalette from './surfaces/CommandPalette';
 import ShellA from './surfaces/ShellA';
 import ShellB from './surfaces/ShellB';
 import Sidebar from './surfaces/Sidebar';
+import TopbarFeatures from './surfaces/FeatureLayer/TopbarFeatures.vue';
+import FeatureLayer from './surfaces/FeatureLayer/FeatureLayer.vue';
+import { createFeatureState } from './features/state';
 import { loadSettings, updateSettings, subscribeSettings } from './settings';
 import { __ } from '~/locale';
 
@@ -96,6 +99,9 @@ export function mountAuthenticatedShell(el = document.querySelector('.m3-shell-t
         { id: 'header-minimal', label: __('Hide the header theme control'), run: () => savePreference({ shellVariant: 'b' }) },
       ];
       return h(this.variant === 'a' ? ShellA : ShellB, {
+        scopedSlots: options.feature
+          ? { actions: () => h(TopbarFeatures, { props: { feature: options.feature, todosHref: `${window.gon?.relative_url_root || ''}/dashboard/todos` } }) }
+          : undefined,
         props: { chromeOnly: true, brand: options.brand || 'GitLab M3', sections, paletteActions: actions, initialTheme: this.currentTheme, managedTheme: true, preferenceError: this.preferenceError },
         on: { search: navigateSearch, 'regex-change': ({ pattern }) => navigateSearch(pattern), 'theme-change': (theme) => savePreference({ theme }) },
       });
@@ -139,3 +145,18 @@ export function mountMaterialSurfaces(options = {}) {
 }
 
 export default mountMaterialSurfaces;
+
+// Page-wide Material features (features rail, feature hub with the setup wizard, dim sum
+// surprise). Returns the shared feature state so the top bar controls can use the same one.
+export function mountFeatureLayer(options = {}) {
+  const feature = options.feature || createFeatureState({ storage: options.storage });
+  let el = options.el || document.querySelector('#material-feature-layer');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'material-feature-layer';
+    document.body.appendChild(el);
+  }
+  if (el.__materialMount) return { vm: el.__materialMount, feature };
+  const vm = mount(el, FeatureLayer, { feature, autoSetup: options.autoSetup !== false });
+  return { vm, feature };
+}
