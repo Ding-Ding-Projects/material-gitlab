@@ -33,3 +33,5 @@ To contribute to [Pajamas design system](https://design.gitlab.com/) and the [UI
 1. Find an issue that does not have an Assignee to ensure someone else is not working on a solution. Add the `~"workflow::design"` and `~"Community contribution"` labels and mention `@gitlab-com/gitlab-ux/reviewers` to request they assign the issue to you.
 1. Add your design proposal to the issue description/[design management](../../user/project/issues/design_management.md) section. Remember to keep the scope of the proposal/change small following our [MVCs guidelines](https://handbook.gitlab.com/handbook/values/#minimal-viable-change-mvc).
 1. If you have any questions or are ready for a review of your proposal, mention `@gitlab-com/gitlab-ux/reviewers` in a comment to make your request.
+
+The one-click Windows host app is described in [Material GitLab Host app](host-app.md).

@@ -1,6 +1,20 @@
 # Material GitLab overlay handoff
 
-## Super confirmation and the full screen redesign (latest)
+## Material GitLab Host app (latest)
+
+- Scope: `tools/material-gitlab-deployer` rebuilt as Material GitLab Host, a one-click Windows app
+  around `deploy/windows/host.ps1` (which gained `health`, `logs-tail` and three environment
+  switches). Design canvas files are in `design/host-app/project`.
+- Verified: `npm test` in the package (13 passing, two guards watched failing); the built renderer
+  driven in Chrome with a test double for the preload bridge (wizard, start with consent, health,
+  Open, log search with regex, `.env` validation, palette teleport, tab persistence, bilingual at
+  760 px, dark, update banner, dim sum).
+- Not verified here: the packaged app on Windows, real PowerShell and Docker runs, Squirrel install
+  events and a real update. `windows-release.yml` builds and publishes the installer on push.
+- Next: install the published `material-gitlab-deployer-Setup.exe` on a Windows host with Docker
+  Desktop and run Start end to end.
+
+## Super confirmation and the full screen redesign
 
 This section supersedes older claims it contradicts.
 

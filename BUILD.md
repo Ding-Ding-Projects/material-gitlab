@@ -7,7 +7,7 @@ build three different things. None of the root pair produces a GitLab installer;
 | Location | `build.bat` produces | `build-installer.bat` produces |
 | --- | --- | --- |
 | Repository root | The GitLab Rails frontend, compiled into `public/assets` | An unsigned **source ZIP** of this checkout (`git archive`), not an installer |
-| `tools/material-gitlab-deployer/` | A runnable Electron preview build | An unsigned **Squirrel.Windows installer** for the Deployer shell |
+| `tools/material-gitlab-deployer/` | A runnable build of Material GitLab Host | An unsigned **Squirrel.Windows installer** for Material GitLab Host |
 | `tools/material-gitlab-instant/` | A runnable Electron preview build | An unsigned **Squirrel.Windows installer** for the Instant shell |
 
 The two desktop-tool installers are what [`windows-release.yml`](.github/workflows/windows-release.yml)

@@ -65,7 +65,7 @@ a narrative to read straight through.
 | [Install the `.deb` directly](#2-install-the-deb-on-debian-or-ubuntu) | Same package as above, same current blocker: no release has published one yet. |
 | [Build the package yourself](#3-build-the-package-yourself) | The workflow and its scripts reach real compilation; a dispatch is in progress as this is written. See that section for the exact run and its state. |
 | [Build the GitLab frontend from source on Windows](#4-build-from-source-on-windows) | Works today. Produces compiled frontend assets and a source archive, not a full running instance by itself. |
-| The two desktop tools (Deployer, Instant) | Configuration and preview shells by explicit design; they install and provision nothing. Both publish unsigned Squirrel.Windows installers on every push to `main` — 34 tagged releases as of this writing. |
+| The two desktop tools (Host, Instant) | Material GitLab Host starts and manages the Docker container with one click (see [step 1](#1-install-with-docker)); Instant is still a preview shell. Both publish unsigned Squirrel.Windows installers on every push to `main` — 34 tagged releases as of this writing. |
 | [Design parity](#5-design-parity) | All 25 contracts are checked in and their production routes are `known`; **zero** rows have real capture evidence yet. The application shell and every GitLab UI component now render in the Material 3 Expressive scheme (see [`doc/development/ux/material-expressive.md`](doc/development/ux/material-expressive.md)); per-surface parity captures are still outstanding. |
 
 ---
@@ -82,6 +82,14 @@ private networks, and opens the instance in your browser. `host.bat status`, `ho
 `host.bat logs` do what they say. It never prints a password and never deletes a volume. The
 [Omnibus package workflow](.github/workflows/omnibus-package.yml) now runs on every push to `main`,
 so each change to `main` produces the `.deb` and container image `host.bat` installs.
+
+**Or use the app.** Install **Material GitLab Host** (`material-gitlab-deployer-Setup.exe` from the
+[latest Windows release](https://github.com/Ding-Ding-Projects/material-gitlab/releases)) and press
+**Start GitLab**. It runs the same `host.ps1` from a window with a setup wizard, live logs, a
+validated settings editor and unsigned background updates. See
+[`tools/material-gitlab-deployer/README.md`](tools/material-gitlab-deployer/README.md).
+
+![Material GitLab Host overview](doc/development/ux/img/host_app_overview.png)
 
 The manual route on any Docker host follows.
 
@@ -414,7 +422,7 @@ Each has its own pair of scripts, and these two **do** produce real installers:
 ```bash
 cd tools/material-gitlab-deployer
 npm run build      # tsc + asset copy
-npm start           # launch the Electron preview shell
+npm start           # launch Material GitLab Host
 npm test             # node --test test/*.test.mjs
 build.bat /s
 build-installer.bat /s   # unsigned Squirrel.Windows Setup.exe
@@ -665,7 +673,7 @@ upstream GitLab source.
 
 | Path | Origin | Purpose |
 | --- | --- | --- |
-| `tools/material-gitlab-deployer/` | overlay | Deployment plan preview shell |
+| `tools/material-gitlab-deployer/` | overlay | Material GitLab Host, the one-click Windows host app |
 | `tools/material-gitlab-instant/` | overlay | Existing instance client shell |
 | `tools/design-reference/` | overlay | Design parity harness |
 | `site/` | overlay | Landing page, offline docs, changelog, command palette |

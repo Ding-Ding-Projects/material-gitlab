@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Material GitLab Host app
+
+- `tools/material-gitlab-deployer` is now Material GitLab Host, a one-click Windows app that
+  starts, stops, checks and opens the Material GitLab container through `deploy/windows/host.ps1`,
+  with a setup wizard, live logs with regex search, a validated `.env` editor, unsigned Squirrel
+  updates with a restart banner, and the full language, accessibility and appearance controls.
+- `host.ps1` gained `health` and `logs-tail`, plus `MATERIAL_GITLAB_HOST_ROOT`,
+  `MATERIAL_GITLAB_ASSUME_YES` and `MATERIAL_GITLAB_NO_BROWSER` for the app.
+- `build.bat` for the app fetches portable Node.js when none is installed.
+
 ### Material feature layer
 
 - Top bar: EN / 粵 / EN+粵 language toggle, an always visible accessibility tools menu, the five

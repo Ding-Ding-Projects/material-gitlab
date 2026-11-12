@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Command palette</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+/* Material GitLab Host. Material 3 tokens derived from one seed colour with color-mix, so the
+   accent picker drives the whole window. Fonts are the system's own; nothing loads remotely. */
+.hroot {
+  --seed: #e2725b;
+  --font: 'Segoe UI Variable Text', 'Segoe UI', system-ui, 'Microsoft JhengHei UI', 'PingFang HK', sans-serif;
+  --font-display: 'Segoe UI Variable Display', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'Cascadia Mono', Consolas, ui-monospace, monospace;
+  --radius-s: 8px;
+  --radius-m: 16px;
+  --radius-l: 28px;
+  --gap: 16px;
+  --target: 40px;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hroot[data-theme='light'] {
+  --surface: #fbf6ee;
+  --surface-low: #f4ece0;
+  --surface-high: #ffffff;
+  --on-surface: #24201c;
+  --on-surface-variant: #5b534b;
+  --outline: #8c8278;
+  --outline-variant: #d9cfc3;
+  --primary: color-mix(in oklab, var(--seed) 88%, black);
+  --on-primary: #ffffff;
+  --primary-container: color-mix(in oklab, var(--seed) 22%, white);
+  --on-primary-container: color-mix(in oklab, var(--seed) 40%, black);
+  --ok: #1f7a5a;
+  --warn: #946200;
+  --bad: #b3261e;
+  --scrim: rgb(36 32 28 / 0.4);
+}
+.hroot[data-theme='dark'] {
+  --surface: #1b1815;
+  --surface-low: #24201c;
+  --surface-high: #2e2925;
+  --on-surface: #efe7dc;
+  --on-surface-variant: #cfc4b8;
+  --outline: #9a8f84;
+  --outline-variant: #4a433c;
+  --primary: color-mix(in oklab, var(--seed) 70%, white);
+  --on-primary: color-mix(in oklab, var(--seed) 25%, black);
+  --primary-container: color-mix(in oklab, var(--seed) 40%, black);
+  --on-primary-container: color-mix(in oklab, var(--seed) 25%, white);
+  --ok: #7fd8b0;
+  --warn: #f3c25c;
+  --bad: #ffb4ab;
+  --scrim: rgb(0 0 0 / 0.55);
+}
+.hroot[data-contrast='true'] {
+  --on-surface-variant: var(--on-surface);
+  --outline: var(--on-surface);
+  --outline-variant: var(--on-surface);
+}
+.hroot[data-density='compact'] { --gap: 10px; --target: 32px; }
+.hroot[data-large='true'] { --target: 48px; }
+.hroot[data-low-stim='true'] {
+  --primary: color-mix(in oklab, var(--seed) 45%, var(--on-surface));
+  --primary-container: var(--surface-low);
+}
+.hroot[data-motion='reduce'] *, .hroot[data-motion='reduce'] *::before, .hroot[data-motion='reduce'] *::after {
+  animation: none !important;
+  transition: none !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body{margin:0}
+.hroot {
+  height: 820px;
+  position: relative;
+  font: 400 0.9375rem/1.5 var(--font);
+  background: var(--surface);
+  color: var(--on-surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+:focus-visible, .hroot[data-ring='true'] :focus { outline: 3px solid var(--primary); outline-offset: 2px; }
+.skip { position: absolute; left: -999px; top: 4px; z-index: 50; background: var(--surface-high); padding: 8px 12px; border-radius: var(--radius-s); }
+.skip:focus { left: 8px; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+h1 { font: 600 2rem/1.15 var(--font-display); margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font: 600 1.05rem/1.3 var(--font-display); margin: 0; }
+.muted { color: var(--on-surface-variant); }
+.small { font-size: 0.82rem; }
+code, kbd, pre { font-family: var(--mono); }
+
+/* Title bar: the app's own chrome on a frameless window. */
+.titlebar {
+  -webkit-app-region: drag;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding-left: 12px;
+  background: var(--surface-low);
+  border-bottom: 1px solid var(--outline-variant);
+  flex: none;
+}
+.titlebar button { -webkit-app-region: no-drag; }
+.titlebar__logo { border-radius: 6px; }
+.titlebar__name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.titlebar__search {
+  margin: 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: min(360px, 40vw);
+  height: 28px;
+  padding: 0 6px 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--outline-variant);
+  background: var(--surface);
+  color: var(--on-surface-variant);
+  font: inherit;
+  cursor: pointer;
+}
+.titlebar__search svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; flex: none; }
+.titlebar__search kbd { margin-left: auto; font-size: 0.72rem; padding: 1px 6px; border-radius: 6px; background: var(--surface-low); }
+.titlebar__controls { display: flex; height: 100%; }
+.wc { width: 46px; height: 100%; border: 0; background: transparent; color: var(--on-surface); display: grid; place-items: center; cursor: pointer; }
+.wc svg { width: 10px; height: 10px; fill: none; stroke: currentColor; stroke-width: 1; }
+.wc:hover { background: color-mix(in oklab, var(--on-surface) 10%, transparent); }
+.wc--close:hover { background: #c42b1c; color: #fff; }
+
+.update {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--primary-container);
+  color: var(--on-primary-container);
+  flex-wrap: wrap;
+}
+.update span { flex: 1 1 320px; }
+
+.shell { flex: 1; display: flex; min-height: 0; }
+
+/* Left vertical tab strip. */
+.strip {
+  width: 248px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 10px;
+  background: var(--surface-low);
+  border-right: 1px solid var(--outline-variant);
+  overflow-y: auto;
+}
+.strip__filter { width: 100%; }
+.strip__list { display: flex; flex-direction: column; gap: 2px; }
+.strip__group {
+  margin: 10px 8px 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.strip__group::before { content: ''; width: 8px; height: 8px; border-radius: 3px; background: var(--seed); }
+.strip__group--app::before { background: #2a9d8f; }
+.strip__tools { margin-top: auto; display: flex; flex-direction: column; align-items: stretch; gap: 2px; padding-top: 8px; border-top: 1px solid var(--outline-variant); }
+.strip__tools .text-btn { justify-content: flex-start; }
+.tab { position: relative; display: flex; align-items: center; border-radius: 999px; transition: background 0.2s var(--ease); }
+.tab:hover { background: color-mix(in oklab, var(--on-surface) 6%, transparent); }
+.tab--active { background: var(--primary-container); color: var(--on-primary-container); }
+.tab__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: var(--target);
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  border-radius: 999px;
+  cursor: pointer;
+}
+.tab--active .tab__main { font-weight: 600; }
+.tab__icon { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.tab__label { overflow-wrap: break-word; min-width: 0; }
+.tab__pin, .tab__close { opacity: 0; width: 28px; height: 28px; font-size: 0.8rem; }
+.tab:hover .tab__pin, .tab:hover .tab__close, .tab:focus-within .tab__pin, .tab:focus-within .tab__close,
+.tab--active .tab__close, .tab--pinned .tab__pin { opacity: 1; }
+.bulk { background: var(--surface-high); border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 12px; }
+.bulk ul { margin: 0 0 8px; padding-left: 18px; }
+
+/* Main area. */
+.main { flex: 1; overflow-y: auto; outline: none; }
+.page { max-width: 760px; margin: 0 auto; padding: 32px 32px 64px; display: flex; flex-direction: column; gap: var(--gap); }
+.page--wide { max-width: 1100px; }
+.lead { font-size: 1.05rem; color: var(--on-surface-variant); margin: 0; }
+.note { background: var(--surface-low); border-left: 4px solid var(--warn); padding: 10px 14px; border-radius: var(--radius-s); margin: 0; }
+.hroot[data-focus='true'] .strip, .hroot[data-focus='true'] .titlebar { opacity: 0.45; transition: opacity 0.2s; }
+.hroot[data-focus='true'] .strip:hover, .hroot[data-focus='true'] .strip:focus-within { opacity: 1; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.stat { background: var(--surface-high); border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; position: relative; overflow: hidden; }
+.stat::before { content: ''; position: absolute; inset: 0 auto 0 0; width: 5px; background: var(--outline-variant); }
+.stat--ok::before { background: var(--ok); }
+.stat--warn::before { background: var(--warn); }
+.stat--bad::before { background: var(--bad); }
+.stat__label { font-size: 0.78rem; color: var(--on-surface-variant); font-weight: 600; }
+.stat__value { font-weight: 600; overflow-wrap: anywhere; }
+
+.actions, .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button { font: inherit; }
+.filled-btn, .tonal-btn, .text-btn, .chip, .file-btn {
+  min-height: var(--target);
+  padding: 0 20px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 600;
+  transition: transform 0.25s var(--spring), background 0.2s var(--ease);
+}
+.filled-btn { background: var(--primary); color: var(--on-primary); }
+.filled-btn.big { min-height: calc(var(--target) + 16px); padding: 0 32px; font-size: 1.05rem; border-radius: 20px; }
+.filled-btn:not(:disabled):active { transform: scale(0.96); }
+.tonal-btn { background: var(--primary-container); color: var(--on-primary-container); }
+.text-btn, .file-btn { background: transparent; color: var(--primary); padding: 0 12px; }
+.text-btn:hover:not(:disabled), .file-btn:hover { background: color-mix(in oklab, var(--primary) 10%, transparent); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+.icon-btn { border: 0; background: transparent; color: inherit; border-radius: 999px; cursor: pointer; min-width: 28px; min-height: 28px; }
+.icon-btn:hover { background: color-mix(in oklab, var(--on-surface) 10%, transparent); }
+.chip { background: var(--surface-high); border: 1px solid var(--outline-variant); color: var(--on-surface); padding: 0 14px; font-weight: 500; min-height: 32px; }
+.chip--on { background: var(--primary-container); color: var(--on-primary-container); border-color: transparent; }
+.next-chip { align-self: flex-start; margin: 0; padding: 6px 14px; border-radius: 999px; background: var(--primary-container); color: var(--on-primary-container); font-weight: 600; }
+
+input[type='text'], input[type='search'], input[type='number'], input[type='date'] {
+  font: inherit;
+  color: inherit;
+  min-height: var(--target);
+  padding: 0 14px;
+  border: 1px solid var(--outline);
+  border-radius: var(--radius-s);
+  background: var(--surface-high);
+  width: 100%;
+}
+input[type='range'] { width: 100%; accent-color: var(--primary); }
+input[type='color'] { width: 64px; height: 64px; border: 0; border-radius: var(--radius-m); padding: 0; background: none; cursor: pointer; }
+
+.consent { border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 12px 16px; background: var(--surface-high); display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.consent legend { font-weight: 600; padding: 0 6px; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: var(--target); cursor: pointer; }
+.switch { appearance: none; width: 52px; height: 32px; flex: none; border-radius: 999px; background: var(--surface-low); border: 2px solid var(--outline); position: relative; cursor: pointer; transition: background 0.2s; }
+.switch::after { content: ''; position: absolute; top: 6px; left: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--outline); transition: transform 0.3s var(--spring), width 0.2s, height 0.2s; }
+.switch:checked { background: var(--primary); border-color: var(--primary); }
+.switch:checked::after { transform: translateX(20px); top: 2px; left: 2px; width: 24px; height: 24px; background: var(--on-primary); }
+
+.progress { background: var(--surface-high); border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.progress__head { display: flex; align-items: center; gap: 10px; }
+.progress__head .text-btn { margin-left: auto; }
+.spinner { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--primary-container); border-top-color: var(--primary); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.steps { margin: 0; padding-left: 20px; color: var(--on-surface-variant); }
+.steps__now { color: var(--on-surface); font-weight: 600; }
+.live { display: block; font-size: 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--on-surface-variant); }
+
+.wizard__dots { display: flex; gap: 8px; list-style: none; padding: 0; margin: 0; }
+.wizard__dots li { width: 28px; height: 6px; border-radius: 999px; background: var(--outline-variant); }
+.wizard__dots li.done { background: var(--primary); }
+.wizard__dots li.now { background: var(--primary); width: 48px; }
+
+.searchbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.searchbar input[type='search'] { flex: 1 1 260px; width: auto; }
+.searchbar input[type='date'] { width: auto; }
+.log { margin: 0; min-height: 280px; max-height: 60vh; overflow: auto; padding: 14px 16px; border-radius: var(--radius-m); background: #1e1b18; color: #efe7dc; font-size: 0.8rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+.rx { background: var(--surface-high); border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; }
+.rx__pieces { display: flex; flex-wrap: wrap; gap: 6px; }
+.rx__pieces .chip { font-family: var(--mono); }
+.rx__result { font-family: var(--mono); margin: 0; }
+.rx__explain { margin: 0; padding-left: 18px; }
+.rx > .tonal-btn { align-self: flex-start; }
+
+.form { display: flex; flex-direction: column; gap: var(--gap); }
+.field, .pref { display: flex; flex-direction: column; gap: 6px; background: var(--surface-high); border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 14px 16px; }
+.field__head { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.field__head label, .field__head span, .field__head h2 { font-weight: 600; }
+.field--bad input { border-color: var(--bad); border-width: 2px; }
+.field__err { color: var(--bad); margin: 0; font-size: 0.85rem; }
+.info-btn { font-style: italic; font-weight: 700; font-family: Georgia, serif; border: 1px solid var(--outline-variant); width: 24px; height: 24px; min-width: 24px; min-height: 24px; font-size: 0.8rem; }
+.info { margin: 0; font-size: 0.85rem; color: var(--on-surface-variant); background: var(--surface-low); border-radius: var(--radius-s); padding: 8px 12px; }
+.origin { font-size: 0.75rem; color: var(--on-surface-variant); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--outline); border-radius: 999px; overflow: hidden; align-self: flex-start; }
+.seg__item { min-height: var(--target); padding: 0 16px; border: 0; background: transparent; color: inherit; cursor: pointer; }
+.seg__item + .seg__item { border-left: 1px solid var(--outline); }
+.seg__item--on { background: var(--primary-container); color: var(--on-primary-container); font-weight: 600; }
+.seg__item--on::before { content: '✓ '; }
+.color-formats { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; align-items: center; flex: 1; min-width: 200px; }
+.color-formats dt { font-weight: 700; font-size: 0.75rem; color: var(--on-surface-variant); }
+.color-formats dd { margin: 0; }
+.preview { margin: 0; padding: 10px 12px; background: var(--surface-low); border-radius: var(--radius-s); }
+.changelog { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.changelog li { background: var(--surface-high); border: 1px solid var(--outline-variant); border-radius: var(--radius-m); padding: 14px 16px; }
+.changelog p { margin: 6px 0; }
+
+.teleported { animation: teleport 1.6s var(--ease); }
+@keyframes teleport { 0%, 60% { box-shadow: 0 0 0 4px var(--seed); } 100% { box-shadow: 0 0 0 0 transparent; } }
+
+/* Corner toasts: never modal. */
+.toasts { position: absolute; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 40; max-width: min(420px, calc(100vw - 32px)); }
+.toast { display: flex; align-items: center; gap: 8px; padding: 10px 10px 10px 16px; border-radius: var(--radius-m); background: #2e2925; color: #f6efe6; box-shadow: 0 6px 20px rgb(0 0 0 / 0.25); animation: rise 0.35s var(--spring); }
+.toast span { flex: 1; }
+.toast--ok { border-left: 5px solid #7fd8b0; }
+.toast--error { border-left: 5px solid #ffb4ab; }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } }
+
+.dimsum { margin-top: auto; display: flex; gap: 10px; align-items: flex-start; padding: 10px; border-radius: var(--radius-m); background: var(--surface-high); border: 1px solid var(--outline-variant); animation: rise 0.4s var(--spring); }
+.dimsum + .strip__tools { margin-top: 0; }
+.dimsum__text { flex: 1; min-width: 0; font-size: 0.85rem; }
+.dimsum img { background: var(--surface-low); }
+.dimsum img, .dimsum__ph { width: 64px; height: 64px; border-radius: 16px; object-fit: cover; flex: none; }
+.dimsum__ph { display: grid; place-items: center; text-align: center; font-size: 0.65rem; background: var(--surface-low); padding: 4px; }
+.dimsum p { margin: 0; }
+.dimsum .icon-btn { align-self: flex-start; }
+
+.palette { position: absolute; inset: 0; z-index: 60; display: grid; justify-items: center; align-items: start; padding-top: 12vh; }
+.palette__scrim { position: absolute; inset: 0; background: var(--scrim); }
+.palette__card { position: relative; width: min(640px, calc(100vw - 32px)); max-height: 70vh; display: flex; flex-direction: column; background: var(--surface-high); border-radius: var(--radius-l); box-shadow: 0 16px 48px rgb(0 0 0 / 0.3); overflow: hidden; }
+.palette__card input { border: 0; border-bottom: 1px solid var(--outline-variant); border-radius: 0; min-height: 56px; font-size: 1.05rem; padding: 0 20px; }
+.palette__card ul { list-style: none; margin: 0; padding: 6px; overflow-y: auto; }
+.palette__card li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius-s); cursor: pointer; }
+.palette__card li.on { background: var(--primary-container); color: var(--on-primary-container); }
+
+.timer { position: absolute; right: 16px; top: 52px; padding: 4px 12px; border-radius: 999px; background: var(--surface-high); border: 1px solid var(--outline-variant); font-variant-numeric: tabular-nums; z-index: 20; }
+
+@media (max-width: 900px) {
+  .strip { width: 216px; }
+  .page { padding: 24px 20px 48px; }
+  .titlebar__search-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .tab__main { gap: 8px; padding: 0 8px; }
+  .titlebar__search { min-width: 0; }
+}
+
+</style>
+</helmet>
+<div class="hroot" data-theme="{{theme}}" data-density="{{density}}" style="--seed:{{seed}}">
+
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="titlebar" id="titlebar">
+      <img class="titlebar__logo" src="/_blob/effe40dcf3e820a50f2e1b5684238e6c" alt="" width="20" height="20">
+      <span class="titlebar__name" id="display-name">Material GitLab Host</span>
+      <button class="titlebar__search" id="palette-open" type="button" aria-keyshortcuts="Control+Shift+F">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
+        <span class="titlebar__search-label" data-t="palette.open">Find anything</span><kbd>Ctrl+Shift+F</kbd>
+      </button>
+      <div class="titlebar__controls">
+        <button type="button" class="wc" data-wc="minimize" data-t-label="window.minimize" aria-label="Minimize">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1 5h8"></path></svg>
+        </button>
+        <button type="button" class="wc" data-wc="maximize" data-t-label="window.maximize" aria-label="Maximize">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="1.5" width="7" height="7"></rect></svg>
+        </button>
+        <button type="button" class="wc wc--close" data-wc="close" data-t-label="window.close" aria-label="Close">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.5 1.5l7 7M8.5 1.5l-7 7"></path></svg>
+        </button>
+      </div>
+    </header>
+    <div class="update" id="update-banner" role="status" hidden=""></div>
+    <div class="shell">
+      <nav class="strip" id="strip" aria-label="Tabs"><input type="search" class="strip__filter" placeholder="Filter tabs" aria-label="Filter tabs"><div class="strip__list" role="tablist" aria-orientation="vertical" id="strip-list"><div class="strip__group strip__group--host" role="presentation">Host</div><div class="tab tab--active"><button type="button" role="tab" class="tab__main" data-tab="overview" aria-selected="true" aria-controls="main" tabindex="0"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M3 12l9-8 9 8v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"></path></svg></span><span class="tab__label">Overview</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Overview" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Overview tab" aria-keyshortcuts="Delete">×</button></div><div class="tab"><button type="button" role="tab" class="tab__main" data-tab="setup" aria-selected="false" aria-controls="main" tabindex="-1"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M12 2l2.4 6.9H22l-6 4.6 2.3 7-6.3-4.5-6.3 4.5 2.3-7-6-4.6h7.6z"></path></svg></span><span class="tab__label">Setup</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Setup" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Setup tab" aria-keyshortcuts="Delete">×</button></div><div class="tab"><button type="button" role="tab" class="tab__main" data-tab="logs" aria-selected="false" aria-controls="main" tabindex="-1"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"></path></svg></span><span class="tab__label">Logs</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Logs" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Logs tab" aria-keyshortcuts="Delete">×</button></div><div class="tab"><button type="button" role="tab" class="tab__main" data-tab="settings" aria-selected="false" aria-controls="main" tabindex="-1"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M14 4v4M8 10v4M16 16v4"></path></svg></span><span class="tab__label">Host settings</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Host settings" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Host settings tab" aria-keyshortcuts="Delete">×</button></div><div class="strip__group strip__group--app" role="presentation">App</div><div class="tab"><button type="button" role="tab" class="tab__main" data-tab="preferences" aria-selected="false" aria-controls="main" tabindex="-1"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM8 13a4 4 0 0 0 8 0"></path></svg></span><span class="tab__label">Preferences</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Preferences" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Preferences tab" aria-keyshortcuts="Delete">×</button></div><div class="tab"><button type="button" role="tab" class="tab__main" data-tab="appearance" aria-selected="false" aria-controls="main" tabindex="-1"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-2 0-3 4 0 5-1 2-3 2-4a9 9 0 0 0-9-8z"></path></svg></span><span class="tab__label">Appearance</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Appearance" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Appearance tab" aria-keyshortcuts="Delete">×</button></div><div class="tab"><button type="button" role="tab" class="tab__main" data-tab="changelog" aria-selected="false" aria-controls="main" tabindex="-1"><span class="tab__icon-wrap" aria-hidden="true"><svg class="tab__icon" viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM9 12h7M9 16h7M9 8h4"></path></svg></span><span class="tab__label">Changelog</span></button><button type="button" class="tab__pin icon-btn" aria-label="Pin: Changelog" aria-pressed="false" aria-keyshortcuts="Control+P"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6l-1 6 4 4H6l4-4zM12 13v8"/></svg></button><button type="button" class="tab__close icon-btn" aria-label="Close Changelog tab" aria-keyshortcuts="Delete">×</button></div></div><div class="strip__tools"><button type="button" class="text-btn" id="open-every">Open every tab</button><button type="button" class="text-btn">Close tabs containing text</button><button type="button" class="text-btn">Close tabs not containing text</button></div></nav>
+      <main class="main" id="main" tabindex="-1" aria-labelledby=""><section class="page" aria-labelledby="ov-title"><h1 id="ov-title">Your very own GitLab clubhouse</h1><p class="lead">One click and GitLab is up in Docker, open to every device on your network.</p><p class="next-chip" id="whats-next">Next up: open GitLab and sign in</p><div class="stats"><div class="stat stat--ok"><span class="stat__label">Docker</span><span class="stat__value">running</span></div><div class="stat stat--ok"><span class="stat__label">Container</span><span class="stat__value">running healthy</span></div><div class="stat stat--ok"><span class="stat__label">Address</span><span class="stat__value">http://192.168.1.20:8929</span></div></div><div class="actions"><button type="button" class="filled-btn big" id="start-btn" aria-describedby="first-start-note">Start GitLab</button><button type="button" class="tonal-btn" id="stop-btn">Stop GitLab</button><button type="button" class="tonal-btn" id="open-btn">Open GitLab</button><button type="button" class="text-btn" id="health-btn">Check health</button></div><p class="muted small" id="first-start-note">First start takes 5 to 15 minutes: download, unpack, configure, then coffee.</p></section></main>
+    </div>
+    <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+    <div class="palette" id="palette"><div class="palette__scrim"></div><div class="palette__card" role="dialog" aria-modal="true" aria-label="Command palette"><input type="text" role="combobox" aria-expanded="true" aria-controls="palette-list" aria-autocomplete="list" placeholder="Type a command, tab or setting" value="port" aria-label="Command palette" aria-activedescendant="pal-0"><ul role="listbox" id="palette-list" aria-label="Command palette"><li role="option" id="pal-0" aria-selected="true" class="on"><span>Export log</span></li><li role="option" id="pal-1" aria-selected="false" class=""><span>HTTP port  ·  Host settings</span></li><li role="option" id="pal-2" aria-selected="false" class=""><span>SSH port  ·  Host settings</span></li></ul></div></div>
+    <div class="timer" id="timer" hidden="" aria-live="off"></div>
+    
+  
+
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark": {"editor": "boolean", "default": false}, "compact": {"editor": "boolean", "default": false}, "accent": {"editor": "enum", "options": ["coral", "teal", "yellow", "violet"], "default": "coral"}, "$preview": {"width": 1240, "height": 820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = this.props.dark ?? false;
+    const compact = this.props.compact ?? false;
+    const seeds = { coral: '#e2725b', teal: '#2a9d8f', yellow: '#c99a06', violet: '#6e1aff' };
+    return {
+      theme: dark ? 'dark' : 'light',
+      density: compact ? 'compact' : 'comfortable',
+      seed: seeds[this.props.accent] || seeds.coral,
+    };
+  }
+}
+</script>
+</body>
+</html>

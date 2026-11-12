@@ -1,0 +1,136 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T03:00:00Z"
+ },
+ "title": "Material GitLab Host",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1240,
+   "h": 820,
+   "title": "Setup wizard: what happens",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "setup_permissions.dc.html": {
+   "x": 1320,
+   "y": 0,
+   "w": 1240,
+   "h": 820,
+   "title": "Setup wizard: permissions",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "setup_starting.dc.html": {
+   "x": 2640,
+   "y": 0,
+   "w": 1240,
+   "h": 820,
+   "title": "Setup wizard: starting with live progress",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "overview.dc.html": {
+   "x": 3960,
+   "y": 0,
+   "w": 1240,
+   "h": 820,
+   "title": "Overview: running and healthy",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "logs.dc.html": {
+   "x": 0,
+   "y": 900,
+   "w": 1240,
+   "h": 820,
+   "title": "Logs with regex builder",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "host_settings.dc.html": {
+   "x": 1320,
+   "y": 900,
+   "w": 1240,
+   "h": 820,
+   "title": "Host settings with inline errors",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "preferences.dc.html": {
+   "x": 2640,
+   "y": 900,
+   "w": 1240,
+   "h": 820,
+   "title": "Preferences in bilingual mode",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "appearance.dc.html": {
+   "x": 3960,
+   "y": 900,
+   "w": 1240,
+   "h": 820,
+   "title": "Appearance",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "changelog.dc.html": {
+   "x": 0,
+   "y": 1800,
+   "w": 1240,
+   "h": 820,
+   "title": "Changelog",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "palette.dc.html": {
+   "x": 1320,
+   "y": 1800,
+   "w": 1240,
+   "h": 820,
+   "title": "Command palette",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "update_dimsum.dc.html": {
+   "x": 2640,
+   "y": 1800,
+   "w": 1240,
+   "h": 820,
+   "title": "Update banner and dim sum surprise",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "setup_permissions.dc.html",
+  "setup_starting.dc.html",
+  "overview.dc.html",
+  "logs.dc.html",
+  "host_settings.dc.html",
+  "preferences.dc.html",
+  "appearance.dc.html",
+  "changelog.dc.html",
+  "palette.dc.html",
+  "update_dimsum.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -300,
+   "text": "Material GitLab Host: one-click Windows host",
+   "kind": "title1",
+   "maxW": 5160
+  }
+ },
+ "designSystems": []
+}
