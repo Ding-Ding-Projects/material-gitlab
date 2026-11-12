@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:07:44Z"
+ },
+ "title": "Material GitLab: Your work to manage",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Import history",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "explore_projects.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Explore projects",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "explore_groups.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Explore groups",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "topics.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Topics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "explore_snippets.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Explore snippets",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "ci_cd_catalog.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "CI/CD Catalog",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "ci_cd_component.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "CI/CD component",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "ai_catalog.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "AI Catalog",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "analytics_dashboards.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Analytics dashboards",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "project_overview.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Project overview",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "project_overview_dark.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Project overview, dark",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "project_activity.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Project activity",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "members.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Members",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "labels.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Labels",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "new_project.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "New project",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "explore_projects.dc.html",
+  "explore_groups.dc.html",
+  "topics.dc.html",
+  "explore_snippets.dc.html",
+  "ci_cd_catalog.dc.html",
+  "ci_cd_component.dc.html",
+  "ai_catalog.dc.html",
+  "analytics_dashboards.dc.html",
+  "project_overview.dc.html",
+  "project_overview_dark.dc.html",
+  "project_activity.dc.html",
+  "members.dc.html",
+  "labels.dc.html",
+  "new_project.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Your work to manage",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
