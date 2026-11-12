@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Project: operate and monitor to observe",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Error detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "alerts.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Alerts",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "alert_detail.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Alert detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "on_call_schedules.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "On-call schedules",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "escalation_policies.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Escalation policies",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "logs.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Logs",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "traces.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Traces",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "trace_detail.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Trace detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "metrics.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Metrics",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "services.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Services",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "service_map.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Service map",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "observe_dashboards.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Observe dashboards",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "infrastructure.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Infrastructure",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "messaging_queues.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Messaging queues",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "external_apis.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "External APIs",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "alerts.dc.html",
+  "alert_detail.dc.html",
+  "on_call_schedules.dc.html",
+  "escalation_policies.dc.html",
+  "logs.dc.html",
+  "traces.dc.html",
+  "trace_detail.dc.html",
+  "metrics.dc.html",
+  "services.dc.html",
+  "service_map.dc.html",
+  "observe_dashboards.dc.html",
+  "infrastructure.dc.html",
+  "messaging_queues.dc.html",
+  "external_apis.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: operate and monitor to observe",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
