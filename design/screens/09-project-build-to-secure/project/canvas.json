@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:07:44Z"
+ },
+ "title": "Material GitLab: Project: build to secure",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Pipeline failed jobs",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "pipeline_tests.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Pipeline tests",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "jobs.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Jobs",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "job_log.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Job log",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "artifacts.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Artifacts",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "attestations.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Attestations",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "pipeline_editor.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Pipeline editor",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "ci_lint.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "CI lint",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "pipeline_schedules.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Pipeline schedules",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "runners.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Runners",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "runner_detail.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Runner detail",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "register_a_runner.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Register a runner",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "merge_trains.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Merge trains",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "vulnerability_report.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Vulnerability report",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "vulnerability_detail.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Vulnerability detail",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "pipeline_tests.dc.html",
+  "jobs.dc.html",
+  "job_log.dc.html",
+  "artifacts.dc.html",
+  "attestations.dc.html",
+  "pipeline_editor.dc.html",
+  "ci_lint.dc.html",
+  "pipeline_schedules.dc.html",
+  "runners.dc.html",
+  "runner_detail.dc.html",
+  "register_a_runner.dc.html",
+  "merge_trains.dc.html",
+  "vulnerability_report.dc.html",
+  "vulnerability_detail.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: build to secure",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
