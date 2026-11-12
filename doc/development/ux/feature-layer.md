@@ -40,7 +40,25 @@ shortcut and the dim sum chance. Each entry opens the matching tab of the featur
 ## Feature hub and setup wizard
 
 `surfaces/FeatureLayer/FeatureLayer.vue` holds a dialog with tabs for setup, language,
-accessibility, ADHD modes, dim sum, the notification centre and settings export.
+accessibility, ADHD modes, dim sum, the notification centre, School mode, personal wording,
+display name, seed color, extensions and settings export. The last five live in
+`MoreFeatures.vue`:
+
+- **School mode**: English only, funny levels at 1, no dim sum and no personal wording until it
+  is turned off with the PIN set when it was turned on. The PIN is stored as a salted SHA-256
+  digest. This is a comfort lock, not security: deleting the site data clears it.
+- **Personal wording**: upload a JSON file (`{"schemaVersion":1,"entries":[{"language":"en",
+  "key":"back","value":"Go back"}]}`) to replace feature layer labels by key. Validation errors
+  are listed. The file stays on this device and is never exported.
+- **Display name**: renames the sidebar brand and the browser tab suffix. Package names, data
+  and update paths keep the shipped name.
+- **Color**: a continuous color picker plus HEX, RGB and HSL readouts, with the contrast of white
+  text on the chosen color checked against 4.5:1.
+- **Extensions**: a searchable manager for the built-in extensions, each with its version and
+  declared permissions and its own switch. *Pipeline status in the tab title* and *Copy a commit
+  SHA by clicking it* ship on by default. No tokens or secrets are passed to them.
+
+![Feature hub on the Extensions tab in bilingual mode](img/feature_layer_extensions.png)
 
 The setup wizard (`SetupWizard.vue`) opens on first run. It has four steps: language and funny
 levels, appearance (optional), comfort (optional), then a summary. Each step applies its
@@ -96,6 +114,10 @@ All motion is removed under reduced motion.
 | `material-system.adhd-modes.v1` | The five ADHD modes |
 | `material-system.accessibility-tools.v1` | Accessibility tools and whether the menu is hidden |
 | `material-system.setup-wizard.v1` | Setup step, skipped steps, completion |
+| `material-system.school-mode.v1`, `material-system.school-mode-pin.v1` | School mode state and PIN digest |
+| `material-system.personal-vocabulary.v1` | Personal wording |
+| `material-system.display-name.v1` | Display name |
+| `material-system.extensions.v1` | Which built-in extensions are on |
 
 Export (in the hub) downloads settings, ADHD modes and accessibility tools as UTF-8 JSON.
 
@@ -107,6 +129,7 @@ Export (in the hub) downloads settings, ADHD modes and accessibility tools as UT
 
 - The theme choice in setup changes the Material shell theme. GitLab's own dark stylesheet still
   follows the user preference on the server.
-- The extensions manager, Support Tickets, unlock ladder, school mode, schedules, personal
-  wording, logo and color translator from the design canvas have models in `material_system/`
-  but no in-app screens yet.
+- Third-party, out-of-process extensions are not available in the browser build. Only the
+  built-in extensions run.
+- Element locks, Support Tickets, the unlock ladder, scheduled settings and logo upload from the
+  design canvas have models in `material_system/` but no in-app screens yet.

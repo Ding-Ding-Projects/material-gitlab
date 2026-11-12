@@ -24,8 +24,9 @@ This section supersedes older claims it contradicts.
   signature page styling now ship in the real app. See `doc/development/ux/feature-layer.md`.
   Verified in the isolated harness (26 cases across the three new specs, guards watched failing)
   and with real render captures; the GitLab Jest suite and a running instance were not available.
-- Still design-only: extensions manager, Support Tickets, unlock ladder, school mode, schedules,
-  personal wording, logo and color translator screens.
+- The feature hub also has School mode (PIN), personal wording upload, display name, the color
+  translator and the built-in extensions manager. Still design-only: element locks, Support
+  Tickets, the unlock ladder, scheduled settings and logo upload.
 - Design canvas: `design/screens/` holds 322 screens in 23 sections.
 
 ## Material 3 Expressive redesign, 2026-11-11

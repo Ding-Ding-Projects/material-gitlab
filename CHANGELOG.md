@@ -9,6 +9,8 @@
 - Features rail along the bottom, a feature hub (setup, language, accessibility, ADHD modes, dim
   sum, notification centre, export) and a first-run setup wizard with resume and skip.
 - Dim sum surprise from the public catalog, about 1 in 10 page loads, always on.
+- Feature hub tabs for School mode (PIN), personal wording, display name, the seed color
+  translator, and a built-in extensions manager with two default extensions.
 - Settings now change the live page (motion, density, text size, focus, contrast, targets), and
   GitLab pages carry the canvas signature details. See `doc/development/ux/feature-layer.md`.
 

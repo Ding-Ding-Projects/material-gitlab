@@ -7,6 +7,8 @@ import { createFeatureState } from '~/material_system/features/state';
 import TopbarFeatures from '~/material_system/surfaces/FeatureLayer/TopbarFeatures.vue';
 import FeatureLayer from '~/material_system/surfaces/FeatureLayer/FeatureLayer.vue';
 import { createNotificationCenter } from '~/material_system/notifications';
+import MoreFeatures from '~/material_system/surfaces/FeatureLayer/MoreFeatures.vue';
+import { createExtensionHost } from '~/material_system/features/extensions';
 
 const mem = () => {
   const m = new Map();
@@ -191,5 +193,99 @@ describe('FeatureLayer', () => {
     box.element.checked = false;
     await box.trigger('change');
     expect(feature.state.a11y.menuHidden).toBe(false);
+  });
+});
+
+const flush = () => new Promise((r) => setTimeout(r, 0));
+const more = (feature, tab) => mount(MoreFeatures, { propsData: { feature, tab } });
+
+describe('MoreFeatures', () => {
+  it('School mode needs a PIN to turn off and forces English', async () => {
+    const feature = mkFeature();
+    feature.setSetting({ language: 'yue' });
+    const w = more(feature, 'school');
+    await tid(w, 'school-pin').setValue('12');
+    await tid(w, 'school-toggle').trigger('click');
+    await flush();
+    expect(feature.state.school.enabled).toBe(false);
+    expect(tid(w, 'school-error').exists()).toBe(true);
+    await tid(w, 'school-pin').setValue('2468');
+    await tid(w, 'school-toggle').trigger('click');
+    await flush();
+    await flush();
+    expect(feature.state.school.enabled).toBe(true);
+    expect(feature.state.lang).toBe('en');
+    await tid(w, 'school-pin').setValue('1111');
+    await tid(w, 'school-toggle').trigger('click');
+    await flush();
+    await flush();
+    expect(feature.state.school.enabled).toBe(true);
+    await tid(w, 'school-pin').setValue('2468');
+    await tid(w, 'school-toggle').trigger('click');
+    await flush();
+    await flush();
+    expect(feature.state.school.enabled).toBe(false);
+    expect(feature.state.lang).toBe('yue');
+  });
+  it('personal wording replaces labels by key and clears', async () => {
+    const feature = mkFeature();
+    const r = feature.loadWording(
+      JSON.stringify({
+        schemaVersion: 1,
+        entries: [{ language: 'en', key: 'back', value: 'Go back' }],
+      }),
+    );
+    expect(r.ok).toBe(true);
+    await flush();
+    expect(t('back', 'en')).toBe('Go back');
+    feature.clearWording();
+    await flush();
+    expect(t('back', 'en')).toBe('Back');
+    expect(
+      feature.loadWording('{"schemaVersion":1,"entries":[{"language":"xx","key":"a","value":"b"}]}')
+        .ok,
+    ).toBe(false);
+  });
+  it('rename changes the display name only, and reset restores it', async () => {
+    const feature = mkFeature();
+    const w = more(feature, 'name');
+    await tid(w, 'display-name').setValue('Ding Ding Forge');
+    await tid(w, 'display-name-save').trigger('click');
+    expect(feature.state.displayName).toBe('Ding Ding Forge');
+    feature.rename('');
+    expect(feature.state.displayName).toBe('Material GitLab');
+  });
+  it('color translator shows RGB, HSL and contrast for the seed', async () => {
+    const feature = mkFeature();
+    const w = more(feature, 'color');
+    await tid(w, 'color-hex').setValue('#FFFFFF');
+    await tid(w, 'color-hex').trigger('change');
+    expect(feature.state.settings.accentColor).toBe('#FFFFFF');
+    expect(tid(w, 'color-rgb').text()).toBe('rgb(255, 255, 255)');
+    expect(tid(w, 'color-contrast').text()).toContain('1:1');
+    await tid(w, 'color-hex').setValue('#000000');
+    await tid(w, 'color-hex').trigger('change');
+    expect(tid(w, 'color-contrast').text()).toContain('21:1');
+  });
+  it('extensions can be searched and switched off', async () => {
+    const feature = mkFeature();
+    const w = more(feature, 'extensions');
+    await tid(w, 'extensions-search').setValue('clipboard');
+    expect(w.findAll('[role="switch"]').length).toBe(1);
+    const sw = tid(w, 'extension-copy-sha');
+    sw.element.checked = false;
+    await sw.trigger('change');
+    expect(feature.state.extensions.find((e) => e.id === 'copy-sha').enabled).toBe(false);
+  });
+});
+
+describe('extension host', () => {
+  it('runs built-ins and stops one when disabled', () => {
+    const host = createExtensionHost({ storage: mem(), target: new EventTarget() });
+    const doc = document.implementation.createHTMLDocument('x');
+    host.start({ doc, notify: () => {} });
+    expect(host.isRunning('copy-sha')).toBe(true);
+    host.setEnabled('copy-sha', false);
+    expect(host.isRunning('copy-sha')).toBe(false);
   });
 });

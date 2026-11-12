@@ -20,7 +20,7 @@ export default {
       return this.feature.state;
     },
     lang() {
-      return this.s.settings.language;
+      return this.s.lang;
     },
     elapsed() {
       const seconds = Math.max(0, Math.floor((this.now - this.s.pageLoadedAt) / 1000));

@@ -22,7 +22,7 @@ const materialTopbarHost = document.querySelector('.m3-shell-topbar-host[data-ma
 const { feature } = materialSidebarHost ? mountFeatureLayer() : {};
 
 if (materialSidebarHost && superSidebarData) {
-  mountSidebar(materialSidebarHost, { data: superSidebarData.sidebarData });
+  mountSidebar(materialSidebarHost, { data: superSidebarData.sidebarData, feature });
 } else if (superSidebarData) {
   initSuperSidebar(superSidebarData);
 }

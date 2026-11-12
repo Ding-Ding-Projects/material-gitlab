@@ -20,7 +20,7 @@ export default {
       return this.feature.state;
     },
     lang() {
-      return this.s.settings.language;
+      return this.s.lang;
     },
     steps: () => STEPS,
     index() {

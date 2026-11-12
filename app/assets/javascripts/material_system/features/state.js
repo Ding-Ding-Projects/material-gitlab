@@ -2,8 +2,23 @@ import Vue from 'vue';
 import { loadSettings, updateSettings, subscribeSettings } from '../settings';
 import { createAdhdModes, createAccessibilityTools } from './flags';
 import { applyToDocument } from './document';
+import { createSchoolModeAdapter } from '../school-mode';
+import { createPersonalVocabularyLoader } from '../vocabulary';
+import { createExtensionHost } from './extensions';
+import { setWordingOverride } from './i18n';
 
 export const SETUP_STORAGE_KEY = 'material-system.setup-wizard.v1';
+export const SCHOOL_PIN_STORAGE_KEY = 'material-system.school-mode-pin.v1';
+export const DISPLAY_NAME_STORAGE_KEY = 'material-system.display-name.v1';
+export const SHIPPED_NAME = 'Material GitLab';
+
+// School mode's PIN is kept as a salted SHA-256 digest. It is a comfort lock for this device,
+// not a security boundary: deleting the site data clears it.
+async function digest(pin, salt) {
+  const bytes = new TextEncoder().encode(`${salt}:${pin}`);
+  const hash = await globalThis.crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(hash)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 // One reactive store shared by the top bar controls, the features rail, the feature hub
 // and the setup wizard, so every view of a value reads and writes the same thing.
@@ -24,6 +39,35 @@ export function createFeatureState({
     return { step: 0, completed: false, skipped: [] };
   };
 
+  const readJson = (key) => {
+    try {
+      return JSON.parse(storage?.getItem?.(key) || 'null');
+    } catch (_error) {
+      return null;
+    }
+  };
+  const writeJson = (key, value) => {
+    try {
+      if (value === null) storage?.removeItem?.(key);
+      else storage?.setItem?.(key, JSON.stringify(value));
+      return true;
+    } catch (_error) {
+      return false;
+    }
+  };
+  const school = createSchoolModeAdapter({
+    storage,
+    target,
+    unlockAdapter: {
+      async verify(pin) {
+        const saved = readJson(SCHOOL_PIN_STORAGE_KEY);
+        return Boolean(saved && (await digest(String(pin), saved.salt)) === saved.hash);
+      },
+    },
+  });
+  const wording = createPersonalVocabularyLoader({ storage });
+  const extensions = createExtensionHost({ storage, target });
+
   const state = Vue.observable({
     settings: loadSettings(storage),
     adhd: adhdStore.get(),
@@ -33,9 +77,29 @@ export function createFeatureState({
     hubTab: 'setup',
     error: '',
     pageLoadedAt: Date.now(),
+    school: school.snapshot(),
+    wording: wording.snapshot(),
+    displayName: readJson(DISPLAY_NAME_STORAGE_KEY) || SHIPPED_NAME,
+    extensions: extensions.list(),
+    lang: 'en',
   });
 
-  const apply = () => applyToDocument(state, root);
+  const apply = () => {
+    state.lang = state.school.enabled ? 'en' : state.settings.language;
+    setWordingOverride(
+      state.school.enabled || state.wording.status !== 'loaded'
+        ? null
+        : (key, language, fallback) => wording.translate(key, language, fallback),
+    );
+    if (root?.ownerDocument && state.displayName !== SHIPPED_NAME) {
+      const doc = root.ownerDocument;
+      doc.title = doc.title.replace(/(GitLab|Material GitLab)\s*$/, state.displayName);
+    }
+    return applyToDocument(
+      { ...state, settings: { ...state.settings, language: state.lang } },
+      root,
+    );
+  };
   const unsubscribers = [
     subscribeSettings((next) => {
       state.settings = next;
@@ -47,6 +111,14 @@ export function createFeatureState({
     }),
     a11yStore.subscribe((next) => {
       state.a11y = next;
+      apply();
+    }),
+    school.subscribe((next) => {
+      state.school = next;
+      apply();
+    }),
+    wording.subscribe((next) => {
+      state.wording = next;
       apply();
     }),
   ];
@@ -105,6 +177,43 @@ export function createFeatureState({
         null,
         2,
       );
+    },
+    async enableSchool(pin) {
+      if (!/^\d{4,12}$/.test(String(pin))) return { ok: false, reason: 'pinInvalid' };
+      const salt = Math.random().toString(36).slice(2);
+      if (!writeJson(SCHOOL_PIN_STORAGE_KEY, { salt, hash: await digest(String(pin), salt) }))
+        return { ok: false, reason: 'saveFailed' };
+      const result = school.enable();
+      return result.ok ? { ok: true } : { ok: false, reason: 'saveFailed' };
+    },
+    async disableSchool(pin) {
+      const result = await school.disable(String(pin));
+      if (result.ok) writeJson(SCHOOL_PIN_STORAGE_KEY, null);
+      return result.ok
+        ? { ok: true }
+        : { ok: false, reason: result.status === 'rejected' ? 'pinRejected' : 'saveFailed' };
+    },
+    loadWording(source) {
+      return wording.load(source);
+    },
+    clearWording() {
+      return wording.clear();
+    },
+    rename(name) {
+      const value = String(name || '')
+        .trim()
+        .slice(0, 80);
+      state.displayName = value || SHIPPED_NAME;
+      writeJson(DISPLAY_NAME_STORAGE_KEY, value && value !== SHIPPED_NAME ? value : null);
+      apply();
+    },
+    startExtensions(context) {
+      return extensions.start(context);
+    },
+    setExtension(id, value) {
+      const ok = extensions.setEnabled(id, value);
+      state.extensions = extensions.list();
+      return ok;
     },
     dispose() {
       unsubscribers.forEach((unsubscribe) => unsubscribe());

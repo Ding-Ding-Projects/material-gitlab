@@ -115,6 +115,51 @@ const STRINGS = {
   history: ['Local history', '本機紀錄'],
   historyCount: ['%{n} saved changes', '%{n} 個已儲存變更'],
   open: ['Open', '打開'],
+  more: ['More', '更多'],
+  schoolMode: ['School mode', '學校模式'],
+  schoolHelp: [
+    'English only, funny levels 1, no dim sum and no personal wording on this device until turned off with your PIN. A comfort lock, not security.',
+    '開咗之後呢部機只用英文、搞笑程度 1、冇點心、冇個人字眼，要用 PIN 先熄到。只係舒適鎖，唔係保安。',
+  ],
+  schoolOn: ['School mode is on', '學校模式開緊'],
+  setPin: ['PIN to turn it off (4 to 12 digits)', '熄嘅時候要用嘅 PIN（4 至 12 位數字）'],
+  enterPin: ['Enter the PIN to turn it off', '輸入 PIN 熄佢'],
+  turnOn: ['Turn on', '開'],
+  turnOff: ['Turn off', '熄'],
+  pinRejected: ['That PIN did not match.', 'PIN 唔啱。'],
+  pinInvalid: ['Use 4 to 12 digits.', '要 4 至 12 位數字。'],
+  wording: ['Personal wording', '個人字眼'],
+  wordingHelp: [
+    'Upload a JSON file that replaces feature labels by key. It stays on this device and is never exported.',
+    '上載 JSON 檔，按 key 換走功能標籤，只留喺呢部機，唔會匯出。',
+  ],
+  wordingLoaded: ['Personal wording applied: %{n} entries', '個人字眼已套用：%{n} 項'],
+  wordingEmpty: ['No file loaded. Original wording is shown.', '未載入檔案，顯示原本字眼。'],
+  upload: ['Upload JSON', '上載 JSON'],
+  clear: ['Clear', '清除'],
+  nameLogo: ['Name', '名稱'],
+  displayName: ['Display name', '顯示名稱'],
+  displayNameHelp: [
+    'Changes what this instance calls itself in the browser tab and sidebar. Package names, data and update paths keep the shipped name.',
+    '只改瀏覽器分頁同側邊欄顯示嘅名，套件名、資料同更新路徑唔變。',
+  ],
+  reset: ['Reset', '重設'],
+  color: ['Color', '顏色'],
+  colorHelp: [
+    'Any color. Values translate live between formats; contrast is checked against the surface.',
+    '任揀顏色，各種格式即時轉換，仲會檢查對比度。',
+  ],
+  contrast: ['Contrast with white text', '同白字嘅對比'],
+  contrastOk: ['passes 4.5:1', '過咗 4.5:1'],
+  contrastLow: ['below 4.5:1 for small text', '細字低過 4.5:1'],
+  extensions: ['Extensions', '擴充功能'],
+  extensionsHelp: [
+    'Built-in extensions run in this page with the permissions listed. Secrets and tokens are never passed to them.',
+    '內置擴充功能喺呢頁運行，只有列出嘅權限，秘密同 token 永遠唔會交俾佢哋。',
+  ],
+  searchExtensions: ['Search extensions', '搜尋擴充功能'],
+  permissions: ['Permissions', '權限'],
+  shaCopied: ['Commit SHA copied', '已複製 commit SHA'],
 };
 
 export const LANGUAGES = Object.freeze(['en', 'yue', 'bilingual']);
@@ -122,10 +167,19 @@ export const LANGUAGES = Object.freeze(['en', 'yue', 'bilingual']);
 const fill = (text, vars) =>
   text.replace(/%\{(\w+)\}/g, (match, name) => (name in vars ? vars[name] : match));
 
+// Personal wording: an optional translator (the personal vocabulary loader) that may replace
+// any entry by key. It is cleared while School mode is on.
+let override = null;
+export const setWordingOverride = (translate) => {
+  override = typeof translate === 'function' ? translate : null;
+};
+
 export function t(key, language = 'en', vars = {}) {
   const entry = STRINGS[key];
   if (!entry) return key;
-  const [en, yue] = entry.map((text) => fill(text, vars));
+  const [en, yue] = entry
+    .map((text, index) => (override ? override(key, index ? 'yue' : 'en', text) : text))
+    .map((text) => fill(text, vars));
   if (language === 'yue') return yue;
   if (language === 'bilingual') return en === yue ? en : `${en} · ${yue}`;
   return en;

@@ -3,6 +3,7 @@ import { t } from '../../features/i18n';
 import { rollDimSum, dimSumCount } from '../../features/dim-sum';
 import notificationCenter from '../../notifications';
 import SetupWizard from './SetupWizard.vue';
+import MoreFeatures from './MoreFeatures.vue';
 
 const HUB_TABS = [
   'setup',
@@ -11,15 +12,22 @@ const HUB_TABS = [
   'adhd',
   'dimsum',
   'notifications',
+  'school',
+  'wording',
+  'name',
+  'color',
+  'extensions',
   'export',
 ];
+const MORE_TABS = ['school', 'wording', 'name', 'color', 'extensions'];
 
 // Page-wide Material features: the bottom features rail, the feature hub (setup wizard,
-// language, accessibility, ADHD modes, dim sum, notification centre, export), the dim sum
+// language, accessibility, ADHD modes, dim sum, notification centre, School mode, personal
+// wording, display name, seed color, extensions, export), the dim sum
 // surprise and the Momentum mode on the To-Do List.
 export default {
   name: 'MaterialFeatureLayer',
-  components: { SetupWizard },
+  components: { SetupWizard, MoreFeatures },
   props: {
     feature: { type: Object, required: true },
     notifications: { type: Object, default: () => notificationCenter },
@@ -40,9 +48,10 @@ export default {
       return this.feature.state;
     },
     lang() {
-      return this.s.settings.language;
+      return this.s.lang;
     },
     tabs: () => HUB_TABS,
+    moreTabs: () => MORE_TABS,
     dishCount: () => dimSumCount(),
   },
   created() {
@@ -53,17 +62,23 @@ export default {
   mounted() {
     const blocked =
       Boolean(document.querySelector('.modal.show, [role="dialog"][aria-modal="true"]')) ||
-      document.body?.dataset?.page?.startsWith('errors');
+      document.body?.dataset?.page?.startsWith('errors') ||
+      this.s.school.enabled;
     if (this.autoSetup && !this.s.setup.completed && !this.s.setup.dismissed) {
       this.feature.openHub('setup');
     } else {
       this.dish = rollDimSum({ random: this.random, blocked });
     }
+    this.stopExtensions = this.feature.startExtensions?.({
+      doc: document,
+      notify: () => this.notifications.notify({ title: this.t('shaCopied'), severity: 'success' }),
+    });
     this.onClick = (event) => this.momentum(event);
     document.addEventListener('click', this.onClick, true);
   },
   beforeDestroy() {
     this.unsubscribe?.();
+    this.stopExtensions?.();
     document.removeEventListener('click', this.onClick, true);
     if (this.exportUrl) URL.revokeObjectURL(this.exportUrl);
   },
@@ -225,6 +240,11 @@ export default {
                   adhd: 'adhdModes',
                   dimsum: 'dimSum',
                   notifications: 'notificationCentre',
+                  school: 'schoolMode',
+                  wording: 'wording',
+                  name: 'nameLogo',
+                  color: 'color',
+                  extensions: 'extensions',
                   export: 'exportSettings',
                 }[tab],
               )
@@ -235,6 +255,12 @@ export default {
 
         <div class="m3-hub__body" role="tabpanel">
           <setup-wizard v-if="s.hubTab === 'setup'" :feature="feature" @finish="finishSetup" />
+
+          <more-features
+            v-else-if="moreTabs.includes(s.hubTab)"
+            :feature="feature"
+            :tab="s.hubTab"
+          />
 
           <template v-else-if="s.hubTab === 'language'">
             <div class="m3-field">

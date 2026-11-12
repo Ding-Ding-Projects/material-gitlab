@@ -62,6 +62,8 @@ export function mountSidebar(el = document.querySelector('.m3-shell-sidebar-host
   const vm = mount(el, Sidebar, { sections: options.sections || toSections(payload), active: options.active || payload.current_context_header || '', project: options.project || payload.current_context?.item || {}, theme: resolveTheme(loadSettings()) });
   const unsubscribe = subscribeSettings((next) => { vm.surfaceProps.theme = resolveTheme(next); });
   vm.$once('hook:beforeDestroy', unsubscribe);
+  // The display name from the feature hub renames the sidebar brand, never the install.
+  if (options.feature) vm.$watch(() => options.feature.state.displayName, (name) => { vm.surfaceProps.brand = name; }, { immediate: true });
   return vm;
 }
 
