@@ -16,7 +16,8 @@ The Material shell implementation and its production mount contract are document
 design canvas it comes from are documented in [Material 3 Expressive redesign](material-expressive.md).
 
 Destructive dialogs use a two-key, slide-to-confirm gate with an emergency exit instead of
-typing a name. See [Destructive super confirmation](super-confirmation.md).
+typing a name. See [Destructive super confirmation](super-confirmation.md). Navigation is a
+left-docked tab strip with every tab open by default. See [Left-docked tab strip](tab-strip.md).
 
 You may leverage the [Pajamas UI Kit](https://www.figma.com/community/file/781156790581391771/component-library/component-library) in Figma to create mockups for your proposals. However, we will also gladly accept handmade drawings and sketches, wireframes, manipulated DOM screenshots, or prototypes. You can find design resources documentation in our [Design System](https://design.gitlab.com/). Use it to understand where and when to use common design solutions.
 

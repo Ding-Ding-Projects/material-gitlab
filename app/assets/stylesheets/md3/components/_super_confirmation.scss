@@ -56,6 +56,12 @@
     }
   }
 
+  &__key-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
   &__key-head {
     flex: 0 0 auto;
     width: 44px;

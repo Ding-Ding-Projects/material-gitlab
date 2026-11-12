@@ -137,8 +137,8 @@ export default {
             <path d="M12 12h9M18 12v3M21 12v2" />
           </svg>
         </span>
-        <span>
-          <strong class="gl-block"
+        <span class="gl-md3-super-confirm__key-text">
+          <strong
             >{{ item.name }}
             {{ $data[item.key] ? $options.i18n.turned : $options.i18n.off }}</strong
           >

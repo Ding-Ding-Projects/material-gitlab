@@ -2,7 +2,10 @@
 
 ## Unreleased
 
-### Destructive super confirmation
+### Destructive super confirmation and left tab strip
+
+- The Material sidebar is a left-docked vertical tab strip with every tab open by default,
+  persisted closed tabs, a New tab catalog, Open every tab, and collapsible tab groups.
 
 - Destructive dialogs (the shared danger modal and the group/project delete modal) no longer ask
   you to type a name. They show what is affected, then require two key switches, a full slide to

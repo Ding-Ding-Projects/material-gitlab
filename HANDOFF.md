@@ -13,9 +13,12 @@ This section supersedes older claims it contradicts.
   `ruby -c`.
 - Not run here: the GitLab Jest suite, the Rails feature specs and QA, because this checkout has no
   installed frontend dependencies, database or browser stack.
-- Not done yet: Rails-rendered (HAML) danger forms, and the live left-docked tab strip in the real
-  shell (the design canvas has it on every screen; `material_system/tabs.js` already defaults the
-  dock to the left).
+- The Material sidebar is now a left-docked vertical tab strip: every tab open by default, closed
+  tabs stay closed, New tab catalog, Open every tab, collapsible groups, arrow-key and Delete
+  handling. See `doc/development/ux/tab-strip.md`. Verified in the same isolated harness (8 cases,
+  plus a deliberate break that turned 2 red) and a real render capture.
+- Not done yet: Rails-rendered (HAML) danger forms; pinning, drag reorder, the four separate tab
+  searches and the dock-edge picker in the live sidebar.
 - Design canvas: `design/screens/` holds 322 screens in 23 sections.
 
 ## Material 3 Expressive redesign, 2026-11-11
