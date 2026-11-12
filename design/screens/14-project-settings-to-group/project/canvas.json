@@ -1,0 +1,176 @@
+{
+ "v": 3,
+ "createdOnFiles": {
+  "v": 1,
+  "at": "2026-11-12T04:30:20Z"
+ },
+ "title": "Material GitLab: Project: settings to Group",
+ "launch": {
+  "view": "canvas"
+ },
+ "pages": [],
+ "boards": {
+  "Main.dc.html": {
+   "x": 0,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Repository",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_merge_requests.dc.html": {
+   "x": 1520,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Merge requests",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_ci_cd_variables.dc.html": {
+   "x": 3040,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: CI/CD variables",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_ci_cd_general.dc.html": {
+   "x": 4560,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: CI/CD general",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_packages_and_registries.dc.html": {
+   "x": 6080,
+   "y": 0,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Packages and registries",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_monitor.dc.html": {
+   "x": 0,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Monitor",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_service_accounts.dc.html": {
+   "x": 1520,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Service accounts",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "settings_usage_quotas.dc.html": {
+   "x": 3040,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Settings: Usage quotas",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_overview.dc.html": {
+   "x": 4560,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group overview",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_activity.dc.html": {
+   "x": 6080,
+   "y": 1160,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group activity",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_members.dc.html": {
+   "x": 0,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group members",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_labels.dc.html": {
+   "x": 1520,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group labels",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "achievements.dc.html": {
+   "x": 3040,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Achievements",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_issues.dc.html": {
+   "x": 4560,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group issues",
+   "expand": "fill",
+   "is_interactive": true
+  },
+  "group_merge_requests.dc.html": {
+   "x": 6080,
+   "y": 2320,
+   "w": 1440,
+   "h": 1040,
+   "title": "Group merge requests",
+   "expand": "fill",
+   "is_interactive": true
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "settings_merge_requests.dc.html",
+  "settings_ci_cd_variables.dc.html",
+  "settings_ci_cd_general.dc.html",
+  "settings_packages_and_registries.dc.html",
+  "settings_monitor.dc.html",
+  "settings_service_accounts.dc.html",
+  "settings_usage_quotas.dc.html",
+  "group_overview.dc.html",
+  "group_activity.dc.html",
+  "group_members.dc.html",
+  "group_labels.dc.html",
+  "achievements.dc.html",
+  "group_issues.dc.html",
+  "group_merge_requests.dc.html"
+ ],
+ "notes": {
+  "t": {
+   "x": 0,
+   "y": -260,
+   "text": "Material GitLab: Project: settings to Group",
+   "kind": "title1",
+   "maxW": 7600
+  }
+ },
+ "designSystems": []
+}
