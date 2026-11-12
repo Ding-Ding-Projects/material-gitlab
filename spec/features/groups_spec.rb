@@ -367,7 +367,7 @@ RSpec.describe 'Group', :with_current_organization, feature_category: :groups_an
     it 'focuses confirmation field on remove group' do
       click_button('Delete')
 
-      expect(page).to have_selector '#confirm_name_input:focus'
+      expect(page).to have_selector '[data-testid="super-confirmation-key-1"]:focus'
     end
 
     it 'marks the group for deletion' do
@@ -558,9 +558,8 @@ RSpec.describe 'Group', :with_current_organization, feature_category: :groups_an
     end
   end
 
-  def remove_with_confirm(button_text, confirm_with)
+  def remove_with_confirm(button_text, _confirm_with)
     click_button button_text
-    fill_in 'confirm_name_input', with: confirm_with
-    click_button 'Yes, delete group'
+    complete_super_confirmation
   end
 end

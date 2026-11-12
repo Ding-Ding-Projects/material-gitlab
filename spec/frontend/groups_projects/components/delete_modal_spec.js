@@ -1,8 +1,9 @@
-import { GlFormInput, GlModal } from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import { nextTick } from 'vue';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import GroupsProjectsDeleteModal from '~/groups_projects/components/delete_modal.vue';
 import PermanentDeletionConfirmCheckbox from '~/groups_projects/components/permanent_deletion_confirm_checkbox.vue';
+import SuperConfirmation from '~/material_system/components/super_confirmation.vue';
 import { stubComponent } from 'helpers/stub_component';
 import { useFakeDate } from 'helpers/fake_date';
 import { RESOURCE_TYPES } from '~/groups_projects/constants';
@@ -45,7 +46,7 @@ describe('GroupsProjectsDeleteModal', () => {
   };
 
   const findGlModal = () => wrapper.findComponent(GlModal);
-  const findFormInput = () => wrapper.findComponent(GlFormInput);
+  const findSuperConfirmation = () => wrapper.findComponent(SuperConfirmation);
   const findModalBodyMessage = () => wrapper.findByTestId('modal-body-message');
   const findPermanentDeletionCheckbox = () =>
     wrapper.findComponent(PermanentDeletionConfirmCheckbox);
@@ -63,18 +64,9 @@ describe('GroupsProjectsDeleteModal', () => {
         expect(findGlModal().props()).toMatchObject({
           visible: defaultPropsData.visible,
           modalId: `delete-modal-fake-id`,
-          actionPrimary: {
-            text: `Yes, delete ${resourceType}`,
-            attributes: {
-              variant: 'danger',
-              disabled: true,
-              'data-testid': 'confirm-delete-button',
-            },
-          },
-          actionCancel: {
-            text: `Cancel, keep ${resourceType}`,
-          },
         });
+        expect(findGlModal().props('actionPrimary')).toBeFalsy();
+        expect(findSuperConfirmation().props('target')).toBe(defaultPropsData.confirmPhrase);
       });
 
       describe('when markedForDeletion prop is false', () => {
@@ -116,20 +108,15 @@ describe('GroupsProjectsDeleteModal', () => {
             expect(findPermanentDeletionCheckbox().props('resourceType')).toBe(resourceType);
           });
 
-          describe.each`
-            description                                        | confirmPhrase                     | checked  | submitDisabled
-            ${'phrase is correct but checkbox unchecked'}      | ${defaultPropsData.confirmPhrase} | ${false} | ${true}
-            ${'phrase is correct and checkbox is checked'}     | ${defaultPropsData.confirmPhrase} | ${true}  | ${false}
-            ${'phrase is incorrect and checkbox is unchecked'} | ${'wrong-phrase'}                 | ${false} | ${true}
-            ${'phrase is incorrect but checkbox is checked'}   | ${'wrong-phrase'}                 | ${true}  | ${true}
-          `('when %description', ({ confirmPhrase, checked, submitDisabled }) => {
-            it(`primary action's disabled attribute is '${submitDisabled}'`, async () => {
-              findFormInput().vm.$emit('input', confirmPhrase);
-              findPermanentDeletionCheckbox().vm.$emit('change', checked);
-              await nextTick();
+          it.each`
+            checked  | ready
+            ${false} | ${false}
+            ${true}  | ${true}
+          `('unlocks the slider only when the checkbox is $checked', async ({ checked, ready }) => {
+            findPermanentDeletionCheckbox().vm.$emit('change', checked);
+            await nextTick();
 
-              expect(findGlModal().props('actionPrimary').attributes.disabled).toBe(submitDisabled);
-            });
+            expect(findSuperConfirmation().props('ready')).toBe(ready);
           });
         });
       });
@@ -142,48 +129,27 @@ describe('GroupsProjectsDeleteModal', () => {
     expect(wrapper.findByTestId('alert-slot').exists()).toBe(true);
   });
 
-  it('renders the confirmation phrase as the input label', () => {
+  it('names what is affected and has nothing to type', () => {
     createComponent();
 
-    expect(
-      wrapper
-        .findByLabelText(`Enter the following to confirm: ${defaultPropsData.confirmPhrase}`)
-        .attributes('autocomplete'),
-    ).toBe('off');
+    expect(wrapper.text()).toContain(`This affects: ${defaultPropsData.confirmPhrase}`);
+    expect(wrapper.find('input[type="text"]').exists()).toBe(false);
   });
 
-  describe('when correct confirm phrase is used', () => {
-    beforeEach(() => {
-      createComponent();
-
-      findFormInput().vm.$emit('input', defaultPropsData.confirmPhrase);
-    });
-
-    it('enables the primary action', () => {
-      expect(findGlModal().props('actionPrimary').attributes.disabled).toBe(false);
-    });
-  });
-
-  describe('when correct confirm phrase is not used', () => {
-    beforeEach(() => {
-      createComponent();
-
-      findFormInput().vm.$emit('input', 'bar');
-    });
-
-    it('keeps the primary action disabled', () => {
-      expect(findGlModal().props('actionPrimary').attributes.disabled).toBe(true);
-    });
-  });
-
-  it('emits `primary` with .prevent event', () => {
+  it('emits `primary` when the super confirmation authorizes', () => {
     createComponent();
 
-    findGlModal().vm.$emit('primary', {
-      preventDefault: jest.fn(),
-    });
+    findSuperConfirmation().vm.$emit('authorized');
 
     expect(wrapper.emitted('primary')).toEqual([[]]);
+  });
+
+  it('closes on emergency exit', () => {
+    createComponent();
+
+    findSuperConfirmation().vm.$emit('exit');
+
+    expect(wrapper.emitted('change')).toEqual([[false]]);
   });
 
   it('emits `change` event', () => {
@@ -214,18 +180,21 @@ describe('GroupsProjectsDeleteModal', () => {
   });
 
   describe('when modal is closed then re-opened', () => {
-    it('resets input fields', () => {
+    it('resets the keys, slider and checkbox', async () => {
       window.gon = { saas_features: { groupProjectPermanentDeletionConfirmation: true } };
       createComponent({ markedForDeletion: true });
 
       findGlModal().vm.$emit('change', true);
-      findFormInput().vm.$emit('input', defaultPropsData.confirmPhrase);
+      await wrapper.findByTestId('super-confirmation-key-1').trigger('click');
       findPermanentDeletionCheckbox().vm.$emit('change', true);
 
       findGlModal().vm.$emit('change', false);
       findGlModal().vm.$emit('change', true);
+      await nextTick();
 
-      expect(findFormInput().props('value')).toBeNull();
+      expect(wrapper.findByTestId('super-confirmation-key-1').attributes('aria-checked')).toBe(
+        'false',
+      );
       expect(findPermanentDeletionCheckbox().props('checked')).toBe(false);
     });
   });

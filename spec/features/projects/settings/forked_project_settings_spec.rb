@@ -20,8 +20,7 @@ RSpec.describe 'Projects > Settings > For a forked project', :js, feature_catego
 
       click_button 'Remove fork relationship'
 
-      fill_in('confirm_name_input', with: forked_project.path)
-      click_button('Confirm')
+      complete_super_confirmation
 
       expect(page).to have_content 'The fork relationship has been removed.'
       expect(forked_project.reload.forked?).to be_falsy

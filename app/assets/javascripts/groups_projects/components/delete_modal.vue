@@ -1,5 +1,6 @@
 <script>
-import { GlFormGroup, GlFormInput, GlModal, GlSprintf } from '@gitlab/ui';
+import { GlModal, GlSprintf } from '@gitlab/ui';
+import SuperConfirmation from '~/material_system/components/super_confirmation.vue';
 import { uniqueId } from 'lodash-es';
 import { __, s__, sprintf } from '~/locale';
 import { RESOURCE_TYPES } from '~/groups_projects/constants';
@@ -33,9 +34,8 @@ export default {
   components: {
     GlModal,
     GlSprintf,
-    GlFormGroup,
-    GlFormInput,
     PermanentDeletionConfirmCheckbox,
+    SuperConfirmation,
   },
   model: {
     prop: 'visible',
@@ -76,7 +76,6 @@ export default {
   emits: ['change', 'primary'],
   data() {
     return {
-      userInput: null,
       checkboxChecked: false,
       modalId: uniqueId(`delete-modal-`),
     };
@@ -92,26 +91,8 @@ export default {
 
       return featureAvailable && this.markedForDeletion;
     },
-    confirmDisabled() {
-      const phraseMatches = this.userInput === this.confirmPhrase;
-      const checkboxValid = !this.checkboxRequired || this.checkboxChecked;
-      return !phraseMatches || !checkboxValid;
-    },
-    modalActionProps() {
-      return {
-        primary: {
-          text: this.i18n.primaryButtonText,
-          attributes: {
-            variant: 'danger',
-            disabled: this.confirmDisabled,
-            loading: this.confirmLoading,
-            'data-testid': 'confirm-delete-button',
-          },
-        },
-        cancel: {
-          text: this.i18n.cancelButtonText,
-        },
-      };
+    checkboxValid() {
+      return !this.checkboxRequired || this.checkboxChecked;
     },
     ariaLabel() {
       return sprintf(__('Delete %{name}'), {
@@ -145,8 +126,8 @@ export default {
   methods: {
     handleModalChange(isVisible) {
       if (!isVisible) {
-        this.userInput = null;
         this.checkboxChecked = false;
+        this.$refs.superConfirmation?.reset();
       }
 
       this.$emit('change', isVisible);
@@ -159,10 +140,7 @@ export default {
   <gl-modal
     :visible="visible"
     :modal-id="modalId"
-    :action-primary="modalActionProps.primary"
-    :action-cancel="modalActionProps.cancel"
     :aria-label="ariaLabel"
-    @primary.prevent="$emit('primary')"
     @change="handleModalChange"
   >
     <template #modal-title>{{ __('Are you absolutely sure?') }}</template>
@@ -186,29 +164,23 @@ export default {
           )
         }}
       </p>
-      <gl-form-group class="gl-mb-5" label-for="confirm_name_input">
-        <template #label>
-          <gl-sprintf :message="__('Enter the following to confirm: %{phrase}')">
-            <template #phrase>
-              <code class="gl-whitespace-pre-wrap">{{ confirmPhrase }}</code>
-            </template>
-          </gl-sprintf>
-        </template>
-
-        <gl-form-input
-          id="confirm_name_input"
-          v-model="userInput"
-          name="confirm_name_input"
-          type="text"
-          autocomplete="off"
-          data-testid="confirm-name-field"
-        />
-      </gl-form-group>
-
+      <p class="gl-mb-3">
+        {{ __('This affects:') }}
+        <code class="gl-whitespace-pre-wrap">{{ confirmPhrase }}</code>
+      </p>
       <permanent-deletion-confirm-checkbox
         v-if="checkboxRequired"
         v-model="checkboxChecked"
         :resource-type="resourceType"
+      />
+      <super-confirmation
+        ref="superConfirmation"
+        :target="confirmPhrase"
+        :loading="confirmLoading"
+        :ready="checkboxValid"
+        :ready-hint="__('Tick the permanent deletion box above to unlock the slider')"
+        @authorized="$emit('primary')"
+        @exit="handleModalChange(false)"
       />
     </div>
   </gl-modal>

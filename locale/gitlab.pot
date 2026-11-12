@@ -74,6 +74,45 @@ msgstr ""
 msgid " reacted with :%{name}:"
 msgstr ""
 
+msgid "MaterialSuperConfirm|Authorized"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Contents and history go"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Emergency exit"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Key 1"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Key 2"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Nothing can be recovered after the grace period"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Nothing to type. Turn both keys, then slide."
+msgstr ""
+
+msgid "MaterialSuperConfirm|Slide to the end to delete %{target}"
+msgstr ""
+
+msgid "MaterialSuperConfirm|Slider locked until both keys are turned"
+msgstr ""
+
+msgid "MaterialSuperConfirm|off"
+msgstr ""
+
+msgid "MaterialSuperConfirm|turned"
+msgstr ""
+
+msgid "This affects:"
+msgstr ""
+
+msgid "Tick the permanent deletion box above to unlock the slider"
+msgstr ""
+
 msgid "\"%{path}\" did not exist on \"%{ref}\""
 msgstr ""
 

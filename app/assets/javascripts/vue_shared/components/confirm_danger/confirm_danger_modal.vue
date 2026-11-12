@@ -1,6 +1,8 @@
 <script>
-import { GlAlert, GlModal, GlFormGroup, GlFormInput, GlSprintf } from '@gitlab/ui';
+import { GlAlert, GlModal } from '@gitlab/ui';
+import SuperConfirmation from '~/material_system/components/super_confirmation.vue';
 import SafeHtml from '~/vue_shared/directives/safe_html';
+import { __ } from '~/locale';
 import {
   CONFIRM_DANGER_MODAL_BUTTON,
   CONFIRM_DANGER_MODAL_TITLE,
@@ -14,9 +16,7 @@ export default {
   components: {
     GlAlert,
     GlModal,
-    GlFormGroup,
-    GlFormInput,
-    GlSprintf,
+    SuperConfirmation,
   },
   directives: {
     SafeHtml,
@@ -66,8 +66,8 @@ export default {
       required: false,
       default: CONFIRM_DANGER_MODAL_TITLE,
     },
-    // Rendered through GlSprintf, so an override must carry a `%{phrase}` placeholder:
-    // that is where the phrase to type is interpolated.
+    // Kept for API compatibility. Nothing is typed any more: the phrase is shown as the
+    // thing affected, and the two-key slider is the confirmation.
     phraseLabel: {
       type: String,
       required: false,
@@ -75,32 +75,6 @@ export default {
     },
   },
   emits: ['change', 'confirm'],
-  data() {
-    return { confirmationPhrase: '' };
-  },
-  computed: {
-    isValid() {
-      return Boolean(
-        this.confirmationPhrase.length && this.equalString(this.confirmationPhrase, this.phrase),
-      );
-    },
-    actionPrimary() {
-      return {
-        text: this.confirmButtonText,
-        attributes: {
-          variant: 'danger',
-          disabled: !this.isValid,
-          loading: this.confirmLoading,
-          'data-testid': 'confirm-danger-modal-button',
-        },
-      };
-    },
-    actionCancel() {
-      return {
-        text: this.cancelButtonText,
-      };
-    },
-  },
   watch: {
     confirmLoading(isLoading, wasLoading) {
       // If the button was loading and now no longer is
@@ -111,22 +85,23 @@ export default {
     },
   },
   methods: {
-    equalString(a, b) {
-      return a.trim().toLowerCase() === b.trim().toLowerCase();
+    authorize() {
+      this.$emit('confirm', { preventDefault() {} });
     },
-    focusConfirmInput() {
+    exit() {
+      this.$refs.modal.hide();
+    },
+    focusFirstKey() {
       this.$nextTick(() => {
-        this.$refs.confirmInput.focus();
+        this.$el?.querySelector?.('[data-testid="super-confirmation-key-1"]')?.focus();
       });
     },
-    // The phrase a user typed is spent once the modal closes, whether they confirmed or
-    // cancelled. Clearing it means the next open asks for the confirmation again rather
-    // than reopening with the danger button already enabled.
-    resetConfirmationPhrase() {
-      this.confirmationPhrase = '';
+    resetConfirmation() {
+      this.$refs.superConfirmation?.reset();
     },
   },
   i18n: {
+    AFFECTS: __('This affects:'),
     CONFIRM_DANGER_MODAL_BUTTON,
     CONFIRM_DANGER_MODAL_TITLE,
     CONFIRM_DANGER_WARNING,
@@ -140,12 +115,9 @@ export default {
     :modal-id="modalId"
     :data-testid="modalId"
     :title="modalTitle"
-    :action-primary="actionPrimary"
-    :action-cancel="actionCancel"
-    @primary="$emit('confirm', $event)"
     @change="$emit('change', $event)"
-    @shown="focusConfirmInput()"
-    @hidden="resetConfirmationPhrase()"
+    @shown="focusFirstKey()"
+    @hidden="resetConfirmation()"
   >
     <gl-alert
       v-if="confirmDangerMessage"
@@ -164,24 +136,17 @@ export default {
         {{ additionalInformation }}
       </p>
     </slot>
-    <label data-testid="confirm-danger-phrase" for="confirm_name_input" class="gl-mb-3 gl-block">
-      <gl-sprintf :message="phraseLabel">
-        <template #phrase>
-          <code class="gl-whitespace-pre-wrap">{{ phrase }}</code>
-        </template>
-      </gl-sprintf>
-    </label>
-    <gl-form-group :state="isValid" class="gl-mb-0">
-      <gl-form-input
-        id="confirm_name_input"
-        ref="confirmInput"
-        v-model="confirmationPhrase"
-        class="form-control"
-        data-testid="confirm-danger-field"
-        type="text"
-        autocomplete="off"
-      />
-    </gl-form-group>
+    <p data-testid="confirm-danger-phrase" class="gl-mb-3">
+      {{ $options.i18n.AFFECTS }}
+      <code class="gl-whitespace-pre-wrap">{{ phrase }}</code>
+    </p>
+    <super-confirmation
+      ref="superConfirmation"
+      :target="phrase"
+      :loading="confirmLoading"
+      @authorized="authorize"
+      @exit="exit"
+    />
     <slot name="modal-footer"></slot>
   </gl-modal>
 </template>

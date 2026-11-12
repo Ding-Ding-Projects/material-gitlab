@@ -1,5 +1,23 @@
 # Material GitLab overlay handoff
 
+## Super confirmation and the full screen redesign (latest)
+
+This section supersedes older claims it contradicts.
+
+- `ConfirmDangerModal` and the group/project delete modal now use
+  `material_system/components/super_confirmation.vue`: two keys, slide to confirm, emergency exit,
+  nothing to type. Feature and QA specs drive it through `complete_super_confirmation` and the
+  updated `QA::Page::Component::ConfirmModal`.
+- Verified: the component's logic in an isolated Vue 2.7 + jsdom harness (6 cases, plus a
+  deliberate break that turned a case red). The SCSS compiles with Sass 1.77.8. Ruby files pass
+  `ruby -c`.
+- Not run here: the GitLab Jest suite, the Rails feature specs and QA, because this checkout has no
+  installed frontend dependencies, database or browser stack.
+- Not done yet: Rails-rendered (HAML) danger forms, and the live left-docked tab strip in the real
+  shell (the design canvas has it on every screen; `material_system/tabs.js` already defaults the
+  dock to the left).
+- Design canvas: `design/screens/` holds 322 screens in 23 sections.
+
 ## Material 3 Expressive redesign, 2026-11-11
 
 This section supersedes older claims it contradicts about how the application looks.

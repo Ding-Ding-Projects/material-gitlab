@@ -1,0 +1,165 @@
+// Destructive super-confirmation: two key switches, a full-range slider and an
+// emergency exit. Nothing is typed. Motion uses the expressive spatial curves and
+// is removed entirely under reduced motion.
+
+.gl-md3-super-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__hint {
+    margin: 0;
+    color: var(--gl-md3-onsurfv, var(--gl-text-color-subtle));
+  }
+
+  &__keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  &__key {
+    flex: 1 1 200px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 12px 14px;
+    border: 0;
+    border-radius: 18px 18px 18px 6px;
+    background: var(--gl-md3-surfc, var(--gl-background-color-subtle));
+    color: inherit;
+    text-align: left;
+    box-shadow: inset 0 0 0 2px var(--gl-md3-outlv, var(--gl-border-color-default));
+    cursor: pointer;
+    transition: border-radius 0.35s cubic-bezier(0.42, 1.67, 0.21, 0.9),
+      background-color 0.2s, box-shadow 0.2s;
+
+    &:hover:not(:disabled) {
+      border-radius: 24px;
+    }
+
+    &:focus-visible {
+      outline: 3px solid var(--gl-focus-ring-outer-color, currentColor);
+      outline-offset: 2px;
+    }
+
+    &.is-on {
+      background: var(--gl-md3-errc, #ffdad6);
+      color: var(--gl-md3-onerrc, #410002);
+      box-shadow: inset 0 0 0 2px var(--gl-md3-err, #ba1a1a);
+    }
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.7;
+    }
+  }
+
+  &__key-head {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    background: var(--gl-md3-surfch, var(--gl-background-color-strong));
+    transition: transform 0.7s cubic-bezier(0.42, 1.67, 0.21, 0.9), background-color 0.2s;
+
+    .is-on & {
+      transform: rotate(90deg);
+      background: var(--gl-md3-err, #ba1a1a);
+      color: var(--gl-md3-onerr, #fff);
+    }
+  }
+
+  &__label {
+    margin: 4px 0 0;
+    font-weight: 600;
+  }
+
+  &__track {
+    position: relative;
+    height: 56px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--gl-md3-surfch, var(--gl-background-color-strong));
+
+    &.is-locked {
+      opacity: 0.55;
+    }
+
+    input[type='range'] {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      opacity: 0;
+      cursor: grab;
+
+      &:disabled {
+        cursor: not-allowed;
+      }
+    }
+
+    &:focus-within {
+      outline: 3px solid var(--gl-focus-ring-outer-color, currentColor);
+      outline-offset: 2px;
+    }
+  }
+
+  &__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: repeating-linear-gradient(
+      -45deg,
+      var(--gl-md3-err, #ba1a1a) 0 10px,
+      #93000a 10px 20px
+    );
+    background-size: 40px 100%;
+    transition: width 0.45s cubic-bezier(0.38, 1.21, 0.22, 1);
+    animation: gl-md3-super-confirm-stripes 0.6s linear infinite;
+
+    .is-authorized & {
+      background: var(--gl-md3-success, #108548);
+      animation: none;
+    }
+  }
+
+  &__value {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
+  }
+
+  &__exit {
+    align-self: flex-start;
+    min-width: 220px;
+
+    kbd {
+      margin-left: 6px;
+    }
+  }
+}
+
+@keyframes gl-md3-super-confirm-stripes {
+  to {
+    background-position: 40px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gl-md3-super-confirm__key,
+  .gl-md3-super-confirm__key-head,
+  .gl-md3-super-confirm__fill {
+    transition: none;
+    animation: none;
+  }
+}

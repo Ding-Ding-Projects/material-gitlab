@@ -14,25 +14,34 @@ module QA
             element 'confirmation-modal'
           end
 
-          base.view 'app/assets/javascripts/vue_shared/components/confirm_danger/confirm_danger_modal.vue' do
-            element 'confirm-danger-modal-button'
-            element 'confirm-danger-field'
+          base.view 'app/assets/javascripts/material_system/components/super_confirmation.vue' do
+            element 'super-confirmation'
+            element 'super-confirmation-slider'
+            element 'super-confirmation-exit'
           end
         end
 
-        def fill_confirmation_text(text)
-          fill_element('confirm-danger-field', text)
+        # Destructive actions use the two-key, slide-to-confirm gate. Nothing is typed, so the
+        # text argument is accepted for compatibility and ignored.
+        def fill_confirmation_text(_text = nil)
+          click_element('super-confirmation-key-1')
+          click_element('super-confirmation-key-2')
         end
 
         def wait_for_confirm_button_enabled
           wait_until(reload: false) do
-            !element_disabled?('confirm-danger-modal-button')
+            !element_disabled?('super-confirmation-slider')
           end
         end
 
         def confirm_transfer
           wait_for_confirm_button_enabled
-          click_element('confirm-danger-modal-button')
+          page.execute_script(<<~JS)
+            const slider = document.querySelector('[data-testid="super-confirmation-slider"]');
+            slider.value = '100';
+            slider.dispatchEvent(new Event('input', { bubbles: true }));
+            slider.dispatchEvent(new Event('change', { bubbles: true }));
+          JS
         end
 
         def click_confirmation_ok_button

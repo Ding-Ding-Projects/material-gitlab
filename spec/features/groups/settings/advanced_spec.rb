@@ -233,10 +233,9 @@ RSpec.describe 'Group settings > Advanced', :with_current_organization, feature_
   end
 
   describe 'group deletion', :js, :freeze_time do
-    def remove_with_confirm(button_text, confirm_with, confirm_button_text = 'Yes, delete group')
+    def remove_with_confirm(button_text, _confirm_with, _confirm_button_text = 'Yes, delete group')
       click_button button_text
-      fill_in 'confirm_name_input', with: confirm_with
-      click_button confirm_button_text
+      complete_super_confirmation
     end
 
     before do
@@ -417,8 +416,7 @@ RSpec.describe 'Group settings > Advanced', :with_current_organization, feature_
           "This action changes the group's path and can lead to data loss."
       )
 
-      fill_in 'confirm_name_input', with: group.full_path
-      click_button 'Transfer group'
+      complete_super_confirmation
     end
   end
 end

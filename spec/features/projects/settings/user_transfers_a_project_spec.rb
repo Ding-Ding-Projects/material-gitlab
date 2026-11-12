@@ -34,14 +34,12 @@ RSpec.describe 'Projects > Settings > User transfers a project', :js, feature_ca
 
     return unless confirm
 
-    fill_in 'confirm_name_input', with: project.full_path
-
-    click_button 'Confirm'
+    complete_super_confirmation
   end
 
   it 'focuses on the confirmation field' do
     transfer_project(project, group, confirm: false)
-    expect(page).to have_selector '#confirm_name_input:focus'
+    expect(page).to have_selector '[data-testid="super-confirmation-key-1"]:focus'
   end
 
   it 'allows transferring a project to a group' do

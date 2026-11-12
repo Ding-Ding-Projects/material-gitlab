@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Destructive super confirmation
+
+- Destructive dialogs (the shared danger modal and the group/project delete modal) no longer ask
+  you to type a name. They show what is affected, then require two key switches, a full slide to
+  confirm, and offer an emergency exit (Esc). See `doc/development/ux/super-confirmation.md`.
+- Design canvas: every screen now uses the left-docked vertical tab strip, an always visible
+  accessibility tools button, info icons above each setting, the five separate ADHD modes, and a
+  new 29-board section covering the remaining shared UI contract features (322 screens total).
+
 ### One-click hosting
 
 - Add `host.bat` and `deploy/windows/host.ps1`: one double-click installs Docker Desktop if needed,

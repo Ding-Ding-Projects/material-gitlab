@@ -279,9 +279,8 @@ RSpec.describe 'Project', feature_category: :source_code_management do
       stub_application_setting(deletion_adjourned_period: 7)
     end
 
-    def remove_with_confirm(confirm_with)
-      fill_in 'confirm_name_input', with: confirm_with
-      click_button 'Yes, delete project'
+    def remove_with_confirm(_confirm_with)
+      complete_super_confirmation
       wait_for_requests
     end
 

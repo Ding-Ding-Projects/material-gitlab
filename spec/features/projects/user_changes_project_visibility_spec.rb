@@ -14,11 +14,7 @@ RSpec.describe 'User changes public project visibility', :js, feature_category: 
         click_button 'Save changes'
       end
 
-      fill_in 'confirm_name_input', with: project.path_with_namespace
-
-      page.within '.modal' do
-        click_button 'Reduce project visibility'
-      end
+      complete_super_confirmation
 
       # Wait for the success flash so project.reload does not race the full-page redirect.
       expect(page).to have_content('successfully updated')

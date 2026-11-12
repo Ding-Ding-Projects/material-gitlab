@@ -7,6 +7,7 @@ import waitForPromises from 'helpers/wait_for_promises';
 import { mountExtended } from 'helpers/vue_test_utils_helper';
 import { typePolicies as globalTypePolicies } from '~/lib/graphql';
 import { createAlert } from '~/alert';
+import SuperConfirmation from '~/material_system/components/super_confirmation.vue';
 import DeleteRepositoryModal from 'ee/packages_and_registries/artifact_registry/repositories/components/delete_repository_modal.vue';
 import { typePolicies } from 'ee/packages_and_registries/artifact_registry/graphql/cache_config';
 import getRepositoriesQuery from 'ee/packages_and_registries/artifact_registry/graphql/queries/get_repositories.query.graphql';
@@ -40,12 +41,9 @@ describe('ArtifactRegistryDeleteRepositoryModal', () => {
     errors,
   });
 
-  const findModal = () => wrapper.findComponent(GlModal);
   const findPhraseLabel = () => wrapper.findByTestId('confirm-danger-phrase');
   const findConsequenceCopy = () => wrapper.findByTestId('confirm-danger-warning');
-  const findConfirmationInput = () => wrapper.findComponentByTestId('confirm-danger-field');
-  const findPrimaryAction = () => findModal().props('actionPrimary');
-  const findPrimaryActionAttributes = (attr) => findPrimaryAction().attributes[attr];
+  const findSuperConfirmation = () => wrapper.findComponent(SuperConfirmation);
 
   const organizationCacheId = () =>
     cache.identify({ __typename: 'Organization', id: ORGANIZATION_GID });
@@ -99,7 +97,7 @@ describe('ArtifactRegistryDeleteRepositoryModal', () => {
   };
 
   const confirm = async () => {
-    findModal().vm.$emit('primary');
+    findSuperConfirmation().vm.$emit('authorized');
     await waitForPromises();
   };
 
@@ -108,10 +106,8 @@ describe('ArtifactRegistryDeleteRepositoryModal', () => {
       await createComponent();
     });
 
-    it('names the repository as the phrase that has to be typed', () => {
-      expect(findPhraseLabel().text()).toBe(
-        `Type the repository name below to confirm: ${mockRepository.name}`,
-      );
+    it('names the repository that is affected', () => {
+      expect(findPhraseLabel().text()).toBe(`This affects: ${mockRepository.name}`);
     });
 
     it('states what deleting the repository destroys', () => {
@@ -120,21 +116,9 @@ describe('ArtifactRegistryDeleteRepositoryModal', () => {
       );
     });
 
-    it('names the confirm action after what it does', () => {
-      expect(findPrimaryAction().text).toBe('Delete repository');
-      expect(findPrimaryActionAttributes('variant')).toBe('danger');
-    });
-
-    it('keeps the confirm action disabled until the typed name matches', async () => {
-      expect(findPrimaryActionAttributes('disabled')).toBe(true);
-
-      await findConfirmationInput().vm.$emit('input', 'not-the-repository');
-
-      expect(findPrimaryActionAttributes('disabled')).toBe(true);
-
-      await findConfirmationInput().vm.$emit('input', mockRepository.name);
-
-      expect(findPrimaryActionAttributes('disabled')).toBe(false);
+    it('asks for nothing to be typed and gates on the two-key slider', () => {
+      expect(wrapper.find('input[type="text"]').exists()).toBe(false);
+      expect(findSuperConfirmation().props('target')).toBe(mockRepository.name);
     });
   });
 
