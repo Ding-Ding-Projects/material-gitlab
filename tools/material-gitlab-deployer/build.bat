@@ -17,35 +17,18 @@ set "NODE_DIR=%CD%\.tools\node"
 
 call :log "[1/3] Checking Node.js"
 call :node_ok
-if errorlevel 1 (
-  if exist "%NODE_DIR%\node.exe" (
-    set "PATH=%NODE_DIR%;%PATH%"
-    call :node_ok
-  )
-)
+if not errorlevel 1 goto :have_node
+if exist "%NODE_DIR%\node.exe" set "PATH=%NODE_DIR%;%PATH%"
 call :node_ok
-if errorlevel 1 (
-  call :log "Node.js 20+ not found; fetching portable Node.js %NODE_VERSION% into .tools\node"
-  powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "$ErrorActionPreference='Stop';" ^
-    "$v='%NODE_VERSION%'; $name=\"node-v$v-win-x64\"; $base=\"https://nodejs.org/dist/v$v\";" ^
-    "$tmp=Join-Path $env:TEMP \"mgh-node-$v\"; New-Item -ItemType Directory -Force $tmp | Out-Null;" ^
-    "$zip=Join-Path $tmp \"$name.zip\"; Invoke-WebRequest \"$base/$name.zip\" -OutFile $zip -UseBasicParsing;" ^
-    "$sums=(Invoke-WebRequest \"$base/SHASUMS256.txt\" -UseBasicParsing).Content -split \"`n\";" ^
-    "$want=($sums | Where-Object { $_ -match \" $name.zip$\" } | Select-Object -First 1).Split(' ')[0];" ^
-    "$got=(Get-FileHash $zip -Algorithm SHA256).Hash.ToLower();" ^
-    "if ($want -ne $got) { throw \"SHA-256 mismatch for $name.zip\" };" ^
-    "Expand-Archive $zip -DestinationPath $tmp -Force;" ^
-    "if (Test-Path '%NODE_DIR%') { Remove-Item -Recurse -Force '%NODE_DIR%' };" ^
-    "New-Item -ItemType Directory -Force (Split-Path '%NODE_DIR%') | Out-Null;" ^
-    "Move-Item (Join-Path $tmp $name) '%NODE_DIR%'; Write-Host \"Installed Node.js $v to %NODE_DIR% (sha256 $got)\""
-  if errorlevel 1 (call :err "Could not download portable Node.js %NODE_VERSION% from https://nodejs.org/dist/" & goto :failed)
-  set "PATH=%NODE_DIR%;%PATH%"
-  call :node_ok
-  if errorlevel 1 (call :err "Portable Node.js was installed but does not run." & goto :failed)
-) else (
-  for /f "delims=" %%V in ('node --version') do call :log "Found Node.js %%V"
-)
+if not errorlevel 1 goto :have_node
+call :log "Node.js 20+ not found; fetching portable Node.js %NODE_VERSION% into .tools\node"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%CD%\scripts\fetch-node.ps1" -Version %NODE_VERSION% -Destination "%NODE_DIR%"
+if errorlevel 1 goto :fetch_failed
+set "PATH=%NODE_DIR%;%PATH%"
+call :node_ok
+if errorlevel 1 goto :node_broken
+:have_node
+for /f "delims=" %%V in ('node --version') do call :log "Using Node.js %%V"
 
 call :log "[2/3] Installing dependencies"
 if exist package-lock.json (call npm ci --no-audit --no-fund) else (call npm install --no-audit --no-fund)
@@ -77,6 +60,14 @@ exit /b 0
 :err
 echo ERROR: %~1 1>&2
 exit /b 0
+
+:fetch_failed
+call :err "Could not download portable Node.js %NODE_VERSION% from https://nodejs.org/dist/"
+goto :failed
+
+:node_broken
+call :err "Portable Node.js was installed but does not run."
+goto :failed
 
 :failed
 popd >nul
