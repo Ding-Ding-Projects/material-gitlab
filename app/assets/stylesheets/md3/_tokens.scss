@@ -93,7 +93,10 @@
   --gl-md3-warning: var(--gl-md3-warn);
   --gl-md3-warning-container: var(--gl-md3-warnc);
   --gl-md3-on-warning-container: var(--gl-md3-onwarnc);
-  --gl-md3-card: var(--gl-md3-card);
+  // `card` is already its own semantic name, set to its real value earlier in this
+  // block. Aliasing it to itself here made it a cyclic custom property, which the
+  // browser drops entirely, so every light-theme consumer, including the form focus
+  // ring, lost its value.
   --gl-md3-row-container: var(--gl-md3-row);
   --gl-md3-inverse-surface: var(--gl-md3-inv);
   --gl-md3-inverse-on-surface: var(--gl-md3-oninv);
